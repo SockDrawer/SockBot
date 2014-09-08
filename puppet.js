@@ -36,22 +36,31 @@ function auth(page, username, password, cb){
         },function(cb){
             console.log(5);
                 setTimeout(function() {page.evaluate(function(){
-                    return document.querySelector('div.current-username').innerText;
-                },function(val){console.log(val);cb()});
-            }, 1000);
+                    $('div#current-username').click();
+                    return document.querySelector('ul.user-dropdown-links a.user-activity-link').href
+                },function(val){console.log(val);
+                page.render('page.png','PNG',cb);
+                });
+            }, 3000);
         }],
         function(){
             console.log(6);
+
             (cb || function(){})()
         });
+}
+
+function post(page, url, text){
+    //http://what.thedailywtf.com/t/signature-dev-guy-bot-thread/3031/49
 }
 
 create(function(ph){
     console.log(1);
     ph.createPage(function(page){
         console.log(2);
-        auth(page, 'sockbot', 'sockbot', function(){
+        auth(page, 'sockbot', 'sockbotsockbot', function(){
             ph.exit()
         })
+
     });
 })
