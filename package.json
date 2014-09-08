@@ -7,6 +7,6 @@
   "author": "Accalia Elementia <Accalia.de.elementia>",
   "dependencies": {
     "async": "~0.2.8",
-    "node-phantom": "^0.2.5"
+    "phantom": "^0.6.5"
   }
 }
