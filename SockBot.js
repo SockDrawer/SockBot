@@ -72,10 +72,33 @@ function readTopic(topic_id, start_post, callback) {
     });
 }
 
-auth('sockbot', 'sockbotsockbot', function () {
-    console.log('authenticated?!');
+function likeTopicPage(topic_id, start_post, callback) {
+    getContent('t/' + topic_id + '/' + start_post + '.json', function (err, req, contents) {
+        var stream = JSON.parse(contents),
+            likeables = stream.post_stream.posts.filter(function (x) {
+                var action = x.actions_summary.filter(function (y) {
+                    return y.id === 2;
+                });
+                return action && action[0].can_act;
+            });
+        async.eachSeries(likeables, function (x, cb) {
+            var form = {
+                'id': x.id,
+                'post_action_type_id': 2,
+                'flag_topic': false
+            };
+            console.log('Liking Post ' + x.id + ' By `' + x.username + '`');
+            postMessage('post_actions', form, function () {
+                setTimeout(cb, 60000); // Rate limit these to better sout the occasion
+            });
+        }, function () {
+            callback(null, likeables.length);
+        });
+    });
+}
 
-    readTopic(1000, 1, function (err, posts) {
+auth('sockbot', 'sockbotsockbot', function () {
+    likeTopicPage(1000, 1, function (err, posts) {
         console.log(posts);
     });
 });
