@@ -2,7 +2,6 @@
 
 var async = require('async'),
     browser = require('./browser'),
-    queue = require('./queue'),
     likes = require('./likes');
 
 
@@ -21,31 +20,6 @@ function readTopic(topic_id, start_post, callback) {
             });
         }, function () {
             callback(null, stream.post_stream.posts.length);
-        });
-    });
-}
-
-function likeTopicPage(topic_id, start_post, callback) {
-    browser.getContent('t/' + topic_id + '/' + start_post + '.json', function (err, req, contents) {
-        var stream = JSON.parse(contents),
-            likeables = stream.post_stream.posts.filter(function (x) {
-                var action = x.actions_summary.filter(function (y) {
-                    return y.id === 2;
-                });
-                return action && action[0].can_act;
-            });
-        async.eachSeries(likeables, function (x, cb) {
-            var form = {
-                'id': x.id,
-                'post_action_type_id': 2,
-                'flag_topic': false
-            };
-            console.log('Liking Post ' + x.post_number + '(#' + x.id + ') By `' + x.username + '`');
-            browser.postMessage('post_actions', form, function () {
-                setTimeout(cb, 300000); // Rate limit these to better sout the occasion
-            });
-        }, function () {
-            callback(null, likeables.length);
         });
     });
 }
