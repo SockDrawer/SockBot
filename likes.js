@@ -2,6 +2,7 @@
 (function () {
     'use strict';
     var async = require('async'),
+        config = require('./configuration').configuration,
         likesList = [],
         scheduleBinges,
         likeBinge,
@@ -20,14 +21,14 @@
                 utc = new Date(),
                 hours,
                 minutes;
-            utc.setUTCHours(23);
-            utc.setUTCMinutes(40);
+            utc.setUTCHours(config.likeBingeHour || 23);
+            utc.setUTCMinutes(config.likeBingeMinute || 40);
             utc.setUTCSeconds(0);
             utc.setMilliseconds(0);
             now = now.getTime();
             utc = utc.getTime();
             if (now > utc) {
-                utc += 24 * 60 * 60 * 1000; // add a day if scheduling after 23:40 UTC  
+                utc += 24 * 60 * 60 * 1000; // add a day if scheduling after 23:40 UTC
             }
             minutes = Math.ceil(((utc - now) / 1000) / 60);
             hours = Math.floor(minutes / 60);
@@ -51,7 +52,7 @@
                 if (resp.statusCode < 300 || resp.statusCode === 403) {
                     setTimeout(cb, 100);
                 } else {
-                    console.log('Send Error ' + resp.statusCode + ': ' + JSON.stringify(contents));
+                    console.log('Send Error ' + resp.statusCode);
                     likesList.unshift(like);
                     cb(true);
                 }
@@ -66,7 +67,7 @@
         var start_post = 0;
         async.forever(function (cb) {
             if (likesList.length >= 1000) {
-                // if likeslist od longer than limit wait 5 minutes and check again
+                // if likeslist is longer than limit wait 5 minutes and check again
                 setTimeout(cb, 5 * 60 * 1000);
                 return;
             }

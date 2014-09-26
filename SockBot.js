@@ -2,7 +2,8 @@
 
 var async = require('async'),
     browser = require('./browser'),
-    likes = require('./likes');
+    likes = require('./likes'),
+    config = require('./configuration').configuration;
 
 
 
@@ -24,6 +25,9 @@ function readTopic(topic_id, start_post, callback) {
     });
 }
 
-browser.auth('sockbot', 'sockbotsockbot', function () {
-    likes.likeThread(browser, 1000);
+browser.auth(config.username, config.password, function () {
+    console.log(config);
+    if (config.likeBinge) {
+        likes.likeThread(browser, config.likeBingeTopics);
+    }
 });
