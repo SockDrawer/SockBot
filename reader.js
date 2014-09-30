@@ -6,32 +6,69 @@
         laterReads = [];
 
     function readAllTheThings(browser) {
-        var next = '/latest.json?ascending=true&order=activity&no_definitions=true';
-        async.whilst(
-            function () {
-                return !!next;
-            },
-            function (cb) {
-                getTopicsPage(browser, next, function (topic_list) {
-                    next = topic_list.next;
-                    async.eachSeries(topic_list.topics, function (topic, seriescb) {
-                            console.log('Reading topic ' + topic.id + ' ' + topic.slug);
-                            var i = 1,
-                                max = 2;
-                            async.whilst(function () {
-                                    return i < max;
-                                },
-                                function (whilstcb) {
-                                    getTopicPage(browser, topic.id, i, function (page) {
-                                        i = page.last + 1;
-                                        max = page.posts;
-                                        readTopicPage(browser, page, whilstcb);
-                                    });
-                                }, seriescb);
-                        },
-                        cb);
+        readAllTheOldThings(browser);
+        readAllTheWaitingThings(browser);
+    }
+
+    function readAllTheWaitingThings(browser) {
+        async.forever(function (next) {
+            var cutoff = (new Date().getTime()) - config.readifyWait,
+                readIt = laterReads.filter(function (p) {
+                    return p.posted < cutoff;
                 });
+            laterReads = laterReads.filter(function (p) {
+                return p.posted >= cutoff;
             });
+
+            async.eachSeries(readIt, function (p, cb) {
+                    var form = {
+                        'topic_id': p.topic_id,
+                        'topic_time': 4995 // msecs passed on topic (We're pretty sure)
+                    };
+                    form['timings[' + p.id + ']'] = 4995; // msecs passed on post (same)
+
+                    browser.postMessage('topics/timings', form, function () {
+                        setTimeout(cb, 50); // Rate limit these to better sout the occasion
+                    });
+                },
+                function () {
+                    setTimeout(next, 60 * 60 * 1000);
+                }
+            );
+        });
+    }
+
+    function readAllTheOldThings(browser) {
+        async.forever(function (nextTime) {
+            var next = '/latest.json?ascending=true&order=activity&no_definitions=true';
+            async.whilst(
+                function () {
+                    return !!next;
+                },
+                function (cb) {
+                    getTopicsPage(browser, next, function (topic_list) {
+                        next = topic_list.next;
+                        async.eachSeries(topic_list.topics, function (topic, seriescb) {
+                                console.log('Reading topic ' + topic.id + ' ' + topic.slug);
+                                var i = 1,
+                                    max = 2;
+                                async.whilst(function () {
+                                        return i < max;
+                                    },
+                                    function (whilstcb) {
+                                        getTopicPage(browser, topic.id, i, function (page) {
+                                            i = page.last + 1;
+                                            max = page.posts;
+                                            readTopicPage(browser, page, whilstcb);
+                                        });
+                                    }, seriescb);
+                            },
+                            cb);
+                    });
+                }, function () {
+                    setTimeout(nextTime, 24 * 60 * 60 * 1000);
+                });
+        });
     }
     exports.readAllTheThings = readAllTheThings;
 
