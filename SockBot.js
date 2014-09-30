@@ -2,6 +2,7 @@
 
 var async = require('async'),
     browser = require('./browser'),
+    queue = require('./queue'),
     likes = require('./likes'),
     reader = require('./reader'),
     poster = require('./poster'),
@@ -10,10 +11,11 @@ var async = require('async'),
 
 browser.auth(config.username, config.password, function () {
     if (config.likeBinge) {
-        //likes.likeThread(browser, config.likeBingeTopics);
+        likes.likeThread(browser, config.likeBingeTopics);
     }
     if (config.readify){
-        //reader.readAllTheThings(browser);
+        reader.readAllTheThings(browser);
     }
+    queue.begin(browser);
     //poster.reply_topic(browser, 3547, '', 'can i reply to the topic?', function(){});
 });

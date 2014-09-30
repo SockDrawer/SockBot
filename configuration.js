@@ -10,11 +10,10 @@
             'likeBingeMinute': 50,
             'likeBingeTopics': 1000,
             'readify': true,
-            'readifyWait': 48 * 60 * 60 * 1000 // 48 hours
+            'readifyWait': 24 * 60 * 60 * 1000, // 48 hours
+            'queuestart': 0
         };
 
-    console.dir(conf);
-    
     function merge() {
         var i = 0,
             res = {},
