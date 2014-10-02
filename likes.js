@@ -2,6 +2,7 @@
 (function () {
     'use strict';
     var async = require('async'),
+        browser = require('./browser'),
         config = require('./configuration').configuration,
         likesList = [],
         scheduleBinges,
@@ -9,13 +10,13 @@
         fillList,
         getPage;
 
-    function likeThread(browser, thread_id) {
-        fillList(browser, thread_id);
-        scheduleBinges(browser);
+    function likeThread(thread_id) {
+        fillList(thread_id);
+        scheduleBinges();
     }
     exports.likeThread = likeThread;
 
-    scheduleBinges = function scheduleBinges(browser) {
+    scheduleBinges = function scheduleBinges() {
         async.forever(function (cb) {
             var now = new Date(),
                 utc = new Date(),
@@ -35,12 +36,12 @@
             minutes = minutes % 60;
             console.log('Like Binge scheduled for ' + hours + 'h' + minutes + 'm from now');
             setTimeout(function () {
-                likeBinge(browser, cb);
+                likeBinge(cb);
             }, utc - now);
         });
     };
 
-    likeBinge = function likeBinge(browser, callback) {
+    likeBinge = function likeBinge(callback) {
         async.forever(function (cb) {
             if (likesList.length === 0) {
                 setTimeout(cb, 100);
@@ -63,7 +64,7 @@
         });
     };
 
-    fillList = function fillList(browser, thread_id) {
+    fillList = function fillList(thread_id) {
         var start_post = 0;
         async.forever(function (cb) {
             if (likesList.length >= 1000) {
@@ -71,7 +72,7 @@
                 setTimeout(cb, 5 * 60 * 1000);
                 return;
             }
-            getPage(browser, thread_id, start_post, function (last_post) {
+            getPage(thread_id, start_post, function (last_post) {
                 console.log('Processed ' + last_post + ' posts for likeable posts.');
                 var got_results = last_post > start_post;
                 start_post = last_post + 1;
@@ -81,8 +82,11 @@
         });
     };
 
-    getPage = function getPage(browser, thread_id, start_post, callback) {
+    getPage = function getPage(thread_id, start_post, callback) {
         browser.getContent('t/' + thread_id + '/' + start_post + '.json', function (err, req, contents) {
+            if (req.statusCode>=300){
+                console.log('Topic '+thread_id+' is private or not exist');
+            }
             var posts = contents.post_stream.posts,
                 likeables = posts.filter(function (x) {
                     var action = x.actions_summary.filter(function (y) {

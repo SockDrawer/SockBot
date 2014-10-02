@@ -18,6 +18,9 @@
                 var q = JSON.parse(c);
                 callback(a, b, q);
             } catch (e) {
+                if (b.statusCode < 300 && !!c && !/^\s*$/.test(c)) {
+                    console.error('Exception: ' + e.message);
+                }
                 callback(a, b, c);
             }
         });
@@ -43,6 +46,9 @@
                         var q = JSON.parse(c);
                         callback(a, b, q);
                     } catch (e) {
+                        if (!!c && !/^\s*$/.test(c)) {
+                            console.error('Exception: ' + e.message + "'" + c + "'");
+                        }
                         callback(a, b, c);
                     }
                 });
@@ -70,9 +76,9 @@
         ], callback);
     }
     exports.auth = auth;
-    
-    
-    function post_topic(browser, category, title, content, callback) {
+
+
+    function post_topic(category, title, content, callback) {
         var form = {
             raw: content,
             is_warning: false,
@@ -81,14 +87,13 @@
             title: title,
             auto_close_time: ''
         };
-        browser.postMessage('/posts', form, function (a, b, c) {
-            console.log(c);
+        postMessage('/posts', form, function (a, b, c) {
             callback();
         });
     }
     exports.post_topic = post_topic;
 
-    function reply_topic(browser, topic, reply_to, content, callback) {
+    function reply_topic(topic, reply_to, content, callback) {
         var form = {
             raw: content,
             topic_id: topic,
@@ -98,9 +103,9 @@
             archetype: 'regular',
             auto_close_time: ''
         };
-        browser.postMessage('/posts', form, function (a, b, c) {
+        postMessage('/posts', form, function (a, b, c) {
             callback();
         });
     }
-    exports.reply_topic=reply_topic;
+    exports.reply_topic = reply_topic;
 }());
