@@ -13,8 +13,8 @@ browser.auth(config.username, config.password, function () {
         likes.likeThread(config.likeBingeTopics);
     }
     if (config.readify) {
-        reader.readAllTheThings(browser);
+        reader.readAllTheThings();
     }
-    queue.begin(browser);
+    queue.begin();
 
 });

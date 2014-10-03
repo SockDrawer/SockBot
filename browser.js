@@ -10,7 +10,8 @@
                 'X-Requested-With': 'XMLHttpRequest',
                 'User-Agent': 'SockAdept 1.0.0'
             }
-        });
+        }),
+        tag = "\n\n<!-- Posted by @SockBot v0.9.99 on %DATE%-->";
 
     function getContent(url, callback) {
         browser.get('http://what.thedailywtf.com/' + url, function (a, b, c) {
@@ -46,7 +47,7 @@
                         var q = JSON.parse(c);
                         callback(a, b, q);
                     } catch (e) {
-                        if (!!c && !/^\s*$/.test(c)) {
+                        if (b.statusCode < 300 && !!c && !/^\s*$/.test(c)) {
                             console.error('Exception: ' + e.message + "'" + c + "'");
                         }
                         callback(a, b, c);
@@ -80,7 +81,7 @@
 
     function post_topic(category, title, content, callback) {
         var form = {
-            raw: content,
+            raw: content + tag.replace('%DATE%', new Date()),
             is_warning: false,
             category: category,
             archetype: 'regular',
@@ -95,7 +96,7 @@
 
     function reply_topic(topic, reply_to, content, callback) {
         var form = {
-            raw: content,
+            raw: content + tag.replace('%DATE%', new Date()),
             topic_id: topic,
             is_warning: false,
             reply_to_post_number: reply_to,

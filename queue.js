@@ -42,8 +42,8 @@
     function begin() {
         async.forever(function (next) {
             browser.getContent('/notifications', function (a, b, c) {
-                if (!c) {
-                    next();
+                if (!c || typeof c !== 'object') {
+                    setTimeout(next, 5 * 1000);
                     return;
                 }
                 var next_notify = Date.parse(c[0].created_at) + 1;

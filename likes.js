@@ -50,7 +50,7 @@
             var like = likesList.shift();
             console.log('Liking Post ' + like.post_number + '(#' + like.post_id + ') By `' + like.username + '`');
             browser.postMessage('post_actions', like.form, function (err, resp, contents) {
-                if (resp.statusCode < 300 || resp.statusCode === 403) {
+                if (resp.statusCode < 300) {
                     setTimeout(cb, 100);
                 } else {
                     console.log('Send Error ' + resp.statusCode);
@@ -76,16 +76,20 @@
                 console.log('Processed ' + last_post + ' posts for likeable posts.');
                 var got_results = last_post > start_post;
                 start_post = last_post + 1;
-                // delay a quarter second on post get, delay 10 minutes on no new posts
-                setTimeout(cb, got_results ? 250 : 10 * 60 * 1000);
+                // delay a quarter second on post get, delay 5 minutes on no new posts
+                setTimeout(cb, got_results ? 250 : 5 * 60 * 1000);
             });
         });
     };
 
     getPage = function getPage(thread_id, start_post, callback) {
         browser.getContent('t/' + thread_id + '/' + start_post + '.json', function (err, req, contents) {
-            if (req.statusCode>=300){
-                console.log('Topic '+thread_id+' is private or not exist');
+            if (req.statusCode >= 300) {
+                console.log('Topic ' + thread_id + ' is private or not exist');
+            }
+            if (typeof contents !== 'object') {
+                callback(0);
+                return;
             }
             var posts = contents.post_stream.posts,
                 likeables = posts.filter(function (x) {

@@ -12,12 +12,12 @@
         var cutoff = (new Date().getTime()) - config.readifyWait,
             form = {
                 'topic_id': topic.id,
-                'topic_time': Math.floor(4995 * topic.unread.length / 3) // msecs passed on topic (We're pretty sure)
+                'topic_time': Math.floor(4242 * topic.unread.length / 3) // msecs passed on topic (We're pretty sure)
             };
         topic.unread.filter(function (p) {
             return p.posted < cutoff;
         }).map(function (p) {
-            form['timings[' + p.id + ']'] = 4995; // msecs passed on post (same)
+            form['timings[' + p.id + ']'] = 4242; // msecs passed on post (same)
         });
         topic.unread.filter(function (p) {
             return p.posted >= cutoff;
@@ -27,43 +27,79 @@
         });
 
         browser.postMessage('topics/timings', form, function () {
-            setTimeout(callback, 50); // Rate limit these to better sout the occasion
+            setTimeout(callback, 100); // Rate limit requests so as to not overload the server.
         });
     }
 
     function getTopicsPage(url, callback) {
-        browser.getContent(url, function (a, b, c) {
-            callback({
-                next: c.topic_list.more_topics_url,
-                topics: c.topic_list.topics.map(function (o) {
-                    return {
-                        id: o.id,
-                        slug: o.slug
-                    };
-                })
-            });
-        });
+        var result;
+        async.whilst(
+            function () {
+                return typeof result !== 'object';
+            },
+            function (next) {
+                browser.getContent(url, function (a, b, c) {
+                    if (typeof c !== 'object') {
+                        setTimeout(next, 500);
+                        return;
+                    }
+                    result = c;
+                    next();
+                });
+            },
+            function () {
+                if (typeof result.topic_list !== 'object') {
+                    callback(null);
+                    return;
+                }
+                callback({
+                    next: result.topic_list.more_topics_url,
+                    topics: result.topic_list.topics.map(function (o) {
+                        return {
+                            id: o.id,
+                            slug: o.slug
+                        };
+                    })
+                });
+            }
+        );
     }
 
     function getTopicPage(topic, post, callback) {
-        browser.getContent('/t/' + topic + '/' + post + '.json', function (a, b, c) {
-            var posts = c.post_stream.posts;
-            callback({
-                start: c.last_read_post_number,
-                last: posts[posts.length - 1].post_number,
-                posts: c.highest_post_number,
-                id: c.id,
-                slug: c.slug,
-                unread: posts.filter(function (p) {
-                    return !p.read;
-                }).map(function (p) {
-                    return {
-                        id: p.post_number,
-                        posted: Date.parse(p.created_at)
-                    };
-                })
-            });
-        });
+        var result;
+        async.whilst(
+            function () {
+                return result === undefined;
+            },
+            function (next) {
+                browser.getContent('/t/' + topic + '/' + post + '.json', function (a, b, c) {
+                    if (typeof c !== 'object') {
+                        setTimeout(next, 500);
+                        return;
+                    }
+                    result = c;
+                    next();
+                });
+            },
+            function () {
+                var posts = result.post_stream.posts;
+                callback({
+                    start: result.last_read_post_number,
+                    last: posts[posts.length - 1].post_number,
+                    posts: result.highest_post_number,
+                    id: result.id,
+                    slug: result.slug,
+                    unread: posts.filter(function (p) {
+                        return !p.read;
+                    }).map(function (p) {
+                        return {
+                            id: p.post_number,
+                            posted: Date.parse(p.created_at)
+                        };
+                    })
+                });
+            }
+        );
     }
 
     function readAllTheWaitingThings() {
