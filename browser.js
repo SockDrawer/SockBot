@@ -1,6 +1,6 @@
-/*jslint node: true, indent: 4, unparam: true, sloppy: true,  */
-
+/*jslint node: true, indent: 4, unparam: true  */
 (function () {
+    'use strict';
     var async = require('async'),
         request = require('request'),
         jar = request.jar(),
@@ -14,14 +14,14 @@
         tag = "\n\n<!-- Posted by @SockBot v0.9.99 on %DATE%-->";
 
     function getContent(url, callback) {
-        browser.get('http://what.thedailywtf.com/' + url, function (a, b, c) {
+        if (!/^http:\/\//.test(url)) {
+            url = 'http://what.thedailywtf.com/' + url;
+        }
+        browser.get(url, function (a, b, c) {
             try {
                 var q = JSON.parse(c);
                 callback(a, b, q);
             } catch (e) {
-                if (b.statusCode < 300 && !!c && !/^\s*$/.test(c)) {
-                    console.error('Exception: ' + e.message);
-                }
                 callback(a, b, c);
             }
         });
@@ -47,9 +47,6 @@
                         var q = JSON.parse(c);
                         callback(a, b, q);
                     } catch (e) {
-                        if (b.statusCode < 300 && !!c && !/^\s*$/.test(c)) {
-                            console.error('Exception: ' + e.message + "'" + c + "'");
-                        }
                         callback(a, b, c);
                     }
                 });
@@ -58,6 +55,7 @@
     exports.postMessage = postMessage;
 
     function auth(username, password, callback) {
+        var user;
         async.waterfall([
 
             function (cb) {
@@ -67,6 +65,7 @@
                 }, cb);
             },
             function (req, body, cb) {
+                user = body;
                 // Not needed for authentication but registers the login
                 postMessage('login', {
                     username: username,
@@ -74,7 +73,9 @@
                     redirect: 'http://what.thedailywtf.com/'
                 }, cb);
             }
-        ], callback);
+        ], function () {
+            callback(user);
+        });
     }
     exports.auth = auth;
 

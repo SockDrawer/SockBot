@@ -1,0 +1,11 @@
+{
+    "likeBinge": false,
+    "likeBingeHour": 23,
+    "likeBingeMinute": 50,
+    "likeBingeTopic": 1000,
+    "readify": false,
+    "readifyWait": 0,
+    "summoner":true,
+    "summonerTimeout": 60000,
+    "dicemaster":true
+}

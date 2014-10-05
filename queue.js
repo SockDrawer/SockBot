@@ -1,10 +1,10 @@
-/*jslint node: true, indent: 4, unparam: true  */
+/*jslint node: true, indent: 4 */
 (function () {
     'use strict';
     var async = require('async'),
         browser = require('./browser'),
-        config = require('./configuration').configuration,
-        notify_time = config.queuestart,
+        notify_time = (new Date().getTime()),
+        sock_modules,
         notify_types = {
             1: 'mentioned',
             2: 'replied',
@@ -20,38 +20,63 @@
             12: 'granted_badge'
         };
 
+    function process_notification(notification, post, callback) {
+        async.eachSeries(sock_modules,
+            function (module, complete) {
+                if (typeof module.onNotify === 'function') {
+                    module.onNotify(notify_types[notification.notification_type], notification, post, complete);
+                } else {
+                    complete();
+                }
+            }, function () {
+                if (notification.topic_id && notification.topic_id > 0) {
+                    var form = {
+                        'topic_id': notification.topic_id,
+                        'topic_time': 4242
+                    };
+                    form['timings[' + notification.post_number + ']'] = 4242;
+                    browser.postMessage('topics/timings', form, callback);
+                } else {
+                    callback();
+                }
+            });
+    }
+
     function process_notifications(notifications, callback) {
         async.eachSeries(notifications.filter(function (n) {
             return Date.parse(n.created_at) >= notify_time;
         }), function (notify, cb) {
-            var handlers = config.behavior[notify_types[notify.notification_type]];
-            if (!handlers) {
-                cb();
-            } else {
-                async.eachSeries(handlers, function (h, cb2) {
-                    if (!h.handle(notify)) {
-                        cb2();
-                        return;
+            if (notify.data.original_post_id) {
+                browser.getContent('/posts/' + notify.data.original_post_id + '.json', function (err, resp, post) {
+                    if (err || resp.statusCode >= 300) {
+                        console.error('Error loading post #' + notify.data.original_post_id);
+                        post = undefined;
                     }
-                    h.action(browser, notify, cb2);
-                }, cb);
+                    process_notification(notify, post, cb);
+                });
+            } else {
+                process_notification(notify, undefined, cb);
             }
         }, callback);
     }
 
-    function begin() {
+    function begin(modules) {
+        sock_modules = modules;
         async.forever(function (next) {
-            browser.getContent('/notifications', function (a, b, c) {
-                if (!c || typeof c !== 'object') {
+            browser.getContent('/notifications', function (err, resp, notifications) {
+                if (err || resp.statusCode >= 300 || !notifications || typeof notifications !== 'object' || typeof notifications.filter !== 'function') {
                     setTimeout(next, 5 * 1000);
                     return;
                 }
-                var next_notify = Date.parse(c[0].created_at) + 1;
-                process_notifications(c, function () {
+                var next_notify = Date.parse(notifications[0].created_at) + 1;
+                process_notifications(notifications, function () {
                     notify_time = next_notify;
                     setTimeout(next, 5 * 1000);
                 });
             });
+        }, function () {
+            console.log('queue ending!');
+            console.log(arguments);
         });
     }
     exports.begin = begin;
