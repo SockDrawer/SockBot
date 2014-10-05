@@ -1,7 +1,7 @@
 /*jslint node: true, indent: 4, unparam: true  */
 (function () {
     'use strict';
-    var conf = require('./SockBot.conf').config,
+    var conf = require('./SockBot.conf.json'),
         def = {
             'username': 'sockbot',
             'password': 'sockbotsockbot',
@@ -11,7 +11,6 @@
             'likeBingeTopics': 1000,
             'readify': true,
             'readifyWait': 24 * 60 * 60 * 1000, // 48 hours
-            'queuestart': 0
         };
 
     function merge() {

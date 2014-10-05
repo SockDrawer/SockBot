@@ -1,15 +1,13 @@
-/*jslint node: true, indent: 4, unparam: true  */
+/*jslint node: true, indent: 4 */
 (function () {
     'use strict';
     var async = require('async'),
-        browser = require('./browser'),
-        config = require('./configuration').configuration,
+        m_browser,
+        m_config,
         laterReads = [];
 
-
-
     function readTopicPage(topic, callback) {
-        var cutoff = (new Date().getTime()) - config.readifyWait,
+        var cutoff = (new Date().getTime()) - m_config.readifyWait,
             form = {
                 'topic_id': topic.id,
                 'topic_time': Math.floor(4242 * topic.unread.length / 3) // msecs passed on topic (We're pretty sure)
@@ -26,7 +24,7 @@
             laterReads.push(p);
         });
 
-        browser.postMessage('topics/timings', form, function () {
+        m_browser.postMessage('topics/timings', form, function () {
             setTimeout(callback, 100); // Rate limit requests so as to not overload the server.
         });
     }
@@ -38,12 +36,12 @@
                 return typeof result !== 'object';
             },
             function (next) {
-                browser.getContent(url, function (a, b, c) {
-                    if (typeof c !== 'object') {
+                m_browser.getContent(url, function (err, resp, obj) {
+                    if (err || resp.statusCode >= 400 || typeof obj !== 'object') {
                         setTimeout(next, 500);
                         return;
                     }
-                    result = c;
+                    result = obj;
                     next();
                 });
             },
@@ -72,12 +70,12 @@
                 return result === undefined;
             },
             function (next) {
-                browser.getContent('/t/' + topic + '/' + post + '.json', function (a, b, c) {
-                    if (typeof c !== 'object') {
+                m_browser.getContent('/t/' + topic + '/' + post + '.json', function (err, resp, obj) {
+                    if (err || resp.statusCode >= 400 || typeof obj !== 'object') {
                         setTimeout(next, 500);
                         return;
                     }
-                    result = c;
+                    result = obj;
                     next();
                 });
             },
@@ -104,7 +102,7 @@
 
     function readAllTheWaitingThings() {
         async.forever(function (next) {
-            var cutoff = (new Date().getTime()) - config.readifyWait,
+            var cutoff = (new Date().getTime()) - m_config.readifyWait,
                 readIt = laterReads.filter(function (p) {
                     return p.posted < cutoff;
                 });
@@ -120,7 +118,7 @@
                     };
                     form['timings[' + p.id + ']'] = 4995; // msecs passed on post (same)
 
-                    browser.postMessage('topics/timings', form, function () {
+                    m_browser.postMessage('topics/timings', form, function () {
                         setTimeout(cb, 50); // Rate limit these to better sout the occasion
                     });
                 },
@@ -132,7 +130,8 @@
 
     function readAllTheOldThings() {
         async.forever(function (nextTime) {
-            var next = '/latest.json?ascending=true&order=activity&no_definitions=true';
+            //var next = '/latest.json?ascending=true&order=activity&no_definitions=true';
+            var next = '/latest.json';
             async.whilst(
                 function () {
                     return !!next;
@@ -174,5 +173,13 @@
         readAllTheOldThings();
         readAllTheWaitingThings();
     }
-    exports.readAllTheThings = readAllTheThings;
+
+    exports.name = 'Readify 1.0.1';
+    exports.begin = function begin(browser, config) {
+        m_browser = browser;
+        m_config = config;
+        if (config.readify) {
+            readAllTheThings();
+        }
+    };
 }());

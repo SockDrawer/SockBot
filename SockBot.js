@@ -1,20 +1,41 @@
-/*jslint node: true, indent: 4, unparam: true, sloppy: true,  */
+/*jslint node: true, indent: 4 */
+(function () {
+    'use strict';
+    var fs = require('fs'),
+        async = require('async'),
+        browser = require('./browser'),
+        queue = require('./queue'),
+        config = require('./configuration').configuration,
+        sock_modules = [];
 
-var async = require('async'),
-    browser = require('./browser'),
-    queue = require('./queue'),
-    likes = require('./likes'),
-    reader = require('./reader'),
-    config = require('./configuration').configuration;
+    async.waterfall([
 
+        function (cb) {
+            fs.readdir('./sock_modules/', cb);
+        },
+        function (files, cb) {
+            files.filter(function (name) {
+                return name[0] !== '.' && /[.]js$/.test(name);
+            }).forEach(function (name) {
+                var module = require('./sock_modules/' + name);
+                sock_modules.push(module);
+                console.log('Loaded module: ' + module.name);
+            });
+            cb();
+        },
+        function () {
+            browser.auth(config.username, config.password, function (user) {
+                config.user = user;
+                sock_modules.forEach(function (module) {
+                    if (typeof module.begin !== 'function') {
+                        return;
+                    }
+                    console.log('Starting module: ' + module.name);
+                    module.begin(browser, config);
+                });
+                queue.begin(sock_modules);
 
-browser.auth(config.username, config.password, function () {
-    if (config.likeBinge) {
-        likes.likeThread(config.likeBingeTopics);
-    }
-    if (config.readify) {
-        reader.readAllTheThings();
-    }
-    queue.begin();
-
-});
+            });
+        }
+    ]);
+}());
