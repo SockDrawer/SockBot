@@ -7,7 +7,9 @@
     exports.onNotify = function (type, notification, post, callback) {
         if (m_browser && m_config) {
             console.log('Notification ' + type + ' from ' + notification.data.display_username + ' in "' + notification.data.topic_title + '"');
-            console.log('\t' + (post.raw || '').split('\n')[0]);
+            if (post && post.raw){
+                console.log('\t' + (post.raw || '').split('\n')[0]);
+            }
         }
         callback();
     };
