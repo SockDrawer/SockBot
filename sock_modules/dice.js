@@ -19,6 +19,30 @@
         });
     }
 
+    function rollDnD(num, sides, callback) {
+        if (isNaN(num) || isNaN(sides)) {
+            callback(null);
+            return;
+        }
+        if (num > m_config.diceMaxDice) {
+            callback(null, 'Refusing to roll ' + num + 'd' + sides + ': Too many dice requested');
+            return;
+        }
+        if (sides === 1) {
+            callback(null, 'Rolling ' + num + 'd1: Sum : ' + num);
+            return;
+        }
+        getDiceFromServer(num, sides, function (dice) {
+            if (num > 1) {
+                callback(null, 'Rolling ' + num + 'd' + sides + ': ' + dice.join(', ') + ' Sum: ' + dice.reduce(function (i, v) {
+                    return i + v;
+                }, 0));
+            } else {
+                callback(null, 'Rolling ' + num + 'd' + sides + ': ' + dice[0]);
+            }
+        });
+    }
+
     function doDnD(post, callback) {
         var format = /\b(\d+)d(\d+)\b/gi,
             result = '';
@@ -26,22 +50,13 @@
             return r.split('d');
         });
         async.map(result, function (roll, complete) {
-            getDiceFromServer(roll[0], roll[1], function (dice) {
-                complete(null, [roll, dice]);
-            });
+            rollDnD(parseInt(roll[0], 10), parseInt(roll[1], 10), complete);
         }, function (err, result) {
             if (err) {
                 callback();
                 return;
             }
-            var str = '';
-            result.forEach(function (f) {
-                var sum = f[1].reduce(function (i, v) {
-                    return i + v;
-                }, 0);
-                str += 'Rolling ' + f[0][0] + 'd' + f[0][1] + ': ' + f[1].join(', ') + ' Sum: ' + sum + '\n\n';
-            });
-            callback(str);
+            callback(result.join('\n\n'));
         });
     }
 

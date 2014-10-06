@@ -7,5 +7,6 @@
     "readifyWait": 0,
     "summoner":true,
     "summonerTimeout": 60000,
-    "dicemaster":true
+    "dicemaster":true,
+    "diceMaxDice":20
 }
