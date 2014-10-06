@@ -49,6 +49,10 @@
         result = post.raw.match(format).map(function (r) {
             return r.split('d');
         });
+        if (result.length > m_config.diceMaxRolls){
+            callback('Too many dice rolls requested, sorry');
+            return;
+        }
         async.map(result, function (roll, complete) {
             rollDnD(parseInt(roll[0], 10), parseInt(roll[1], 10), complete);
         }, function (err, result) {
