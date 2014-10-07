@@ -9,6 +9,7 @@
     "async": "~0.2.8",
     "cheerio": "^0.17.0",
     "node-uuid": "^1.4.1",
-    "request": "^2.42.0"
+    "request": "^2.42.0",
+    "xregexp": "^2.0.0"
   }
 }

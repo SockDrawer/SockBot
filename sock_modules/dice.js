@@ -1,9 +1,11 @@
-//http://www.random.org/integers/?num=5&min=1&max=100&col=1&base=10&format=plain&rnd=new
-/*jslint node: true, indent: 4 */
+/*jslint node: true, indent: 4, todo: true */
 (function () {
     'use strict';
 
     var async = require('async'),
+        xRegExp = require('xregexp').XRegExp,
+        matcher = '\\b(?<num>\\d+)(d(?<sides>\\d+)|(\\s?(?<method>S|SS|Scion|W|WW|Wolf|M|MM|Mage|F|FF|Fudge|Fate|C|CC|Coin)))(t(?<target>\\d+))?(?<options>[pr]+)?\\b',
+        rmatcher = xRegExp(matcher, 'i'),
         m_browser,
         m_config;
 
@@ -19,49 +21,103 @@
         });
     }
 
-    function rollDnD(num, sides, callback) {
+    function getError() {
+        return m_config.errors[Math.floor(Math.random() * m_config.errors.length)];
+    }
+
+    function prerollDice(num, sides) {
+        var dice,
+            ct = 0,
+            i,
+            ones = 1,
+            reducer = function reducer(i, o) {
+                return i + o === 1 ? 1 : 0;
+            };
+        while (ones > 0) {
+            dice = [];
+            for (i = 0; i < num; i += 1) {
+                dice.push((Math.floor(Math.random() * sides)) + 1);
+            }
+            ones = dice.reduce(reducer, 0);
+            ct += 1;
+        }
+        return ct;
+    }
+
+    function rollXDice(match, callback) {
+        var num = parseInt(match.num, 10),
+            sides = parseInt(match.sides, 10),
+            result = 'Rolling ' + num + 'd' + sides + ': ';
+
         if (isNaN(num) || isNaN(sides)) {
-            callback(null);
+            callback(result + getError());
             return;
         }
         if (num > m_config.diceMaxDice) {
-            callback(null, 'Refusing to roll ' + num + 'd' + sides + ': Too many dice requested');
+            callback(result + 'Error Too many dice requested');
             return;
         }
         if (sides === 1) {
-            callback(null, 'Rolling ' + num + 'd1: Sum : ' + num);
+            callback(result + 'Sum : ' + num);
             return;
         }
+        if (match.options && match.options.toLowerCase().indexOf('p') >= 0) {
+            result += 'Prerolling ' + prerollDice(num, sides) + ' times: ';
+        }
         getDiceFromServer(num, sides, function (dice) {
-            if (num > 1) {
-                callback(null, 'Rolling ' + num + 'd' + sides + ': ' + dice.join(', ') + ' Sum: ' + dice.reduce(function (i, v) {
-                    return i + v;
-                }, 0));
-            } else {
-                callback(null, 'Rolling ' + num + 'd' + sides + ': ' + dice[0]);
+            var sum = dice.reduce(function (i, v) {
+                return i + v;
+            }, 0);
+            result += dice.join(', ');
+            if (isNaN(sum)) {
+                result += ' ' + getError();
+            } else if (num > 1) {
+                result += ' Sum: ' + sum;
             }
+            callback(result);
         });
     }
 
-    function doDnD(post, callback) {
-        var format = /\b(\d+)d(\d+)\b/gi,
-            result = '';
-        result = post.raw.match(format).map(function (r) {
-            return r.split('d');
-        });
-        if (result.length > m_config.diceMaxRolls){
-            callback('Too many dice rolls requested, sorry');
-            return;
+    function rollDice(match, callback) {
+        if (match.sides) {
+            rollXDice(match, callback);
+        } else {
+            callback('Not implemented');
         }
-        async.map(result, function (roll, complete) {
-            rollDnD(parseInt(roll[0], 10), parseInt(roll[1], 10), complete);
-        }, function (err, result) {
-            if (err) {
-                callback();
-                return;
+    }
+
+    function rollAllDice(input, callback) {
+        var match = 1,
+            pos = 0,
+            results = [];
+        async.until(
+            function () {
+                return !match;
+            },
+            function (next) {
+                match = rmatcher.xexec(input, pos);
+                if (match) {
+                    pos = match.index + match[0].length;
+                    if (results.length >= m_config.diceMaxRolls) {
+                        results.push('Reached maximum dice roll. stopping.');
+                        next(true);
+                    } else {
+                        rollDice(match, function (line) {
+                            results.push(line);
+                            next();
+                        });
+                    }
+                } else {
+                    next();
+                }
+            },
+            function (err) {
+                if (err) {
+                    results.push(results.pop()); // TODO: figurter noop
+                }
+                callback(results);
             }
-            callback(result.join('\n\n'));
-        });
+        );
     }
 
     exports.name = "DiceMaster 1.0.0";
@@ -74,9 +130,10 @@
         //8 and up is success in mage
         console.log(post.raw);
 
-        doDnD(post, function (dice) {
-            if (dice) {
-                m_browser.reply_topic(notification.topic_id, notification.post_number, dice, callback);
+        rollAllDice(post.raw, function (dice) {
+            var result = dice.join("\n\n").trim();
+            if (result) {
+                m_browser.reply_topic(notification.topic_id, notification.post_number, result, callback);
             } else {
                 callback();
             }
