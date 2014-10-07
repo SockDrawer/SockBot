@@ -5,9 +5,28 @@
     "likeBingeTopic": 1000,
     "readify": false,
     "readifyWait": 0,
-    "summoner":true,
+    "summoner": true,
     "summonerTimeout": 60000,
-    "dicemaster":true,
-    "diceMaxDice":20,
-    "diceMaxRolls":6
+    "dicemaster": true,
+    "diceMaxDice": 20,
+    "diceMaxRolls": 6,
+    "errors": [
+        "Ph'nglui mglw'nafh Cthulhu R'lyeh wgah'nagl fhtagn",
+        "+++Mr. Jelly! Mr. Jelly!+++ ",
+        "+++Error At Address: 14, Treacle Mine Road, Ankh-Morpork+++",
+        "+++Divide By Cucumber Error. Please Reinstall Universe And Reboot +++",
+        "+++Whoops! Here Comes The Cheese! +++",
+        "Divided the universe by zero.",
+        "Does not Compute.",
+        "All your base are belong to us!",
+        "What do you get when you multiply six by nine?",
+        "Iyeeeeeeeee!!! A segmentation fault has occurred. Have a fluffy day.",
+        "Error: Success.",
+        "No keyboard detected. Press F1 to continue.",
+        "No user detected. Press the any key to continue.",
+        "Error: Not a boolean 'FileNotFound'.",
+        "Error 119: 2.88MB floppy installed but not supported by the floppy controller.",
+        "Error: Operation completed successfully.",
+        "Error: FILE_NOT_FOUND"
+    ]
 }
