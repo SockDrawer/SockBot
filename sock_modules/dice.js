@@ -150,7 +150,7 @@
             function (next) {
                 match = rmatcher.xexec(input, pos);
                 if (match) {
-                    pos = match.index + match[0].length;
+                    pos = match.index + match[0].length - 1;
                     if (results.length >= m_config.diceMaxRolls) {
                         results.push('Reached maximum dice roll. stopping.');
                         next(true);
