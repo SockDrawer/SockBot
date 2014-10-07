@@ -65,13 +65,13 @@
         async.forever(function (next) {
             browser.getContent('/notifications', function (err, resp, notifications) {
                 if (err || resp.statusCode >= 300 || !notifications || typeof notifications !== 'object' || typeof notifications.filter !== 'function') {
-                    setTimeout(next, 5 * 1000);
+                    setTimeout(next, 0.2 * 1000);
                     return;
                 }
                 var next_notify = Date.parse(notifications[0].created_at) + 1;
                 process_notifications(notifications, function () {
                     notify_time = next_notify;
-                    setTimeout(next, 5 * 1000);
+                    setTimeout(next, 0.2 * 1000);
                 });
             });
         }, function () {
