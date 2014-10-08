@@ -10,7 +10,7 @@
             'likeBingeMinute': 50,
             'likeBingeTopics': 1000,
             'readify': true,
-            'readifyWait': 24 * 60 * 60 * 1000, // 48 hours
+            'readifyWait': 24 * 60 * 60 * 1000, // 24 hours
         };
 
     function merge() {
