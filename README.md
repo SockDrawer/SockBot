@@ -17,7 +17,8 @@ For hosting the forum and allowing our bots to flourish:
 [@apapadimoulis](http://what.thedailywtf.com/users/apapadimoulis)
 [@PJH](http://what.thedailywtf.com/users/PJH)
 
-For telling us that it couldn't be done
+For telling us that it couldn't be done:
+[@Codinghorror](http://what.thedailywtf.com/users/Codinghorror)
 
 For code that I looked at and lifted many ideas and implementiations from:
 [@Arantor](http://what.thedailywtf.com/users/Arantor)
