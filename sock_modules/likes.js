@@ -80,7 +80,7 @@
             var like = likesList.shift();
             console.log('Liking Post ' + like.post_number + '(#' + like.post_id + ') By `' + like.username + '`');
             m_browser.postMessage('post_actions', like.form, function (err, resp) {
-                if (err || resp.statusCode < 300) {
+                if (err || (resp.statusCode < 300 && resp.statusCode != 403)) { // Ignore error 403, that means duplicate like or post deleted
                     setTimeout(cb, 100);
                 } else {
                     console.log('Send Error ' + resp.statusCode);
