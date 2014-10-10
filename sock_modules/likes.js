@@ -30,6 +30,10 @@
                         return y.id === 2;
                     });
                     return action && action[0].can_act;
+                }).filter(function (x) {
+                    return likesList.filter(function (y) {
+                        return x.id === y.id;
+                    }).length === 0;
                 });
             likeables.forEach(function (x) {
                 var data = {
@@ -80,7 +84,8 @@
             var like = likesList.shift();
             console.log('Liking Post ' + like.post_number + '(#' + like.post_id + ') By `' + like.username + '`');
             m_browser.postMessage('post_actions', like.form, function (err, resp) {
-                if (err || (resp.statusCode < 300 && resp.statusCode != 403)) { // Ignore error 403, that means duplicate like or post deleted
+                // Ignore error 403, that means duplicate like or post deleted
+                if (err || (resp.statusCode < 300 && resp.statusCode !== 403)) {
                     setTimeout(cb, 100);
                 } else {
                     console.log('Send Error ' + resp.statusCode);
