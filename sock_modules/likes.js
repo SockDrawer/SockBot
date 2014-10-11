@@ -6,8 +6,6 @@
         m_config,
         likesList = [];
 
-
-
     function getPage(thread_id, start_post, callback) {
         m_browser.getContent('t/' + thread_id + '/' + start_post + '.json', function (err, req, contents) {
             if (err || req.statusCode >= 400) {
@@ -32,19 +30,19 @@
                     return action && action[0].can_act;
                 }).filter(function (x) {
                     return likesList.filter(function (y) {
-                        return x.id === y.id;
+                        return x.id === y.post_id;
                     }).length === 0;
                 });
             likeables.forEach(function (x) {
                 var data = {
-                    form: {
+                    'form': {
                         'id': x.id,
                         'post_action_type_id': 2,
                         'flag_topic': false
                     },
-                    post_number: x.post_number,
-                    post_id: x.id,
-                    username: x.username
+                    'post_number': x.post_number,
+                    'post_id': x.id,
+                    'username': x.username
                 };
                 likesList.push(data);
             });
@@ -85,7 +83,7 @@
             console.log('Liking Post ' + like.post_number + '(#' + like.post_id + ') By `' + like.username + '`');
             m_browser.postMessage('post_actions', like.form, function (err, resp) {
                 // Ignore error 403, that means duplicate like or post deleted
-                if (err || (resp.statusCode < 300 && resp.statusCode !== 403)) {
+                if ((err && resp.statusCode !== 403) || resp.statusCode < 300) {
                     setTimeout(cb, 100);
                 } else {
                     console.log('Send Error ' + resp.statusCode);
