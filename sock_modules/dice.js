@@ -4,10 +4,64 @@
 
     var async = require('async'),
         xRegExp = require('xregexp').XRegExp,
-        matcher = '(^|\\s)(?<num>-?\\d+)?(d(?<sides>-?\\d+)|(d(?<method>S|SS|Scion|W|WW|Wolf|M|MM|Mage|F|FF|Fudge|Fate|C|CC|Coin)))(t(?<target>\\d+))?(b(?<bonus>-?\\d+))?(?<options>[pfr]+)?($|\\s)',
-        rmatcher = xRegExp(matcher, 'i'),
+        parser,
         m_browser,
         m_config;
+
+    //The parse ir somplicated. don't let it leak
+    (function () {
+        var num = '(?<num>-?\\d+)',
+            sides = '(?<sides>-?\\d+)',
+            method = '(?<method>W|Wolf|F|Fate|Fudge)',
+            target = '(?:t(?<target>\\d+))',
+            bonus = '(?:b(?<bonus>-?\\d+))',
+            options = '(?<options>[pfrs]+)',
+            matcher = '\\b' + num + '?d(' + sides + '|' + method + ')(?:' + target + '|' + bonus + '|' + options + ')*\\b',
+            r_target = xRegExp(target, 'i'),
+            r_bonus = xRegExp(bonus, 'i'),
+            r_options = xRegExp(options, 'i'),
+            r_matcher = xRegExp(matcher, 'i');
+        parser = function parser(input, each, complete) {
+            var match = 1,
+                pos = 0;
+            async.until(
+                function () {
+                    return !match;
+                },
+                function (next) {
+                    var target,
+                        bonus,
+                        options,
+                        inner,
+                        matched = {};
+                    match = r_matcher.xexec(input, pos);
+                    if (match) {
+                        inner = ' ' + match[0] + ' ';
+                        target = r_target.xexec(inner);
+                        bonus = r_bonus.xexec(inner);
+                        options = r_options.xexec(inner);
+
+                        matched.num = match.num ? parseInt(match.num, 10) : undefined;
+                        matched.sides = match.sides ? parseInt(match.sides, 10) : undefined;
+                        matched.method = match.method ? match.method.toLowerCase() : undefined;
+                        matched.target = (target && target.target) ? parseInt(target.target, 10) : undefined;
+                        matched.options = (match.options || '').toLowerCase();
+                        matched.bonus = (bonus && bonus.bonus) ? parseInt(bonus.bonus, 10) : undefined;
+                        matched.reroll = matched.options.indexOf('r') !== -1;
+                        matched.preroll = matched.options.indexOf('p') !== -1;
+                        matched.sort = matched.options.indexOf('s') !== -1;
+                        matched.fails = matched.options.indexOf('f') !== -1;
+                        pos = match.index + match[0].length - 1;
+                        each(matched, next);
+                    } else {
+                        next(true);
+                    }
+                },
+                complete
+            );
+
+        };
+    }());
 
     function getDiceFromServer(num, sides, rerollGreater, callback) {
         var factor = sides < 0 ? -1 : 1,
@@ -90,7 +144,7 @@
 
     function rollWolfDice(match, callback) {
         var criticals;
-        if (match.options.indexOf('r') !== -1) {
+        if (match.reroll) {
             criticals = 10;
         }
         if (!match.num) {
@@ -131,13 +185,13 @@
     }
 
     function rollFudgeDice(match, callback) {
+        if (!match.num) {
+            match.num = 4;
+        }
         var result = 'Rolling ' + match.num + ' dice of Fate: ';
         if (isNaN(match.num) || match.num < 1) {
             callback(result + getError());
             return;
-        }
-        if (!match.num) {
-            match.num = 4;
         }
         if (match.num > (m_config.diceMaxDice || 20)) {
             callback(result + 'Error Too many dice requested');
@@ -236,40 +290,20 @@
     }
 
     function rollAllDice(input, callback) {
-        var match = 1,
-            pos = 0,
-            results = [];
-        async.until(
-            function () {
-                return !match;
-            },
-            function (next) {
-                match = rmatcher.xexec(input, pos);
-                if (match) {
-                    match.num = match.num ? parseInt(match.num, 10) : undefined;
-                    match.sides = parseInt(match.sides || '0', 10);
-                    match.method = (match.method || '').toLowerCase();
-                    match.target = match.target ? parseInt(match.target, 10) : undefined;
-                    match.options = (match.options || '').toLowerCase();
-                    match.bonus = parseInt(match.bonus || '0', 10);
-                    pos = match.index + match[0].length - 1;
-                    if (results.length >= (m_config.diceMaxRolls || 6)) {
-                        results.push('Reached maximum dice roll. stopping.');
-                        next(true);
-                    } else {
-                        rollDice(match, function (line) {
-                            results.push(line);
-                            next();
-                        });
-                    }
+        var results = [];
+        parser(input, function (match, next) {
+                console.log(match);
+                if (results.length >= (m_config.diceMaxRolls || 6)) {
+                    results.push('Reached maximum dice roll. stopping.');
+                    next(true);
                 } else {
-                    next();
+                    rollDice(match, function (line) {
+                        results.push(line);
+                        next();
+                    });
                 }
             },
-            function (err) {
-                if (err) {
-                    results.push(results.pop()); // TODO: figurter noop
-                }
+            function () {
                 callback(results);
             }
         );
