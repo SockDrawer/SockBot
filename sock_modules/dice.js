@@ -8,19 +8,19 @@
         m_browser,
         m_config;
 
-    //The parse ir somplicated. don't let it leak
+    //The parse is complicated. don't let it leak
     (function () {
-        var num = '(?<num>-?\\d+)',
-            sides = '(?<sides>-?\\d+)',
-            method = '(?<method>W|Wolf|F|Fate|Fudge)',
-            target = '(?:t(?<target>\\d+))',
-            bonus = '(?:b(?<bonus>-?\\d+))',
-            options = '(?<options>[pfrs]+)',
-            matcher = '\\b' + num + '?d(' + sides + '|' + method + ')(?:' + target + '|' + bonus + '|' + options + ')*\\b',
-            r_target = xRegExp(target, 'i'),
-            r_bonus = xRegExp(bonus, 'i'),
-            r_options = xRegExp(options, 'i'),
-            r_matcher = xRegExp(matcher, 'i');
+        var p_num = '(?<num>-?\\d+)',
+            p_sides = '(?<sides>-?\\d+)',
+            p_method = '(?<method>W|Wolf|F|Fate|Fudge)',
+            p_target = '(?:t(?<target>\\d+))',
+            p_bonus = '(?:b(?<bonus>-?\\d+))',
+            p_options = '(?<options>[pfrs]+)',
+            p_matcher = '\\b' + p_num + '?d(' + p_sides + '|' + p_method + ')(?<optional>' + p_target + '|' + p_bonus + '|' + p_options + ')*\\b',
+            r_target = xRegExp(p_target, 'i'),
+            r_bonus = xRegExp(p_bonus, 'i'),
+            r_options = xRegExp(p_options, 'i'),
+            r_matcher = xRegExp(p_matcher, 'i');
         parser = function parser(input, each, complete) {
             var match = 1,
                 pos = 0;
@@ -36,7 +36,7 @@
                         matched = {};
                     match = r_matcher.xexec(input, pos);
                     if (match) {
-                        inner = ' ' + match[0] + ' ';
+                        inner = match.optional || '';
                         target = r_target.xexec(inner);
                         bonus = r_bonus.xexec(inner);
                         options = r_options.xexec(inner);
@@ -45,7 +45,7 @@
                         matched.sides = match.sides ? parseInt(match.sides, 10) : undefined;
                         matched.method = match.method ? match.method.toLowerCase() : undefined;
                         matched.target = (target && target.target) ? parseInt(target.target, 10) : undefined;
-                        matched.options = (match.options || '').toLowerCase();
+                        matched.options = (options || '').toLowerCase();
                         matched.bonus = (bonus && bonus.bonus) ? parseInt(bonus.bonus, 10) : undefined;
                         matched.reroll = matched.options.indexOf('r') !== -1;
                         matched.preroll = matched.options.indexOf('p') !== -1;
@@ -291,7 +291,8 @@
 
     function rollAllDice(input, callback) {
         var results = [];
-        parser(input, function (match, next) {
+        parser(input,
+            function (match, next) {
                 console.log(match);
                 if (results.length >= (m_config.diceMaxRolls || 6)) {
                     results.push('Reached maximum dice roll. stopping.');
@@ -305,8 +306,7 @@
             },
             function () {
                 callback(results);
-            }
-        );
+            });
     }
 
     exports.name = "DiceMaster 1.0.0";
