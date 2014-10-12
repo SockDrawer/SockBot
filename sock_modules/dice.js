@@ -36,7 +36,7 @@
                         matched = {};
                     match = r_matcher.xexec(input, pos);
                     if (match) {
-                        inner = match.optional || '';
+                        inner = match[0] || '';
                         target = r_target.xexec(inner);
                         bonus = r_bonus.xexec(inner);
                         options = r_options.xexec(inner);
@@ -45,7 +45,7 @@
                         matched.sides = match.sides ? parseInt(match.sides, 10) : undefined;
                         matched.method = match.method ? match.method.toLowerCase() : undefined;
                         matched.target = (target && target.target) ? parseInt(target.target, 10) : undefined;
-                        matched.options = (options || '').toLowerCase();
+                        matched.options = ((options || {}).options || '').toLowerCase();
                         matched.bonus = (bonus && bonus.bonus) ? parseInt(bonus.bonus, 10) : undefined;
                         matched.reroll = matched.options.indexOf('r') !== -1;
                         matched.preroll = matched.options.indexOf('p') !== -1;
@@ -75,6 +75,11 @@
         }
         if (sides < 0) {
             sides *= -1;
+        }
+        if (!num || !sides) {
+            callback(0, [
+                []
+            ]);
         }
         toRoll = num;
         async.whilst(
@@ -231,12 +236,16 @@
 
 
     function rollXDice(match, callback) {
-        var num = match.num || 1,
+        var num = match.num,
             sides = match.sides,
             crit,
-            result = 'Rolling ' + num + 'd' + sides + ': ';
+            result;
 
-        if (isNaN(num) || isNaN(sides)) {
+        if (num === undefined) {
+            num = 1;
+        }
+        result = 'Rolling ' + num + 'd' + sides + ': ';
+        if (isNaN(num) || isNaN(sides) || !num) {
             callback(result + getError());
             return;
         }
@@ -293,7 +302,6 @@
         var results = [];
         parser(input,
             function (match, next) {
-                console.log(match);
                 if (results.length >= (m_config.diceMaxRolls || 6)) {
                     results.push('Reached maximum dice roll. stopping.');
                     next(true);
