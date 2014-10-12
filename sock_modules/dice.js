@@ -319,15 +319,12 @@
 
     exports.name = "DiceMaster 1.0.0";
     exports.onNotify = function (type, notification, post, callback) {
-        if (!m_config.dicemaster || !post || !post.raw || ['private_message', 'mentioned', 'replied'].indexOf(type) === -1) {
+        if (!m_config.dicemaster || !post || !post.cleaned || ['private_message', 'mentioned', 'replied'].indexOf(type) === -1) {
             callback();
             return;
         }
 
-        //8 and up is success in mage
-        console.log(post.raw);
-
-        rollAllDice(post.raw, function (dice) {
+        rollAllDice(post.cleaned, function (dice) {
             var result = dice.join("\n\n").trim();
             if (result) {
                 m_browser.reply_topic(notification.topic_id, notification.post_number, result, callback);
