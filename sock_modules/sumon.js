@@ -17,7 +17,7 @@
             }
             summons[notification.topic_id] = now + m_config.summonerTimeout;
             m_browser.reply_topic(notification.topic_id, notification.post_number,
-                '@' + notification.data.display_username + ' has summoned me, and so I appear.',
+                '@' + notification.data.display_username + ' has summoned me, and so I appear' + ((notification.topic_id !== 3125) ? '.' : '?'),
                 callback);
         } else {
             callback();

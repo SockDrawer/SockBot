@@ -1,13 +1,43 @@
 /*jslint node: true, indent: 4 */
+/**
+ * @module notifyprint
+ * @author Accalia
+ * @license MIT
+ * @overview Prints messages to the console when notifications are received.
+ */
 (function () {
     'use strict';
     var m_browser,
         m_config;
-    exports.name = "NotifyPrint 0.0.0";
+
+    /**
+     * @var {string} name The name of this sock_module
+     */
+    exports.name = "NotifyPrint";
+
+    /**
+     * @var {string} version The version of theis sock_module
+     */
+    exports.version = "0.0.0";
+
+    /**
+     * @var {string} description Brief description of this module for Help Docs
+     */
+    exports.description = 'Print messages to console on notifications';
+
+
+
+    /**
+     * Handle a notification;
+     * @param {string} type Notification type received
+     * @param {Discourse.Notification} notification notification details
+     * @param {Discourse.Post} post post details
+     * @param {sock_module.Callback} callback
+     */
     exports.onNotify = function (type, notification, post, callback) {
         if (m_browser && m_config) {
             console.log('Notification ' + type + ' from ' + notification.data.display_username + ' in "' + notification.data.topic_title + '"');
-            if (post && post.raw){
+            if (post && post.raw) {
                 console.log('\t' + (post.raw || '').split('\n')[0]);
             }
         }

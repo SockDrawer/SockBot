@@ -26,10 +26,12 @@ For code that I looked at and lifted many ideas and implementiations from:
 [@riking](http://what.thedailywtf.com/users/riking)
 [@Yamikuronue](http://what.thedailywtf.com/users/Yamikuronue)
 
+For Providing Bugreports and feature requests that make Sockbot better for all:
+[@FrostCat](http://what.thedailywtf.com/users/FrostCat)
+
 For ad-hoc debugging of @sockbot:
 [@Matches](http://what.thedailywtf.com/users/Matches)
 [@VinDuv](http://what.thedailywtf.com/users/VinDuv)
-[@FrostCat](http://what.thedailywtf.com/users/FrostCat)
 [@loopback0](http://what.thedailywtf.com/users/loopback0)
 [@mott555](http://what.thedailywtf.com/users/mott555)
 [@jaloopa](http://what.thedailywtf.com/users/jaloopa)
@@ -39,6 +41,8 @@ For ad-hoc debugging of @sockbot:
 [@Keith](http://what.thedailywtf.com/users/Keith)
 [@aliceif](http://what.thedailywtf.com/users/aliceif)
 [@dkf](http://what.thedailywtf.com/users/dkf)
+[@anonymous234](http://what.thedailywtf.com/users/anonymous234)
+[@RaceProUK](http://what.thedailywtf.com/users/RaceProUK)
 
 For providing the lovely and amusing Error messages that sockbot will occasionally spew
 [@aliceif](http://what.thedailywtf.com/users/aliceif)
