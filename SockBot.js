@@ -24,8 +24,8 @@
             cb();
         },
         function () {
-            browser.auth(config.username, config.password, function (user) {
-                config.user = user;
+            browser.authenticate(config.username, config.password, function () {
+                config.user = browser.user;
                 sock_modules.forEach(function (module) {
                     if (typeof module.begin !== 'function') {
                         return;

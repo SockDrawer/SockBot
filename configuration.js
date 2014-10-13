@@ -13,6 +13,10 @@
             'readifyWait': 24 * 60 * 60 * 1000, // 24 hours
         };
 
+/**
+ * @callback sock_module.Callback
+ */
+
     function merge() {
         var i = 0,
             res = {},

@@ -25,16 +25,18 @@
         "No keyboard detected. Press F1 to continue.",
         "No user detected. Press the any key to continue.",
         "No user detected. Press any other key to continue.",
-        "Error: Not a boolean 'FileNotFound'.",
         "Error 119: 2.88MB floppy installed but not supported by the floppy controller.",
-        "Error: Operation completed successfully.",
-        "Error: FILE_NOT_FOUND",
-        "Error: An exception has occurred. Please press <kdb>Alt</kbd>+<kbd>F4</kbd> to retry.",
-        "Error: Hard disk fluid reservoir empty.",
-        "Error: Expected success, but found success instead.",
-        "Error: I saw a squirrel out the window and forgot what you asked.",
-        "Error: I'm too sexy for this shirt.",
-        "Error: Contraceptives not found",
-        "Error: Sperm production overload, emergency overflow measures activated."
+        "Operation completed successfully.",
+        "FILE_NOT_FOUND",
+        "An exception has occurred. Please press <kdb>Alt</kbd>+<kbd>F4</kbd> to retry.",
+        "Hard disk fluid reservoir empty.",
+        "Expected success, but found success instead.",
+        "I saw a squirrel out the window and forgot what you asked.",
+        "I'm too sexy for this shirt.",
+        "Contraceptives not found",
+        "Sperm production overload, emergency overflow measures activated.",
+        "/dev/null full",
+        "I used to be a bot like you, then I took an exception in the knee.",
+        "Here I am, brain the size of a planet, and they ask me to roll some dice."
     ]
 }
