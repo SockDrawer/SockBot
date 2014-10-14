@@ -27,11 +27,27 @@
 
 
     /**
-     *@callback BrowserCallback
-     *  @param {object} err error object if `request` indicated error
+     * @callback BrowserCallback
+     * @param {object} err error object if `request` indicated error
      *  @param {object} resp response object, contains the response object from `request`
      *  @param {onject} body body of response. If body was valid JSON this has been deserialized
      */
+
+    function rateLimit(callback) {
+        return function (err, resp, body) {
+            if (resp.statusCode === 429) {
+                console.log('Too many requests. Muting for 60 seconds.');
+                var until = (new Date()).getTime() + 60 * 1000,
+                    now;
+                //Doing a busy wait on purpose. Using SetTimeout would allow other threads to process while the wait is 
+                //happening. we got the 429 for a reason. don't mess it up
+                do {
+                    now = (new Date()).getTime();
+                } while (now < until);
+            }
+            callback(err, resp, body);
+        };
+    }
 
     /**
      * Issue a GET request to the defined url and call the provided callback with the results.
@@ -47,19 +63,14 @@
         if (!/^https?:\/\//i.test(url)) {
             url = 'http://what.thedailywtf.com/' + url;
         }
-        browser.get(url, function (a, b, c) {
-            if (b.statusCode === 429) {
-                console.log('Too many requests. Muting for 60 seconds.');
+        browser.get(url, rateLimit(function (a, b, c) {
+            try {
+                var q = JSON.parse(c);
+                callback(a, b, q);
+            } catch (e) {
+                callback(a, b, c);
             }
-            setTimeout(function () {
-                try {
-                    var q = JSON.parse(c);
-                    callback(a, b, q);
-                } catch (e) {
-                    callback(a, b, c);
-                }
-            }, b.statusCode !== 429 ? 1 : 60 * 1000);
-        });
+        }));
     };
 
     /**
@@ -73,37 +84,27 @@
      */
     exports.postMessage = function postMessage(url, form, callback) {
         browser.get('http://what.thedailywtf.com/session/csrf.json',
-            function (a, b, c) {
-                if (b.statusCode === 429) {
-                    console.log('Too many requests. Muting for 60 seconds.');
+            rateLimit(function (a, b, c) {
+                var csrf = '';
+                try {
+                    csrf = JSON.parse(c).csrf;
+                } catch (e) {
+                    callback(e);
                 }
-                setTimeout(function () {
-                    var csrf = '';
+                browser.post('http://what.thedailywtf.com/' + url, {
+                    headers: {
+                        'X-CSRF-Token': csrf
+                    },
+                    form: form
+                }, rateLimit(function (a, b, c) {
                     try {
-                        csrf = JSON.parse(c).csrf;
+                        var q = JSON.parse(c);
+                        callback(a, b, q);
                     } catch (e) {
-                        callback(e);
+                        callback(a, b, c);
                     }
-                    browser.post('http://what.thedailywtf.com/' + url, {
-                        headers: {
-                            'X-CSRF-Token': csrf
-                        },
-                        form: form
-                    }, function (a, b, c) {
-                        if (b.statusCode === 429) {
-                            console.log('Too many requests. Muting for 60 seconds.');
-                        }
-                        setTimeout(function () {
-                            try {
-                                var q = JSON.parse(c);
-                                callback(a, b, q);
-                            } catch (e) {
-                                callback(a, b, c);
-                            }
-                        }, b.statusCode !== 429 ? 1 : 60 * 1000);
-                    });
-                }, b.statusCode !== 429 ? 1 : 60 * 1000);
-            });
+                }));
+            }));
     };
 
     /**
