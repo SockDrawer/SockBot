@@ -35,7 +35,7 @@
 
     function rateLimit(callback) {
         return function (err, resp, body) {
-            if (resp.statusCode === 429) {
+            if (resp.statusCode === 429 || resp.statusCode === 503) {
                 console.log('Too many requests. Muting for 60 seconds.');
                 var until = (new Date()).getTime() + 60 * 1000,
                     now;
