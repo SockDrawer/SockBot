@@ -6,6 +6,47 @@
         m_config,
         laterReads = [];
 
+    /**
+     * @callback AsyncCallback
+     * @param {boolean} [stop] Set to True to stop processing notification or message. No lower priority sock_modules will be called for the message if set to `true`
+     */
+
+    /**
+     * @callback RegistrationCallback
+     * @param {string[]} channels Message_bus channels this modules wishes to listen to
+     */
+
+    /**
+     * @var {string} description Brief description of this module for Help Docs
+     */
+    exports.description = 'Read All The Things!';
+
+    /**
+     * @var {object} configuration Default Configuration settings for this sock_module
+     */
+    exports.configuration = {
+        enabled: false,
+        readTime: 4242,
+        readWait: 3 * 24 * 60 * 60 * 1000
+    };
+
+    /**
+     * @var {string} name The name of this sock_module
+     */
+    exports.name = "Readify";
+
+    /**
+     * @var {number} priority If defined by a sock_module it is the priority of the module with respect to other modules.
+     *
+     * sock_modules **should not** define modules with negative permissions. Default value is 50 with lower numbers being higher priority.
+     */
+    exports.priority = undefined;
+
+    /**
+     * @var {string} version The version of this sock_module
+     */
+    exports.version = "0.0.0";
+
     function readTopicPage(topic, callback) {
         var cutoff = (new Date().getTime()) - m_config.readifyWait,
             form = {
@@ -24,7 +65,7 @@
             laterReads.push(p);
         });
 
-        m_browser.postMessage('topics/timings', form, function () {
+        m_browser.post_message('topics/timings', form, function () {
             setTimeout(callback, 100); // Rate limit requests so as to not overload the server.
         });
     }
@@ -36,7 +77,7 @@
                 return typeof result !== 'object';
             },
             function (next) {
-                m_browser.getContent(url, function (err, resp, obj) {
+                m_browser.get_content(url, function (err, resp, obj) {
                     if (err || resp.statusCode >= 400 || typeof obj !== 'object') {
                         setTimeout(next, 500);
                         return;
@@ -70,7 +111,7 @@
                 return result === undefined;
             },
             function (next) {
-                m_browser.getContent('/t/' + topic + '/' + post + '.json', function (err, resp, obj) {
+                m_browser.get_content('/t/' + topic + '/' + post + '.json', function (err, resp, obj) {
                     if (err || resp.statusCode >= 400 || typeof obj !== 'object') {
                         setTimeout(next, 500);
                         return;
@@ -118,7 +159,7 @@
                     };
                     form['timings[' + p.id + ']'] = 4995; // msecs passed on post (same)
 
-                    m_browser.postMessage('topics/timings', form, function () {
+                    m_browser.post_message('topics/timings', form, function () {
                         setTimeout(cb, 50); // Rate limit these to better sout the occasion
                     });
                 },
@@ -174,7 +215,6 @@
         readAllTheWaitingThings();
     }
 
-    exports.name = 'Readify 1.0.1';
     exports.begin = function begin(browser, config) {
         m_browser = browser;
         m_config = config;

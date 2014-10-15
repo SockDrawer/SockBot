@@ -6,8 +6,41 @@
         m_config,
         likesList = [];
 
+    /**
+     * @var {string} description Brief description of this module for Help Docs
+     */
+    exports.description = 'Issue Likes to all posts in a thread';
+
+    /**
+     * @var {object} configuration Default Configuration settings for this sock_module
+     */
+    exports.configuration = {
+        enabled: false,
+        binge: true,
+        bingeHour: 23,
+        bingeMinute: 50,
+        bingeTopic: 1000,
+    };
+
+    /**
+     * @var {string} name The name of this sock_module
+     */
+    exports.name = "AutoLikes";
+
+    /**
+     * @var {number} priority If defined by a sock_module it is the priority of the module with respect to other modules.
+     *
+     * sock_modules **should not** define modules with negative permissions. Default value is 50 with lower numbers being higher priority.
+     */
+    exports.priority = 0;
+
+    /**
+     * @var {string} version The version of this sock_module
+     */
+    exports.version = "1.1.0";
+
     function getPage(thread_id, start_post, callback) {
-        m_browser.getContent('t/' + thread_id + '/' + start_post + '.json', function (err, req, contents) {
+        m_browser.get_content('t/' + thread_id + '/' + start_post + '.json', function (err, req, contents) {
             if (err || req.statusCode >= 400) {
                 console.error('Topic ' + thread_id + ' could not be loaded.');
                 callback(-1);
@@ -81,7 +114,7 @@
             }
             var like = likesList.shift();
             console.log('Liking Post ' + like.post_number + '(#' + like.post_id + ') By `' + like.username + '`');
-            m_browser.postMessage('post_actions', like.form, function (err, resp) {
+            m_browser.post_message('post_actions', like.form, function (err, resp) {
                 // Ignore error 403, that means duplicate like or post deleted
                 if ((err && resp.statusCode !== 403) || resp.statusCode < 300) {
                     setTimeout(cb, 100);
@@ -121,7 +154,6 @@
             }, utc - now);
         });
     }
-    exports.name = 'AutoLike 1.0.1';
     exports.begin = function begin(browser, config) {
         m_browser = browser;
         m_config = config;
