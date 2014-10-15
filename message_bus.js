@@ -42,7 +42,7 @@
         },
         notify_time = (new Date()).getTime();
 
-    function poll_message_bus(callback) {
+    function pollMessageBus(callback) {
         var posts = {};
         m_browser.post_message('message-bus/' + client_id + '/poll', channels, function (err, resp, data) {
             if (err || resp.statusCode >= 300) {
@@ -97,7 +97,7 @@
         });
     }
 
-    function handle_notifications(message, post, callback) {
+    function handleNotifications(message, post, callback) {
         //we have some notifications here!
         m_browser.get_content('/notifications', function (err, resp, notifications) {
             if (err || resp.statusCode >= 300 || !notifications || typeof notifications !== 'object' || typeof notifications.filter !== 'function') {
@@ -156,7 +156,7 @@
         });
     }
 
-    function update_channels(message, post, callback) {
+    function updateChannels(message, post, callback) {
         var channel;
         if (!message || message.channel !== '/__status') {
             callback();
@@ -170,11 +170,11 @@
         callback();
     }
 
-    function poll_subscribers(cb) {
+    function pollSubscribers(cb) {
         var reg = {},
             chan = {};
-        reg['/__status'] = [update_channels];
-        reg['/notification/' + m_config.user.id] = [handle_notifications];
+        reg['/__status'] = [updateChannels];
+        reg['/notification/' + m_config.user.id] = [handleNotifications];
         chan['/notification/' + m_config.user.id] = -1;
         async.each(sock_modules, function (module, callback) {
             if (typeof module.registerListeners !== 'function' || typeof module.onMessage !== 'function') {
@@ -211,10 +211,10 @@
         m_browser = browser;
         sock_modules = modules;
 
-        poll_subscribers(function () {
-            async.forever(poll_message_bus);
+        pollSubscribers(function () {
+            async.forever(pollMessageBus);
             async.forever(function (next) {
-                poll_subscribers(function () {
+                pollSubscribers(function () {
                     setTimeout(next, 60 * 1000);
                 });
             });

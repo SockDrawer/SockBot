@@ -2,10 +2,10 @@
 (function () {
     'use strict';
     var fs = require('fs'),
+        browser,
         async = require('async'),
-        browser = require('./browser'),
         message_bus = require('./message_bus'),
-        config = require('./configuration').configuration,
+        config = require('./configuration'),
         sock_modules = [];
 
     async.waterfall([
@@ -30,15 +30,20 @@
             cb();
         },
         function (cb) {
+            config = config.loadConfiguration(sock_modules);
+            browser = require('./browser');
+            cb();
+        },
+        function (cb) {
             browser.authenticate(config.username, config.password, function () {
                 cb();
             });
         },
         function (cb) {
-            if (!config.user){
+            if (!config.user) {
                 // login failed. what can we do?
-                console.log('Loigin failed. Waiting 10 minutes to exit');
-                setTimeout(cb, 10*60*1000);
+                console.log('Login failed. Waiting 10 minutes to exit');
+                setTimeout(cb, 10 * 60 * 1000);
                 return;
             }
 
