@@ -6,7 +6,8 @@
         xRegExp = require('xregexp').XRegExp,
         parser,
         m_browser,
-        m_config;
+        m_config,
+        configuration;
 
     /**
      * @var {string} description Brief description of this module for Help Docs
@@ -19,7 +20,8 @@
     exports.configuration = {
         enabled: false,
         maxDice: 20,
-        maxRolls: 6
+        maxRolls: 6,
+        maxReRolls: 10
     };
 
     /**
@@ -118,7 +120,7 @@
                 return toRoll > 0;
             },
             function (next) {
-                if (results.length >= (m_config.diceMaxReRolls || 20)) {
+                if (results.length >= (configuration.maxReRolls || 20)) {
                     results.push(['Too many Rerolls. Stopping.']);
                     next(true);
                     return;
@@ -179,7 +181,8 @@
     }
 
     function rollWolfDice(match, callback) {
-        var criticals;
+        var criticals,
+            result;
         if (match.reroll) {
             criticals = 10;
         }
@@ -189,9 +192,13 @@
         if (!match.target) {
             match.target = 8;
         }
+        result = 'Rolling ' + match.num + 'd10 Target: ' + match.target + ': ';
+        if (match.num > (configuration.maxDice || 20)) {
+            callback(result + 'Error Too many dice requested');
+            return;
+        }
         getDiceFromServer(match.num, 10, criticals, function (sum, dice) {
-            var result = sum,
-                successes = 0,
+            var successes = sum,
                 mapper = function mapper(v) {
                     if (v >= match.target) {
                         successes += 1;
@@ -199,8 +206,8 @@
                     }
                     return v.toString();
                 };
-            result = 'Rolling ' + match.num + 'd10 Target: ' + match.target + ': ';
-            if (match.options.indexOf('p') >= 0) {
+            successes = 0; // reset successes
+            if (match.preroll) {
                 result += 'Prerolling ' + prerollDice(match.num, 10) + ' times: ';
             }
             result += dice.shift().map(mapper).join(', ');
@@ -229,7 +236,7 @@
             callback(result + getError());
             return;
         }
-        if (match.num > (m_config.diceMaxDice || 20)) {
+        if (match.num > (configuration.maxDice || 20)) {
             callback(result + 'Error Too many dice requested');
             return;
         }
@@ -280,7 +287,7 @@
             callback(result + getError());
             return;
         }
-        if (num > (m_config.diceMaxDice || 20)) {
+        if (num > (configuration.maxDice || 20)) {
             callback(result + 'Error Too many dice requested');
             return;
         }
@@ -288,10 +295,10 @@
             callback(result + 'Sum : ' + num);
             return;
         }
-        if (match.options && match.options.indexOf('p') >= 0) {
+        if (match.preroll) {
             result += 'Prerolling ' + prerollDice(num, sides) + ' times: ';
         }
-        if (match.options && match.options.indexOf('r') >= 0) {
+        if (match.reroll) {
             crit = sides;
         }
         getDiceFromServer(num, sides, crit, function (sum, dice) {
@@ -333,7 +340,7 @@
         var results = [];
         parser(input,
             function (match, next) {
-                if (results.length >= (m_config.diceMaxRolls || 6)) {
+                if (results.length >= (configuration.maxRolls || 6)) {
                     results.push('Reached maximum dice roll. stopping.');
                     next(true);
                 } else {
@@ -348,7 +355,7 @@
             });
     }
     exports.onNotify = function (type, notification, post, callback) {
-        if (!m_config.dicemaster || !post || !post.cleaned || ['private_message', 'mentioned', 'replied'].indexOf(type) === -1) {
+        if (!configuration.enabled || !post || !post.cleaned || ['private_message', 'mentioned', 'replied'].indexOf(type) === -1) {
             callback();
             return;
         }
@@ -356,13 +363,16 @@
         rollAllDice(post.cleaned, function (dice) {
             var result = dice.join("\n\n").trim();
             if (result) {
-                m_browser.reply_topic(notification.topic_id, notification.post_number, result, callback);
+                m_browser.reply_topic(notification.topic_id, notification.post_number, result, function () {
+                    callback(true);
+                });
             } else {
                 callback();
             }
         });
     };
     exports.begin = function begin(browser, config) {
+        configuration = config.modules[exports.name];
         m_config = config;
         m_browser = browser;
     };

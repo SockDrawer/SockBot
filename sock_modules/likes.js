@@ -154,6 +154,7 @@
             }, utc - now);
         });
     }
+
     exports.begin = function begin(browser, config) {
         m_browser = browser;
         m_config = config;
