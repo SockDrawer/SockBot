@@ -4,7 +4,8 @@
     "modules": {
         "AutoLikes": {
             "enabled": false,
-            "binge": true
+            "binge": true,
+            "topic": 1000
         },
         "NotifyPrint": {
             "printTime": true,
@@ -21,19 +22,9 @@
             "readWait": 259200000
         },
         "Summoner": {
-            "enabled": true,
-            "autoTimeout": 60000
+            "enabled": true
         }
     },
-    "likeBinge": false,
-    "likeBingeHour": 23,
-    "likeBingeMinute": 50,
-    "likeBingeTopic": 1000,
     "readify": false,
     "readifyWait": 0,
-    "summoner": true,
-    "summonerTimeout": 60000,
-    "dicemaster": true,
-    "diceMaxDice": 20,
-    "diceMaxRolls": 6
 }

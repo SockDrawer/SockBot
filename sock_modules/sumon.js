@@ -4,6 +4,7 @@
     var m_config,
         m_browser,
         summons = {},
+        configuration,
         summoning;
 
     /**
@@ -16,7 +17,11 @@
      */
     exports.configuration = {
         enabled: true,
-        autoTimeout: 1 * 60 * 1000
+        autoTimeout: 60 * 1000,
+        messages: [
+            '@%__username__% has summoned me, and so I appear.',
+            'Yes master %__name__%, I shall appear as summoned.'
+        ]
     };
 
     /**
@@ -37,24 +42,33 @@
     exports.version = "1.1.0";
 
     exports.onNotify = function onNotify(type, notification, post, callback) {
-        if (type === 'mentioned' && m_config.summoner && summoning.test(post.raw)) {
+        if (type === 'mentioned' && configuration.enabled && summoning.test(post.raw)) {
             console.log(notification.data.display_username + ' summoned me to play in ' + notification.slug);
-            var now = (new Date().getTime());
-            if ((!!summons[notification.topic_id]) && now < summons[notification.topic_id]) {
+            var now = (new Date().getTime()),
+                r = Math.floor(Math.random() * configuration.messages.length),
+                s = configuration.messages[r],
+                k;
+            if (summons[notification.topic_id] && now < summons[notification.topic_id]) {
                 callback();
                 return;
             }
+            for (k in post) {
+                if (post.hasOwnProperty(k)) {
+                    s = s.replace(new RegExp('%__' + k + '__%', 'g'), post[k]);
+                }
+            }
             summons[notification.topic_id] = now + m_config.summonerTimeout;
-            m_browser.reply_topic(notification.topic_id, notification.post_number,
-                '@' + notification.data.display_username + ' has summoned me, and so I appear' + ((notification.topic_id !== 3125) ? '.' : '?'),
-                callback);
+            m_browser.reply_topic(notification.topic_id, notification.post_number, s, function () {
+                callback(true);
+            });
         } else {
             callback();
         }
     };
     exports.begin = function begin(browser, config) {
+        configuration = config.modules[exports.name];
         m_browser = browser;
         m_config = config;
-        summoning = new RegExp('@' + config.username + '(,|[.]|[?]|!|;|:| ?-)');
+        summoning = new RegExp('@' + config.username);
     };
 }());
