@@ -8,6 +8,37 @@
         m_browser,
         m_config;
 
+    /**
+     * @var {string} description Brief description of this module for Help Docs
+     */
+    exports.description = 'Allow bot to play with dice';
+
+    /**
+     * @var {object} configuration Default Configuration settings for this sock_module
+     */
+    exports.configuration = {
+        enabled: false,
+        maxDice: 20,
+        maxRolls: 6
+    };
+
+    /**
+     * @var {string} name The name of this sock_module
+     */
+    exports.name = "DiceMaster";
+
+    /**
+     * @var {number} priority If defined by a sock_module it is the priority of the module with respect to other modules.
+     *
+     * sock_modules **should not** define modules with negative permissions. Default value is 50 with lower numbers being higher priority.
+     */
+    exports.priority = undefined;
+
+    /**
+     * @var {string} version The version of this sock_module
+     */
+    exports.version = "1.1.0";
+
     //The parse is complicated. don't let it leak
     (function () {
         var p_num = '(?<num>-?\\d+)',
@@ -92,7 +123,7 @@
                     next(true);
                     return;
                 }
-                m_browser.getContent('http://www.random.org/integers/?num=' + toRoll + '&min=1&max=' + sides + '&col=1&base=10&format=plain&rnd=new', function (err, res, data) {
+                m_browser.get_content('http://www.random.org/integers/?num=' + toRoll + '&min=1&max=' + sides + '&col=1&base=10&format=plain&rnd=new', function (err, res, data) {
 
                     var dice;
                     if (err || res >= 300) {
@@ -316,8 +347,6 @@
                 callback(results);
             });
     }
-
-    exports.name = "DiceMaster 1.0.0";
     exports.onNotify = function (type, notification, post, callback) {
         if (!m_config.dicemaster || !post || !post.cleaned || ['private_message', 'mentioned', 'replied'].indexOf(type) === -1) {
             callback();
