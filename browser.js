@@ -10,6 +10,7 @@
     'use strict';
     // Request library handles the actual web stuff
     var request = require('request'),
+        xRegExp = require('xregexp').XRegExp,
         conf = require('./configuration').configuration,
         // Cookie jar to save cookies in. not persistant across Sockbot instances
         jar = request.jar(),
@@ -23,7 +24,10 @@
             }
         }),
         //Append this to all posts made by sockbot. Makes sockbot easier to track and prevents body to simmilar errors
-        tag = "\n\n<!-- Posted by @SockBot v0.9.99 on %DATE%-->";
+        tag = "\n\n<!-- Posted by @SockBot v0.9.99 on %DATE%-->",
+        r_quote = xRegExp('\\[quote(?:(?!\\[/quote\\]).)*\\[/quote\\]', 'sgi'),
+        r_close_quote = xRegExp('\\[/quote\\]', 'sgi');
+
 
 
     /**
@@ -39,7 +43,7 @@
                 console.log('Too many requests. Muting for 60 seconds.');
                 var until = (new Date()).getTime() + 60 * 1000,
                     now;
-                //Doing a busy wait on purpose. Using SetTimeout would allow other threads to process while the wait is 
+                //Doing a busy wait on purpose. Using SetTimeout would allow other threads to process while the wait is
                 //happening. we got the 429 for a reason. don't mess it up
                 do {
                     now = (new Date()).getTime();
@@ -59,7 +63,7 @@
      * @returns undefined
      *
      */
-    exports.getContent = function getContent(url, callback) {
+    exports.get_content = function get_content(url, callback) {
         if (!/^https?:\/\//i.test(url)) {
             url = 'http://what.thedailywtf.com/' + url;
         }
@@ -74,6 +78,12 @@
     };
 
     /**
+     * Replaced by get_content.
+     * @deprecated
+     */
+    exports.getContent = exports.get_content;
+
+    /**
      * Post `form` to remote url` and call provided callback with results
      *
      * If `url` does not begin with http(s):// the URL of the configured discourse instance is used.
@@ -82,7 +92,7 @@
      * @param {object} form Name:Value dictionary to post
      * @param {BrowserCallback} callback
      */
-    exports.postMessage = function postMessage(url, form, callback) {
+    exports.post_message = function post_message(url, form, callback) {
         browser.get('http://what.thedailywtf.com/session/csrf.json',
             rateLimit(function (a, b, c) {
                 var csrf = '';
@@ -106,6 +116,7 @@
                 }));
             }));
     };
+    exports.postMessage = exports.post_message;
 
     /**
      * @var {Discourse.User} user Details about authenticated user
@@ -120,10 +131,18 @@
      * @param {BrowserCallback} callback
      */
     exports.authenticate = function authenticate(username, password, callback) {
-        exports.postMessage('session', {
+        exports.post_message('session', {
             login: username,
             password: password
-        }, callback);
+        }, function (a, b, c) {
+            if (!a) {
+                conf.user = c.user;
+            } else {
+                console.log(a);
+            }
+            callback(a, b, c);
+
+        });
     };
 
     /**
@@ -143,7 +162,7 @@
             title: title,
             auto_close_time: ''
         };
-        exports.postMessage('/posts', form, function (a, b, c) {
+        exports.post_message('/posts', form, function (a, b, c) {
             callback();
         });
     };
@@ -166,8 +185,31 @@
             archetype: 'regular',
             auto_close_time: ''
         };
-        exports.postMessage('/posts', form, function (a, b, c) {
+        exports.post_message('/posts', form, function (a, b, c) {
             callback();
+        });
+    };
+
+    exports.get_post = function get_post(post_id, callback) {
+        exports.get_content('/posts/' + post_id + '.json', function (err, resp, post) {
+            if (err || resp.statusCode >= 300) {
+                console.error('Error loading post #' + post_id);
+                post = undefined;
+            } else {
+                post.cleaned = xRegExp.replace(xRegExp.replace(post.raw, r_quote, ''), r_close_quote, '');
+            }
+            callback(post);
+        });
+    };
+
+    exports.get_topic_post = function get_topic_post(topic_number, post_number, callback) {
+        exports.get_content('http://what.thedailywtf.com/t/' + topic_number + '/posts.json?post_ids=0', function (err, resp, topic) {
+            if (err || resp.statusCode >= 300 || !topic || !topic.post_stream || !topic.post_stream.stream || !topic.post_stream.stream[post_number]) {
+                console.error('Error loading post #' + topic_number);
+                callback();
+            } else {
+                get_post(topic.post_stream.stream[post_number], callback);
+            }
         });
     };
 }());
