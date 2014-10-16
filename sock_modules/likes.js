@@ -86,7 +86,7 @@
 
     function fillList(thread_id) {
         var start_post = 0,
-            tries = 0;;
+            tries = 0;
         async.forever(function (cb) {
             if (likesList.length >= 1000) {
                 // if likeslist is longer than limit wait an hour and check again
@@ -101,7 +101,7 @@
                         cb(true);
                         return;
                     } else {
-                        cb();
+                        setTimeout(cb, tries * 15*1000);
                     }
                 }
                 tries = 0;
@@ -109,7 +109,7 @@
                 var got_results = last_post > start_post;
                 start_post = last_post + 1;
                 // delay a quarter second on post get, delay 5 minutes on no new posts
-                setTimeout(cb, got_results ? 250 : 5 * 60 * 1000);
+                setTimeout(cb, got_results ? 5*1000 : 5 * 60 * 1000);
             });
         });
     }
