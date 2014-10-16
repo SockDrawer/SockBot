@@ -43,6 +43,7 @@
         notify_time = (new Date()).getTime();
 
     function pollMessageBus(callback) {
+        console.log("Polling Message Bus " + (new Date()));
         var posts = {};
         m_browser.post_message('message-bus/' + client_id + '/poll', channels, function (err, resp, data) {
             if (err || resp.statusCode >= 300) {
@@ -74,7 +75,7 @@
                             return;
                         }
                         async.eachSeries(registrations[message.channel], function (handler, innerNext) {
-                            handler(message, post, function (handled) {
+                            handler.onMessage(message, post, function (handled) {
                                 if (handled) {
                                     setTimeout(function () {
                                         innerNext(true);
@@ -173,9 +174,13 @@
     function pollSubscribers(cb) {
         var reg = {},
             chan = {};
-        reg['/__status'] = [updateChannels];
+        reg['/__status'] = [{
+            onMessage: updateChannels
+        }];
         if (m_config.notifications) {
-            reg['/notification/' + m_config.user.id] = [handleNotifications];
+            reg['/notification/' + m_config.user.id] = [{
+                onMessage: handleNotifications
+            }];
             chan['/notification/' + m_config.user.id] = -1;
         }
         async.each(sock_modules, function (module, callback) {
@@ -187,7 +192,7 @@
                 if (regs && regs.length) {
                     regs.forEach(function (r) {
                         var a = (reg[r] || []);
-                        a.push(module.onMessage);
+                        a.push(module);
                         reg[r] = a;
                         chan[r] = -1;
                     });
