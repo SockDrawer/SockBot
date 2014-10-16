@@ -191,7 +191,11 @@
                 'post_action_type_id': 2,
                 'flag_topic': false
             };
-            console.log('Liking Post /t/' + post.topic_id + '/' + post.post_number + ' by @' + post.username);
+            if (post) {
+                console.log('Liking Post /t/' + post.topic_id + '/' + post.post_number + ' by @' + post.username);
+            } else {
+                console.log('Liking Post #' + message.data.id);
+            }
             m_browser.post_message('post_actions', likeForm, function () {
                 // Ignore all errors, just move on if error
                 setTimeout(callback, 0.5 * 1000);
