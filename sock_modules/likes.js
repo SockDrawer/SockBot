@@ -189,6 +189,8 @@
                 // Ignore error 403, that means duplicate like or post deleted
                 setTimeout(callback, ((err && resp.statusCode !== 403) || resp.statusCode < 300) ? 15 * 1000 : 0.5 * 1000);
             });
+        }else {
+            callback();
         }
     };
 
