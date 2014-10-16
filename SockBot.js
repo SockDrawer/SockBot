@@ -46,7 +46,7 @@
                 setTimeout(cb, 10 * 60 * 1000);
                 return;
             }
-
+            console.log('Logged in as: '+ config.user.username);
             sock_modules.forEach(function (module) {
                 if (typeof module.begin !== 'function') {
                     return;
