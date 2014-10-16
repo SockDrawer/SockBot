@@ -3,7 +3,7 @@
     'use strict';
     var async = require('async'),
         m_browser,
-        m_config,
+        configuration,
         laterReads = [];
 
     /**
@@ -45,18 +45,18 @@
     /**
      * @var {string} version The version of this sock_module
      */
-    exports.version = "0.0.0";
+    exports.version = "1.0.0";
 
     function readTopicPage(topic, callback) {
-        var cutoff = (new Date().getTime()) - m_config.readifyWait,
+        var cutoff = (new Date().getTime()) - configuration.readWait,
             form = {
                 'topic_id': topic.id,
-                'topic_time': Math.floor(4242 * topic.unread.length / 3) // msecs passed on topic (We're pretty sure)
+                'topic_time': Math.floor(configuration.readTime * topic.unread.length / 3) // msecs passed on topic (We're pretty sure)
             };
         topic.unread.filter(function (p) {
             return p.posted < cutoff;
         }).map(function (p) {
-            form['timings[' + p.id + ']'] = 4242; // msecs passed on post (same)
+            form['timings[' + p.id + ']'] = configuration.readTime; // msecs passed on post (same)
         });
         topic.unread.filter(function (p) {
             return p.posted >= cutoff;
@@ -79,11 +79,11 @@
             function (next) {
                 m_browser.get_content(url, function (err, resp, obj) {
                     if (err || resp.statusCode >= 400 || typeof obj !== 'object') {
-                        setTimeout(next, 500);
+                        setTimeout(next, 15 * 1000);
                         return;
                     }
                     result = obj;
-                    next();
+                    setTimeout(next, 5 * 1000);
                 });
             },
             function () {
@@ -113,11 +113,11 @@
             function (next) {
                 m_browser.get_content('/t/' + topic + '/' + post + '.json', function (err, resp, obj) {
                     if (err || resp.statusCode >= 400 || typeof obj !== 'object') {
-                        setTimeout(next, 500);
+                        setTimeout(next, 15 * 1000);
                         return;
                     }
                     result = obj;
-                    next();
+                    setTimeout(next, 5 * 1000);
                 });
             },
             function () {
@@ -143,7 +143,7 @@
 
     function readAllTheWaitingThings() {
         async.forever(function (next) {
-            var cutoff = (new Date().getTime()) - m_config.readifyWait,
+            var cutoff = (new Date().getTime()) - configuration.readWait,
                 readIt = laterReads.filter(function (p) {
                     return p.posted < cutoff;
                 });
@@ -155,12 +155,12 @@
                 function (p, cb) {
                     var form = {
                         'topic_id': p.topic_id,
-                        'topic_time': 4995 // msecs passed on topic (We're pretty sure)
+                        'topic_time': configuration.readTime // msecs passed on topic (We're pretty sure)
                     };
-                    form['timings[' + p.id + ']'] = 4995; // msecs passed on post (same)
+                    form['timings[' + p.id + ']'] = configuration.readTime; // msecs passed on post (same)
 
                     m_browser.post_message('topics/timings', form, function () {
-                        setTimeout(cb, 50); // Rate limit these to better sout the occasion
+                        setTimeout(cb, 5 * 1000); // Rate limit these to better sout the occasion
                     });
                 },
                 function () {
@@ -217,8 +217,9 @@
 
     exports.begin = function begin(browser, config) {
         m_browser = browser;
-        m_config = config;
-        if (config.readify) {
+        configuration = config.modules[exports.name];
+
+        if (configuration.enabled) {
             readAllTheThings();
         }
     };

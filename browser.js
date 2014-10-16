@@ -204,11 +204,11 @@
 
     exports.get_topic_post = function get_topic_post(topic_number, post_number, callback) {
         exports.get_content('http://what.thedailywtf.com/t/' + topic_number + '/posts.json?post_ids=0', function (err, resp, topic) {
-            if (err || resp.statusCode >= 300 || !topic || !topic.post_stream || !topic.post_stream.stream || !topic.post_stream.stream[post_number]) {
+            if (err || resp.statusCode >= 300 || !topic || !topic.post_stream || !topic.post_stream.stream || !topic.post_stream.stream[post_number - 1]) {
                 console.error('Error loading post #' + topic_number);
                 callback();
             } else {
-                get_post(topic.post_stream.stream[post_number], callback);
+                exports.get_post(topic.post_stream.stream[post_number - 1], callback);
             }
         });
     };

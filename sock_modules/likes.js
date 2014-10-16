@@ -99,17 +99,17 @@
                     if (tries > 10) {
                         console.error(exports.name + ' encountered a fatal error. Stopping.');
                         cb(true);
-                        return;
                     } else {
-                        setTimeout(cb, tries * 15*1000);
+                        setTimeout(cb, tries * 15 * 1000);
                     }
+                    return;
                 }
                 tries = 0;
                 console.log('Processed ' + last_post + ' posts for likeable posts.');
                 var got_results = last_post > start_post;
                 start_post = last_post + 1;
                 // delay a quarter second on post get, delay 5 minutes on no new posts
-                setTimeout(cb, got_results ? 5*1000 : 5 * 60 * 1000);
+                setTimeout(cb, got_results ? 5 * 1000 : 5 * 60 * 1000);
             });
         });
     }
@@ -192,8 +192,8 @@
                 'flag_topic': false
             };
             console.log('Liking Post /t/' + post.topic_id + '/' + post.post_number + ' by @' + post.username);
-            m_browser.post_message('post_actions', likeForm, function (err, resp) {
-                // Ignore error 403, that means duplicate like or post deleted
+            m_browser.post_message('post_actions', likeForm, function () {
+                // Ignore all errors, just move on if error
                 setTimeout(callback, 0.5 * 1000);
             });
         } else {
