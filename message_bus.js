@@ -174,8 +174,10 @@
         var reg = {},
             chan = {};
         reg['/__status'] = [updateChannels];
-        reg['/notification/' + m_config.user.id] = [handleNotifications];
-        chan['/notification/' + m_config.user.id] = -1;
+        if (m_config.notifications) {
+            reg['/notification/' + m_config.user.id] = [handleNotifications];
+            chan['/notification/' + m_config.user.id] = -1;
+        }
         async.each(sock_modules, function (module, callback) {
             if (typeof module.registerListeners !== 'function' || typeof module.onMessage !== 'function') {
                 callback();

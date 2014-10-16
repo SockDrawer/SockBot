@@ -4,6 +4,7 @@
     var def = {
         username: 'sockbot',
         password: 'sockbotsockbot',
+        notifications: true,
         modules: {},
         errors: [
             "Ph'nglui mglw'nafh Cthulhu R'lyeh wgah'nagl fhtagn",
