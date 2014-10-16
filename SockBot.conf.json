@@ -3,8 +3,9 @@
     "password": "sockbotsockbot",
     "modules": {
         "AutoLikes": {
-            "enabled": false,
-            "binge": true,
+            "enabled": true,
+            "binge": false,
+            "follow":true,
             "topic": 1000
         },
         "NotifyPrint": {
@@ -26,5 +27,5 @@
         }
     },
     "readify": false,
-    "readifyWait": 0,
+    "readifyWait": 0
 }

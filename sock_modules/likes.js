@@ -4,6 +4,7 @@
     var async = require('async'),
         m_browser,
         m_config,
+        configuration,
         likesList = [];
 
     /**
@@ -16,10 +17,11 @@
      */
     exports.configuration = {
         enabled: false,
-        binge: true,
+        follow: false,
+        binge: false,
         bingeHour: 23,
         bingeMinute: 50,
-        bingeTopic: 1000,
+        topic: 1000,
     };
 
     /**
@@ -155,11 +157,60 @@
         });
     }
 
+
+    /**
+     * Handle a message from message_bus
+     * @param {SockBot.Message} message Message from message_bus
+     * @param {SockBot.Post} post Post details associated with message
+     * @param {AsyncCallback} callback
+     */
+    exports.onMessage = function onMessage(message, post, callback) {
+        if (message || post) { // jslint unused params
+            callback();
+        } else {
+            callback();
+        }
+    };
+
+    /**
+     * Handle a message from message_bus
+     * @param {SockBot.Message} message Message from message_bus
+     * @param {SockBot.Post} post Post details associated with message
+     * @param {AsyncCallback} callback
+     */
+    exports.onMessage = function onMessage(message, post, callback) {
+        if (message.data && message.data.type === 'created') {
+            var likeForm = {
+                'id': message.data.id,
+                'post_action_type_id': 2,
+                'flag_topic': false
+            };
+            m_browser.post_message('post_actions', likeForm, function (err, resp) {
+                // Ignore error 403, that means duplicate like or post deleted
+                setTimeout(callback, ((err && resp.statusCode !== 403) || resp.statusCode < 300) ? 15 * 1000 : 0.5 * 1000);
+            });
+        }
+    };
+
+
+    /**
+     * Called Periodically to get channels that sock_modules wish to listen in on.
+     * @param {RegistrationCallback} callback
+     */
+    exports.registerListeners = function registerListeners(callback) {
+        if (configuration.enabled && configuration.follow) {
+            callback(['/topic/' + configuration.topic]);
+        } else {
+            callback();
+        }
+    };
+
     exports.begin = function begin(browser, config) {
+        configuration = config.modules[exports.name];
         m_browser = browser;
         m_config = config;
 
-        if (config.likeBinge) {
+        if (configuration.enabled && configuration.binge) {
             fillList(config.likeBingeTopic);
             scheduleBinges();
         }

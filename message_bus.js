@@ -185,7 +185,7 @@
                 if (regs && regs.length) {
                     regs.forEach(function (r) {
                         var a = (reg[r] || []);
-                        a.append(module.onMessage);
+                        a.push(module.onMessage);
                         reg[r] = a;
                         chan[r] = -1;
                     });
