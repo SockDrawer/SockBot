@@ -3,7 +3,6 @@
     'use strict';
     var async = require('async'),
         m_browser,
-        m_config,
         configuration,
         likesList = [];
 
@@ -138,8 +137,8 @@
                 utc = new Date(),
                 hours,
                 minutes;
-            utc.setUTCHours(m_config.likeBingeHour || 23);
-            utc.setUTCMinutes(m_config.likeBingeMinute || 40);
+            utc.setUTCHours(configuration.bingeHour || 23);
+            utc.setUTCMinutes(configuration.bingeMinute || 40);
             utc.setUTCSeconds(0);
             utc.setMilliseconds(0);
             now = now.getTime();
@@ -208,10 +207,9 @@
     exports.begin = function begin(browser, config) {
         configuration = config.modules[exports.name];
         m_browser = browser;
-        m_config = config;
 
         if (configuration.enabled && configuration.binge) {
-            fillList(config.likeBingeTopic);
+            fillList(configuration.topic);
             scheduleBinges();
         }
     };
