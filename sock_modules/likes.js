@@ -85,7 +85,8 @@
     }
 
     function fillList(thread_id) {
-        var start_post = 0;
+        var start_post = 0,
+            tries = 0;;
         async.forever(function (cb) {
             if (likesList.length >= 1000) {
                 // if likeslist is longer than limit wait an hour and check again
@@ -94,10 +95,16 @@
             }
             getPage(thread_id, start_post, function (last_post) {
                 if (last_post < 0) {
-                    console.error(exports.name + ' encountered a fatal error. Stopping.');
-                    cb(true);
-                    return;
+                    tries += 1;
+                    if (tries > 10) {
+                        console.error(exports.name + ' encountered a fatal error. Stopping.');
+                        cb(true);
+                        return;
+                    } else {
+                        cb();
+                    }
                 }
+                tries = 0;
                 console.log('Processed ' + last_post + ' posts for likeable posts.');
                 var got_results = last_post > start_post;
                 start_post = last_post + 1;
@@ -187,9 +194,9 @@
             console.log('Liking Post /t/' + post.topic_id + '/' + post.post_number + ' by @' + post.username);
             m_browser.post_message('post_actions', likeForm, function (err, resp) {
                 // Ignore error 403, that means duplicate like or post deleted
-                setTimeout(callback,  0.5 * 1000);
+                setTimeout(callback, 0.5 * 1000);
             });
-        }else {
+        } else {
             callback();
         }
     };
