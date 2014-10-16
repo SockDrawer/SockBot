@@ -18,14 +18,12 @@
             "maxRolls": 6
         },
         "Readify": {
-            "enabled": false,
+            "enabled": true,
             "readTime": 4242,
             "readWait": 259200000
         },
         "Summoner": {
             "enabled": true
         }
-    },
-    "readify": false,
-    "readifyWait": 0
+    }
 }
