@@ -3,8 +3,8 @@
     'use strict';
     var fs = require('fs'),
         browser,
+        notifications,
         async = require('async'),
-        message_bus = require('./message_bus'),
         config = require('./configuration'),
         sock_modules = [];
 
@@ -31,11 +31,12 @@
         },
         function (cb) {
             config = config.loadConfiguration(sock_modules);
-            browser = require('./browser');
+            browser = require('./discourse');
+            notifications = require('./notifications');
             cb();
         },
         function (cb) {
-            browser.authenticate(config.username, config.password, function () {
+            browser.begin(function () {
                 cb();
             });
         },
@@ -54,7 +55,7 @@
                 console.log('Starting module: ' + module.name);
                 module.begin(browser, config);
             });
-            message_bus.begin(browser, config, sock_modules);
+            notifications.begin(sock_modules);
             cb();
         }
     ]);
