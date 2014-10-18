@@ -2,9 +2,12 @@
 (function () {
     'use strict';
     var def = {
-        username: 'sockbot',
-        password: 'sockbotsockbot',
+        username: 'username',
+        password: 'passwordpassword',
         notifications: true,
+        cyborg: false,
+        verbose: true,
+        processActed: false,
         modules: {},
         errors: [
             "Ph'nglui mglw'nafh Cthulhu R'lyeh wgah'nagl fhtagn",
@@ -34,7 +37,7 @@
             "/dev/null full",
             "I used to be a bot like you, then I took an exception in the knee.",
             "Here I am, brain the size of a planet, and they ask me to roll some dice.",
-            "An erro of type 2094 has occured"
+            "An error of type 2094 has occured"
         ]
     };
 
