@@ -4,6 +4,7 @@
     var def = {
         username: 'username',
         password: 'passwordpassword',
+        message_bus: true,
         notifications: true,
         cyborg: false,
         verbose: true,
@@ -79,14 +80,23 @@
         }
     }
 
-    exports.loadConfiguration = function loadConfiguration(modules) {
-        var userconf = getConfig('./SockBot.conf.json'),
-            hiddenconf = getConfig('./.SockBot.conf.json');
+    exports.loadConfiguration = function loadConfiguration(modules, configuration) {
+        var userconf;
+        if (!configuration) {
+            console.error('No user configuration file specified. Sockbot will likely not work!');
+            userconf = {};
+        } else {
+            if (configuration[0] !== '/') {
+                configuration = './' + configuration;
+            }
+            userconf = getConfig(configuration);
+        }
         def.modules = {};
         modules.forEach(function (m) {
             def.modules[m.name] = m.configuration;
         });
-        exports.configuration = merge(def, userconf, hiddenconf);
+
+        exports.configuration = merge(def, userconf);
         return exports.configuration;
     };
 }());
