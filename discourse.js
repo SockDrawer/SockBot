@@ -59,7 +59,7 @@
             } else {
                 discofailures = 0;
             }
-            until = (new Date()).getTime() + 500;
+            until = (new Date()).getTime() + 250;
             //Doing a busy wait on purpose. Using SetTimeout would allow other threads to process while the wait is
             //happening. we don't want to get a 429 for any reason. don't mess it up
             do {
@@ -179,7 +179,23 @@
     }
     exports.getPost = getPost;
 
-    function getPosts(topic_id, each_chunk, complete) {
+    function getPosts(topic_id, start_post, number, callback) {
+        var base = 't/' + topic_id + '/posts.json';
+        getContent(base + '?post_ids=0', function (err, resp, topic) {
+            var posts = topic.post_stream.stream,
+                part = [],
+                i;
+            for (i = start_post - 1; i < start_post + number && posts[i]; i += 1) {
+                part.push(posts[i]);
+            }
+            getContent(base + '?post_ids[]=' + part.join('&post_ids[]='), function (err, resp, posts) {
+                callback(posts.post_stream.posts);
+            });
+        });
+    }
+    exports.getPosts = getPosts;
+
+    function getAllPosts(topic_id, each_chunk, complete) {
         var base = 't/' + topic_id + '/posts.json';
         getContent(base + '?post_ids=0', function (err, resp, topic) {
             var posts = topic.post_stream.stream;
@@ -193,7 +209,6 @@
                         part.push(posts.shift());
                     }
                     getContent(base + '?post_ids[]=' + part.join('&post_ids[]='), function (err, resp, posts) {
-                        console.log(resp.statusCode);
                         each_chunk(posts.post_stream.posts, function () {
                             setTimeout(next, 500);
                         });
@@ -203,14 +218,14 @@
             );
         });
     }
-    exports.getPosts = getPosts;
+    exports.getAllPosts = getAllPosts;
 
     function readPosts(topic_id, posts, callback) {
         if (typeof posts === 'number') {
             posts = [posts];
         }
         if (!Array.isArray(posts)) {
-            callback(true);
+            return callback(true);
         }
         var form = {
             'topic_id': topic_id,
@@ -222,6 +237,33 @@
         postContent('topics/timings', form, callback);
     }
     exports.readPosts = readPosts;
+
+
+    function likePosts(post_ids, callback) {
+        if (typeof post_ids === 'number') {
+            post_ids = [post_ids];
+        }
+        if (!Array.isArray(post_ids)) {
+            return callback(true);
+        }
+        async.eachSeries(post_ids, function (post_id, next) {
+            var likeForm = {
+                'id': post_id,
+                'post_action_type_id': 2,
+                'flag_topic': false
+            };
+            postContent('post_actions', likeForm, function () {
+                var args = arguments;
+                // Ignore all errors, just move on if error
+                setTimeout(function () {
+                    next.apply(null, args);
+                }, 0.5 * 1000);
+            });
+        }, function () {
+            callback();
+        });
+    }
+    exports.likePosts = likePosts;
 
     //Backwards compatibility with browser.js
 
