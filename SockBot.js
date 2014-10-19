@@ -21,8 +21,12 @@
                 if (isNaN(module.priority)) {
                     module.priority = 50;
                 }
-                sock_modules.push(module);
-                console.log('Loaded module: ' + module.name + ' v' + module.version);
+                if ((!module.configuration || module.configuration.enabled) && module.name !== 'NotifyPrint') {
+                    console.warn('Ingoring module: `' + (module.name || name) + '` Does not default to disabled');
+                } else {
+                    sock_modules.push(module);
+                    console.log('Loaded module: ' + module.name + ' v' + module.version);
+                }
             });
             sock_modules.sort(function (a, b) {
                 return a.priority - b.priority;
@@ -30,9 +34,12 @@
             cb();
         },
         function (cb) {
-            config = config.loadConfiguration(sock_modules);
+            config = config.loadConfiguration(sock_modules, process.argv[2]);
             browser = require('./discourse');
             notifications = require('./notifications');
+            sock_modules = sock_modules.filter(function (module) {
+                return config.modules[module.name].enabled;
+            });
             cb();
         },
         function (cb) {
