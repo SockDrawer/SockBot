@@ -2,9 +2,8 @@
 (function () {
     'use strict';
     var async = require('async'),
-        m_browser,
-        configuration,
-        laterReads = [];
+        discourse,
+        configuration;
 
     /**
      * @callback AsyncCallback
@@ -47,180 +46,61 @@
      */
     exports.version = "1.0.0";
 
-    function readTopicPage(topic, callback) {
-        var cutoff = (new Date().getTime()) - configuration.readWait,
-            form = {
-                'topic_id': topic.id,
-                'topic_time': Math.floor(configuration.readTime * topic.unread.length / 3) // msecs passed on topic (We're pretty sure)
-            };
-        topic.unread.filter(function (p) {
-            return p.posted < cutoff;
-        }).map(function (p) {
-            form['timings[' + p.id + ']'] = configuration.readTime; // msecs passed on post (same)
-        });
-        topic.unread.filter(function (p) {
-            return p.posted >= cutoff;
-        }).map(function (p) {
-            p.topic_id = topic.id;
-            laterReads.push(p);
-        });
-
-        m_browser.post_message('topics/timings', form, function () {
-            setTimeout(callback, 100); // Rate limit requests so as to not overload the server.
-        });
-    }
-
-    function getTopicsPage(url, callback) {
-        var result;
-        async.whilst(
-            function () {
-                return typeof result !== 'object';
-            },
-            function (next) {
-                m_browser.get_content(url, function (err, resp, obj) {
-                    if (err || resp.statusCode >= 400 || typeof obj !== 'object') {
-                        setTimeout(next, 15 * 1000);
-                        return;
-                    }
-                    result = obj;
-                    setTimeout(next, 5 * 1000);
-                });
-            },
-            function () {
-                if (typeof result.topic_list !== 'object') {
-                    callback(null);
-                    return;
-                }
-                callback({
-                    next: result.topic_list.more_topics_url,
-                    topics: result.topic_list.topics.map(function (o) {
-                        return {
-                            id: o.id,
-                            slug: o.slug
-                        };
-                    })
-                });
-            }
-        );
-    }
-
-    function getTopicPage(topic, post, callback) {
-        var result;
-        async.whilst(
-            function () {
-                return result === undefined;
-            },
-            function (next) {
-                m_browser.get_content('/t/' + topic + '/' + post + '.json', function (err, resp, obj) {
-                    if (err || resp.statusCode >= 400 || typeof obj !== 'object') {
-                        setTimeout(next, 15 * 1000);
-                        return;
-                    }
-                    result = obj;
-                    setTimeout(next, 5 * 1000);
-                });
-            },
-            function () {
-                var posts = result.post_stream.posts;
-                callback({
-                    start: result.last_read_post_number,
-                    last: posts[posts.length - 1].post_number,
-                    posts: result.highest_post_number,
-                    id: result.id,
-                    slug: result.slug,
-                    unread: posts.filter(function (p) {
-                        return !p.read;
-                    }).map(function (p) {
-                        return {
-                            id: p.post_number,
-                            posted: Date.parse(p.created_at)
-                        };
-                    })
-                });
-            }
-        );
-    }
-
-    function readAllTheWaitingThings() {
-        async.forever(function (next) {
-            var cutoff = (new Date().getTime()) - configuration.readWait,
-                readIt = laterReads.filter(function (p) {
-                    return p.posted < cutoff;
-                });
-            laterReads = laterReads.filter(function (p) {
-                return p.posted >= cutoff;
+    function readTopic(topic_id, callback) {
+        discourse.getAllPosts(topic_id, function (posts, next) {
+            posts = posts.filter(function (post) {
+                return !post.read && Date.parse(post.created_at) > configuration.readWait;
             });
+            if (!posts) {
+                return next();
+            }
+            discourse.readPosts(topic_id, posts.map(function (p) {
+                return p.post_number;
+            }), function () {
+                process.nextTick(next);
+            });
+        }, callback);
+    }
 
-            async.eachSeries(readIt,
-                function (p, cb) {
-                    var form = {
-                        'topic_id': p.topic_id,
-                        'topic_time': configuration.readTime // msecs passed on topic (We're pretty sure)
-                    };
-                    form['timings[' + p.id + ']'] = configuration.readTime; // msecs passed on post (same)
-
-                    m_browser.post_message('topics/timings', form, function () {
-                        setTimeout(cb, 5 * 1000); // Rate limit these to better sout the occasion
+    function getTopics(callback) {
+        var url = 'latest.json';
+        async.whilst(
+            function () {
+                return !!url;
+            },
+            function (next) {
+                discourse.getContent(url, function (err, resp, topics) {
+                    if (err || resp.statusCode >= 300) {
+                        console.warn('error getting topics:' + err);
+                        return setTimeout(callback, 5 * 60 * 1000);
+                    }
+                    url = topics.topic_list.more_topics_url;
+                    async.eachSeries(topics.topic_list.topics, function (topic, innerNext) {
+                        console.log('Reading `' + topic.slug + '`');
+                        readTopic(topic.id, function () {
+                            setTimeout(innerNext, 60 * 1000);
+                        });
+                    }, function () {
+                        next();
                     });
-                },
-                function () {
-                    setTimeout(next, 60 * 60 * 1000);
                 });
-        });
-    }
-
-    function readAllTheOldThings() {
-        async.forever(function (nextTime) {
-            //var next = '/latest.json?ascending=true&order=activity&no_definitions=true';
-            var next = '/latest.json';
-            async.whilst(
-                function () {
-                    return !!next;
-                },
-                function (cb) {
-                    getTopicsPage(next, function (topic_list) {
-                        next = topic_list.next;
-                        async.eachSeries(topic_list.topics,
-                            function (topic, seriescb) {
-                                console.log('Reading topic ' + topic.id + ' ' + topic.slug);
-                                var i = 1,
-                                    max = 2;
-                                async.whilst(
-                                    function () {
-                                        return i < max;
-                                    },
-                                    function (whilstcb) {
-                                        getTopicPage(topic.id, i,
-                                            function (page) {
-                                                i = page.last + 1;
-                                                max = page.posts;
-                                                readTopicPage(page, whilstcb);
-                                            });
-                                    },
-                                    seriescb
-                                );
-                            },
-                            cb);
-                    });
-                },
-                function () {
-                    setTimeout(nextTime, 24 * 60 * 60 * 1000);
-                }
-            );
-        });
-    }
-
-    function readAllTheThings() {
-        readAllTheOldThings();
-        readAllTheWaitingThings();
+            },
+            function () {
+                callback();
+            }
+        );
     }
 
     exports.begin = function begin(browser, config) {
-        m_browser = browser;
+        discourse = browser;
         configuration = config.modules[exports.name];
 
         if (configuration.enabled) {
-            readAllTheThings();
+            async.forever(function (next) {
+                getTopics(function () {
+                    setTimeout(next, 24 * 60 * 60 * 1000);
+                });
+            });
         }
     };
 }());

@@ -16,11 +16,12 @@
      * @var {object} configuration Default Configuration settings for this sock_module
      */
     exports.configuration = {
-        enabled: true,
+        enabled: false,
         autoTimeout: 60 * 1000,
         messages: [
             '@%__username__% has summoned me, and so I appear.',
-            'Yes master %__name__%, I shall appear as summoned.'
+            'Yes master %__name__%, I shall appear as summoned.',
+            'Yes mistress %__name__%, I shall appear as summoned.'
         ]
     };
 
@@ -69,6 +70,6 @@
         configuration = config.modules[exports.name];
         m_browser = browser;
         m_config = config;
-        summoning = new RegExp('@' + config.username);
+        summoning = new RegExp('@' + config.username, 'i');
     };
 }());
