@@ -2,7 +2,7 @@
 (function () {
     'use strict';
     var async = require('async'),
-        m_browser,
+        discourse,
         configuration,
         likesList = [];
 
@@ -40,24 +40,23 @@
      */
     exports.version = "1.1.0";
 
-    function getPage(thread_id, start_post, callback) {
-        m_browser.get_content('t/' + thread_id + '/' + start_post + '.json', function (err, req, contents) {
-            if (err || req.statusCode >= 400) {
-                console.error('Topic ' + thread_id + ' could not be loaded.');
-                callback(-1);
-                return;
+    function fillList(thread_id, callback) {
+        var start_post = 1,
+            should_continue = true;
+        async.whilst(function () {
+            return should_continue;
+        }, function (cb) {
+            if (likesList.length >= 1000) {
+                // if likeslist is longer than limit wait an hour and check again
+                return setTimeout(cb, 60 * 60 * 1000);
             }
-            if (req.statusCode >= 300) {
-                console.log('Topic ' + thread_id + ' is private or not exist');
-                callback(-1);
-                return;
-            }
-            if (typeof contents !== 'object') {
-                callback(0);
-                return;
-            }
-            var posts = contents.post_stream.posts,
-                likeables = posts.filter(function (x) {
+            discourse.getPosts(thread_id, start_post, 100, function (posts) {
+                if (!posts) {
+                    // If no new posts then it's time to stop adding posts to the list
+                    should_continue = false;
+                    return setImmediate(cb);
+                }
+                var likeables = posts.filter(function (x) {
                     var action = x.actions_summary.filter(function (y) {
                         return y.id === 2;
                     });
@@ -67,63 +66,32 @@
                         return x.id === y.post_id;
                     }).length === 0;
                 });
-            likeables.forEach(function (x) {
-                var data = {
-                    'form': {
-                        'id': x.id,
-                        'post_action_type_id': 2,
-                        'flag_topic': false
-                    },
-                    'post_number': x.post_number,
-                    'post_id': x.id,
-                    'username': x.username
-                };
-                likesList.push(data);
+                likeables.forEach(function (x) {
+                    var data = {
+                        'post_number': x.post_number,
+                        'post_id': x.id,
+                        'username': x.username
+                    };
+                    likesList.push(data);
+                });
+                start_post = posts[posts.length - 1].post_number + 1;
+                console.log('Processed ' + start_post + ' posts, found ' + likeables.length + ' new posts for a total of ' + likeables.length + ' likeable posts');
+                setTimeout(cb, 10 * 1000);
             });
-            callback(posts[posts.length - 1].post_number);
-        });
-    }
-
-    function fillList(thread_id) {
-        var start_post = 0,
-            tries = 0;
-        async.forever(function (cb) {
-            if (likesList.length >= 1000) {
-                // if likeslist is longer than limit wait an hour and check again
-                setTimeout(cb, 60 * 60 * 1000);
-                return;
-            }
-            getPage(thread_id, start_post, function (last_post) {
-                if (last_post < 0) {
-                    tries += 1;
-                    if (tries > 10) {
-                        console.error(exports.name + ' encountered a fatal error. Stopping.');
-                        cb(true);
-                    } else {
-                        setTimeout(cb, tries * 15 * 1000);
-                    }
-                    return;
-                }
-                tries = 0;
-                console.log('Processed ' + last_post + ' posts for likeable posts.');
-                var got_results = last_post > start_post;
-                start_post = last_post + 1;
-                // delay a quarter second on post get, delay 5 minutes on no new posts
-                setTimeout(cb, got_results ? 5 * 1000 : 5 * 60 * 1000);
-            });
+        }, function () {
+            callback();
         });
     }
 
     function likeBinge(callback) {
         async.forever(function (cb) {
             if (likesList.length === 0) {
-                setTimeout(cb, 100);
+                cb(true);
                 return;
             }
             var like = likesList.shift();
             console.log('Liking Post ' + like.post_number + '(#' + like.post_id + ') By `' + like.username + '`');
-            m_browser.post_message('post_actions', like.form, function (err, resp) {
-                // Ignore error 403, that means duplicate like or post deleted
+            discourse.likePosts(like.post_id, function (err, resp) {
                 if ((err && resp.statusCode !== 403) || resp.statusCode < 300) {
                     setTimeout(cb, 100);
                 } else {
@@ -132,7 +100,6 @@
                     cb(true);
                 }
             });
-
         }, function () {
             callback();
         });
@@ -171,35 +138,14 @@
      * @param {AsyncCallback} callback
      */
     exports.onMessage = function onMessage(message, post, callback) {
-        if (message || post) { // jslint unused params
-            callback();
-        } else {
-            callback();
-        }
-    };
 
-    /**
-     * Handle a message from message_bus
-     * @param {SockBot.Message} message Message from message_bus
-     * @param {SockBot.Post} post Post details associated with message
-     * @param {AsyncCallback} callback
-     */
-    exports.onMessage = function onMessage(message, post, callback) {
         if (message.data && message.data.type === 'created') {
-            var likeForm = {
-                'id': message.data.id,
-                'post_action_type_id': 2,
-                'flag_topic': false
-            };
             if (post) {
                 console.log('Liking Post /t/' + post.topic_id + '/' + post.post_number + ' by @' + post.username);
             } else {
                 console.log('Liking Post #' + message.data.id);
             }
-            m_browser.post_message('post_actions', likeForm, function () {
-                // Ignore all errors, just move on if error
-                setTimeout(callback, 0.5 * 1000);
-            });
+            discourse.likePosts(message.data.id, callback);
         } else {
             callback();
         }
@@ -220,10 +166,13 @@
 
     exports.begin = function begin(browser, config) {
         configuration = config.modules[exports.name];
-        m_browser = browser;
-
+        discourse = browser;
         if (configuration.enabled && configuration.binge) {
-            fillList(configuration.topic);
+            async.forever(function (next) {
+                fillList(configuration.topic, function () {
+                    setTimeout(next, 48 * 60 * 1000);
+                });
+            });
             scheduleBinges();
         }
     };

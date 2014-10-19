@@ -98,18 +98,4 @@
     exports.registerListeners = function registerListeners(callback) {
         callback();
     };
-
-    /*
-      { notification_type: 2,
-        read: true,
-        created_at: '2014-09-29T19:12:02.600-04:00',
-        post_number: 18,
-        topic_id: 3496,
-        slug: '2-n-queries-for-those-interested',
-        data:
-         { topic_title: '2^n queries for those interested',
-           original_post_id: 99296,
-           original_username: 'Matches',
-           display_username: 'Matches' } }
-    */
 }());
