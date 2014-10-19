@@ -49,7 +49,7 @@
         message_bus = 'message-bus/' + uuid() + '/poll';
 
     function delay(fn, time) {
-        setTimeout(fn, delay_factor * (time || (delay_factor < 1.1 ? 0 : 333)));
+        setTimeout(fn, delay_factor * (time || (conf.cyborg ? 0 : 333)));
     }
 
     function pollMessages(callback) {
@@ -68,34 +68,57 @@
             }
             async.eachSeries(messages,
                 function (message, next) {
+                    channels[message.channel] = Math.max(channels[message.channel], message.message_id);
+
+                    console.log(message.channel);
+
                     async.waterfall([
 
-                        function getThePost(cb) {
+                        function (cb) {
                             if (message.data && message.data.post_number) {
                                 discourse.getPost(message.data.id, function (post) {
                                     cb(null, post);
                                 });
                             } else {
-                                cb(null, null);
+                                cb(null, undefined);
                             }
                         },
-                        function dispatchMessage(post, cb) {
-                            channels[message.channel] = Math.max(channels[message.channel], message.message_id);
-                            async.eachSeries(registrations[message.channel], function (module, next) {
+                        function (post, cb) {
+                            async.eachSeries(registrations[message.channel], function (module, innerNext) {
                                 module.onMessage(message, post, function (handled) {
                                     delay(function () {
-                                        next(!!handled);
+                                        innerNext(!!handled);
                                     }, handled ? 5 * 1000 : 1000);
                                 });
-                            }, cb);
+                            }, function () {
+
+                                cb();
+                            });
                         }
-                    ], next);
+                    ], function () {
+                        next();
+                    });
+
                 },
-                delay(callback, 12 * 1000));
+                function () {
+                    delay(callback, 12 * 1000);
+                });
         });
     }
 
-    function handleNotifications(message, post, callback) {
+    function processNotifications(callback) {
+        if (conf.verbose) {
+            console.log('Polling for Notifications @' + (/[\d]{2}:[\d]{2}:[\d]{2}/.exec(new Date().toUTCString())[0]));
+        }
+        function get_post(notification, callback) {
+            if (notification.data.original_post_id) {
+                discourse.getPost(notification.data.original_post_id, function (post) {
+                    callback(post);
+                });
+            } else {
+                callback();
+            }
+        }
         discourse.getContent('/notifications', function (err, resp, notifications) {
             if (err || resp.statusCode >= 300) {
                 return delay(callback, 5 * 1000);
@@ -114,36 +137,25 @@
                 notify_time = notifications[0].created_at + 1;
             }
             async.eachSeries(notifications, function (notification, next) {
-                async.waterfall([
-
-                    function (innerNext) {
-                        if (notification.data.original_post_id) {
-                            discourse.getPost(notification.data.original_post_id, function (post) {
-                                innerNext(null, post);
-                            });
+                get_post(notification, function (post) {
+                    async.eachSeries(sock_modules, function (module, complete) {
+                        if (typeof module.onNotify === 'function') {
+                            module.onNotify(notify_types[notification.notification_type], notification, post, complete);
                         } else {
-                            innerNext(null, undefined);
+                            complete();
                         }
-                    },
-                    function (post, innerNext) {
-                        async.eachSeries(sock_modules, function (module, complete) {
-                            if (typeof module.onNotify === 'function') {
-                                module.onNotify(notify_types[notification.notification_type], notification, post, complete);
-                            } else {
-                                complete();
-                            }
-                        }, function (handled) {
-                            var after = function () {
-                                delay(callback, handled ? 5 * 1000 : 1000);
-                            };
-                            if (!conf.cyborg) {
-                                return discourse.readPosts(notification.topic_id, notification.post_number, after);
-                            }
-                            after();
-                        });
-                    }
-                ]);
-            });
+                    }, function (handled) {
+                        var after = function () {
+                            next();
+                        };
+                        if (!conf.cyborg) {
+                            return discourse.readPosts(notification.topic_id, notification.post_number, after);
+                        }
+                        after();
+                    });
+                });
+
+            }, callback);
         });
     }
 
@@ -166,12 +178,6 @@
         reg['/__status'] = [{
             onMessage: updateChannels
         }];
-        if (conf.notifications) {
-            reg['/notification/' + conf.user.id] = [{
-                onMessage: handleNotifications
-            }];
-            chan['/notification/' + conf.user.id] = -1;
-        }
         async.each(sock_modules, function (module, callback) {
             if (typeof module.registerListeners !== 'function' || typeof module.onMessage !== 'function') {
                 return callback();
@@ -209,6 +215,13 @@
                     delay(next, 60 * 1000);
                 });
             });
+            if (conf.notifications) {
+                async.forever(function (next) {
+                    processNotifications(function () {
+                        delay(next, 30 * 1000);
+                    });
+                });
+            }
         });
     }
     exports.begin = begin;
