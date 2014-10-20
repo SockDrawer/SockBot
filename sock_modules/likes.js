@@ -6,38 +6,21 @@
         configuration,
         likesList = [];
 
-    /**
-     * @var {string} description Brief description of this module for Help Docs
-     */
     exports.description = 'Issue Likes to all posts in a thread';
 
-    /**
-     * @var {object} configuration Default Configuration settings for this sock_module
-     */
     exports.configuration = {
         enabled: false,
         follow: false,
         binge: false,
         bingeHour: 23,
-        bingeMinute: 50,
+        bingeMinute: 30,
         topic: 1000,
     };
 
-    /**
-     * @var {string} name The name of this sock_module
-     */
     exports.name = "AutoLikes";
 
-    /**
-     * @var {number} priority If defined by a sock_module it is the priority of the module with respect to other modules.
-     *
-     * sock_modules **should not** define modules with negative permissions. Default value is 50 with lower numbers being higher priority.
-     */
     exports.priority = 0;
 
-    /**
-     * @var {string} version The version of this sock_module
-     */
     exports.version = "1.1.0";
 
     function fillList(thread_id, callback) {
@@ -74,9 +57,9 @@
                     };
                     likesList.push(data);
                 });
-                start_post = posts[posts.length - 1].post_number + 1;
-                console.log('Processed ' + start_post + ' posts, found ' + likeables.length + ' new posts for a total of ' + likeables.length + ' likeable posts');
-                setTimeout(cb, 10 * 1000);
+                start_post = start_post + posts.length;
+                console.log('Processed ' + start_post + ' posts, found ' + likeables.length + ' new posts for a total of ' + likesList.length + ' likeable posts');
+                setTimeout(cb, 45 * 1000);
             });
         }, function () {
             callback();
@@ -92,10 +75,10 @@
             var like = likesList.shift();
             console.log('Liking Post ' + like.post_number + '(#' + like.post_id + ') By `' + like.username + '`');
             discourse.likePosts(like.post_id, function (err, resp) {
-                if ((err && resp.statusCode !== 403) || resp.statusCode < 300) {
-                    setTimeout(cb, 100);
+                if ((err && resp.statusCode !== 403) || (resp && resp.statusCode < 300)) {
+                    setTimeout(cb, 250);
                 } else {
-                    console.log('Send Error ' + resp.statusCode);
+                    console.log('Send Error ' + (resp ? resp.statusCode : err));
                     likesList.unshift(like);
                     cb(true);
                 }
@@ -111,8 +94,8 @@
                 utc = new Date(),
                 hours,
                 minutes;
-            utc.setUTCHours(configuration.bingeHour || 23);
-            utc.setUTCMinutes(configuration.bingeMinute || 40);
+            utc.setUTCHours(configuration.bingeHour);
+            utc.setUTCMinutes(configuration.bingeMinute);
             utc.setUTCSeconds(0);
             utc.setMilliseconds(0);
             now = now.getTime();
@@ -131,14 +114,7 @@
     }
 
 
-    /**
-     * Handle a message from message_bus
-     * @param {SockBot.Message} message Message from message_bus
-     * @param {SockBot.Post} post Post details associated with message
-     * @param {AsyncCallback} callback
-     */
     exports.onMessage = function onMessage(message, post, callback) {
-
         if (message.data && message.data.type === 'created') {
             if (post) {
                 console.log('Liking Post /t/' + post.topic_id + '/' + post.post_number + ' by @' + post.username);
@@ -151,11 +127,6 @@
         }
     };
 
-
-    /**
-     * Called Periodically to get channels that sock_modules wish to listen in on.
-     * @param {RegistrationCallback} callback
-     */
     exports.registerListeners = function registerListeners(callback) {
         if (configuration.enabled && configuration.follow) {
             callback(['/topic/' + configuration.topic]);

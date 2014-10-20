@@ -68,10 +68,6 @@
             }
             async.eachSeries(messages,
                 function (message, next) {
-                    channels[message.channel] = Math.max(channels[message.channel], message.message_id);
-
-                    console.log(message.channel);
-
                     async.waterfall([
 
                         function (cb) {
@@ -101,7 +97,7 @@
 
                 },
                 function () {
-                    delay(callback, 12 * 1000);
+                    delay(callback, 20 * 1000);
                 });
         });
     }
