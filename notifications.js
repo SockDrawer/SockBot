@@ -97,7 +97,7 @@
 
                 },
                 function () {
-                    delay(callback, 20 * 1000);
+                    delay(callback, 15 * 1000);
                 });
         });
     }
@@ -214,7 +214,7 @@
             if (conf.notifications) {
                 async.forever(function (next) {
                     processNotifications(function () {
-                        delay(next, 30 * 1000);
+                        delay(next, 15 * 1000);
                     });
                 });
             }
