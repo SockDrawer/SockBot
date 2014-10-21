@@ -8,7 +8,7 @@
  */
 (function () {
     'use strict';
-    var version = 'SockBot 0.11.1 "Artful Alice"',
+    var version = 'SockBot 0.12.5 "Guileful Ginny"',
         request = require('request'),
         async = require('async'),
         xRegExp = require('xregexp').XRegExp,
