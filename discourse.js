@@ -41,7 +41,7 @@
         return function (err, resp, body) {
             var until,
                 now;
-            if (resp.request.href.indexOf('what.thedailywtf.com') < 0) {
+            if (resp && resp.request.href.indexOf('what.thedailywtf.com') < 0) {
                 return callback(err, resp, body);
             }
             if (resp && (resp.statusCode === 429 || resp.statusCode === 503)) {
