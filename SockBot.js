@@ -50,9 +50,7 @@
         function (cb) {
             if (!config.user) {
                 // login failed. what can we do?
-                console.log('Login failed. Waiting 10 minutes to exit');
-                setTimeout(cb, 10 * 60 * 1000);
-                return;
+                return console.log('Login failed.');
             }
             console.log('Logged in as: ' + config.user.username);
             sock_modules.forEach(function (module) {

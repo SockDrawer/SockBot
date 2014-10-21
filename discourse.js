@@ -246,21 +246,22 @@
         if (!Array.isArray(post_ids)) {
             return callback(true);
         }
+        var results=[];
         async.eachSeries(post_ids, function (post_id, next) {
             var likeForm = {
                 'id': post_id,
                 'post_action_type_id': 2,
                 'flag_topic': false
             };
-            postContent('post_actions', likeForm, function () {
-                var args = arguments;
+            postContent('post_actions', likeForm, function (err) {
+                results = Array.prototype.slice.call(arguments);
                 // Ignore all errors, just move on if error
                 setTimeout(function () {
-                    next.apply(null, args);
+                    next.apply(err);
                 }, 0.5 * 1000);
             });
         }, function () {
-            callback();
+            callback.apply(null, results);
         });
     }
     exports.likePosts = likePosts;
