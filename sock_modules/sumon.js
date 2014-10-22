@@ -4,8 +4,7 @@
     var m_config,
         m_browser,
         summons = {},
-        configuration,
-        summoning;
+        configuration;
 
     /**
      * @var {string} description Brief description of this module for Help Docs
@@ -43,7 +42,7 @@
     exports.version = "1.1.0";
 
     exports.onNotify = function onNotify(type, notification, post, callback) {
-        if (type === 'mentioned' && configuration.enabled && summoning.test(post.raw)) {
+        if (type === 'mentioned' && configuration.enabled) {
             console.log(notification.data.display_username + ' summoned me to play in ' + notification.slug);
             var now = (new Date().getTime()),
                 r = Math.floor(Math.random() * configuration.messages.length),
@@ -70,6 +69,5 @@
         configuration = config.modules[exports.name];
         m_browser = browser;
         m_config = config;
-        summoning = new RegExp('@' + config.username, 'i');
     };
 }());
