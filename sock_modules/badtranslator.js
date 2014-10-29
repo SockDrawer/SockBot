@@ -43,8 +43,12 @@
     }
 
     function getTranslator(languages) {
+<<<<<<< HEAD
         return 'Bing';
         /*var translators = [],
+=======
+        var translators = [],
+>>>>>>> b20b99a9caac7f34ba96c6dc9a78ff4ebaa974d2
             bad = ['name', 'SDL', 'Babelfish'],
             name;
         for (name in languages[0]) {
@@ -53,7 +57,11 @@
             }
         }
         translators.sort(randomize);
+<<<<<<< HEAD
         return translators[0];*/
+=======
+        return translators[0];
+>>>>>>> b20b99a9caac7f34ba96c6dc9a78ff4ebaa974d2
     }
 
     function getLanguages(languages, num, translator) {
@@ -122,7 +130,10 @@
                 langs = getLanguages(languages, configuration.translations, trans);
             translate(text, langs, trans, function (err, result) {
                 if (err) {
+<<<<<<< HEAD
                     discourse.log(err);
+=======
+>>>>>>> b20b99a9caac7f34ba96c6dc9a78ff4ebaa974d2
                     return callback();
                 }
                 discourse.reply_topic(notification.topic_id, notification.post_number, result, function () {
