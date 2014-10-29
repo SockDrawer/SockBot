@@ -43,7 +43,8 @@
     }
 
     function getTranslator(languages) {
-        var translators = [],
+        return 'Bing';
+        /*var translators = [],
             bad = ['name', 'SDL', 'Babelfish'],
             name;
         for (name in languages[0]) {
@@ -52,7 +53,7 @@
             }
         }
         translators.sort(randomize);
-        return translators[0];
+        return translators[0];*/
     }
 
     function getLanguages(languages, num, translator) {
@@ -121,6 +122,7 @@
                 langs = getLanguages(languages, configuration.translations, trans);
             translate(text, langs, trans, function (err, result) {
                 if (err) {
+                    discourse.log(err);
                     return callback();
                 }
                 discourse.reply_topic(notification.topic_id, notification.post_number, result, function () {
