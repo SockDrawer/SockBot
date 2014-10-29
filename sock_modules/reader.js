@@ -43,12 +43,12 @@
             function (next) {
                 discourse.getContent(url, function (err, resp, topics) {
                     if (err || resp.statusCode >= 300) {
-                        console.warn('error getting topics:' + err);
+                        discourse.warn('error getting topics:' + err);
                         return setTimeout(callback, 15 * 60 * 1000);
                     }
                     url = topics.topic_list.more_topics_url;
                     async.eachSeries(topics.topic_list.topics, function (topic, innerNext) {
-                        console.log('Reading `' + topic.slug + '`');
+                        discourse.log('Reading `' + topic.slug + '`');
                         readTopic(topic.id, function () {
                             setTimeout(innerNext, 5 * 60 * 1000);
                         });
