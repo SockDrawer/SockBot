@@ -50,7 +50,8 @@
         function (cb) {
             if (!config.user) {
                 // login failed. what can we do?
-                return console.log('Login failed.');
+                console.log('Login failed');
+                return process.exit(1);
             }
             console.log('Logged in as: ' + config.user.username);
             sock_modules.forEach(function (module) {

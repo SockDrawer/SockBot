@@ -29,10 +29,15 @@
             return callback();
         }
         var match = r_quote.xexec(post.raw);
-        if (!match){
+        if (!match) {
             return callback();
         }
-        discourse.postReply(match.topic_id, match.post_number, post.raw, function(){
+        discourse.postReply(match.topic_id, match.post_number, post.raw, function () {
+            setTimeout(function () {
+                discourse.reply_topic(notification.topic_id, notification.post_number, 'Anonymizied Reply Sent. Thank you for using Anonymizer, a SockIndustries application.', function () {
+
+                });
+            }, 5 * 1000);
             callback(true);
         });
     };

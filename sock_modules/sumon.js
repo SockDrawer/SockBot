@@ -43,7 +43,7 @@
 
     exports.onNotify = function onNotify(type, notification, post, callback) {
         if (type === 'mentioned' && configuration.enabled) {
-            console.log(notification.data.display_username + ' summoned me to play in ' + notification.slug);
+            m_browser.log(notification.data.display_username + ' summoned me to play in ' + notification.slug);
             var now = (new Date().getTime()),
                 r = Math.floor(Math.random() * configuration.messages.length),
                 s = configuration.messages[r],

@@ -54,7 +54,7 @@
 
     function pollMessages(callback) {
         if (conf.verbose) {
-            console.log('Polling for Messages @' + (/[\d]{2}:[\d]{2}:[\d]{2}/.exec(new Date().toUTCString())[0]));
+            discourse.log('Polling for Messages');
         }
         discourse.postContent(message_bus, channels, function (err, resp, messages) {
             if (err || resp.statusCode >= 300) {
@@ -104,7 +104,7 @@
 
     function processNotifications(callback) {
         if (conf.verbose) {
-            console.log('Polling for Notifications @' + (/[\d]{2}:[\d]{2}:[\d]{2}/.exec(new Date().toUTCString())[0]));
+            discourse.log('Polling for Notifications');
         }
         function get_post(notification, callback) {
             if (notification.data.original_post_id) {

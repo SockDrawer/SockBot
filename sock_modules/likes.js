@@ -58,7 +58,7 @@
                     likesList.push(data);
                 });
                 start_post = start_post + posts.length;
-                console.log('Processed ' + start_post + ' posts, found ' + likeables.length + ' new posts for a total of ' + likesList.length + ' likeable posts');
+                discourse.log('Processed ' + start_post + ' posts, found ' + likeables.length + ' new posts for a total of ' + likesList.length + ' likeable posts');
                 setTimeout(cb, 45 * 1000);
             });
         }, function () {
@@ -73,12 +73,12 @@
                 return;
             }
             var like = likesList.shift();
-            console.log('Liking Post ' + like.post_number + '(#' + like.post_id + ') By `' + like.username + '`');
+            discourse.log('Liking Post ' + like.post_number + '(#' + like.post_id + ') By `' + like.username + '`');
             discourse.likePosts(like.post_id, function (err, resp) {
                 if ((err && resp.statusCode !== 403) || (resp && resp.statusCode < 300)) {
                     setTimeout(cb, 250);
                 } else {
-                    console.log('Send Error ' + (resp ? resp.statusCode : err));
+                    discourse.log('Send Error ' + (resp ? resp.statusCode : err));
                     likesList.unshift(like);
                     cb(true);
                 }
@@ -106,7 +106,7 @@
             minutes = Math.ceil(((utc - now) / 1000) / 60);
             hours = Math.floor(minutes / 60);
             minutes = minutes % 60;
-            console.log('Like Binge scheduled for ' + hours + 'h' + minutes + 'm from now');
+            discourse.log('Like Binge scheduled for ' + hours + 'h' + minutes + 'm from now');
             setTimeout(function () {
                 likeBinge(cb);
             }, utc - now);
@@ -117,9 +117,9 @@
     exports.onMessage = function onMessage(message, post, callback) {
         if (message.data && message.data.type === 'created') {
             if (post) {
-                console.log('Liking Post /t/' + post.topic_id + '/' + post.post_number + ' by @' + post.username);
+                discourse.log('Liking Post /t/' + post.topic_id + '/' + post.post_number + ' by @' + post.username);
             } else {
-                console.log('Liking Post #' + message.data.id);
+                discourse.log('Liking Post #' + message.data.id);
             }
             discourse.likePosts(message.data.id, callback);
         } else {

@@ -8,9 +8,12 @@
         notifications: true,
         cyborg: false,
         verbose: true,
+        timestamp: true,
+        datestamp: false,
         processActed: false,
         modules: {},
         errors: [
+            "Response confused me :-( error), please try again",
             "Ph'nglui mglw'nafh Cthulhu R'lyeh wgah'nagl fhtagn",
             "+++Mr. Jelly! Mr. Jelly!+++ ",
             "+++Error At Address: 14, Treacle Mine Road, Ankh-Morpork+++",

@@ -83,9 +83,9 @@
      */
     exports.onNotify = function (type, notification, post, callback) {
         if (m_browser && m_config) {
-            console.log('Notification ' + type + ' from ' + notification.data.display_username + ' in "' + notification.data.topic_title + '"');
+            m_browser.log('Notification ' + type + ' from ' + notification.data.display_username + ' in "' + notification.data.topic_title + '"');
             if (post && post.raw) {
-                console.log('\t' + (post.raw || '').split('\n')[0]);
+                m_browser.log('\t' + (post.raw || '').split('\n')[0]);
             }
         }
         callback();

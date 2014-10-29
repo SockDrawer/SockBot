@@ -1,4 +1,4 @@
-/*jslint node: true, indent: 4, unparam: true  */
+/*jslint node: true, indent: 4, unparam: true, regexp: true  */
 /**
  * @module browser
  * @class brower
@@ -27,6 +27,35 @@
         r_close_quote = xRegExp('\\[/quote\\]', 'sgi'),
         discofailures = 0;
 
+    function log(message) {
+        if (conf.datestamp) {
+            message = new Date().toUTCString().replace('T', ' ').replace(/\..+$/, '') + message;
+        } else if (conf.timestamp) {
+            message = new Date().toUTCString().replace(/^.+T/, '').replace(/\..+$/, '') + message;
+        }
+        console.log(message);
+    }
+    exports.log = log;
+
+    function warn(message) {
+        if (conf.datestamp) {
+            message = new Date().toUTCString().replace('T', ' ').replace(/\..+$/, '') + message;
+        } else if (conf.timestamp) {
+            message = new Date().toUTCString().replace(/^.+T/, '').replace(/\..+$/, '') + message;
+        }
+        console.warn(message);
+    }
+    exports.warn = warn;
+
+    function error(message) {
+        if (conf.datestamp) {
+            message = new Date().toUTCString().replace('T', ' ').replace(/\..+$/, '') + message;
+        } else if (conf.timestamp) {
+            message = new Date().toUTCString().replace(/^.+T/, '').replace(/\..+$/, '') + message;
+        }
+        console.error(message);
+    }
+    exports.error = error;
     /**
      * @callback BrowserCallback
      * @param {object} err error object if `request` indicated error
@@ -47,15 +76,15 @@
             if (resp && (resp.statusCode === 429 || resp.statusCode === 503)) {
                 discofailures += 1;
                 until = (new Date()).getTime() + discofailures * 60 * 1000;
-                console.warn(resp.statusCode + ': Too many requests. Muting for ' + (discofailures * 60) + ' seconds.');
+                warn(resp.statusCode + ': Too many requests. Muting for ' + (discofailures * 60) + ' seconds.');
                 //Doing a busy wait on purpose. Using SetTimeout would allow other threads to process while the wait is
                 //happening. we got the 429 for a reason. don't mess it up
                 do {
                     now = (new Date()).getTime();
                 } while (now < until);
             } else if (err && !resp) {
-                console.error('Severe error:' + err);
-                process.exit(0);
+                error('Severe error:' + err);
+                process.exit(1);
             } else {
                 discofailures = 0;
             }
@@ -132,7 +161,7 @@
             if (!a) {
                 conf.user = c.user;
             } else {
-                console.log(a);
+                log(a);
             }
             callback(a, b, c);
         });
@@ -169,7 +198,6 @@
     function getPost(post_id, callback) {
         getContent('posts/' + post_id + '.json', function (err, resp, post) {
             if (err || resp.statusCode >= 300) {
-                console.error('Error loading post #' + post_id);
                 post = undefined;
             } else {
                 post.cleaned = xRegExp.replace(xRegExp.replace(post.raw, r_quote, ''), r_close_quote, '');
@@ -246,7 +274,7 @@
         if (!Array.isArray(post_ids)) {
             return callback(true);
         }
-        var results=[];
+        var results = [];
         async.eachSeries(post_ids, function (post_id, next) {
             var likeForm = {
                 'id': post_id,
