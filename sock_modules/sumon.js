@@ -48,7 +48,7 @@
                 r = Math.floor(Math.random() * configuration.messages.length),
                 s = configuration.messages[r],
                 k;
-            if (post.trust_level === 1 && (users[post.user_id] && users[post.user_id] < now)) {
+            if (post.trust_level === 1 && (users[post.user_id] && now < users[post.user_id])) {
                 return callback();
             }
             if (summons[notification.topic_id] && now < summons[notification.topic_id]) {
