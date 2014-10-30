@@ -1,9 +1,9 @@
 /*jslint node: true, indent: 4 */
 (function () {
     'use strict';
-    var m_config,
-        m_browser,
+    var m_browser,
         summons = {},
+        users = {},
         configuration;
 
     /**
@@ -17,6 +17,7 @@
     exports.configuration = {
         enabled: false,
         autoTimeout: 60 * 1000,
+        userTimeout: 60 * 60 * 1000,
         messages: [
             '@%__username__% has summoned me, and so I appear.',
             'Yes master %__name__%, I shall appear as summoned.',
@@ -42,22 +43,27 @@
     exports.version = "1.1.0";
 
     exports.onNotify = function onNotify(type, notification, post, callback) {
-        if (type === 'mentioned' && configuration.enabled) {
-            m_browser.log(notification.data.display_username + ' summoned me to play in ' + notification.slug);
+        if (type === 'mentioned' && configuration.enabled && !(post.trust_level < 1 || post.primary_group_name === 'bots')) {
             var now = (new Date().getTime()),
                 r = Math.floor(Math.random() * configuration.messages.length),
                 s = configuration.messages[r],
                 k;
-            if (summons[notification.topic_id] && now < summons[notification.topic_id]) {
-                callback();
-                return;
+            if (post.trust_level === 1 && (users[post.user_id] && users[post.user_id] < now)) {
+                return callback();
             }
+            if (summons[notification.topic_id] && now < summons[notification.topic_id]) {
+                return callback();
+            }
+            m_browser.log(notification.data.display_username + ' summoned me to play in ' + notification.slug);
             for (k in post) {
                 if (post.hasOwnProperty(k)) {
                     s = s.replace(new RegExp('%__' + k + '__%', 'g'), post[k]);
                 }
             }
-            summons[notification.topic_id] = now + m_config.summonerTimeout;
+            summons[notification.topic_id] = now + configuration.autoTimeout;
+            if (post.trust_level === 1) {
+                users[post.user_id] = now + configuration.userTimeout;
+            }
             m_browser.reply_topic(notification.topic_id, notification.post_number, s, function () {
                 callback(true);
             });
@@ -68,6 +74,5 @@
     exports.begin = function begin(browser, config) {
         configuration = config.modules[exports.name];
         m_browser = browser;
-        m_config = config;
     };
 }());
