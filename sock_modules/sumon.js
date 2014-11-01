@@ -42,8 +42,23 @@
      */
     exports.version = "1.1.0";
 
+    function purgeMemory() {
+        var lastHour = (new Date().getTime()) - 60 * 60 * 1000, // an hour ago;
+            k; //key
+        for (k in users) {
+            if (users.hasOwnProperty(k) && users[k] < lastHour) {
+                delete users[k];
+            }
+        }
+        for (k in summons) {
+            if (summons.hasOwnProperty(k) && summons[k] < lastHour) {
+                delete summons[k];
+            }
+        }
+    }
+
     exports.onNotify = function onNotify(type, notification, post, callback) {
-        if (type === 'mentioned' && configuration.enabled && !(post.trust_level < 1 || post.primary_group_name === 'bots')) {
+        if (type === 'mentioned' &&  !(post.trust_level < 1 || post.primary_group_name === 'bots')) {
             var now = (new Date().getTime()),
                 r = Math.floor(Math.random() * configuration.messages.length),
                 s = configuration.messages[r],
@@ -74,5 +89,6 @@
     exports.begin = function begin(browser, config) {
         configuration = config.modules[exports.name];
         m_browser = browser;
+        setInterval(purgeMemory, 30 * 60 * 1000);
     };
 }());
