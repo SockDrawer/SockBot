@@ -45,6 +45,16 @@
             11: 'linked',
             12: 'granted_badge'
         },
+        action_types = {
+            1: 'bookmark',
+            2: 'like',
+            3: 'off_topic',
+            4: 'inappropriate',
+            5: 'vote',
+            8: 'spam',
+            6: 'notify_user',
+            7: 'notify_moderators'
+        },
         notify_time = (new Date().getTime()),
         message_bus = 'message-bus/' + uuid() + '/poll';
 
@@ -106,6 +116,7 @@
         if (conf.verbose) {
             discourse.log('Polling for Notifications');
         }
+
         function get_post(notification, callback) {
             if (notification.data.original_post_id) {
                 discourse.getPost(notification.data.original_post_id, function (post) {
