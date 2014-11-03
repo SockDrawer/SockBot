@@ -1,4 +1,3 @@
-/*jslint node: true, indent: 4, unparam: true, regexp: true  */
 /**
  * @module browser
  * @class brower
@@ -6,332 +5,362 @@
  * @license MIT
  * @overview Used for communicating to discourse and the web.
  */
-(function () {
-    'use strict';
-    var version = 'SockBot 0.13.0 "Devious Daine"',
-        request = require('request'),
-        async = require('async'),
-        xRegExp = require('xregexp').XRegExp,
-        conf = require('./configuration').configuration,
-        csrf,
-        jar = request.jar(),
-        browser = request.defaults({
-            jar: jar,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'User-Agent': version + ' @' + conf.username
-            }
-        }),
-        tag = '\n\n<!-- Posted by ' + version + ' on %DATE%-->',
-        r_quote = xRegExp('\\[quote(?:(?!\\[/quote\\]).)*\\[/quote\\]', 'sgi'),
-        r_close_quote = xRegExp('\\[/quote\\]', 'sgi'),
-        discofailures = 0;
+'use strict';
 
-    function log(message) {
-        if (conf.datestamp) {
-            message = new Date().toUTCString().replace('T', ' ').replace(/\..+$/, '') + message;
-        } else if (conf.timestamp) {
-            message = new Date().toUTCString().replace(/^.+T/, '').replace(/\..+$/, '') + message;
+
+/**
+ * Generate a type 4 UUID.
+ * I don't understand how this does what it does, but it works.
+ * It's a lot slower than using node-uuid but i only need one
+ * of these so its good enough
+ * Source: http://jsperf.com/node-uuid-performance/19
+ */
+function uuid() {
+
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,
+        function (c) {
+            var r = Math.random() * 16 | 0,
+                v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+}
+
+var request = require('request'),
+    async = require('async'),
+    xRegExp = require('xregexp').XRegExp,
+    conf = require('./configuration').configuration;
+var version = 'SockBot 0.13.0 "Devious Daine"',
+    csrf,
+    jar = request.jar(),
+    clientId = uuid(),
+    browser = request.defaults({
+        jar: jar,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'User-Agent': version + ' @' + conf.username
         }
-        console.log(message);
-    }
-    exports.log = log;
+    }),
+    tag = '\n\n<!-- Posted by ' + version + ' on %DATE%-->',
+    rQuote = xRegExp('\\[quote(?:(?!\\[/quote\\]).)*\\[/quote\\]', 'sgi'),
+    rCloseQuote = xRegExp('\\[/quote\\]', 'sgi'),
+    delayUntil = new Date().getTime(),
+    postActionTypes = {
+        'bookmark': 1,
+        'like': 2,
+        'off_topic': 3,
+        'inappropriate': 4,
+        'vote': 5,
+        'notify_user': 6,
+        'notify_moderators': 7,
+        'spam': 8
+    };
 
-    function warn(message) {
-        if (conf.datestamp) {
-            message = new Date().toUTCString().replace('T', ' ').replace(/\..+$/, '') + message;
-        } else if (conf.timestamp) {
-            message = new Date().toUTCString().replace(/^.+T/, '').replace(/\..+$/, '') + message;
+
+exports.log = function log(message) {
+    console.log(addTimestamp(message));
+};
+exports.warn = function warn(message) {
+    console.warn(addTimestamp(message));
+};
+exports.error = function error(message) {
+    console.error(addTimestamp(message));
+};
+
+function dGet(url, callback) {
+    var base = 'http://what.thedailywtf.com/';
+    schedule(function () {
+        browser.get(base + url, handleResponse(callback));
+    });
+}
+
+function dPost(url, form, callback) {
+    var base = 'http://what.thedailywtf.com/';
+    schedule(function () {
+        browser.post(base + url, {
+            form: form
+        }, handleResponse(callback));
+    });
+}
+
+function dDelete(url, form, callback) {
+    var base = 'http://what.thedailywtf.com/';
+    schedule(function () {
+        browser.post(base + url, {
+            form: form
+        }, handleResponse(callback));
+    });
+}
+
+
+function addTimestamp(message) {
+    var date = new Date().toISOString().replace(/\..+$/, '');
+    if (conf.datestamp) {
+        message = date.replace('T', ' ') + ' => ' + message;
+    } else if (conf.timestamp) {
+        message = date.replace(/^.+T/, '') + ' => ' + message;
+    }
+    return message;
+}
+
+
+function cleanPost(post) {
+    if (post.raw) {
+        post.cleaned = xRegExp.replace(post.raw, rQuote, '');
+        post.cleaned = xRegExp.replace(post.cleaned, rCloseQuote, '');
+    }
+    return post;
+}
+
+function schedule(task) {
+    var now = new Date().getTime();
+    if (now > delayUntil) {
+        delayUntil = now + 100;
+        process.nextTick(task);
+    } else {
+        setTimeout(function () {
+            schedule(task);
+        }, delayUntil - now);
+    }
+}
+
+function handleResponse(callback) {
+    return function handleIt(err, resp, body) {
+        if (!resp) {
+            err = err || 'Unknown network error';
+            exports.error('Critical error: ' + err);
+            throw err;
         }
-        console.warn(message);
-    }
-    exports.warn = warn;
-
-    function error(message) {
-        if (conf.datestamp) {
-            message = new Date().toUTCString().replace('T', ' ').replace(/\..+$/, '') + message;
-        } else if (conf.timestamp) {
-            message = new Date().toUTCString().replace(/^.+T/, '').replace(/\..+$/, '') + message;
+        if (resp.statusCode === 429) {
+            exports.warn('E429: Too Many Requests');
+            delayUntil = new Date().getTime() + 2 * 60 * 1000;
         }
-        console.error(message);
-    }
-    exports.error = error;
-    /**
-     * @callback BrowserCallback
-     * @param {object} err error object if `request` indicated error
-     *  @param {object} resp response object, contains the response object from `request`
-     *  @param {onject} body body of response. If body was valid JSON this has been deserialized
-     */
+        console.log(resp.statusCode);
+        try {
+            body = JSON.parse(body);
+        } catch (e) {}
+        callback(err, resp, body);
+    };
+}
 
-    /**
-     * @param {BrowserCallback} callback Function to continue execution with after validation
-     */
-    function discotime(callback) {
-        return function (err, resp, body) {
-            var until,
-                now;
-            if (resp && resp.request.href.indexOf('what.thedailywtf.com') < 0) {
-                return callback(err, resp, body);
-            }
-            if (resp && (resp.statusCode === 429 || resp.statusCode === 503)) {
-                discofailures += 1;
-                until = (new Date()).getTime() + discofailures * 60 * 1000;
-                warn(resp.statusCode + ': Too many requests. Muting for ' + (discofailures * 60) + ' seconds.');
-                //Doing a busy wait on purpose. Using SetTimeout would allow other threads to process while the wait is
-                //happening. we got the 429 for a reason. don't mess it up
-                do {
-                    now = (new Date()).getTime();
-                } while (now < until);
-            } else if (err && !resp) {
-                error('Severe error:' + err);
-                process.exit(1);
-            } else {
-                discofailures = 0;
-            }
-            until = (new Date()).getTime() + 250;
-            //Doing a busy wait on purpose. Using SetTimeout would allow other threads to process while the wait is
-            //happening. we don't want to get a 429 for any reason. don't mess it up
-            do {
-                now = (new Date()).getTime();
-            } while (now < until);
-            setImmediate(function () {
-                var obj;
-                try {
-                    obj = JSON.parse(body);
-                } catch (e) {
-                    obj = body;
-                }
-                callback(err, resp, obj);
-            });
-        };
-    }
+exports.login = function login(callback) {
+    async.waterfall([
 
-
-    /**
-     * Issue a GET request to the defined url and call the provided callback with the results.
-     *
-     * If `url` does not begin with http(s):// the URL of the configured discourse instance is used.
-     *
-     * @param {string} url Url to get content from
-     * @param {BrowserCallback} callback
-     */
-    function getContent(url, callback) {
-        if (!/^https?:\/\//i.test(url)) {
-            url = 'http://what.thedailywtf.com/' + url;
-        }
-        browser.get(url, discotime(callback));
-    }
-    exports.getContent = getContent;
-
-
-    function getCSRF(callback) {
-        if (csrf) {
-            callback(null, csrf);
-        } else {
-            getContent('session/csrf.json', function (err, resp, obj) {
-                csrf = obj.csrf;
-                callback(null, csrf);
-            });
-        }
-    }
-
-    function postContent(url, form, callback) {
-        if (!/^https?:\/\//i.test(url)) {
-            url = 'http://what.thedailywtf.com/' + url;
-        }
-        async.waterfall([
-            getCSRF,
-            function (csrf, next) {
-                browser.post(url, {
+        function (next) {
+            dGet('session/csrf.json', function (err, resp, obj) {
+                csrf = (obj || {}).csrf;
+                browser = browser.defaults({
                     headers: {
                         'X-CSRF-Token': csrf
-                    },
-                    form: form
-                }, discotime(next));
-            }
-        ], callback);
-    }
-    exports.postContent = postContent;
-
-    function begin(callback) {
-        postContent('session', {
-            login: conf.username,
-            password: conf.password
-        }, function (a, b, c) {
-            if (!a) {
-                conf.user = c.user;
-            } else {
-                log(a);
-            }
-            callback(a, b, c);
-        });
-    }
-    exports.begin = begin;
-
-    function postTopic(category, title, content, callback) {
-        var form = {
-            raw: content + tag.replace('%DATE%', new Date()),
-            is_warning: false,
-            category: category,
-            archetype: 'regular',
-            title: title,
-            auto_close_time: ''
-        };
-        postContent('posts', form, callback);
-    }
-    exports.postTopic = postTopic;
-
-    function postReply(topic, reply_to, content, callback) {
-        var form = {
-            raw: content + tag.replace('%DATE%', new Date()),
-            topic_id: topic,
-            is_warning: false,
-            reply_to_post_number: reply_to,
-            category: '',
-            archetype: 'regular',
-            auto_close_time: ''
-        };
-        postContent('posts', form, callback);
-    }
-    exports.postReply = postReply;
-
-    function getPost(post_id, callback) {
-        getContent('posts/' + post_id + '.json', function (err, resp, post) {
-            if (err || resp.statusCode >= 300) {
-                post = undefined;
-            } else {
-                post.cleaned = xRegExp.replace(xRegExp.replace(post.raw, r_quote, ''), r_close_quote, '');
-            }
-            callback(post);
-        });
-    }
-    exports.getPost = getPost;
-
-    function getPosts(topic_id, start_post, number, callback) {
-        var base = 't/' + topic_id + '/posts.json';
-        getContent(base + '?post_ids=0', function (err, resp, topic) {
-            var posts = topic.post_stream.stream,
-                part = [],
-                i;
-            for (i = start_post - 1; i < start_post + number && posts[i]; i += 1) {
-                part.push(posts[i]);
-            }
-            getContent(base + '?post_ids[]=' + part.join('&post_ids[]='), function (err, resp, posts) {
-                callback(posts.post_stream.posts);
-            });
-        });
-    }
-    exports.getPosts = getPosts;
-
-    function getAllPosts(topic_id, each_chunk, complete) {
-        var base = 't/' + topic_id + '/posts.json';
-        getContent(base + '?post_ids=0', function (err, resp, topic) {
-            var posts = topic.post_stream.stream;
-            async.whilst(
-                function () {
-                    return posts.length > 0;
-                },
-                function (next) {
-                    var part = [];
-                    while (part.length < 200 && posts.length > 0) {
-                        part.push(posts.shift());
                     }
-                    getContent(base + '?post_ids[]=' + part.join('&post_ids[]='), function (err, resp, posts) {
-                        each_chunk(posts.post_stream.posts, function () {
-                            setTimeout(next, 500);
-                        });
-                    });
-                },
-                complete
-            );
-        });
-    }
-    exports.getAllPosts = getAllPosts;
-
-    function readPosts(topic_id, posts, callback) {
-        if (typeof posts === 'number') {
-            posts = [posts];
+                });
+                next(err);
+            });
+        },
+        function (next) {
+            dPost('session', {
+                login: conf.username,
+                password: conf.password
+            }, function (err, resp, user) {
+                conf.user = user;
+                next(err, resp, user);
+            });
         }
-        if (!Array.isArray(posts)) {
-            return callback(true);
+    ], callback);
+};
+
+exports.createPost = function createPost(topic, replyTo, raw, callback) {
+    var form = {
+        'raw': raw + tag.replace('%DATE%', new Date()),
+        'topic_id': topic,
+        'is_warning': false,
+        'reply_to_post_number': replyTo,
+        'category': '',
+        'archetype': 'regular',
+        'auto_close_time': ''
+    };
+    dPost('posts', form, function (err, resp, post) {
+        post = cleanPost(post);
+        callback(err, resp, post);
+    });
+};
+
+exports.editPost = function editPost(postId, raw, editReason, callback) {
+    if (typeof editReason === 'function') {
+        callback = editReason;
+        editReason = '';
+    }
+    var form = {
+        'raw': raw,
+        'edit_reason': editReason
+    };
+    dPost('posts/' + postId, form, function (err, resp, post) {
+        post = cleanPost(post);
+        callback(err, resp, post);
+    });
+};
+
+exports.deletePost = function deletePost(postId, callback) {
+    var form = {
+        'id': postId
+    };
+    dDelete('posts/' + postId, form, callback);
+};
+
+exports.postAction = function postAction(action, postId, message, callback) {
+    if (typeof message === 'function') {
+        callback = message;
+        message = '';
+    }
+    if (typeof action === 'string') {
+        action = postActionTypes[action];
+    }
+    if (typeof action !== 'number') {
+        callback('Action type not recognized!');
+        return;
+    }
+    var form = {
+        'id': postId,
+        'post_action_type_id': action,
+        'flag_topic': false,
+        'message': message
+    };
+    dPost('post_actions', form, callback);
+};
+
+exports.deletePostAction = function deletePostAction(action,
+    postId, message, callback) {
+    if (typeof message === 'function') {
+        callback = message;
+        message = '';
+    }
+    if (typeof action === 'string') {
+        action = postActionTypes[action];
+    }
+    if (typeof action !== 'number') {
+        callback('Action type not recognized!');
+        return;
+    }
+    var form = {
+        'id': postId,
+        'post_action_type_id': action,
+        'flag_topic': false,
+        'message': message
+    };
+    dDelete('post_actions', form, callback);
+};
+
+exports.readPosts = function readPosts(topicId, posts, callback) {
+    if (typeof posts === 'number') {
+        posts = [posts];
+    }
+    async.whist(function () {
+        return posts.length > 0;
+    }, function (next) {
+        var part = [];
+        while (posts.length > 0 && part.length < 5) {
+            part.push(posts.shift());
         }
         var form = {
-            'topic_id': topic_id,
-            'topic_time': 4242 * Math.ceil(posts.length / 3)
+            'topic_id': topicId,
+            'topic_time': 4242
         };
-        posts.forEach(function (post) {
-            form['timings[' + post + ']'] = 4242;
+        part.forEach(function (v) {
+            form['timings[' + v + ']'] = 4242;
         });
-        postContent('topics/timings', form, callback);
-    }
-    exports.readPosts = readPosts;
-
-
-    function likePosts(post_ids, callback) {
-        if (typeof post_ids === 'number') {
-            post_ids = [post_ids];
-        }
-        if (!Array.isArray(post_ids)) {
-            return callback(true);
-        }
-        var results = [];
-        async.eachSeries(post_ids, function (post_id, next) {
-            var likeForm = {
-                'id': post_id,
-                'post_action_type_id': 2,
-                'flag_topic': false
-            };
-            postContent('post_actions', likeForm, function (err) {
-                results = Array.prototype.slice.call(arguments);
-                // Ignore all errors, just move on if error
-                setTimeout(function () {
-                    next.apply(err);
-                }, 0.5 * 1000);
-            });
-        }, function () {
-            callback.apply(null, results);
+        dPost('topics/timings', form, function (err, resp, data) {
+            function doit() {
+                next(err, resp, data);
+            }
+            if (err || posts.length === 0) {
+                return doit();
+            }
+            return setTimeout(doit, 4242);
         });
-    }
-    exports.likePosts = likePosts;
+    }, callback);
+};
 
-    //Backwards compatibility with browser.js
+exports.getPost = function getPost(postId, callback) {
+    dGet('posts/' + postId + '.json', function (err, resp, post) {
+        callback(err, resp, cleanPost(post));
+    });
+};
 
-    /**
-     * @deprecated Will be removed in 0.15.0
-     * @see getContent
-     */
-    exports.get_content = getContent;
-    /**
-     * @deprecated Will be removed in 0.15.0
-     * @see postContent
-     */
-    exports.post_message = postContent;
+exports.getPosts = function getPosts(topicId, start, number, callback) {
+    var base = 't/' + topicId + '/posts.json';
+    dGet(base + '?post_ids=0', function (err, resp, topic) {
+        if (err || resp.statusCode >= 400) {
+            err = err || 'Error ' + resp.statusCode;
+            return callback(err, resp, topic);
+        }
+        var posts = topic.post_stream.stream,
+            part = [],
+            i;
+        for (i = start - 1; i < start + number && posts[i]; i += 1) {
+            part.push(posts[i]);
+        }
+        part = part.join('&post_ids[]=');
+        dGet(base + '?post_ids[]=' + part, function (err, resp, posts) {
+            if (err || resp.statusCode >= 400) {
+                err = err || 'Error ' + resp.statusCode;
+                return callback(err, resp, posts);
+            }
+            callback(null, posts.post_stream.posts.map(function (p) {
+                return cleanPost(p);
+            }));
+        });
+    });
+};
 
-    /**
-     * @deprecated Will be removed in 0.15.0
-     * @see postContent
-     */
-    exports.postMessage = postContent;
-    /**
-     * @deprecated Will be removed in 0.15.0
-     * @see postTopic
-     */
-    exports.post_topic = postTopic;
-    /**
-     * @deprecated Will be removed in 0.15.0
-     * @see postReply
-     */
-    exports.reply_topic = postReply;
+exports.getAllPosts = function getAllPosts(topicId, eachChunk, complete) {
+    var base = 't/' + topicId + '/posts.json';
+    dGet(base + '?post_ids=0', function (err, resp, topic) {
+        if (err || resp.statusCode >= 400) {
+            err = err || 'Error ' + resp.statusCode;
+            return complete(err, resp, topic);
+        }
+        var posts = topic.post_stream.stream;
+        async.whilst(
+            function () {
+                return posts.length > 0;
+            },
+            function (next) {
+                var part = [];
+                while (part.length < 200 && posts.length > 0) {
+                    part.push(posts.shift());
+                }
+                part = part.join('&post_ids[]=');
+                dGet(base + '?post_ids[]=' + part, function (err, resp, posts) {
+                    if (err || resp.statusCode >= 400) {
+                        err = err || 'Error ' + resp.statusCode;
+                        return next(err, resp, posts);
+                    }
+                    eachChunk(null, posts.post_stream.posts.map(function (p) {
+                        return cleanPost(p);
+                    }), function () {
+                        setTimeout(next, 500);
+                    });
+                });
+            },
+            complete
+        );
+    });
+};
 
-    /**
-     * @deprecated Will be removed in 0.15.0
-     * @see getPost
-     */
-    exports.get_post = getPost;
+exports.getMessageBus = function getMessageBus(channels, callback) {
+    var url = 'message-bus/' + clientId + '/poll';
+    dPost(url, channels, function (err, resp, messages) {
+        if (err || resp.statusCode >= 300) {
+            err = err || 'Unknown message-bus error';
+        }
+        callback(err, resp, messages);
+    });
+};
 
-    /**
-     * @deprecated Will be removed in 0.15.0
-     * @see readPosts
-     */
-    exports.read_posts = readPosts;
-}());
+exports.getNotifications = function getNotifications(callback) {
+    dGet('notifications', function (err, resp, notifications) {
+        if (err || resp.statusCode >= 300) {
+            err = err || 'Unknown notifications error';
+        }
+        callback(err, resp, notifications);
+    });
+};
