@@ -134,7 +134,6 @@ function handleResponse(callback) {
             exports.warn('E429: Too Many Requests');
             delayUntil = new Date().getTime() + 2 * 60 * 1000;
         }
-        console.log(resp.statusCode);
         try {
             body = JSON.parse(body);
         } catch (e) {}
@@ -253,7 +252,7 @@ exports.readPosts = function readPosts(topicId, posts, callback) {
     if (typeof posts === 'number') {
         posts = [posts];
     }
-    async.whist(function () {
+    async.whilst(function () {
         return posts.length > 0;
     }, function (next) {
         var part = [];
@@ -352,6 +351,7 @@ exports.getMessageBus = function getMessageBus(channels, callback) {
         if (err || resp.statusCode >= 300) {
             err = err || 'Unknown message-bus error';
         }
+        messages = messages || [];
         callback(err, resp, messages);
     });
 };

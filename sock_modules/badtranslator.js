@@ -2,6 +2,7 @@
 (function () {
     'use strict';
     var async = require('async'),
+        request = require('request'),
         configuration,
         discourse,
         errors;
@@ -25,7 +26,7 @@
     }
 
     function loadLanguages(callback) {
-        discourse.getContent('http://ackuna.com/cjs/badtranslator.js', function (err, resp, body) {
+        request.get('http://ackuna.com/cjs/badtranslator.js', function (err, resp, body) {
             if (err || resp.statusCode >= 300) {
                 return callback(err || 'error response');
             }
@@ -86,7 +87,7 @@
         }, function (nextStep) {
             next = languages.shift();
 
-            discourse.getContent('http://ackuna.com/pages/ajax_translate?type=' + translator.toLowerCase() + '&text=' + encodeURIComponent(text) + '&src=' + prev[translator] + '&dst=' + next[translator], function (err, resp, body) {
+            request.get('http://ackuna.com/pages/ajax_translate?type=' + translator.toLowerCase() + '&text=' + encodeURIComponent(text) + '&src=' + prev[translator] + '&dst=' + next[translator], function (err, resp, body) {
                 if (err || resp.statusCode >= 300) {
                     return nextStep(err || 'error response');
                 }
@@ -125,7 +126,7 @@
                     discourse.log(err);
                     return callback();
                 }
-                discourse.reply_topic(notification.topic_id, notification.post_number, result, function () {
+                discourse.createPost(notification.topic_id, notification.post_number, result, function () {
                     callback(true);
                 });
             });

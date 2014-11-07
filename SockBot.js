@@ -5,7 +5,7 @@
         async = require('async'),
         config = require('./configuration');
     var browser,
-        notifications,
+        messageBus,
         sockModules = [];
 
     async.waterfall([
@@ -39,14 +39,14 @@
         function (cb) {
             config = config.loadConfiguration(sockModules, process.argv[2]);
             browser = require('./discourse');
-            notifications = require('./notifications');
+            messageBus = require('./messageBus');
             sockModules = sockModules.filter(function (module) {
                 return config.modules[module.name].enabled;
             });
             cb();
         },
         function (cb) {
-            browser.begin(function () {
+            browser.login(function () {
                 cb();
             });
         },
@@ -55,7 +55,7 @@
                 // login failed. what can we do?
                 throw 'Login failed';
             }
-            console.log('Logged in as: ' + config.user.username);
+            console.log('Logged in as: ' + config.user.user.username);
             sockModules.forEach(function (module) {
                 if (typeof module.begin !== 'function') {
                     return;
@@ -63,7 +63,7 @@
                 console.log('Starting module: ' + module.name);
                 module.begin(browser, config);
             });
-            notifications.begin(sockModules);
+            messageBus.begin(sockModules);
             cb();
         }
     ]);
