@@ -1,7 +1,7 @@
 /*jslint node: true, indent: 4 */
 (function () {
     'use strict';
-    var m_browser,
+    var discourse,
         summons = {},
         users = {},
         configuration;
@@ -12,7 +12,8 @@
     exports.description = 'Allow Summoning of bot to play in certain threads';
 
     /**
-     * @var {object} configuration Default Configuration settings for this sock_module
+     * @var {object} configuration Default Configuration settings for this
+     * sock_module
      */
     exports.configuration = {
         enabled: false,
@@ -28,19 +29,21 @@
     /**
      * @var {string} name The name of this sock_module
      */
-    exports.name = "Summoner";
+    exports.name = 'Summoner';
 
     /**
-     * @var {number} priority If defined by a sock_module it is the priority of the module with respect to other modules.
+     * @var {number} priority If defined by a sock_module it is the priority
+     * of the module with respect to other modules.
      *
-     * sock_modules **should not** define modules with negative permissions. Default value is 50 with lower numbers being higher priority.
+     * sock_modules **should not** define modules with negative permissions.
+     * Default value is 50 with lower numbers being higher priority.
      */
     exports.priority = 1000;
 
     /**
      * @var {string} version The version of this sock_module
      */
-    exports.version = "1.1.0";
+    exports.version = '1.1.0';
 
     function purgeMemory() {
         var lastHour = (new Date().getTime()) - 60 * 60 * 1000, // an hour ago;
@@ -58,18 +61,22 @@
     }
 
     exports.onNotify = function onNotify(type, notification, post, callback) {
-        if (type === 'mentioned' &&  !(post.trust_level < 1 || post.primary_group_name === 'bots')) {
+        if (type === 'mentioned' && !(post.trust_level < 1 ||
+            post.primary_group_name === 'bots')) {
             var now = (new Date().getTime()),
                 r = Math.floor(Math.random() * configuration.messages.length),
                 s = configuration.messages[r],
                 k;
-            if (post.trust_level === 1 && (users[post.user_id] && now < users[post.user_id])) {
+            if (post.trust_level === 1 && (users[post.user_id] &&
+                now < users[post.user_id])) {
                 return callback();
             }
-            if (summons[notification.topic_id] && now < summons[notification.topic_id]) {
+            if (summons[notification.topic_id] &&
+                now < summons[notification.topic_id]) {
                 return callback();
             }
-            m_browser.log(notification.data.display_username + ' summoned me to play in ' + notification.slug);
+            discourse.log(notification.data.display_username +
+                ' summoned me to play in ' + notification.slug);
             for (k in post) {
                 if (post.hasOwnProperty(k)) {
                     s = s.replace(new RegExp('%__' + k + '__%', 'g'), post[k]);
@@ -79,16 +86,17 @@
             if (post.trust_level === 1) {
                 users[post.user_id] = now + configuration.userTimeout;
             }
-            m_browser.reply_topic(notification.topic_id, notification.post_number, s, function () {
-                callback(true);
-            });
+            discourse.createPost(notification.topic_id,
+                notification.post_number, s, function () {
+                    callback(true);
+                });
         } else {
             callback();
         }
     };
     exports.begin = function begin(browser, config) {
         configuration = config.modules[exports.name];
-        m_browser = browser;
+        discourse = browser;
         setInterval(purgeMemory, 30 * 60 * 1000);
     };
 }());
