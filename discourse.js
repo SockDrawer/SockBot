@@ -311,8 +311,8 @@ exports.getPosts = function getPosts(topicId, start, number, callback) {
 };
 
 exports.getAllPosts = function getAllPosts(topicId, eachChunk, complete) {
-    var base = 't/' + topicId + '/posts.json';
-    dGet(base + '?post_ids=0', function (err, resp, topic) {
+    var base = 't/' + topicId + '/posts.json?include_raw=1';
+    dGet(base + '&post_ids=0', function (err, resp, topic) {
         if (err || resp.statusCode >= 400) {
             err = err || 'Error ' + resp.statusCode;
             return complete(err, resp, topic);
@@ -328,7 +328,7 @@ exports.getAllPosts = function getAllPosts(topicId, eachChunk, complete) {
                     part.push(posts.shift());
                 }
                 part = part.join('&post_ids[]=');
-                dGet(base + '?post_ids[]=' + part, function (err, resp, posts) {
+                dGet(base + '&post_ids[]=' + part, function (err, resp, posts) {
                     if (err || resp.statusCode >= 400) {
                         err = err || 'Error ' + resp.statusCode;
                         return next(err, resp, posts);

@@ -139,12 +139,12 @@ function pollNotifications(callback) {
                         return discourse.getPost(
                             notification.data.original_post_id, flow);
                     }
-                    return flow(null, null);
+                    return flow(null, null, null);
                 },
                 function (resp, post, flow) {
                     handleNotification(notification, post,
                         function (err, handled) {
-                            if (post) {
+                            if (post && post.post_number) {
                                 return discourse.readPosts(post.topic_id,
                                     post.post_number, function () {
                                         flow(err, handled);
