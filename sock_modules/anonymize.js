@@ -1,10 +1,11 @@
 /*jslint node: true, indent: 4 */
 (function () {
     'use strict';
-    var xRegExp = require('xregexp').XRegExp,
-        discourse,
+    var xRegExp = require('xregexp').XRegExp;
+    var discourse,
         conf,
-        r_quote = xRegExp('\\[quote.*post:(?<post_number>\\d+).*topic:(?<topic_id>\\d+)');
+        rQuote = xRegExp('\\[quote.*post:(?<post_number>\\d+).*' +
+            'topic:(?<topic_id>\\d+)');
 
     exports.description = 'Anonymize replies';
 
@@ -12,11 +13,11 @@
         enabled: false
     };
 
-    exports.name = "Anonymize";
+    exports.name = 'Anonymize';
 
     exports.priority = 0;
 
-    exports.version = "1.12.0";
+    exports.version = '1.13.0';
 
 
     exports.begin = function begin(browser, config) {
@@ -25,21 +26,27 @@
     };
 
     exports.onNotify = function (type, notification, post, callback) {
-        if (!conf.enabled || !post || !post.cleaned || type !== 'private_message') {
+        if ((!conf.enabled || !post) ||
+            (!post.cleaned || type !== 'private_message')) {
             return callback();
         }
-        var match = r_quote.xexec(post.raw);
+        var match = rQuote.xexec(post.raw);
         if (!match) {
             return callback();
         }
-        discourse.postReply(match.topic_id, match.post_number, post.raw, function () {
-            setTimeout(function () {
-                discourse.reply_topic(notification.topic_id, notification.post_number, 'Anonymizied Reply Sent. Thank you for using Anonymizer, a SockIndustries application.', function () {
+        var anon = 'Anonymizied Reply Sent. Thank you for using Anonymizer, ' +
+            'a SockIndustries application.';
+        discourse.log('Posting anonymously to ' + match.topic_id);
+        discourse.createPost(match.topic_id, match.post_number, post.raw,
+            function () {
+                setTimeout(function () {
+                    discourse.createPost(notification.topic_id,
+                        notification.post_number, anon, function () {
 
-                });
-            }, 5 * 1000);
-            callback(true);
-        });
+                        });
+                }, 500);
+                callback(true);
+            });
     };
 
 }());
