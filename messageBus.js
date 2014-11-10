@@ -66,6 +66,9 @@ function pollMessages(callback) {
                 return !m.data || m.data.type !== 'acted';
             });
         }
+        if (!messages || messages.length === 0) {
+            return setTimeout(callback, 1000);
+        }
         async.each(messages, function (message, next) {
             async.waterfall([
 
@@ -124,7 +127,8 @@ function pollNotifications(callback) {
         // Filter out notifications that are too old or already acted on
         notifications = notifications.filter(function (n) {
             n.createdAt = Date.parse(n.created_at);
-            return n.createdAt >= notifyTime && !n.read;
+            return (notifyTypes[n.notification_type] === 'private_message') ||
+                (n.createdAt >= notifyTime && !n.read);
         });
         // Note when the newest unacted notification is. this is where we
         // start looking next time
