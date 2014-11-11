@@ -2,11 +2,11 @@
 (function () {
     'use strict';
     var fs = require('fs'),
-        browser,
-        notifications,
         async = require('async'),
-        config = require('./configuration'),
-        sock_modules = [];
+        config = require('./configuration');
+    var browser,
+        messageBus,
+        sockModules = [];
 
     async.waterfall([
 
@@ -21,47 +21,49 @@
                 if (isNaN(module.priority)) {
                     module.priority = 50;
                 }
-                if ((!module.configuration || module.configuration.enabled) && module.name !== 'NotifyPrint') {
-                    console.warn('Ingoring module: `' + (module.name || name) + '` Does not default to disabled');
+                if ((!module.configuration || module.configuration.enabled) &&
+                    module.name !== 'NotifyPrint') {
+                    console.warn('Ingoring module: `' + (module.name || name) +
+                        '` Does not default to disabled');
                 } else {
-                    sock_modules.push(module);
-                    console.log('Loaded module: ' + module.name + ' v' + module.version);
+                    sockModules.push(module);
+                    console.log('Loaded module: ' +
+                        module.name + ' v' + module.version);
                 }
             });
-            sock_modules.sort(function (a, b) {
+            sockModules.sort(function (a, b) {
                 return a.priority - b.priority;
             });
             cb();
         },
         function (cb) {
-            config = config.loadConfiguration(sock_modules, process.argv[2]);
+            config = config.loadConfiguration(sockModules, process.argv[2]);
             browser = require('./discourse');
-            notifications = require('./notifications');
-            sock_modules = sock_modules.filter(function (module) {
+            messageBus = require('./messageBus');
+            sockModules = sockModules.filter(function (module) {
                 return config.modules[module.name].enabled;
             });
             cb();
         },
         function (cb) {
-            browser.begin(function () {
+            browser.login(function () {
                 cb();
             });
         },
         function (cb) {
             if (!config.user) {
                 // login failed. what can we do?
-                console.log('Login failed');
-                return process.exit(1);
+                throw 'Login failed';
             }
-            console.log('Logged in as: ' + config.user.username);
-            sock_modules.forEach(function (module) {
+            console.log('Logged in as: ' + config.user.user.username);
+            sockModules.forEach(function (module) {
                 if (typeof module.begin !== 'function') {
                     return;
                 }
                 console.log('Starting module: ' + module.name);
                 module.begin(browser, config);
             });
-            notifications.begin(sock_modules);
+            messageBus.begin(sockModules);
             cb();
         }
     ]);

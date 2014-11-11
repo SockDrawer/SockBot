@@ -4,44 +4,48 @@
     var def = {
         username: 'username',
         password: 'passwordpassword',
-        message_bus: true,
         notifications: true,
-        cyborg: false,
         verbose: true,
         timestamp: true,
         datestamp: false,
         processActed: false,
         modules: {},
         errors: [
-            "Response confused me :-( error), please try again",
-            "Ph'nglui mglw'nafh Cthulhu R'lyeh wgah'nagl fhtagn",
-            "+++Mr. Jelly! Mr. Jelly!+++ ",
-            "+++Error At Address: 14, Treacle Mine Road, Ankh-Morpork+++",
-            "+++Divide By Cucumber Error. Please Reinstall Universe And Reboot +++",
-            "+++Whoops! Here Comes The Cheese! +++",
-            "Divided the universe by zero.",
-            "Does not Compute.",
-            "All your base are belong to us!",
-            "What do you get when you multiply six by nine?",
-            "Iyeeeeeeeee!!! A segmentation fault has occurred. Have a fluffy day.",
-            "Error: Success.",
-            "No keyboard detected. Press F1 to continue.",
-            "No user detected. Press the any key to continue.",
-            "No user detected. Press any other key to continue.",
-            "Error 119: 2.88MB floppy installed but not supported by the floppy controller.",
-            "Operation completed successfully.",
-            "FILE_NOT_FOUND",
-            "An exception has occurred. Please press <kdb>Alt</kbd>+<kbd>F4</kbd> to retry.",
-            "Hard disk fluid reservoir empty.",
-            "Expected success, but found success instead.",
-            "I saw a squirrel out the window and forgot what you asked.",
-            "I'm too sexy for this shirt.",
-            "Contraceptives not found",
-            "Sperm production overload, emergency overflow measures activated.",
-            "/dev/null full",
-            "I used to be a bot like you, then I took an exception in the knee.",
-            "Here I am, brain the size of a planet, and they ask me to roll some dice.",
-            "An error of type 2094 has occured"
+            'Response confused me :-( error), please try again',
+            'Ph\'nglui mglw\'nafh Cthulhu R\'lyeh wgah\'nagl fhtagn',
+            '+++Mr. Jelly! Mr. Jelly!+++ ',
+            '+++Error At Address: 14, Treacle Mine Road, Ankh-Morpork+++',
+            '+++Divide By Cucumber Error. Please Reinstall Universe' +
+            ' And Reboot +++',
+            '+++Whoops! Here Comes The Cheese! +++',
+            'Divided the universe by zero.',
+            'Does not Compute.',
+            'All your base are belong to us!',
+            'What do you get when you multiply six by nine?',
+            'Iyeeeeeeeee!!! A segmentation fault has occurred. ' +
+            'Have a fluffy day.',
+            'Error: Success.',
+            'No keyboard detected. Press F1 to continue.',
+            'No user detected. Press the any key to continue.',
+            'No user detected. Press any other key to continue.',
+            'Error 119: 2.88MB floppy installed but not supported by ' +
+            'the floppy controller.',
+            'Operation completed successfully.',
+            'FILE_NOT_FOUND',
+            'An exception has occurred. Please press <kdb>Alt</kbd>' +
+            '+<kbd>F4</kbd> to retry.',
+            'Hard disk fluid reservoir empty.',
+            'Expected success, but found success instead.',
+            'I saw a squirrel out the window and forgot what you asked.',
+            'I\'m too sexy for this shirt.',
+            'Contraceptives not found',
+            'Sperm production overload, emergency overflow measures activated.',
+            '/dev/null full',
+            'I used to be a bot like you, then I took an ' +
+            'exception in the knee.',
+            'Here I am, brain the size of a planet, and they ask' +
+            ' me to roll some dice.',
+            'An error of type 2094 has occured'
         ]
     };
 
@@ -63,13 +67,10 @@
     function merge() {
         var args = Array.prototype.slice.apply(arguments),
             res = {},
-            obj;
-        while (true) {
             obj = args.shift();
-            if (!obj) {
-                break;
-            }
+        while (obj) {
             mergeInner(res, obj);
+            obj = args.shift();
         }
         return res;
     }
@@ -83,23 +84,25 @@
         }
     }
 
-    exports.loadConfiguration = function loadConfiguration(modules, configuration) {
-        var userconf;
-        if (!configuration) {
-            console.error('No user configuration file specified. Sockbot will likely not work!');
-            userconf = {};
-        } else {
-            if (configuration[0] !== '/') {
-                configuration = './' + configuration;
+    exports.loadConfiguration =
+        function loadConfiguration(modules, configuration) {
+            var userconf;
+            if (!configuration) {
+                console.error('No user configuration file specified. ' +
+                    'Sockbot will likely not work!');
+                userconf = {};
+            } else {
+                if (configuration[0] !== '/') {
+                    configuration = './' + configuration;
+                }
+                userconf = getConfig(configuration);
             }
-            userconf = getConfig(configuration);
-        }
-        def.modules = {};
-        modules.forEach(function (m) {
-            def.modules[m.name] = m.configuration;
-        });
+            def.modules = {};
+            modules.forEach(function (m) {
+                def.modules[m.name] = m.configuration;
+            });
 
-        exports.configuration = merge(def, userconf);
-        return exports.configuration;
-    };
+            exports.configuration = merge(def, userconf);
+            return exports.configuration;
+        };
 }());
