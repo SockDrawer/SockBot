@@ -12,6 +12,8 @@
         request = require('request'),
         async = require('async'),
         xRegExp = require('xregexp').XRegExp,
+        sleep = require('sleep'),
+        floor = Math.floor,
         conf = require('./configuration').configuration,
         csrf,
         jar = request.jar(),
@@ -56,6 +58,25 @@
         console.error(message);
     }
     exports.error = error;
+
+    /**
+     * Perform a sleep, yielding to the system via natives if possible. This
+     * will block all javascript from executing.
+     *
+     * @param {Number} millis milliseconds to sleep for
+     */
+    function blockingSleepFor(millis) {
+        var now = (new Date()).getTime(),
+            until = now + millis,
+            seconds = floor(millis / 1000);
+
+        sleep.sleep(seconds);
+        do {
+            now = (new Date()).getTime();
+            sleep.usleep((until - now) * 1000);
+        } while (now < until);
+    }
+
     /**
      * @callback BrowserCallback
      * @param {object} err error object if `request` indicated error
@@ -68,32 +89,23 @@
      */
     function discotime(callback) {
         return function (err, resp, body) {
-            var until,
-                now;
             if (resp && resp.request.href.indexOf('what.thedailywtf.com') < 0) {
                 return callback(err, resp, body);
             }
             if (resp && (resp.statusCode === 429 || resp.statusCode === 503)) {
                 discofailures += 1;
-                until = (new Date()).getTime() + discofailures * 60 * 1000;
                 warn(resp.statusCode + ': Too many requests. Muting for ' + (discofailures * 60) + ' seconds.');
-                //Doing a busy wait on purpose. Using SetTimeout would allow other threads to process while the wait is
-                //happening. we got the 429 for a reason. don't mess it up
-                do {
-                    now = (new Date()).getTime();
-                } while (now < until);
+                // Do blocking sleep, setTimeout() would allow more requests to happen
+                blockingSleepFor(discofailures * 60 * 1000);
             } else if (err && !resp) {
                 error('Severe error:' + err);
                 process.exit(1);
             } else {
                 discofailures = 0;
             }
-            until = (new Date()).getTime() + 250;
-            //Doing a busy wait on purpose. Using SetTimeout would allow other threads to process while the wait is
-            //happening. we don't want to get a 429 for any reason. don't mess it up
-            do {
-                now = (new Date()).getTime();
-            } while (now < until);
+
+            // Block all requests while sleeping to avoid 429s
+            blockingSleepFor(250);
             setImmediate(function () {
                 var obj;
                 try {
