@@ -345,6 +345,22 @@ exports.getAllPosts = function getAllPosts(topicId, eachChunk, complete) {
     });
 };
 
+exports.getAllTopics = function getAllTopics(eachChunk, complete) {
+    var url = '/latest.json?no_definitions=true';
+    async.whilst(function () {
+        return url;
+    }, function (next) {
+        dGet(url, function (err, resp, latest) {
+            if (err || resp.statusCode >= 300) {
+                return next(err ||
+                    'Non success status code provided:' + resp.statusCode);
+            }
+            url = latest.topic_list.more_topics_url;
+            eachChunk(latest.topic_list.topics, next);
+        });
+    }, complete);
+};
+
 exports.getMessageBus = function getMessageBus(channels, callback) {
     var url = 'message-bus/' + clientId + '/poll';
     dPost(url, channels, function (err, resp, messages) {
