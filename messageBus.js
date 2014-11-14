@@ -29,14 +29,19 @@ var modules = [],
         12: 'granted_badge'
     };
 
+// Handle a single message for all interested modules
 function handleMessage(message, post, callback) {
     var interestedModules = registrations[message.channel];
+    // Run modules in sequence, not in parallel
     async.eachSeries(interestedModules, function (module, innerNext) {
+        //Allow module to process
         module.onMessage(message, post, function (err, handled) {
             if (err) {
                 discourse.warn('Module `' + module.name +
                     '` reported error.');
             }
+            // Stop processing further modules if module reports error or that
+            // it handled the message completely
             innerNext(err || handled);
         });
     }, function () {
@@ -53,31 +58,38 @@ function pollMessages(callback) {
             discourse.warn('Error in message-bus: ' + err);
             setTimeout(callback, 30 * 1000);
         }
+        // Update channels so we don't get the same nessages all the time
         messages.forEach(function (m) {
             channels[m.channel] = Math.max(channels[m.channel], m.message_id);
         });
+        // Merge notification messages down to only the most recent
         var notifications = '/notification/' + conf.user.user.id;
         messages = messages.filter(function (m) {
             return m.channel !== notifications ||
                 m.message_id === channels[notifications];
         });
+        // Filter out messages that are usually irrelevant, unless configuration
+        // says they are relevant
         if (!conf.processActed) {
             messages = messages.filter(function (m) {
                 return !m.data || m.data.type !== 'acted';
             });
         }
+        // Pause a second before retry if we have no more messages.
+        // Prevents message-bus spam
         if (!messages || messages.length === 0) {
             return setTimeout(callback, 1000);
         }
         async.each(messages, function (message, next) {
             async.waterfall([
-
+                // If message is associated with post, load post
                 function (flow) {
                     if (message.data && message.data.post_number) {
                         return discourse.getPost(message.data.id, flow);
                     }
                     return flow(null, null, null);
                 },
+                // pass message off to handlers
                 function (resp, post, flow) {
                     handleMessage(message, post, flow);
                 }
@@ -94,6 +106,7 @@ function pollMessages(callback) {
     });
 }
 
+// Handle notifications
 function handleNotification(notification, post, callback) {
     async.eachSeries(modules, function (module, complete) {
         if (typeof module.onNotify === 'function') {
@@ -127,8 +140,8 @@ function pollNotifications(callback) {
         // Filter out notifications that are too old or already acted on
         notifications = notifications.filter(function (n) {
             n.createdAt = Date.parse(n.created_at);
-            return (notifyTypes[n.notification_type] === 'private_message') ||
-                (n.createdAt >= notifyTime && !n.read);
+            return (notifyTypes[n.notification_type] === 'private_message' ||
+                n.createdAt >= notifyTime) && !n.read;
         });
         // Note when the newest unacted notification is. this is where we
         // start looking next time
@@ -137,7 +150,7 @@ function pollNotifications(callback) {
         }
         async.each(notifications, function (notification, next) {
             async.waterfall([
-
+                // If notification is associated with a post, load it
                 function (flow) {
                     if (notification.data.original_post_id) {
                         return discourse.getPost(
@@ -146,22 +159,25 @@ function pollNotifications(callback) {
                     return flow(null, null, null);
                 },
                 function (resp, post, flow) {
+                    // Hand notification off to sock_modules for processing
                     handleNotification(notification, post,
                         function (err, handled) {
+                            // If notification has a post. mark it read
+                            //TODO: figure out how to handle this for badges too
                             if (post && post.post_number) {
                                 return discourse.readPosts(post.topic_id,
-                                    post.post_number, function () {
+                                    post.post_number,
+                                    function () {
                                         flow(err, handled);
                                     });
                             }
-                            flow(err, handled);
+                            return flow(err, handled);
                         });
                 }
             ], function (err) {
                 if (err) {
                     discourse.warn('Error processing notification: ' + err);
                 }
-
                 // error processing message should not flow over to
                 // rest of message processing
                 next();
@@ -170,7 +186,10 @@ function pollNotifications(callback) {
     });
 }
 
+//Message-bus handler that handles notifications
 function doNotifications(message, post, callback) {
+    // check to see if message is notification with interesting things.
+    // If so pull notification.json
     if (message && message.channel === '/notification/' + conf.user.user.id &&
         (message.data.unread_notifications > 0 ||
             message.data.unread_private_messages > 0)) {
@@ -181,7 +200,9 @@ function doNotifications(message, post, callback) {
 doNotifications.name = 'message_bus.doNotifications()';
 doNotifications.onMessage = doNotifications;
 
+//message-bus handler that handles /__status messages
 function updateChannels(message, post, callback) {
+    //Apply the status to the channels
     if (message && message.channel === '/__status') {
         for (var channel in message.data) {
             channels[channel] = message.data[channel];
@@ -192,21 +213,29 @@ function updateChannels(message, post, callback) {
 updateChannels.name = 'message_bus.updateChannels()';
 updateChannels.onMessage = updateChannels;
 
+//Poll all sock_modules for channels they are interested in
 function updateRegistrations(callback) {
     var reg = {};
+    // /__status is required and handled by message-bus
     reg['/__status'] = [updateChannels];
+    // If configuration sets notifications add notifications
     if (conf.notifications) {
         reg['/notification/' + conf.user.user.id] = [doNotifications];
     }
+    // Grab all sock_modules asynchronously and merge results.
     async.each(modules, function (module, next) {
+        // Ignore modules that don't look like a duck
+        // registerListeners and onMessage functions required for message-bus
         if (typeof module.registerListeners !== 'function' ||
             typeof module.onMessage !== 'function') {
             return next();
         }
+        // Ask module to register for channels it is interested in
         module.registerListeners(function (err, channels) {
             if (err) {
                 return next();
             }
+            // Register channels
             if (channels && channels.length) {
                 channels.forEach(function (channel) {
                     var arr = reg[channel] || [];
@@ -217,6 +246,7 @@ function updateRegistrations(callback) {
             return next();
         });
     }, function () {
+        // Update global registrations
         registrations = reg;
         var chan = {};
         for (var channel in reg) {
