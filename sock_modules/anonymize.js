@@ -30,9 +30,10 @@ exports.onNotify = function (type, notification, post, callback) {
         return callback();
     }
     var match = rQuote.xexec(post.raw);
-    if (!match) {
+    if (!match || post.topic_id.toString() === match.topic_id) {
         return callback();
     }
+
     var anon = 'Anonymizied Reply Sent. Thank you for using Anonymizer, ' +
         'a SockIndustries application.';
     discourse.log('Posting anonymously to ' + match.topic_id);
