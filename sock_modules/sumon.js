@@ -60,15 +60,16 @@
         }
     }
 
-    exports.onNotify = function onNotify(type, notification, post, callback) {
+    exports.onNotify = function onNotify(type, notification, topic,
+        post, callback) {
         if (type === 'mentioned' && !(post.trust_level < 1 ||
-            post.primary_group_name === 'bots')) {
+                post.primary_group_name === 'bots')) {
             var now = (new Date().getTime()),
                 r = Math.floor(Math.random() * configuration.messages.length),
                 s = configuration.messages[r],
                 k;
             if (post.trust_level === 1 && (users[post.user_id] &&
-                now < users[post.user_id])) {
+                    now < users[post.user_id])) {
                 return callback();
             }
             if (summons[notification.topic_id] &&
@@ -87,7 +88,8 @@
                 users[post.user_id] = now + configuration.userTimeout;
             }
             discourse.createPost(notification.topic_id,
-                notification.post_number, s, function () {
+                notification.post_number, s,
+                function () {
                     callback(true);
                 });
         } else {

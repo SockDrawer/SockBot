@@ -10,6 +10,10 @@
         datestamp: false,
         processActed: false,
         modules: {},
+        admin: {
+            owner: 'accalia',
+            ignore: ['blakeyrat', 'PaulaBean']
+        },
         errors: [
             'Response confused me :-( error), please try again',
             'Ph\'nglui mglw\'nafh Cthulhu R\'lyeh wgah\'nagl fhtagn',

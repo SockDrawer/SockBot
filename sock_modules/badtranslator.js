@@ -115,7 +115,7 @@ function translate(text, languages, translator, callback) {
 }
 
 
-exports.onNotify = function (type, notification, post, callback) {
+exports.onNotify = function (type, notification, topic, post, callback) {
     if ((!configuration.enabled || !post || !post.cleaned) ||
         (['private_message', 'mentioned', 'replied'].indexOf(type) === -1)) {
         return callback();

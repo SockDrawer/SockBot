@@ -107,11 +107,11 @@ function pollMessages(callback) {
 }
 
 // Handle notifications
-function handleNotification(notification, post, callback) {
+function handleNotification(notification, topic, post, callback) {
     async.eachSeries(modules, function (module, complete) {
         if (typeof module.onNotify === 'function') {
             module.onNotify(notifyTypes[notification.notification_type],
-                notification, post, complete);
+                notification, topic, post, complete);
         } else {
             complete();
         }
@@ -152,15 +152,46 @@ function pollNotifications(callback) {
             async.waterfall([
                 // If notification is associated with a post, load it
                 function (flow) {
-                    if (notification.data.original_post_id) {
-                        return discourse.getPost(
-                            notification.data.original_post_id, flow);
+                    if (notification.topic_id) {
+                        return discourse.getTopic(notification.topic_id, flow);
                     }
                     return flow(null, null, null);
                 },
-                function (resp, post, flow) {
+                function (resp, topic, flow) {
+                    if (topic) {
+                        if (topic.details.notification_level_text === 'muted') {
+                            return flow('ignore', 'Topic Was Muted');
+                        }
+                        var ignore = conf.admin.ignore;
+                        var user = topic.details.created_by.username;
+                        if (ignore.indexOf(user) >= 0) {
+                            return flow('ignore', 'Topic Creator Ignored');
+                        }
+                    }
+                    return flow(null, topic);
+                },
+                function (topic, flow) {
+                    if (notification.data.original_post_id) {
+                        return discourse.getPost(
+                            notification.data.original_post_id,
+                            function (err, resp, post) {
+                                flow(err, topic, post);
+                            });
+                    }
+                    return flow(null, topic, null);
+                },
+                function (topic, post, flow) {
+                    if (post) {
+                        var ignore = conf.admin.ignore;
+                        if (ignore.indexOf(post.username) >= 0) {
+                            return flow('ignore', 'Poster Ignored');
+                        }
+                    }
+                    return flow(null, topic, flow);
+                },
+                function (topic, post, flow) {
                     // Hand notification off to sock_modules for processing
-                    handleNotification(notification, post,
+                    handleNotification(notification, topic, post,
                         function (err, handled) {
                             // If notification has a post. mark it read
                             //TODO: figure out how to handle this for badges too
@@ -174,8 +205,11 @@ function pollNotifications(callback) {
                             return flow(err, handled);
                         });
                 }
-            ], function (err) {
-                if (err) {
+            ], function (err, reason) {
+                if (err === 'ignore') {
+                    discourse.warn('Notification Ignored: ' + reason);
+                }
+                else if (err) {
                     discourse.warn('Error processing notification: ' + err);
                 }
                 // error processing message should not flow over to

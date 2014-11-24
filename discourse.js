@@ -53,6 +53,12 @@ var version = 'SockBot 0.14.0 "Elfish Emily"',
         'notify_user': 6,
         'notify_moderators': 7,
         'spam': 8
+    },
+    notificationLevels = {
+        'muted': 0,
+        'regular': 1,
+        'tracking': 2,
+        'watching': 3
     };
 
 
@@ -307,6 +313,25 @@ exports.getPosts = function getPosts(topicId, start, number, callback) {
                 return cleanPost(p);
             }));
         });
+    });
+};
+
+exports.getTopic = function getTopic(topicId, callback) {
+    dGet('t/' + topicId + '.json?include_raw=1', function (err, resp, topic) {
+        if (err || resp.statusCode >= 400) {
+            err = err || 'Error ' + resp.statusCode;
+        }
+        delete topic.post_stream;
+        delete topic.details.links;
+        delete topic.details.participants;
+        delete topic.details.suggested_topics;
+        topic.details.notification_level_text = 'unknown';
+        for (var type in notificationLevels) {
+            if (notificationLevels[type] === topic.details.notification_level) {
+                topic.details.notification_level_text = type;
+            }
+        }
+        return callback(err, resp, topic);
     });
 };
 

@@ -360,11 +360,11 @@ function rollAllDice(input, callback) {
             callback(results);
         });
 }
-exports.onNotify = function (type, notification, post, callback) {
+exports.onNotify = function (type, notification, topic, post, callback) {
     if (!configuration.enabled || !post || !post.cleaned) {
         return callback();
     }
-    if (['private_message', 'mentioned', 'replied'].indexOf(type) === -1) {
+    if (['private_message', 'replied'].indexOf(type) === -1) {
         return callback();
     }
 

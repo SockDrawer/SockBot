@@ -70,7 +70,7 @@ exports.onMessage = function onMessage(message, post, callback) {
  * @param {Discourse.Post} post Post details
  * @param {AsyncCallback} callback
  */
-exports.onNotify = function (type, notification, post, callback) {
+exports.onNotify = function (type, notification, topic, post, callback) {
     if (discourse && conf) {
         discourse.log('Notification ' + type + ' from ' +
             notification.data.display_username + ' in "' +
