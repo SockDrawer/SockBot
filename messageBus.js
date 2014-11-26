@@ -110,6 +110,7 @@ function pollMessages(callback) {
 function handleNotification(notification, topic, post, callback) {
     async.eachSeries(modules, function (module, complete) {
         if (typeof module.onNotify === 'function') {
+            
             module.onNotify(notifyTypes[notification.notification_type],
                 notification, topic, post, complete);
         } else {
@@ -187,7 +188,7 @@ function pollNotifications(callback) {
                             return flow('ignore', 'Poster Ignored');
                         }
                     }
-                    return flow(null, topic, flow);
+                    return flow(null, topic, post);
                 },
                 function (topic, post, flow) {
                     // Hand notification off to sock_modules for processing
