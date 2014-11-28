@@ -34,7 +34,7 @@ function readify(callback) {
 function readTopic(topic, callback) {
     var now = new Date().getTime() - configuration.readWait;
     discourse.getAllPosts(topic, function (err, posts, next) {
-        if (err){
+        if (err) {
             return next(err);
         }
         posts = posts.filter(function (post) {
@@ -55,10 +55,13 @@ exports.begin = function begin(browser, config) {
     configuration = config.modules[exports.name];
 
     if (configuration.enabled) {
-        async.forever(function (next) {
-            readify(function () {
-                setTimeout(next, 24 * 60 * 60 * 1000);
+        var day = 24 * 60 * 60 * 1000;
+        setTimeout(function () {
+            async.forever(function (next) {
+                readify(function () {
+                    setTimeout(next, day);
+                });
             });
-        });
+        }, Math.floor(Math.random() * day));
     }
 };
