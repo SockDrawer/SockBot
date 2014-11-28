@@ -62,8 +62,7 @@
 
     exports.onNotify = function onNotify(type, notification, topic,
         post, callback) {
-        if (type === 'mentioned' && !(post.trust_level < 1 ||
-                post.primary_group_name === 'bots')) {
+        if (type === 'mentioned') {
             var now = (new Date().getTime()),
                 r = Math.floor(Math.random() * configuration.messages.length),
                 s = configuration.messages[r],

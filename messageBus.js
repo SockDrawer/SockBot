@@ -110,7 +110,6 @@ function pollMessages(callback) {
 function handleNotification(notification, topic, post, callback) {
     async.eachSeries(modules, function (module, complete) {
         if (typeof module.onNotify === 'function') {
-            
             module.onNotify(notifyTypes[notification.notification_type],
                 notification, topic, post, complete);
         } else {
@@ -187,8 +186,15 @@ function pollNotifications(callback) {
                         if (ignore.indexOf(post.username) >= 0) {
                             return flow('ignore', 'Poster Ignored');
                         }
+                        if (post.trust_level < 1) {
+                            return flow('ignore', 'Poster is TL0');
+                        }
+                        if (post.primary_group_name === 'bots' &&
+                            post.staff === false) {
+                            return flow('ignore', 'Poster is a Bot');
+                        }
                     }
-                    return flow(null, topic, post);
+                    return flow(null, topic, flow);
                 },
                 function (topic, post, flow) {
                     // Hand notification off to sock_modules for processing
@@ -209,8 +215,7 @@ function pollNotifications(callback) {
             ], function (err, reason) {
                 if (err === 'ignore') {
                     discourse.warn('Notification Ignored: ' + reason);
-                }
-                else if (err) {
+                } else if (err) {
                     discourse.warn('Error processing notification: ' + err);
                 }
                 // error processing message should not flow over to
