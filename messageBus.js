@@ -182,6 +182,9 @@ function pollNotifications(callback) {
                 },
                 function (topic, post, flow) {
                     if (post) {
+                        if (post.staff){
+                            return flow(null, topic, post);
+                        }
                         var ignore = conf.admin.ignore;
                         if (ignore.indexOf(post.username) >= 0) {
                             return flow('ignore', 'Poster Ignored');
@@ -189,12 +192,11 @@ function pollNotifications(callback) {
                         if (post.trust_level < 1) {
                             return flow('ignore', 'Poster is TL0');
                         }
-                        if (post.primary_group_name === 'bots' &&
-                            post.staff === false) {
+                        if (post.primary_group_name === 'bots') {
                             return flow('ignore', 'Poster is a Bot');
                         }
                     }
-                    return flow(null, topic, flow);
+                    return flow(null, topic, post);
                 },
                 function (topic, post, flow) {
                     // Hand notification off to sock_modules for processing
