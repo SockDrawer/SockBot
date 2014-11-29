@@ -48,11 +48,6 @@
     function purgeMemory() {
         var lastHour = (new Date().getTime()) - 60 * 60 * 1000, // an hour ago;
             k; //key
-        for (k in users) {
-            if (users.hasOwnProperty(k) && users[k] < lastHour) {
-                delete users[k];
-            }
-        }
         for (k in summons) {
             if (summons.hasOwnProperty(k) && summons[k] < lastHour) {
                 delete summons[k];
@@ -67,10 +62,6 @@
                 r = Math.floor(Math.random() * configuration.messages.length),
                 s = configuration.messages[r],
                 k;
-            if (post.trust_level === 1 && (users[post.user_id] &&
-                    now < users[post.user_id])) {
-                return callback();
-            }
             if (summons[notification.topic_id] &&
                 now < summons[notification.topic_id]) {
                 return callback();
@@ -83,9 +74,6 @@
                 }
             }
             summons[notification.topic_id] = now + configuration.autoTimeout;
-            if (post.trust_level === 1) {
-                users[post.user_id] = now + configuration.userTimeout;
-            }
             discourse.createPost(notification.topic_id,
                 notification.post_number, s,
                 function () {

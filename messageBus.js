@@ -13,6 +13,7 @@ var async = require('async'),
 var modules = [],
     registrations = {},
     channels = {},
+    TL1Timer = {},
     notifyTime = (new Date()).getTime(),
     notifyTypes = {
         1: 'mentioned',
@@ -182,15 +183,24 @@ function pollNotifications(callback) {
                 },
                 function (topic, post, flow) {
                     if (post) {
-                        if (post.staff){
+                        if (post.staff) {
                             return flow(null, topic, post);
                         }
-                        var ignore = conf.admin.ignore;
-                        if (ignore.indexOf(post.username) >= 0) {
+                        var ignore = conf.admin.ignore,
+                            now = (new Date().getTime()),
+                            user = post.username;
+                        if (ignore.indexOf(user) >= 0) {
                             return flow('ignore', 'Poster Ignored');
                         }
                         if (post.trust_level < 1) {
                             return flow('ignore', 'Poster is TL0');
+                        }
+                        if (post.trust_level === 1) {
+                            if (TL1Timer[user] && now < TL1Timer[user]) {
+                                return flow('ignore', 
+                                    'Poster is TL1 on Cooldown');
+                            }
+                            TL1Timer[user] = now + conf.TL1Cooldown;
                         }
                         if (post.primary_group_name === 'bots') {
                             return flow('ignore', 'Poster is a Bot');

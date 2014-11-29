@@ -9,6 +9,7 @@
         timestamp: true,
         datestamp: false,
         processActed: false,
+        TL1Cooldown: 10 * 60 * 60,
         modules: {},
         admin: {
             owner: 'accalia',
