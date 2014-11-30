@@ -160,11 +160,14 @@ function pollNotifications(callback) {
                 },
                 function (resp, topic, flow) {
                     if (topic) {
+                        // Do not allow muted topics
+                        // shouldn't be getting notifications for these anyway
                         if (topic.details.notification_level_text === 'muted') {
                             return flow('ignore', 'Topic Was Muted');
                         }
                         var ignore = conf.admin.ignore;
                         var user = topic.details.created_by.username;
+                        // Do not allow topics when creator is on ignore list
                         if (ignore.indexOf(user) >= 0) {
                             return flow('ignore', 'Topic Creator Ignored');
                         }
@@ -183,18 +186,30 @@ function pollNotifications(callback) {
                 },
                 function (topic, post, flow) {
                     if (post) {
+                        // Allow Staff regardless of other limits
                         if (post.staff) {
+                            return flow(null, topic, post);
+                        }
+                        // Allow TL4+ regardless of other limits
+                        if (post.trust_level >= 4){
                             return flow(null, topic, post);
                         }
                         var ignore = conf.admin.ignore,
                             now = (new Date().getTime()),
                             user = post.username;
+                        //Allow Owner regardless of other limits
+                        if (user === conf.admin.owner){
+                            return flow(null, topic, post);
+                        }
+                        // Do not allow users on the ignore list
                         if (ignore.indexOf(user) >= 0) {
                             return flow('ignore', 'Poster Ignored');
                         }
+                        // Do not allow TL0 users
                         if (post.trust_level < 1) {
                             return flow('ignore', 'Poster is TL0');
                         }
+                        //Rate limit TL1 users
                         if (post.trust_level === 1) {
                             if (TL1Timer[user] && now < TL1Timer[user]) {
                                 return flow('ignore', 
@@ -202,6 +217,7 @@ function pollNotifications(callback) {
                             }
                             TL1Timer[user] = now + conf.TL1Cooldown;
                         }
+                        //Disallow other bots
                         if (post.primary_group_name === 'bots') {
                             return flow('ignore', 'Poster is a Bot');
                         }
