@@ -57,7 +57,7 @@ function pollMessages(callback) {
     discourse.getMessageBus(channels, function (err, resp, messages) {
         if (err) {
             discourse.warn('Error in message-bus: ' + err);
-            setTimeout(callback, 30 * 1000);
+            return setTimeout(callback, 30 * 1000);
         }
         // Update channels so we don't get the same nessages all the time
         messages.forEach(function (m) {
@@ -119,6 +119,14 @@ function handleNotification(notification, topic, post, callback) {
     }, function () {
         callback();
     });
+}
+
+function convertPostNumbers(post) {
+    var nbr = [];
+    for (var i = 0; i < 10; i += 1) {
+        nbr.unshift(post - i);
+    }
+    return nbr;
 }
 
 function pollNotifications(callback) {
@@ -186,21 +194,13 @@ function pollNotifications(callback) {
                 },
                 function (topic, post, flow) {
                     if (post) {
-                        // Allow Staff regardless of other limits
-                        if (post.staff) {
-                            return flow(null, topic, post);
-                        }
                         // Allow TL4+ regardless of other limits
-                        if (post.trust_level >= 4){
+                        if (post.trust_level >= 4) {
                             return flow(null, topic, post);
                         }
                         var ignore = conf.admin.ignore,
                             now = (new Date().getTime()),
                             user = post.username;
-                        //Allow Owner regardless of other limits
-                        if (user === conf.admin.owner){
-                            return flow(null, topic, post);
-                        }
                         // Do not allow users on the ignore list
                         if (ignore.indexOf(user) >= 0) {
                             return flow('ignore', 'Poster Ignored');
@@ -212,7 +212,7 @@ function pollNotifications(callback) {
                         //Rate limit TL1 users
                         if (post.trust_level === 1) {
                             if (TL1Timer[user] && now < TL1Timer[user]) {
-                                return flow('ignore', 
+                                return flow('ignore',
                                     'Poster is TL1 on Cooldown');
                             }
                             TL1Timer[user] = now + conf.TL1Cooldown;
@@ -231,8 +231,12 @@ function pollNotifications(callback) {
                             // If notification has a post. mark it read
                             //TODO: figure out how to handle this for badges too
                             if (post && post.post_number) {
+                                var nbr = post.post_number;
+                                if (notification.notification_type === 6) {
+                                    nbr = convertPostNumbers(post.post_number);
+                                }
                                 return discourse.readPosts(post.topic_id,
-                                    post.post_number,
+                                    nbr,
                                     function () {
                                         flow(err, handled);
                                     });
