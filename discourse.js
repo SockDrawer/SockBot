@@ -126,9 +126,10 @@ function cleanPost(post) {
     /*eslint-disable camelcase */
     if (post.staff) {
         post.trust_level = 5;
-    }
-    if (post.username === conf.admin.owner) {
+    } else if (post.username === conf.admin.owner) {
         post.trust_level = 6;
+    } else if (conf.admin.ignore.indexOf(post.username) >= 0) {
+        post.trust_level = 0;
     }
     /*eslint-enable camelcase */
     return post;
