@@ -44,6 +44,7 @@ var version = 'SockBot 0.14.0 "Elfish Emily"',
     rQuote = xRegExp('\\[quote(?:(?!\\[/quote\\]).)*\\[/quote\\]', 'sgi'),
     rCloseQuote = xRegExp('\\[/quote\\]', 'sgi'),
     delayUntil = new Date().getTime(),
+    sleepUntil = new Date().getTime() - 1,
     postActionTypes = {
         'bookmark': 1,
         'like': 2,
@@ -60,6 +61,13 @@ var version = 'SockBot 0.14.0 "Elfish Emily"',
         'tracking': 2,
         'watching': 3
     };
+
+exports.sleep = function sleep(until) {
+    if (until !== undefined) {
+        sleepUntil = until;
+    }
+    return sleepUntil;
+};
 
 
 exports.log = function log(message) {
@@ -114,6 +122,15 @@ function cleanPost(post) {
         post.cleaned = xRegExp.replace(post.raw, rQuote, '');
         post.cleaned = xRegExp.replace(post.cleaned, rCloseQuote, '');
     }
+    // Don't have a choice about using camelcase here...
+    /*eslint-disable camelcase */
+    if (post.staff) {
+        post.trust_level = 5;
+    }
+    if (post.username === conf.admin.owner) {
+        post.trust_level = 6;
+    }
+    /*eslint-enable camelcase */
     return post;
 }
 
@@ -173,7 +190,11 @@ exports.login = function login(callback) {
     ], callback);
 };
 
-exports.createPost = function createPost(topic, replyTo, raw, callback) {
+exports.createPost = function createPost(topic, replyTo,
+    raw, callback, nomute) {
+    if (!nomute && new Date().getTime() < sleepUntil) {
+        return callback('Muted');
+    }
     var form = {
         'raw': raw + tag.replace('%DATE%', new Date()),
         'topic_id': topic,
@@ -190,6 +211,9 @@ exports.createPost = function createPost(topic, replyTo, raw, callback) {
 };
 
 exports.editPost = function editPost(postId, raw, editReason, callback) {
+    if (new Date().getTime() < sleepUntil) {
+        return callback('Muted');
+    }
     if (typeof editReason === 'function') {
         callback = editReason;
         editReason = '';
@@ -205,6 +229,9 @@ exports.editPost = function editPost(postId, raw, editReason, callback) {
 };
 
 exports.deletePost = function deletePost(postId, callback) {
+    if (new Date().getTime() < sleepUntil) {
+        return callback('Muted');
+    }
     var form = {
         'id': postId
     };
@@ -325,10 +352,16 @@ exports.getTopic = function getTopic(topicId, callback) {
         delete topic.details.links;
         delete topic.details.participants;
         delete topic.details.suggested_topics;
+        // Don't have a choice about using camelcase here...
+        /*eslint-disable camelcase */
         topic.details.notification_level_text = 'unknown';
+        /*eslint-enable camelcase */
         for (var type in notificationLevels) {
             if (notificationLevels[type] === topic.details.notification_level) {
+                // Don't have a choice about using camelcase here...
+                /*eslint-disable camelcase */
                 topic.details.notification_level_text = type;
+                /*eslint-enable camelcase */
             }
         }
         return callback(err, resp, topic);
