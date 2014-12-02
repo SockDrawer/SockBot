@@ -29,7 +29,7 @@ var request = require('request'),
     async = require('async'),
     xRegExp = require('xregexp').XRegExp,
     conf = require('./configuration').configuration;
-var version = 'SockBot 0.14.0 "Elfish Emily"',
+var version = 'SockBot 0.15.0 "Zany Zoe"',
     csrf,
     jar = request.jar(),
     clientId = uuid(),
