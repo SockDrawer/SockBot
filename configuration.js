@@ -60,7 +60,8 @@
         for (name in b) {
             if (b.hasOwnProperty(name)) {
                 if (typeof b[name] === 'object' && !Array.isArray(b[name])) {
-                    a[name] = mergeInner((a[name] || {}), b[name]);
+                    var c = a[name] || {};
+                    a[name] = mergeInner(c, b[name]);
                 } else {
                     a[name] = b[name];
                 }
