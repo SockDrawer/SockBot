@@ -3,13 +3,14 @@
     'use strict';
     var fs = require('fs'),
         async = require('async'),
-        config = require('./configuration');
+        config = require('./configuration'),
+        admin = require('./admin');
     var browser,
         messageBus,
         sockModules = [];
 
     async.waterfall([
-
+        admin.load,
         function (cb) {
             fs.readdir('./sock_modules/', cb);
         },
@@ -21,8 +22,7 @@
                 if (isNaN(module.priority)) {
                     module.priority = 50;
                 }
-                if ((!module.configuration || module.configuration.enabled) &&
-                    module.name !== 'NotifyPrint') {
+                if (!module.configuration || module.configuration.enabled) {
                     console.warn('Ingoring module: `' + (module.name || name) +
                         '` Does not default to disabled');
                 } else {
@@ -43,6 +43,7 @@
             sockModules = sockModules.filter(function (module) {
                 return config.modules[module.name].enabled;
             });
+            sockModules.unshift(admin);
             cb();
         },
         function (cb) {
