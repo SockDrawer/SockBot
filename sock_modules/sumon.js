@@ -3,7 +3,6 @@
     'use strict';
     var discourse,
         summons = {},
-        users = {},
         configuration;
 
     /**
