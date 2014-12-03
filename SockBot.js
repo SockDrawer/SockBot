@@ -44,6 +44,7 @@
                 return config.modules[module.name].enabled;
             });
             sockModules.unshift(admin);
+            admin.setModules(sockModules);
             cb();
         },
         function (cb) {

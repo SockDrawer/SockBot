@@ -54,7 +54,8 @@ function help(args, callback) {
     names.sort();
     for (var i = 0; i < names.length; i += 1) {
         var cmd = commands[names[i]];
-        res.push(names[i] + ':\t(TL' + cmd.trustLevel + ') ' + cmd.description);
+        res.push(names[i] + ':\t(TL' + cmd.trustLevel + '+) ' +
+            cmd.description);
     }
     callback(null, '```text\n' + res.join('\n') + '\n```');
 }
@@ -63,6 +64,29 @@ help.description = 'List commands that are available';
 help.trustLevel = 1;
 help.muteable = false;
 help.prefix = false;
+
+function info(args, callback) {
+    var ret = discourse.version(),
+        sleepy = new Date(discourse.sleep()),
+        now = new Date();
+    ret += '\nCurrent time:\t' + now.toUTCString();
+    if (now < sleepy) {
+        ret += '\nMuted until:\t' + sleepy.toUTCString();
+    }
+    ret += '\nOwned by:\t<a class="mention" href="/users/' + conf.admin.owner +
+        '">@' + conf.admin.owner + '</a>\nActive modules:\n';
+    sockModules.forEach(function (mod) {
+        ret += '\t' + mod.name + '(v' + mod.version + '): ' +
+            mod.description + '\n';
+    });
+    callback(null, '<pre>\n' + ret + '\n</pre>');
+}
+info.command = 'info';
+info.description = 'Show info on the bot';
+info.trustLevel = 1;
+info.muteable = false;
+info.prefix = false;
+
 
 function handleCommand(post, match, callback) {
     if (!commands[match.command]) {
@@ -158,12 +182,15 @@ exports.load = function (callback) {
                 }
             });
             addCommand(help);
-            console.log(commands);
+            addCommand(info);
             cb();
         }
     ], function () {
         callback();
     });
+};
+exports.setModules = function setModules(modules) {
+    sockModules = modules;
 };
 
 exports.begin = function begin(browser, config) {

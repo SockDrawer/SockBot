@@ -29,7 +29,7 @@ var request = require('request'),
     async = require('async'),
     xRegExp = require('xregexp').XRegExp,
     conf = require('./configuration').configuration;
-var version = 'SockBot 0.15.0 "Zany Zoe"',
+var version = 'SockBot 0.15.1 "Zany Zoe"',
     csrf,
     jar = request.jar(),
     clientId = uuid(),
@@ -69,6 +69,9 @@ exports.sleep = function sleep(until) {
     return sleepUntil;
 };
 
+exports.version = function(){
+    return version;
+};
 
 exports.log = function log(message) {
     console.log(addTimestamp(message));
@@ -123,15 +126,19 @@ function cleanPost(post) {
         post.cleaned = xRegExp.replace(post.cleaned, rCloseQuote, '');
     }
     // Don't have a choice about using camelcase here...
-    /*eslint-disable camelcase */
-    if (post.staff) {
-        post.trust_level = 5;
-    } else if (post.username === conf.admin.owner) {
+    /*eslint-disable camelcase, max-depth */
+    if (post.username === conf.admin.owner) {
+        post.trust_level = 9;
+    } else if (post.admin) {
+        post.trust_level = 8;
+    } else if (post.moderator) {
+        post.trust_level = 7;
+    } else if (post.staff) {
         post.trust_level = 6;
     } else if (conf.admin.ignore.indexOf(post.username) >= 0) {
         post.trust_level = 0;
     }
-    /*eslint-enable camelcase */
+    /*eslint-enable camelcase, max-depth */
     return post;
 }
 
