@@ -204,7 +204,7 @@ exports.createPost = function createPost(topic, replyTo,
         return callback('Muted');
     }
     var form = {
-        'raw': raw + tag.replace('%DATE%', new Date()),
+        'raw': raw + tag.replace('%DATE%', new Date().toUTCString()),
         'topic_id': topic,
         'is_warning': false,
         'reply_to_post_number': replyTo,

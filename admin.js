@@ -146,7 +146,7 @@ function addCommand(fn) {
     if (typeof fn === 'function' &&
         typeof fn.command === 'string') {
         if (isNaN(fn.trustLevel)) {
-            fn.trustLevel = 5;
+            fn.trustLevel = 9;
         } else if (fn.trustLevel < 1) {
             fn.trustLevel = 1;
         }
