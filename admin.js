@@ -200,3 +200,31 @@ exports.begin = function begin(browser, config) {
         module.begin(browser, config);
     });
 };
+
+exports.onMessage = function onMessage(message, post, callback) {
+    async.each(adminModules, function (mod, next) {
+        if (typeof mod.onMessage === 'function') {
+            return mod.onMessage(message, post, next);
+        }
+        next();
+    }, function (err) {
+        callback(err);
+    });
+};
+
+exports.registerListeners = function registerListeners(callback) {
+    var listen = [];
+    async.each(adminModules, function (mod, next) {
+        if (typeof mod.registerListeners === 'function') {
+            return mod.registerListeners(function (err, items) {
+                if (!err && items) {
+                    listen = listen.concat(items);
+                }
+                next(err);
+            });
+        }
+        next(null);
+    }, function (err) {
+        callback(err, listen);
+    });
+};

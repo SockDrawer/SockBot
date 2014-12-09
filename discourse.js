@@ -25,6 +25,7 @@ function uuid() {
         });
 }
 
+var fs = require('fs');
 var request = require('request'),
     async = require('async'),
     xRegExp = require('xregexp').XRegExp,
@@ -33,6 +34,7 @@ var version = 'SockBot 0.15.1 "Zany Zoe"',
     csrf,
     jar = request.jar(),
     clientId = uuid(),
+    urlbase = conf.url || 'http://what.thedailywtf.com/',
     browser = request.defaults({
         jar: jar,
         headers: {
@@ -60,7 +62,8 @@ var version = 'SockBot 0.15.1 "Zany Zoe"',
         'regular': 1,
         'tracking': 2,
         'watching': 3
-    };
+    },
+    delays = {};
 
 exports.sleep = function sleep(until) {
     if (until !== undefined) {
@@ -69,7 +72,7 @@ exports.sleep = function sleep(until) {
     return sleepUntil;
 };
 
-exports.version = function(){
+exports.version = function () {
     return version;
 };
 
@@ -83,31 +86,36 @@ exports.error = function error(message) {
     console.error(addTimestamp(message));
 };
 
-function dGet(url, callback) {
-    var base = 'http://what.thedailywtf.com/';
+function dGet(url, callback, delayAfter) {
     schedule(function () {
-        browser.get(base + url, handleResponse(callback));
-    });
+        browser.get(urlbase + url, handleResponse(callback));
+    }, delayAfter);
 }
+exports.getForm = dGet;
 
-function dPost(url, form, callback) {
-    var base = 'http://what.thedailywtf.com/';
+function dPost(url, form, callback, delayAfter) {
     schedule(function () {
-        browser.post(base + url, {
+        browser.post(urlbase + url, {
             form: form
         }, handleResponse(callback));
-    });
+    }, delayAfter);
 }
+exports.postForm = dPost;
 
-function dDelete(url, form, callback) {
-    var base = 'http://what.thedailywtf.com/';
+function dDelete(url, form, callback, delayAfter) {
     schedule(function () {
-        browser.post(base + url, {
+        browser.post(urlbase + url, {
             form: form
         }, handleResponse(callback));
-    });
+    }, delayAfter);
 }
+exports.deleteForm = dDelete;
 
+exports.saveFile = function saveFile(url, filename, callback) {
+    var strm = fs.createWriteStream(filename);
+    strm.on('close', callback);
+    browser.get(url).pipe(strm);
+};
 
 function addTimestamp(message) {
     var date = new Date().toISOString().replace(/\..+$/, '');
@@ -142,11 +150,20 @@ function cleanPost(post) {
     return post;
 }
 
-function schedule(task) {
+function schedule(task, delaygroup) {
     var now = new Date().getTime();
+    if (delaygroup) {
+        var delay = delays['g' + delaygroup] || now - 1;
+        if (now < delay) {
+            return setTimeout(function () {
+                schedule(task, delaygroup);
+            }, delayUntil - now);
+        }
+        delays['g' + delaygroup] = now + delaygroup;
+    }
     if (now > delayUntil) {
         delayUntil = now + 100;
-        process.nextTick(task);
+        process.nextTick(task, delaygroup);
     } else {
         setTimeout(function () {
             schedule(task);
@@ -215,7 +232,22 @@ exports.createPost = function createPost(topic, replyTo,
     dPost('posts', form, function (err, resp, post) {
         post = cleanPost(post);
         callback(err, resp, post);
-    });
+    }, 5000);
+};
+
+exports.createPrivateMessage = function createPrivateMessage(to, title,
+    raw, callback) {
+    var form = {
+        'raw': raw + tag.replace('%DATE%', new Date().toUTCString()),
+        'is_warning': false,
+        'archetype': 'private_message',
+        'title': title,
+        'target_usernames': to
+    };
+    dPost('posts', form, function (err, resp, post) {
+        post = cleanPost(post);
+        callback(err, resp, post);
+    }, 5000);
 };
 
 exports.editPost = function editPost(postId, raw, editReason, callback) {
@@ -233,7 +265,7 @@ exports.editPost = function editPost(postId, raw, editReason, callback) {
     dPost('posts/' + postId, form, function (err, resp, post) {
         post = cleanPost(post);
         callback(err, resp, post);
-    });
+    }, 5000);
 };
 
 exports.deletePost = function deletePost(postId, callback) {
@@ -243,7 +275,7 @@ exports.deletePost = function deletePost(postId, callback) {
     var form = {
         'id': postId
     };
-    dDelete('posts/' + postId, form, callback);
+    dDelete('posts/' + postId, form, callback, 5000);
 };
 
 exports.postAction = function postAction(action, postId, message, callback) {

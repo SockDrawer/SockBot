@@ -65,7 +65,7 @@
                 console.log('Starting module: ' + module.name);
                 module.begin(browser, config);
             });
-            messageBus.begin(sockModules);
+            messageBus.begin(sockModules, admin);
             cb();
         }
     ]);
