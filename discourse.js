@@ -232,7 +232,7 @@ exports.createPost = function createPost(topic, replyTo,
     dPost('posts', form, function (err, resp, post) {
         post = cleanPost(post);
         callback(err, resp, post);
-    }, 5000);
+    }, 6000);
 };
 
 exports.createPrivateMessage = function createPrivateMessage(to, title,
@@ -247,7 +247,7 @@ exports.createPrivateMessage = function createPrivateMessage(to, title,
     dPost('posts', form, function (err, resp, post) {
         post = cleanPost(post);
         callback(err, resp, post);
-    }, 5000);
+    }, 6000);
 };
 
 exports.editPost = function editPost(postId, raw, editReason, callback) {
@@ -265,7 +265,7 @@ exports.editPost = function editPost(postId, raw, editReason, callback) {
     dPost('posts/' + postId, form, function (err, resp, post) {
         post = cleanPost(post);
         callback(err, resp, post);
-    }, 5000);
+    }, 6000);
 };
 
 exports.deletePost = function deletePost(postId, callback) {
@@ -275,7 +275,7 @@ exports.deletePost = function deletePost(postId, callback) {
     var form = {
         'id': postId
     };
-    dDelete('posts/' + postId, form, callback, 5000);
+    dDelete('posts/' + postId, form, callback, 6000);
 };
 
 exports.postAction = function postAction(action, postId, message, callback) {
