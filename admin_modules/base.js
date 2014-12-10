@@ -1,13 +1,15 @@
 'use strict';
 
 var discourse, config;
+
 exports.name = 'Base';
 exports.version = '0.0.1';
 exports.description = 'Base Admin Modules';
+exports.configuration = {};
 
-exports.begin = function begin(browser, configuration) {
+exports.begin = function begin(browser) {
     discourse = browser;
-    config = configuration;
+    config = require('../configuration').configuration;
 };
 
 exports.echo = function echo(args, callback) {

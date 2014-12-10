@@ -17,7 +17,7 @@ exports.configuration = {
 exports.version = '1.0.0';
 
 (function () {
-    var exp = regexp('^> (?<command>\\S+)(?<arguments>( +\\S+)+)?$', 'mn'),
+    var exp = regexp('^!admin (?<command>\\S+)(?<arguments>( +\\S+)+)?$', 'mn'),
         splitter = regexp('\\s+');
     parser = function parser(input, each, complete) {
         var match = 1,
@@ -197,7 +197,7 @@ exports.begin = function begin(browser, config) {
     conf = config;
     discourse = browser;
     adminModules.forEach(function (module) {
-        module.begin(browser, config);
+        module.begin(browser, config.admin.modules[module.name]);
     });
 };
 
@@ -227,4 +227,13 @@ exports.registerListeners = function registerListeners(callback) {
     }, function (err) {
         callback(err, listen);
     });
+};
+
+
+exports.getConfig = function getConfig() {
+    var c = {};
+    adminModules.forEach(function (mod) {
+        c[mod.name] = mod.configuration || {};
+    });
+    return c;
 };

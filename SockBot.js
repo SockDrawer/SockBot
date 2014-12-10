@@ -37,7 +37,8 @@
             cb();
         },
         function (cb) {
-            config = config.loadConfiguration(sockModules, process.argv[2]);
+            config = config.loadConfiguration(sockModules, admin,
+                process.argv[2]);
             browser = require('./discourse');
             messageBus = require('./messageBus');
             sockModules = sockModules.filter(function (module) {

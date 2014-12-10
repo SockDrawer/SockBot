@@ -91,7 +91,7 @@
     }
 
     exports.loadConfiguration =
-        function loadConfiguration(modules, configuration) {
+        function loadConfiguration(modules, admin, configuration) {
             var userconf;
             if (!configuration) {
                 console.error('No user configuration file specified. ' +
@@ -107,7 +107,7 @@
             modules.forEach(function (m) {
                 def.modules[m.name] = m.configuration;
             });
-
+            def.admin.modules = admin.getConfig();
             exports.configuration = merge(def, userconf);
             return exports.configuration;
         };
