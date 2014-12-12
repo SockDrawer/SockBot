@@ -52,7 +52,7 @@ exports.sleep.muteable = false;
 exports.mute = function mute(args, callback) {
     discourse.sleep(Number.MAX_SAFE_INTEGER);
     callback(null, config.user.user.username +
-        ' is set to nap for the two hours');
+        ' is set to muted');
 };
 exports.mute.command = 'mute';
 exports.mute.description = 'Muzzle the bot until further notice';
