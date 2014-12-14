@@ -103,7 +103,8 @@ function pollMessages(callback) {
                 // rest of message processing
                 next();
             });
-        }, callback);
+        });
+        callback();
     });
 }
 
@@ -129,7 +130,15 @@ function convertPostNumbers(post) {
     return nbr;
 }
 
+var notificationsPending = false,
+    notificationsActive = false;
+
 function pollNotifications(callback) {
+    if (notificationsActive) {
+        notificationsPending = true;
+        return callback();
+    }
+    notificationsActive = true;
     if (conf.verbose) {
         discourse.log('Polling for Notifications');
     }
@@ -254,7 +263,16 @@ function pollNotifications(callback) {
                 // rest of message processing
                 next();
             });
-        }, callback);
+        }, function () {
+            notificationsActive = false;
+            if (notificationsPending) {
+                notificationsPending = false;
+                setTimeout(function () {
+                    pollNotifications(function () {});
+                }, 0);
+            }
+            callback();
+        });
     });
 }
 
