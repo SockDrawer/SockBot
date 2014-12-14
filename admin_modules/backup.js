@@ -5,11 +5,13 @@ var async = require('async'),
     fs = require('fs'),
     spawn = require('child_process').spawn;
 var discourse, config, log = [],
-    oncomplete = [];
+    oncomplete = [],
+    executing = false;
 exports.name = 'Backups';
 exports.version = '0.0.1';
 exports.description = 'Backup Manager';
 exports.configuration = {
+    'enabled': false,
     'auto_download': true,
     'download_dir': 'backups',
     'remove_old_backups': true,
@@ -23,6 +25,9 @@ exports.configuration = {
 exports.begin = function begin(browser, configuration) {
     discourse = browser;
     config = configuration;
+    if (!config.enabled) {
+        return;
+    }
     if (config.auto_backup) {
         async.forever(function (next) {
             autoBackup(next);
@@ -60,8 +65,12 @@ function autoBackup(callback) {
 }
 
 exports.backup = function backup(args, callback) {
+    if (!config.enabled) {
+        return callback(true, 'Disabled');
+    }
+    executing = true;
     var arg = (args || []).shift() || '';
-    arg = ''.toLowerCase();
+    arg = arg.toLowerCase();
     switch (arg) {
     case '':
     case 'all':
@@ -70,7 +79,7 @@ exports.backup = function backup(args, callback) {
     case 'load':
         async.series([
             function (flow) {
-                if (arg === 'all' || arg === 'start' || arg === '') {
+                if (arg === 'all' || arg === 'start') {
                     return startBackup(flow);
                 }
                 flow(null, []);
@@ -90,12 +99,14 @@ exports.backup = function backup(args, callback) {
         ], function (err, results) {
             var logs = err ? 'ERROR:\n' : 'SUCCESS:\n';
             results.forEach(function (i) {
-                logs += i.join('\n');
+                logs += i.join('\n') + '\n';
             });
+            executing = false;
             callback(null, logs);
         });
         break;
     default:
+        executing = false;
         callback(null, 'Usage: !admin download [all|start|download|load]');
         break;
     }
@@ -157,8 +168,17 @@ function exec(command, args, pipeTo, callback) {
     return process;
 }
 
-function afterBackup() {
+function afterBackup(success) {
+    var running = executing;
     var messages = log.slice();
+    var m = oncomplete;
+    oncomplete = [];
+    async.each(m, function (func, flow) {
+        func(!success, messages, flow);
+    });
+    if (running) {
+        return;
+    }
     async.series([
         function (flow) {
             if (!config.auto_download) {
@@ -178,8 +198,7 @@ function afterBackup() {
                 flow(err);
             });
         }
-    ], function (err) {
-        console.log(err);
+    ], function () {
         mailLog(messages, function () {});
     });
 }
@@ -329,10 +348,16 @@ function mailLog(lines, callback) {
 }
 
 exports.registerListeners = function registerListeners(callback) {
+    if (!config.enabled) {
+        return callback(null, []);
+    }
     callback(null, ['/admin/backups/logs']);
 };
 
 exports.onMessage = function onMessage(message, post, callback) {
+    if (!config.enabled) {
+        return callback();
+    }
     if (message.data && message.data.operation === 'backup') {
         if (message.data.message === '[STARTED]') {
             log = [];
@@ -342,7 +367,7 @@ exports.onMessage = function onMessage(message, post, callback) {
         }
         if (message.data.message === '[SUCCESS]' ||
             message.data.message === '[FAILED]') {
-            afterBackup();
+            afterBackup(message.data.message === '[SUCCESS]');
         }
     }
     callback();
