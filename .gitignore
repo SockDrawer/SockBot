@@ -29,7 +29,10 @@ SockBot.conf.json
 
 #scratch ideas file
 test.js
+test.txt
 
+#Sockbot admin Baskups downloads directory
+backups/
 
 #Cloud9 IDE
 .c9
