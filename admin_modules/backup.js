@@ -151,11 +151,13 @@ function exec(command, args, pipeTo, callback) {
         process;
     process = spawn(command, args);
     process.stderr.on('data', function (data) {
-        stderr = stderr.concat(split(data));
+        if (!pipeTo) {
+            stderr = stderr.concat(split(data));
+        }
     });
     process.stdout.on('data', function (data) {
         if (pipeTo) {
-            pipeTo.stdin.write(data);
+            return pipeTo.stdin.write(data);
         }
         stdout = stdout.concat(split(data));
     });
