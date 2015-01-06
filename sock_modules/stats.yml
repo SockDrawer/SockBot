@@ -1,0 +1,180 @@
+- query: |
+    SELECT count(*) as days,
+      u.username as user
+    FROM user_visits v
+    JOIN users u on u.id = v.user_id
+    GROUP BY u.username
+    HAVING u.username ILIKE $1::varchar
+    ORDER BY count(*) DESC
+    LIMIT $2::int
+  config:
+    trust_level: 1
+    defaults:
+      1: ['%username%', 10]
+      4: ['', 50]
+  name: DaysVisited
+  chart:
+    filename: DaysVisited %1%% %date%
+    layout:
+      title: Days Visited
+      xaxis:
+        title: User
+        tickangle: 45
+      yaxis:
+        title: Days Visited
+    data:
+    - x: user
+      y: days
+      type: bar
+      name: days
+- query: |
+    WITH StartingPoints AS (
+      SELECT user_id, visited_at, ROW_NUMBER() OVER(ORDER BY user_id, visited_at) AS rownum
+      FROM user_visits AS A
+      WHERE NOT EXISTS (
+         SELECT *
+         FROM user_visits AS B
+         WHERE B.visited_at = A.visited_at - 1 AND
+         B.user_id = A.user_id
+      )
+    ),
+    EndingPoints AS (
+      SELECT user_id, visited_at, ROW_NUMBER() OVER(ORDER BY user_id, visited_at) AS rownum
+      FROM user_visits AS A
+      WHERE NOT EXISTS (
+         SELECT *
+         FROM user_visits AS B
+         WHERE B.visited_at = A.visited_at + 1 AND
+         B.user_id = A.user_id
+      )
+    )
+    SELECT u.username, S.visited_at AS start_range, E.visited_at AS end_range, (E.visited_at - S.visited_at +1) AS Days
+    FROM StartingPoints AS S
+    JOIN EndingPoints AS E ON E.rownum = S.rownum
+    JOIN users u ON u.id=S.user_id AND
+    u.username ILIKE $1::varchar
+    LIMIT $2::int
+  name: Attendance
+  config:
+    trust_level: 1
+    defaults:
+      1: ['%username%', 25]
+      4: ['', 50]
+- query: |
+    WITH exclusions AS ( /* Which categories to exclude from counters */
+            SELECT user_id, id, topic_id, post_number
+            FROM posts
+            WHERE raw LIKE '%c09fa970-5a9a-11e4-8ed6-0800200c9a66%' AND
+            user_id IN  (
+                    SELECT gu.user_id
+                    FROM group_users gu
+                    WHERE group_id IN(
+                            SELECT g.id
+                            FROM groups g
+                            WHERE g.name IN ('admins')
+                    )
+            )
+    ),
+    LastMonth AS ( /* Count eligible posts from last month */
+       SELECT row_number() OVER (ORDER BY count(*) DESC, bp.user_id), u.username, bp.user_id, count(*)
+       FROM badge_posts bp
+       JOIN users u on u.id=bp.user_id AND
+           bp.user_id NOT IN ( /* ignore bots */
+                   SELECT gu.user_id
+                   FROM group_users gu
+                   WHERE group_id IN(
+                       SELECT g.id
+                       FROM groups g
+                       WHERE g.name IN ('bots')
+                   )
+           )
+       WHERE topic_id NOT IN ( /* short topics */
+          SELECT topic_id FROM badge_posts GROUP BY topic_id HAVING count(topic_id) <10
+       ) AND topic_id NOT IN ( /* Ineligible topics */
+          SELECT topic_id
+          FROM exclusions
+       ) AND bp.created_at > CURRENT_DATE - INTERVAL '1 month'
+       GROUP BY u.username, bp.user_id
+       HAVING count(*) > 1
+       ORDER BY count(*) DESC, bp.user_id
+    ),
+    TotalUsers AS (
+       SELECT max(row_number) from LastMonth
+    ),
+    QUERY AS (
+    SELECT username, row_number, cast(row_number*100.0/TotalUsers.max AS numeric(36,2)) as percent, count, CURRENT_DATE granted_at
+    FROM LastMonth, TotalUsers
+    WHERE cast(row_number*100.0/TotalUsers.max AS numeric(36,2)) <= 25)
+    SELECT row_number as rank, username, percent, count
+    FROM QUERY
+  config:
+    trust_level: 1
+    defaults:
+      1: []
+  name: MonthPosts
+  chart:
+    filename: MonthPosts %date%
+    layout:
+      title: Month Posts
+      xaxis:
+        title: User
+        tickangle: 45
+      yaxis:
+        title: Posts
+    data:
+    - x: username
+      y: count
+      text: '%percent%% poster'
+      type: bar
+      name: username
+- query: |
+    WITH exclusions AS ( /* Which categories to exclude from counters */
+           SELECT user_id, id, topic_id, post_number
+           FROM posts
+           WHERE raw LIKE '%c09fa970-5a9a-11e4-8ed6-0800200c9a66%' AND
+           user_id IN  (
+                   SELECT gu.user_id
+                   FROM group_users gu
+                   WHERE group_id IN(
+                           SELECT g.id
+                           FROM groups g
+                           WHERE g.name IN ('admins')
+                   )
+           )
+    )
+    SELECT u.username, count(*) AS posts
+    FROM badge_posts  bp
+    JOIN users u on u.id=bp.user_id AND u.username LIKE '$NAME'
+    WHERE topic_id NOT IN ( /* Topics with less than 10 posts */
+           SELECT topic_id
+           FROM badge_posts
+           GROUP BY topic_id
+           HAVING count(topic_id) < 10
+    ) AND topic_id NOT IN ( /* Excluded topics */
+           SELECT topic_id
+           FROM exclusions
+    )
+    GROUP BY u.username
+    HAVING u.username ILIKE $1::int
+    ORDER BY count(*) DESC
+    LIMIT $2::int
+  config:
+    trust_level: 1
+    defaults:
+      1: ['%username%', 10]
+      4: ['%', 50]
+  name: 2nPosts
+  chart:
+    filename: 2nPosts %1% %date%
+    layout:
+      title: 2^n Posts
+      xaxis:
+        title: User
+        tickangle: 45
+      yaxis:
+        title: Eligible Posts
+    data:
+    - x: username
+      y: posts
+      type: bar
+      name: posts
