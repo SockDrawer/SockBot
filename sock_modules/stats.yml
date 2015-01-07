@@ -144,7 +144,7 @@
     )
     SELECT u.username, count(*) AS posts
     FROM badge_posts  bp
-    JOIN users u on u.id=bp.user_id AND u.username LIKE '$NAME'
+    JOIN users u on u.id=bp.user_id AND u.username ILIKE $1::varchar
     WHERE topic_id NOT IN ( /* Topics with less than 10 posts */
            SELECT topic_id
            FROM badge_posts
