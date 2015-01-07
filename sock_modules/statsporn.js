@@ -75,7 +75,7 @@ function formatFilename(config, args, post, date) {
             name = name.replace(match[0], args[i - 1]);
         }
         pos = match.index + match[0].length - 1;
-        match = /%(\w+)%/.xexec(name, pos);
+        match = word.xexec(name, pos);
     }
     return name;
 }

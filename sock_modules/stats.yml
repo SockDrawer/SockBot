@@ -3,8 +3,8 @@
       u.username as user
     FROM user_visits v
     JOIN users u on u.id = v.user_id
+    WHERE u.username ILIKE $1::varchar
     GROUP BY u.username
-    HAVING u.username ILIKE $1::varchar
     ORDER BY count(*) DESC
     LIMIT $2::int
   config:
@@ -153,9 +153,8 @@
     ) AND topic_id NOT IN ( /* Excluded topics */
            SELECT topic_id
            FROM exclusions
-    )
+    ) AND u.username ILIKE $1::varchar
     GROUP BY u.username
-    HAVING u.username ILIKE $1::varchar
     ORDER BY count(*) DESC
     LIMIT $2::int
   config:
