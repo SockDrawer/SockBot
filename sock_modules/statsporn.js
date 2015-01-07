@@ -191,7 +191,8 @@ exports.onNotify = function (type, notification, topic, post, callback) {
         }
         return callback();
     }
-    doQuery(cmd, notification, post, callback);
+    callback(true);
+    doQuery(cmd, notification, post, function () {});
 };
 
 function listQueries(notification, callback) {
