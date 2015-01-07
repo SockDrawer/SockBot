@@ -11,7 +11,7 @@
     trust_level: 1
     defaults:
       1: ['%username%', 10]
-      4: ['', 50]
+      4: ['%username%', 50]
   name: DaysVisited
   chart:
     filename: DaysVisited %1%% %date%
@@ -59,7 +59,7 @@
     trust_level: 1
     defaults:
       1: ['%username%', 25]
-      4: ['', 50]
+      4: ['%username%', 50]
 - query: |
     WITH exclusions AS ( /* Which categories to exclude from counters */
             SELECT user_id, id, topic_id, post_number
