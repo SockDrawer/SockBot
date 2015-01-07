@@ -173,6 +173,7 @@
         tickangle: 45
       yaxis:
         title: Eligible Posts
+        type: log
     data:
     - x: username
       y: posts
