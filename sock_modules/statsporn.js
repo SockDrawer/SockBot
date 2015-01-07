@@ -66,13 +66,16 @@ function formatFilename(config, args, post, date) {
     var name = config.chart.filename;
     name = name.replace(/%date%/g, date.toISOString().substring(0, 10));
     name = name.replace(/%username%/g, post.username);
-    var match = /%(\w+)%/.exec(name);
+    var word = new XRegExp('%(\\w+)%');
+    var pos = 0;
+    var match = word.xexec(name, 0);
     while (match) {
         if (/^[1-9]\d*$/.test(match[1])) {
             var i = parseInt(match[1], 10);
             name = name.replace(match[0], args[i - 1]);
         }
-        match = /%(\w+)%/.exec(name);
+        pos = match.index + match[0].length - 1;
+        match = /%(\w+)%/.xexec(name, pos);
     }
     return name;
 }
@@ -191,8 +194,7 @@ exports.onNotify = function (type, notification, topic, post, callback) {
         }
         return callback();
     }
-    callback(true);
-    doQuery(cmd, notification, post, function () {});
+    doQuery(cmd, notification, post, callback);
 };
 
 function listQueries(notification, callback) {
