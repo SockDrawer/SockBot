@@ -142,7 +142,7 @@
                    )
            )
     )
-    SELECT u.username, count(*) AS posts, log(2.0, count(*)) AS posts2
+    SELECT u.username, count(*) AS posts, log(2.0, count(*)) AS log2posts
     FROM badge_posts  bp
     JOIN users u on u.id=bp.user_id AND u.username ILIKE $1::varchar
     WHERE topic_id NOT IN ( /* Topics with less than 10 posts */
@@ -175,7 +175,7 @@
         title: 2^n Level
     data:
     - x: username
-      y: posts2
+      y: log2posts
       text: '%posts% posts'
       type: bar
       name: posts
