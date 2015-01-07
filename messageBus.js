@@ -287,8 +287,6 @@ function doNotifications(message, post, callback) {
     }
     return callback();
 }
-doNotifications.name = 'message_bus.doNotifications()';
-doNotifications.onMessage = doNotifications;
 
 //message-bus handler that handles /__status messages
 function updateChannels(message, post, callback) {
@@ -300,17 +298,21 @@ function updateChannels(message, post, callback) {
     }
     callback();
 }
-updateChannels.name = 'message_bus.updateChannels()';
-updateChannels.onMessage = updateChannels;
 
 //Poll all sock_modules for channels they are interested in
 function updateRegistrations(callback) {
     var reg = {};
     // /__status is required and handled by message-bus
-    reg['/__status'] = [updateChannels];
+    reg['/__status'] = [{
+        name: 'message_bus.updateChannels()',
+        onMessage: updateChannels
+    }];
     // If configuration sets notifications add notifications
     if (conf.notifications) {
-        reg['/notification/' + conf.user.user.id] = [doNotifications];
+        reg['/notification/' + conf.user.user.id] = [{
+            name: 'message_bus.doNotifications()',
+            onMessage: doNotifications
+        }];
     }
     // Grab all sock_modules asynchronously and merge results.
     async.each(modules, function (module, next) {
