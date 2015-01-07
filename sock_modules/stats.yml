@@ -155,7 +155,7 @@
            FROM exclusions
     )
     GROUP BY u.username
-    HAVING u.username ILIKE $1::int
+    HAVING u.username ILIKE $1::varchar
     ORDER BY count(*) DESC
     LIMIT $2::int
   config:
