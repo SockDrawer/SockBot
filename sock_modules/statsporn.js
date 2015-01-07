@@ -105,6 +105,17 @@ function parseCmd(post) {
 }
 
 function queryToTable(cmd, query, date, rows, callback) {
+    function tostring(o) {
+        if (typeof o.toUTCString === 'function') {
+            var data = o.toISOString().replace(/\..+$/, '');
+            if (o.getHours() !== 0 || o.getMinutes() !== 0) {
+                return data.replace('T', ' ');
+            } else {
+                return data.replace(/T.+$/, '');
+            }
+        }
+        return '' + o;
+    }
     var res = [];
     res.push(cmd.str);
     res.push('');
@@ -115,7 +126,7 @@ function queryToTable(cmd, query, date, rows, callback) {
         res.push(Object.keys(rows[0]).join('\t| '));
         res = res.concat(rows.map(function (r) {
             return Object.keys(r).map(function (k) {
-                return r[k];
+                return tostring(r[k]);
             }).join('\t| ');
         }));
     } else {
