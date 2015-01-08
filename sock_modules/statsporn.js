@@ -178,7 +178,7 @@ function queryToChart(cmd, query, date, filename, rows, callback) {
         res.push('');
         res.push('Backup Date: ' + date.toUTCString());
         res = '\n```\n' + res.join('\n') + '\n```\n';
-        var txt = '[<img src="%%.svg" height="500" width="700" />](%%)';
+        var txt = '[<img src="%%.svg" height="500" width="700" /><br/>Click for interactive graph.](%%)';
         callback(null, res + txt.replace(/%%/g, msg.url));
     });
 }
