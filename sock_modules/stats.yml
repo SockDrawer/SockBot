@@ -53,6 +53,7 @@
     JOIN EndingPoints AS E ON E.rownum = S.rownum
     JOIN users u ON u.id=S.user_id AND
     u.username ILIKE $1::varchar
+    ORDER BY S.visited_at DESC
     LIMIT $2::int
   name: Attendance
   config:
