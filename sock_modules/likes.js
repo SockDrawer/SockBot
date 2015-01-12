@@ -96,7 +96,13 @@ exports.onMessage = function onMessage(message, post, callback) {
 
 exports.registerListeners = function registerListeners(callback) {
     if (conf.enabled && conf.follow) {
-        callback(null, ['/topic/' + conf.topic]);
+        if (typeof conf.topic === 'number') {
+            callback(null, ['/topic/' + conf.topic]);
+        } else {
+            callback(null, conf.topic.map(function (v) {
+                return '/topic/' + v;
+            }));
+        }
     } else {
         callback();
     }

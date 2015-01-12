@@ -59,19 +59,19 @@
         if (type === 'mentioned') {
             var now = (new Date().getTime()),
                 r = Math.floor(Math.random() * configuration.messages.length),
-                s = configuration.messages[r],
-                k;
+                s = configuration.messages[r];
             if (summons[notification.topic_id] &&
                 now < summons[notification.topic_id]) {
                 return callback();
             }
             discourse.log(notification.data.display_username +
                 ' summoned me to play in ' + notification.slug);
-            for (k in post) {
-                if (post.hasOwnProperty(k)) {
-                    s = s.replace(new RegExp('%__' + k + '__%', 'g'), post[k]);
+            s = s.replace(/%__(\w+)__%/g, function (m, key) {
+                if (post.hasOwnProperty(key)) {
+                    return post[key];
                 }
-            }
+                return m;
+            });
             summons[notification.topic_id] = now + configuration.autoTimeout;
             discourse.createPost(notification.topic_id,
                 notification.post_number, s,
