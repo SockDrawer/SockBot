@@ -30,7 +30,7 @@ function format(str, dict) {
 
 function binge(callback) {
         if (typeof conf.topic === 'number') {
-        binge(conf.topic, callback);
+        innerBinge(conf.topic, callback);
     } else {
         async.each(conf.topic, function(topic, next){
             return innerBinge(topic, next);
