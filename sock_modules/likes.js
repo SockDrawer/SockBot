@@ -29,8 +29,18 @@ function format(str, dict) {
 }
 
 function binge(callback) {
+        if (typeof conf.topic === 'number') {
+        binge(conf.topic, callback);
+    } else {
+        async.each(conf.topic, function(topic, next){
+            return innerBinge(topic, next);
+        }, callback);
+    }
+}
+
+function innerBinge(topic, callback){
     var msg = 'Liking /t/%TOPIC%/%POST% by @%USER%';
-    discourse.getAllPosts(conf.topic, function (posts, next) {
+    discourse.getAllPosts(topic, function (posts, next) {
         var likeables = posts.filter(function (x) {
             var action = x.actions_summary.filter(function (y) {
                 return y.id === 2;
