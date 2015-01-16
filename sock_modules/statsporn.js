@@ -197,9 +197,9 @@ function checkCooldown(topic) {
     if (record) {
         if (record.time <= now) {
             record.time = now + (config.cooldown || 0);
-            return true;
+            return false;
         }
-        return false;
+        return true;
     }
     cooldownTimers.push({
         topic: topic,
