@@ -9,7 +9,8 @@ var discourse,
     config,
     queries,
     cmdMatcher,
-    helpMatcher;
+    helpMatcher,
+    cooldownTimers = [];
 exports.name = 'StatsPorn';
 exports.version = '0.5.0';
 exports.description = 'Provide stats about TDWTF and it\'s users';
@@ -17,7 +18,8 @@ exports.configuration = {
     enabled: false,
     plotlyuser: 'PlotlyUsername',
     plotlypass: 'PlotlyAPIKey',
-    connection: 'postgres://discourse:discourse@localhost/discourse'
+    connection: 'postgres://discourse:discourse@localhost/discourse',
+    cooldown: 5 * 60 * 1000
 };
 
 exports.begin = function begin(browser, c) {
@@ -178,9 +180,32 @@ function queryToChart(cmd, query, date, filename, rows, callback) {
         res.push('');
         res.push('Backup Date: ' + date.toUTCString());
         res = '\n```\n' + res.join('\n') + '\n```\n';
-        var txt = '[<img src="%%.svg" height="500" width="700" /><br/>Click for interactive graph.](%%)';
+        var txt = '[<img src="%%.svg" height="500" width="700" /><br/>';
+        txt += 'Click for interactive graph.](%%)';
         callback(null, res + txt.replace(/%%/g, msg.url));
     });
+}
+
+function checkCooldown(topic) {
+    var now = Date.now(),
+        record = cooldownTimers.filter(function (r) {
+            return r.topic === topic;
+        })[0];
+    cooldownTimers = cooldownTimers.filter(function (r) {
+        return r.time > now;
+    });
+    if (record) {
+        if (record.time <= now) {
+            record.time = now + (config.cooldown || 0);
+            return true;
+        }
+        return false;
+    }
+    cooldownTimers.push({
+        topic: topic,
+        time: now
+    });
+    return true;
 }
 
 exports.onNotify = function (type, notification, topic, post, callback) {
@@ -195,7 +220,9 @@ exports.onNotify = function (type, notification, topic, post, callback) {
         return callback();
     }
     callback(true);
-    doQuery(cmd, notification, post, function () {});
+    if (checkCooldown(notification.topic_id)) {
+        doQuery(cmd, notification, post, function () {});
+    }
 };
 
 function listQueries(notification, callback) {
