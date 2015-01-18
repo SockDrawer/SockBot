@@ -40,7 +40,7 @@ function binge(callback) {
 
 function innerBinge(topic, callback) {
     var msg = 'Liking /t/%TOPIC%/%POST% by @%USER%';
-    discourse.getAllPosts(topic, function (posts, next) {
+    discourse.getAllPosts(topic, function (err, posts, next) {
         var likeables = posts.filter(function (x) {
             var action = x.actions_summary.filter(function (y) {
                 return y.id === 2;
