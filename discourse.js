@@ -433,8 +433,10 @@ exports.getAllPosts = function getAllPosts(topicId, eachChunk, complete) {
                     }
                     eachChunk(null, posts.post_stream.posts.map(function (p) {
                         return cleanPost(p);
-                    }), function () {
-                        setTimeout(next, 500);
+                    }), function (err) {
+                        setTimeout(function () {
+                            next(err);
+                        }, 500);
                     });
                 });
             },
