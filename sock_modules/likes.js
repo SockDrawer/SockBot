@@ -2,7 +2,8 @@
 'use strict';
 var async = require('async');
 var discourse,
-    conf;
+    conf,
+    currentBingeCap = 0;
 
 exports.description = 'Issue Likes to all posts in a thread';
 
@@ -12,6 +13,7 @@ exports.configuration = {
     binge: false,
     bingeHour: 23,
     bingeMinute: 30,
+    bingeCap: 10000,
     topic: 1000
 };
 
@@ -19,7 +21,7 @@ exports.name = 'AutoLikes';
 
 exports.priority = 0;
 
-exports.version = '1.13.0';
+exports.version = '1.14.0';
 
 function format(str, dict) {
     for (var name in dict) {
@@ -41,12 +43,16 @@ function binge(callback) {
 function innerBinge(topic, callback) {
     var msg = 'Liking /t/%TOPIC%/%POST% by @%USER%';
     discourse.getAllPosts(topic, function (err, posts, next) {
+        if (currentBingeCap <= 0) {
+            next(true);
+        }
         var likeables = posts.filter(function (x) {
             var action = x.actions_summary.filter(function (y) {
                 return y.id === 2;
             });
             return action && action[0].can_act;
         });
+        likeables = likeables.slice(0, currentBingeCap);
         async.each(likeables, function (post, flow) {
             discourse.log(format(msg, {
                 'TOPIC': post.topic_id,
@@ -57,6 +63,7 @@ function innerBinge(topic, callback) {
                 flow(err || resp.statusCode === 429);
             });
         }, next);
+        currentBingeCap -= likeables.length;
     }, function () {
         callback();
     });
@@ -84,6 +91,7 @@ function scheduleBinges() {
         discourse.log('Like Binge scheduled for ' + hours + 'h' +
             minutes + 'm from now');
         setTimeout(function () {
+            currentBingeCap = conf.bingeCap;
             binge(cb);
         }, utc - now);
     });
