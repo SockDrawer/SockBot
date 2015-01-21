@@ -64,8 +64,8 @@ function parseArgs(parts, query, post) {
     return defaults;
 }
 
-function formatFilename(config, args, post, date) {
-    var name = config.chart.filename;
+function formatFilename(cfg, args, post, date) {
+    var name = cfg.chart.filename;
     name = name.replace(/%date%/g, date.toISOString().substring(0, 10));
     name = name.replace(/%username%/g, post.username);
     var word = new XRegExp('%(\\w+)%');
@@ -94,18 +94,18 @@ function parseCmd(post) {
         'query': null,
         'str': null
     };
-    var q = queries.filter(function (q) {
-        return q.name.toLowerCase() === res.name;
+    discourse.log('   Query selected: ' + res.name);
+    var q = queries.filter(function (qi) {
+        return qi.name.toLowerCase() === res.name;
     })[0];
-    if (!q) {
+    if (!q || (post.trust_level < q.config.trust_level)) {
         return null;
     }
-    if (post.trust_level < q.config.trust_level) {
-        return null;
-    }
+    discourse.log('   Query found: ' + q.name);
     res.args = parseArgs(parts, q, post);
     res.query = q;
     res.str = q.name + ' ' + res.args.join(' ');
+    discourse.log('   Query: ' + res.str);
     return res;
 }
 
@@ -221,8 +221,10 @@ exports.onNotify = function (type, notification, topic, post, callback) {
     }
     callback(true);
     if (checkCooldown(notification.topic_id)) {
-        doQuery(cmd, notification, post, function () {});
+        discourse.log('   Begin Query.');
+        return doQuery(cmd, notification, post, function () {});
     }
+    discourse.log('  Ignored: On cooldown.');
 };
 
 function listQueries(notification, callback) {
@@ -270,6 +272,7 @@ function doQuery(cmd, notification, post, callback) {
                 client.query(query.query, cmd.args, next);
             },
             function (result, next) {
+                discourse.log('   Results: ' + (result.rows || []).length);
                 if (!query.chart || !result.rows || result.rows.length < 2 ||
                     cmd.type === 'table') {
                     return queryToTable(cmd, query, date, result.rows, next);
