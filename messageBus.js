@@ -28,7 +28,35 @@ var modules = [],
         10: 'moved_post',
         11: 'linked',
         12: 'granted_badge'
-    };
+    },
+    messageInfo = {
+        poll: Date.now(),
+        time: new Date().toISOString(),
+        module: null,
+        moduleTime: new Date().toISOString()
+    },
+    responsive = true;
+
+function watchdog(callback) {
+        var now = Date.now();
+        //trigger if no poll in 5 minutes
+        if (messageInfo.poll + 5 * 60 * 1000 < now && responsive) {
+            responsive = false;
+            return discourse.createPrivateMessage(conf.admin.owner,
+                'Help, I\'ve fallen and I can\'t Get Up',
+                'MessageBus has not been polled for more than five minutes.' +
+                '\n\n```\n' +
+                JSON.stringify(messageInfo, undefined, 4) + '\n```\n',
+                callback);
+        }
+        callback();
+    }
+    //trigger watchdog every minute.
+async.forever(function (next) {
+    watchdog(function () {
+        setTimeout(next, 60 * 1000);
+    });
+});
 
 // Handle a single message for all interested modules
 function handleMessage(message, post, callback) {
@@ -36,6 +64,8 @@ function handleMessage(message, post, callback) {
     // Run modules in sequence, not in parallel
     async.eachSeries(interestedModules, function (module, innerNext) {
         //Allow module to process
+        messageInfo.module = module.name;
+        messageInfo.moduleTime = new Date().toISOString();
         module.onMessage(message, post, function (err, handled) {
             if (err) {
                 discourse.warn('Module `' + module.name +
@@ -54,6 +84,8 @@ function pollMessages(callback) {
     if (conf.verbose) {
         discourse.log('Polling for Messages');
     }
+    messageInfo.poll = Date.now();
+    responsive = true;
     discourse.getMessageBus(channels, function (err, resp, messages) {
         if (err) {
             discourse.warn('Error in message-bus: ' + err);
@@ -82,6 +114,8 @@ function pollMessages(callback) {
             return setTimeout(callback, 1000);
         }
         async.each(messages, function (message, next) {
+            messageInfo.time = new Date().toISOString();
+            messageInfo.message = message;
             async.waterfall([
                 // If message is associated with post, load post
                 function (flow) {
@@ -91,13 +125,13 @@ function pollMessages(callback) {
                     return flow(null, null, null);
                 },
                 // pass message off to handlers
-                function (resp, post, flow) {
+                function (resp2, post, flow) {
                     handleMessage(message, post, flow);
                 }
-            ], function (err) {
-                if (err) {
+            ], function (err2) {
+                if (err2) {
                     discourse.warn('Error processing message for `' +
-                        message.channel + '`: ' + err);
+                        message.channel + '`: ' + err2);
                 }
                 // error processing message should not flow over to
                 // rest of message processing
@@ -175,7 +209,7 @@ function pollNotifications(callback) {
                     }
                     return flow(null, null, null);
                 },
-                function (resp, topic, flow) {
+                function (resp2, topic, flow) {
                     if (topic) {
                         // Do not allow muted topics
                         // shouldn't be getting notifications for these anyway
@@ -195,8 +229,8 @@ function pollNotifications(callback) {
                     if (notification.data.original_post_id) {
                         return discourse.getPost(
                             notification.data.original_post_id,
-                            function (err, resp, post) {
-                                flow(err, topic, post);
+                            function (err2, resp2, post) {
+                                flow(err2, topic, post);
                             });
                     }
                     return flow(null, topic, null);
@@ -236,7 +270,7 @@ function pollNotifications(callback) {
                 function (topic, post, flow) {
                     // Hand notification off to sock_modules for processing
                     handleNotification(notification, topic, post,
-                        function (err, handled) {
+                        function (err2, handled) {
                             // If notification has a post. mark it read
                             //TODO: figure out how to handle this for badges too
                             if (post && post.post_number) {
@@ -247,17 +281,17 @@ function pollNotifications(callback) {
                                 return discourse.readPosts(post.topic_id,
                                     nbr,
                                     function () {
-                                        flow(err, handled);
+                                        flow(err2, handled);
                                     });
                             }
-                            return flow(err, handled);
+                            return flow(err2, handled);
                         });
                 }
-            ], function (err, reason) {
-                if (err === 'ignore') {
+            ], function (err2, reason) {
+                if (err2 === 'ignore') {
                     discourse.warn('Notification Ignored: ' + reason);
-                } else if (err) {
-                    discourse.warn('Error processing notification: ' + err);
+                } else if (err2) {
+                    discourse.warn('Error processing notification: ' + err2);
                 }
                 // error processing message should not flow over to
                 // rest of message processing
@@ -323,13 +357,13 @@ function updateRegistrations(callback) {
             return next();
         }
         // Ask module to register for channels it is interested in
-        module.registerListeners(function (err, channels) {
+        module.registerListeners(function (err, channels2) {
             if (err) {
                 return next();
             }
             // Register channels
-            if (channels && channels.length) {
-                channels.forEach(function (channel) {
+            if (channels2 && channels2.length) {
+                channels2.forEach(function (channel) {
                     var arr = reg[channel] || [];
                     arr.push(module);
                     reg[channel] = arr;
