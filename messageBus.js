@@ -31,9 +31,10 @@ var modules = [],
     },
     messageInfo = {
         poll: Date.now(),
-        time: new Date().toISOString(),
+        message: null,
+        time: null,
         module: null,
-        moduleTime: new Date().toISOString()
+        moduleTime: null
     },
     responsive = true;
 
@@ -85,6 +86,10 @@ function pollMessages(callback) {
         discourse.log('Polling for Messages');
     }
     messageInfo.poll = Date.now();
+    messageInfo.message = null;
+    messageInfo.time= null;
+    messageInfo.module=null;
+    messageInfo.moduleTime = null;
     responsive = true;
     discourse.getMessageBus(channels, function (err, resp, messages) {
         if (err) {
