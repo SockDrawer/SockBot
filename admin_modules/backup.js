@@ -119,11 +119,11 @@ exports.backup.prefix = false;
 
 function startBackup(callback) {
     var abort = false;
-    oncomplete.push(function (err, log, after) {
+    oncomplete.push(function (err, log2, after) {
         if (abort) {
             return;
         }
-        callback(err, log);
+        callback(err, log2);
         after();
     });
     discourse.postForm('admin/backups', {
@@ -233,11 +233,11 @@ function downloadLatestBackup(isauto, callback) {
                     return /tar[.]gz$/.test(i);
                 }).map(function (i) {
                     return config.download_dir + '/' + i;
-                }), fs.unlink, function (err) {
-                    if (err) {
+                }), fs.unlink, function (err2) {
+                    if (err2) {
                         messages.push('DOWNLOAD: Removing Old Backups Failed');
                     }
-                    flow(err);
+                    flow(err2);
                 });
             });
         },
@@ -253,13 +253,13 @@ function downloadLatestBackup(isauto, callback) {
                 }
                 var src = 'http:' + data[0].link;
                 var dest = config.download_dir + '/' + data[0].filename;
-                discourse.saveFile(src, dest, function (err) {
-                    if (err) {
+                discourse.saveFile(src, dest, function (err2) {
+                    if (err2) {
                         messages.push('DOWNLOAD: Error Downloading Backup');
                     } else {
                         messages.push('DOWNLOAD: Downloaded Backup');
                     }
-                    flow(err);
+                    flow(err2);
                 });
             });
         }

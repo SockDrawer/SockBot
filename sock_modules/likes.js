@@ -43,6 +43,9 @@ function binge(callback) {
 function innerBinge(topic, callback) {
     var msg = 'Liking /t/%TOPIC%/%POST% by @%USER%';
     discourse.getAllPosts(topic, function (err, posts, next) {
+        if (err){
+            return next(true);
+        }
         if (currentBingeCap <= 0) {
             next(true);
         }
@@ -59,8 +62,8 @@ function innerBinge(topic, callback) {
                 'POST': post.post_number,
                 'USER': post.username
             }));
-            discourse.postAction('like', post.id, function (err, resp) {
-                flow(err || resp.statusCode === 429);
+            discourse.postAction('like', post.id, function (err2, resp) {
+                flow(err2 || resp.statusCode === 429);
             });
         }, next);
         currentBingeCap -= likeables.length;

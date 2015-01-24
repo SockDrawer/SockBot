@@ -128,9 +128,9 @@ exports.onNotify = function (type, notification, topic, post, callback) {
         }
         var trans = getTranslator(languages),
             langs = getLanguages(languages, configuration.translations, trans);
-        translate(text, langs, trans, function (err, result) {
-            if (err) {
-                discourse.log(err);
+        translate(text, langs, trans, function (err2, result) {
+            if (err2) {
+                discourse.log(err2);
                 return callback();
             }
             discourse.createPost(notification.topic_id,

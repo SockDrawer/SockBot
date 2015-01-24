@@ -146,13 +146,13 @@ function queryToChart(cmd, query, date, filename, rows, callback) {
         layout = query.chart.layout;
     data = JSON.parse(JSON.stringify(data));
     data.map(function (d) {
-        for (var series in d) {
+        Object.keys(d).map(function(series) {
             if (series.length === 1) {
                 d[series] = rows.map(function (m) {
                     return m[d[series]];
                 });
             }
-        }
+        });
         if (d.text) {
             d.text = rows.map(function (m) {
                 var res = d.text;
@@ -280,9 +280,9 @@ function doQuery(cmd, notification, post, callback) {
                 var filename = formatFilename(query, cmd.args, post, date);
                 queryToChart(cmd, query, date, filename, result.rows, next);
             },
-            function (post, next) {
+            function (post2, next) {
                 return discourse.createPost(notification.topic_id,
-                    notification.post_number, post, next);
+                    notification.post_number, post2, next);
             }
         ],
         function (err) {

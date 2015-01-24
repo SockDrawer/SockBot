@@ -87,7 +87,8 @@ function getConfig(file) {
         //Protect against stupid Windows programs being stupid and putting
         //stupid UTF-8 BOM marks at the stupid beginning of the stupid file
         var contents = fs.readFileSync(file);
-        if (contents.length >= 3 && contents[0] === 0xef && contents[1] === 0xbb && contents[2] === 0xbf) {
+        if (contents.length >= 3 && contents[0] === 0xef &&
+            contents[1] === 0xbb && contents[2] === 0xbf) {
             contents = contents.slice(3);
         }
         return yml.safeLoad(contents);

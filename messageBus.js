@@ -87,8 +87,8 @@ function pollMessages(callback) {
     }
     messageInfo.poll = Date.now();
     messageInfo.message = null;
-    messageInfo.time= null;
-    messageInfo.module=null;
+    messageInfo.time = null;
+    messageInfo.module = null;
     messageInfo.moduleTime = null;
     responsive = true;
     discourse.getMessageBus(channels, function (err, resp, messages) {
