@@ -146,7 +146,7 @@ function queryToChart(cmd, query, date, filename, rows, callback) {
         layout = query.chart.layout;
     data = JSON.parse(JSON.stringify(data));
     data.map(function (d) {
-        Object.keys(d).map(function(series) {
+        Object.keys(d).map(function (series) {
             if (series.length === 1) {
                 d[series] = rows.map(function (m) {
                     return m[d[series]];
@@ -188,12 +188,13 @@ function queryToChart(cmd, query, date, filename, rows, callback) {
 
 function checkCooldown(topic) {
     var now = Date.now(),
-        record = cooldownTimers.filter(function (r) {
-            return r.topic === topic;
-        })[0];
+        record;
     cooldownTimers = cooldownTimers.filter(function (r) {
         return r.time > now;
     });
+    record = cooldownTimers.filter(function (r) {
+        return r.topic === topic;
+    })[0];
     if (record) {
         if (record.time <= now) {
             record.time = now + (config.cooldown || 0);
