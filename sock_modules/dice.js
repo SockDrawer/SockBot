@@ -173,8 +173,8 @@ function prerollDice(num, sides) {
         ct = 0,
         i,
         ones = 1,
-        reducer = function reducer(i, o) {
-            return i + o === 1 ? 1 : 0;
+        reducer = function reducer(a, o) {
+            return a + o === 1 ? 1 : 0;
         };
     num = Math.abs(num);
     sides = Math.abs(sides);
@@ -312,8 +312,9 @@ function rollXDice(match, callback) {
 
         result += d.join(', ');
         if (dice.length > 0) {
-            dice.forEach(function (d) {
-                result += '\nRerolling ' + d.length + ' Crits:' + d.join(', ');
+            dice.forEach(function (d2) {
+                result += '\nRerolling ' + d2.length;
+                result += ' Crits:' + d2.join(', ');
             });
             result += '\n';
         }
@@ -372,7 +373,8 @@ exports.onNotify = function (type, notification, topic, post, callback) {
         var result = dice.join('\n\n').trim();
         if (result) {
             discourse.createPost(notification.topic_id,
-                notification.post_number, result, function () {
+                notification.post_number, result,
+                function () {
                     callback(true);
                 });
         } else {

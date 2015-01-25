@@ -371,12 +371,12 @@ exports.getPosts = function getPosts(topicId, start, number, callback) {
             part.push(posts[i]);
         }
         part = part.join('&post_ids[]=');
-        dGet(base + '?post_ids[]=' + part, function (err, resp, posts) {
-            if (err || resp.statusCode >= 400) {
-                err = err || 'Error ' + resp.statusCode;
-                return callback(err, resp, posts);
+        dGet(base + '?post_ids[]=' + part, function (err2, resp2, posts2) {
+            if (err2 || resp2.statusCode >= 400) {
+                err2 = err2 || 'Error ' + resp2.statusCode;
+                return callback(err2, resp2, posts2);
             }
-            callback(null, posts.post_stream.posts.map(function (p) {
+            callback(null, posts2.post_stream.posts.map(function (p) {
                 return cleanPost(p);
             }));
         });
@@ -426,19 +426,22 @@ exports.getAllPosts = function getAllPosts(topicId, eachChunk, complete) {
                     part.push(posts.shift());
                 }
                 part = part.join('&post_ids[]=');
-                dGet(base + '&post_ids[]=' + part, function (err, resp, posts) {
-                    if (err || resp.statusCode >= 400) {
-                        err = err || 'Error ' + resp.statusCode;
-                        return next(err, resp, posts);
-                    }
-                    eachChunk(null, posts.post_stream.posts.map(function (p) {
-                        return cleanPost(p);
-                    }), function (err) {
-                        setTimeout(function () {
-                            next(err);
-                        }, 500);
+                dGet(base + '&post_ids[]=' + part,
+                    function (err2, resp2, posts2) {
+                        if (err2 || resp2.statusCode >= 400) {
+                            err2 = err2 || 'Error ' + resp2.statusCode;
+                            return next(err2, resp2, posts);
+                        }
+                        eachChunk(null,
+                            posts2.post_stream.posts.map(function (p) {
+                                return cleanPost(p);
+                            }),
+                            function (err3) {
+                                setTimeout(function () {
+                                    next(err3);
+                                }, 500);
+                            });
                     });
-                });
             },
             complete
         );

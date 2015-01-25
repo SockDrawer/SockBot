@@ -64,8 +64,8 @@ function parseArgs(parts, query, post) {
     return defaults;
 }
 
-function formatFilename(config, args, post, date) {
-    var name = config.chart.filename;
+function formatFilename(cfg, args, post, date) {
+    var name = cfg.chart.filename;
     name = name.replace(/%date%/g, date.toISOString().substring(0, 10));
     name = name.replace(/%username%/g, post.username);
     var word = new XRegExp('%(\\w+)%');
@@ -94,18 +94,18 @@ function parseCmd(post) {
         'query': null,
         'str': null
     };
-    var q = queries.filter(function (q) {
-        return q.name.toLowerCase() === res.name;
+    discourse.log('   Query selected: ' + res.name);
+    var q = queries.filter(function (qi) {
+        return qi.name.toLowerCase() === res.name;
     })[0];
-    if (!q) {
+    if (!q || (post.trust_level < q.config.trust_level)) {
         return null;
     }
-    if (post.trust_level < q.config.trust_level) {
-        return null;
-    }
+    discourse.log('   Query found: ' + q.name);
     res.args = parseArgs(parts, q, post);
     res.query = q;
     res.str = q.name + ' ' + res.args.join(' ');
+    discourse.log('   Query: ' + res.str);
     return res;
 }
 
@@ -146,13 +146,13 @@ function queryToChart(cmd, query, date, filename, rows, callback) {
         layout = query.chart.layout;
     data = JSON.parse(JSON.stringify(data));
     data.map(function (d) {
-        for (var series in d) {
+        Object.keys(d).map(function(series) {
             if (series.length === 1) {
                 d[series] = rows.map(function (m) {
                     return m[d[series]];
                 });
             }
-        }
+        });
         if (d.text) {
             d.text = rows.map(function (m) {
                 var res = d.text;
@@ -221,8 +221,10 @@ exports.onNotify = function (type, notification, topic, post, callback) {
     }
     callback(true);
     if (checkCooldown(notification.topic_id)) {
-        doQuery(cmd, notification, post, function () {});
+        discourse.log('   Begin Query.');
+        return doQuery(cmd, notification, post, function () {});
     }
+    discourse.log('  Ignored: On cooldown.');
 };
 
 function listQueries(notification, callback) {
@@ -270,6 +272,7 @@ function doQuery(cmd, notification, post, callback) {
                 client.query(query.query, cmd.args, next);
             },
             function (result, next) {
+                discourse.log('   Results: ' + (result.rows || []).length);
                 if (!query.chart || !result.rows || result.rows.length < 2 ||
                     cmd.type === 'table') {
                     return queryToTable(cmd, query, date, result.rows, next);
@@ -277,9 +280,9 @@ function doQuery(cmd, notification, post, callback) {
                 var filename = formatFilename(query, cmd.args, post, date);
                 queryToChart(cmd, query, date, filename, result.rows, next);
             },
-            function (post, next) {
+            function (post2, next) {
                 return discourse.createPost(notification.topic_id,
-                    notification.post_number, post, next);
+                    notification.post_number, post2, next);
             }
         ],
         function (err) {
