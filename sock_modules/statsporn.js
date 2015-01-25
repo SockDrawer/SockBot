@@ -221,7 +221,9 @@ exports.onNotify = function (type, notification, topic, post, callback) {
         return callback();
     }
     callback(true);
-    if (checkCooldown(notification.topic_id)) {
+    if (checkCooldown(notification.data ?
+            notification.data.original_username || notification.topic_id :
+            notification.topic_id)) {
         discourse.log('   Begin Query.');
         return doQuery(cmd, notification, post, function () {});
     }
