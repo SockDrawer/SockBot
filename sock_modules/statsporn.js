@@ -196,15 +196,11 @@ function checkCooldown(topic) {
         return r.topic === topic;
     })[0];
     if (record) {
-        if (record.time <= now) {
-            record.time = now + (config.cooldown || 0);
-            return false;
-        }
-        return true;
+        return false;
     }
     cooldownTimers.push({
         topic: topic,
-        time: now
+        time: now + (config.cooldown || 0)
     });
     return true;
 }
