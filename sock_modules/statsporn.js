@@ -217,7 +217,7 @@ exports.onNotify = function (type, notification, topic, post, callback) {
         return callback();
     }
     callback(true);
-    if (checkCooldown(notification.data ?
+    if (type === 'private_message' || checkCooldown(notification.data ?
             notification.data.original_username || notification.topic_id :
             notification.topic_id)) {
         discourse.log('   Begin Query.');
