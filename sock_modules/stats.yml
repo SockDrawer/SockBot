@@ -200,8 +200,7 @@
       yaxis:
         title: Count
     data:
-    - x: mont
+    - x: month
       y: posts
-      text: '%posts% posts'
       type: bar
       name: posts
