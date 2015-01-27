@@ -180,11 +180,11 @@
       type: bar
       name: posts
 - query: |
-    SELECT count(*) AS posts, date_trunc('month', created_at) AS month
+    SELECT count(*) AS posts, to_char(created_at,'YYYY-MM') AS month
     FROM badge_posts bp
     WHERE bp.user_id = (SELECT id FROM users WHERE username ILIKE $1::varchar)
-    GROUP BY date_trunc('month', created_at)
-    ORDER BY date_trunc('month', created_at)
+    GROUP BY to_char(created_at,'YYYY-MM')
+    ORDER BY to_char(created_at,'YYYY-MM')
   config:
     trust_level: 1
     defaults:
