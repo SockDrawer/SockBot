@@ -179,3 +179,29 @@
       text: '%posts% posts'
       type: bar
       name: posts
+- query: |
+    SELECT count(*) AS posts, date_trunc('month', created_at) AS month
+    FROM badge_posts bp
+    WHERE bp.user_id = (SELECT id FROM users WHERE username ILIKE $1::varchar)
+    GROUP BY date_trunc('month', created_at)
+    ORDER BY date_trunc('month', created_at)
+  config:
+    trust_level: 1
+    defaults:
+      1: ['%username%']
+  name: PostMonths
+  chart:
+    filename: Posts/Month %1% %date%
+    layout:
+      title: Posts/Month %1%
+      xaxis:
+        title: Month
+        tickangle: 45
+      yaxis:
+        title: Count
+    data:
+    - x: mont
+      y: posts
+      text: '%posts% posts'
+      type: bar
+      name: posts
