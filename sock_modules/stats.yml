@@ -122,6 +122,7 @@
         tickangle: 45
       yaxis:
         title: Posts
+        type: log
     data:
     - x: username
       y: count
@@ -177,5 +178,49 @@
     - x: username
       y: log2posts
       text: '%posts% posts'
+      type: bar
+      name: posts
+- query: |
+    WITH exclusions AS ( /* Which categories to exclude from counters */
+        SELECT user_id, id, topic_id, post_number
+        FROM posts
+        WHERE raw LIKE '%c09fa970-5a9a-11e4-8ed6-0800200c9a66%' AND
+        user_id IN  (
+                SELECT gu.user_id
+                FROM group_users gu
+                WHERE group_id IN(
+                        SELECT g.id
+                        FROM groups g
+                        WHERE g.name IN ('admins')
+                )
+        )
+    )
+    SELECT count(*) AS posts, to_char(created_at,'YYYY-MM') AS month
+    FROM badge_posts bp
+    WHERE bp.topic_id NOT IN ( /* short topics */
+          SELECT topic_id FROM badge_posts GROUP BY topic_id HAVING count(topic_id) <10
+       ) AND bp.topic_id NOT IN ( /* Ineligible topics */
+          SELECT topic_id
+          FROM exclusions
+       ) AND bp.user_id = (SELECT id FROM users WHERE username ILIKE $1::varchar)
+    GROUP BY to_char(created_at,'YYYY-MM')
+    ORDER BY to_char(created_at,'YYYY-MM')
+  config:
+    trust_level: 1
+    defaults:
+      1: ['%username%']
+  name: PostMonths
+  chart:
+    filename: Posts/Month %1% %date%
+    layout:
+      title: Posts/Month %1%
+      xaxis:
+        title: Month
+        tickangle: 45
+      yaxis:
+        title: Count
+    data:
+    - x: month
+      y: posts
       type: bar
       name: posts

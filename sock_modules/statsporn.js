@@ -109,18 +109,20 @@ function parseCmd(post) {
     return res;
 }
 
-function queryToTable(cmd, query, date, rows, callback) {
-    function tostring(o) {
-        if (typeof o.toUTCString === 'function') {
-            var data = o.toISOString().replace(/\..+$/, '');
-            if (o.getHours() !== 0 || o.getMinutes() !== 0) {
-                return data.replace('T', ' ');
-            } else {
-                return data.replace(/T.+$/, '');
-            }
+function toString(o) {
+    if (typeof o.toUTCString === 'function') {
+        var data = o.toISOString().replace(/\..+$/, '');
+        if (o.getHours() !== 0 || o.getMinutes() !== 0) {
+            return data.replace('T', ' ');
+        } else {
+            return data.replace(/T.+$/, '');
         }
-        return '' + o;
     }
+    return '' + o;
+}
+
+function queryToTable(cmd, query, date, rows, callback) {
+
     var res = [];
     res.push(cmd.str);
     res.push('');
@@ -131,14 +133,14 @@ function queryToTable(cmd, query, date, rows, callback) {
         res.push(Object.keys(rows[0]).join('\t| '));
         res = res.concat(rows.map(function (r) {
             return Object.keys(r).map(function (k) {
-                return tostring(r[k]);
+                return toString(r[k]);
             }).join('\t| ');
         }));
     } else {
         res.push('No Results Found');
     }
     callback(null, '\n```\n' + res.join('\n') + '\n\nBackup Date: ' +
-        date.toUTCString() + '\n```\n');
+        toString(date) + '\n```\n');
 }
 
 function queryToChart(cmd, query, date, filename, rows, callback) {
@@ -178,7 +180,7 @@ function queryToChart(cmd, query, date, filename, rows, callback) {
         res.push(query.query.replace(/c09fa970-5a9a-11e4-8ed6-0800200c9a66/g,
             '[Magic Exclusion UUID]'));
         res.push('');
-        res.push('Backup Date: ' + date.toUTCString());
+        res.push('Backup Date: ' + toString(date));
         res = '\n```\n' + res.join('\n') + '\n```\n';
         var txt = '[<img src="%%.svg" height="500" width="700" /><br/>';
         txt += 'Click for interactive graph.](%%)';
@@ -286,6 +288,7 @@ function doQuery(cmd, notification, post, callback) {
         ],
         function (err) {
             if (err) {
+                discourse.log(query.query);
                 discourse.error('Error creating statsporn: ' + err);
                 return discourse.createPost(notification.topic_id,
                     notification.post_number, 'An error occured making stats',
