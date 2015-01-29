@@ -122,6 +122,7 @@
         tickangle: 45
       yaxis:
         title: Posts
+        type: log
     data:
     - x: username
       y: count
