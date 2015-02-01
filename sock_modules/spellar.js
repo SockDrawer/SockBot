@@ -54,8 +54,29 @@ function initialiseDictionary() {
                 }
                 dictionary = dict;
                 spellcheckerActive = true;
+                discourse.log("Laoded dictonary " + configuration.baseDictName);
                 discourse.log("Spellar iz aktiv");
+                loadAddtitionalDictionaries();
             });
         });
     });
+}
+
+function loadAddtitionalDictionaries() {
+    var dicts = configuration.extraDictNames;
+    if (Array.isArray(dicts)) {
+        async.each(dicts, function (dict, flow) {
+            fs.readFile(path.join(configuration.extraDictLocation, dict + '.dic'), function (err, data) {
+                if (err) {
+                    discourse.error(err);
+                    return;
+                }
+                dictionary.addDictionary(data);
+                discourse.log("Laoded dictonary " + dict);
+                flow(err);
+            });
+        }, function () {
+            discourse.log("Al dictonaries laoded");
+        });
+    }
 }
