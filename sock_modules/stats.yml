@@ -202,7 +202,7 @@
        ) AND bp.topic_id NOT IN ( /* Ineligible topics */
           SELECT topic_id
           FROM exclusions
-       ) AND bp.user_id = (SELECT id FROM users WHERE username ILIKE $1::varchar)
+       ) AND bp.user_id in (SELECT id FROM users WHERE username ILIKE $1::varchar)
     GROUP BY to_char(created_at,'YYYY-MM')
     ORDER BY to_char(created_at,'YYYY-MM')
   config:
