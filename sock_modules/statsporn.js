@@ -145,7 +145,9 @@ function queryToTable(cmd, query, date, rows, callback) {
 
 function queryToChart(cmd, query, date, filename, rows, callback) {
     var data = query.chart.data,
-        layout = query.chart.layout;
+        layout = query.chart.layout,
+        title = layout.title,
+        i;
     data = JSON.parse(JSON.stringify(data));
     data.map(function (d) {
         Object.keys(d).map(function (series) {
@@ -158,6 +160,9 @@ function queryToChart(cmd, query, date, filename, rows, callback) {
         if (d.text) {
             d.text = rows.map(function (m) {
                 var res = d.text;
+                for (i = 1; i <= (query.args || []).length; i += 1) {
+                    res = res.replace('%' + i + '%', query.args[i]);
+                }
                 for (var name in m) {
                     res = res.replace('%' + name + '%', m[name]);
                 }
@@ -165,6 +170,9 @@ function queryToChart(cmd, query, date, filename, rows, callback) {
             });
         }
     });
+    for (i = 1; i <= (query.args || []).length; i += 1) {
+        title = title.replace('%' + i + '%', query.args[i]);
+    }
     var layout2 = {
         fileopt: 'overwrite',
         filename: filename,
