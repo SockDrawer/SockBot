@@ -27,7 +27,7 @@ exports.begin = function begin(browser, c) {
     discourse = browser;
     plotly = plotly(config.plotlyuser, config.plotlypass);
     cmdMatcher = new XRegExp('@' + c.username +
-        '(?<type> (graph|table))? (?<stats>\\w+)(?<args>( (\\S+))*)', 'ig');
+        '(?<type>\s+(graph|table))?\s+(?<stats>\\w+)(?<args>( (\\S+))*)', 'ig');
     helpMatcher = new XRegExp('@' + c.username + ' (list|list queries)', 'ig');
     async.forever(function (nextTick) {
         loadConfig(function () {
@@ -105,7 +105,6 @@ function parseCmd(post) {
     res.args = parseArgs(parts, q, post);
     res.query = q;
     res.str = q.name + ' ' + res.args.join(' ');
-    discourse.log('   Query: ' + res.str);
     return res;
 }
 
