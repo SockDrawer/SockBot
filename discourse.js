@@ -408,6 +408,21 @@ exports.getTopic = function getTopic(topicId, callback) {
     });
 };
 
+exports.getLastPosts = function getLastPosts(topicId, eachPost, complete) {
+    dGet('t/' + topicId + '/last.json?include_raw=1', function (err, resp, topic) {
+        if (err || resp.statusCode >= 400) {
+            err = err || 'Error ' + resp.statusCode;
+        }
+        //Reverse posts so the most recent ones are first
+        async.eachSeries(topic.post_stream.posts.reverse(), function (post, flow) {
+            eachPost(post, function (err, handled) {
+                //Stop processing posts if the caller flags it handled
+                flow(err || handled);
+            });
+        }, complete);
+    });
+};
+
 exports.getAllPosts = function getAllPosts(topicId, eachChunk, complete) {
     var base = 't/' + topicId + '/posts.json?include_raw=1';
     dGet(base + '&post_ids=0', function (err, resp, topic) {

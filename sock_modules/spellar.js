@@ -84,30 +84,48 @@ function loadAddtitionalDictionaries() {
 
 exports.registerListeners = function registerListeners(callback) {
     if (configuration.enabled && configuration.checkOwnPosts) {
-        callback(null);
+        callback(null, ['/latest']);
     } else {
         callback();
     }
 }
 
 exports.onMessage = function onMessage(message, post, callback) {
-    /*
-    spellcheck(dictionary, textToCheck, function (err, typos) {
+    if (message.data && message.data.topic_id && message.data.message_type === 'latest') {
+        discourse.getLastPosts(message.data.topic_id, function (post, flow) {
+            if (configuration.checkOwnPosts && post.yours) {
+                spellCheckPost(post, flow);
+                flow(null, true);
+            }
+            else {
+                flow();
+            }
+        }, function () {
+            callback();
+        });
+    } else {
+        callback();
+    }
+};
+
+function spellCheckPost(post, callback) {
+    discourse.log("Spellaring psot " + post.id);
+    spellcheck(dictionary, post.raw, function (err, typos) {
         if (err) {
             discourse.error(err);
-            return;
+            callback();
         }
         // `typos` is an array of all typos, each one an object containing:
         //   - `word`: the word which was considered a typo (string)
         //   - `suggestions`: list of suggestions (array of strings)
         //   - `positions`: list of positions where the typo was found (array of objects)
         typos.forEach(function (typo) {
-        // Each entry in `typo.positions` contains the following keys:
-        //   - `from`: The start offset for the typo within the text (integer)
-        //   - `to`: The end offset for the typo within the text (integer)
-        //   - `length`: Word length (integer)
+            // Each entry in `typo.positions` contains the following keys:
+            //   - `from`: The start offset for the typo within the text (integer)
+            //   - `to`: The end offset for the typo within the text (integer)
+            //   - `length`: Word length (integer)
         });
+        discourse.log("Psot " + post.id + " spellard");
+        callback();
     });
-     */
-    callback();
 };
