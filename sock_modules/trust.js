@@ -12,14 +12,16 @@ var discourse,
 
 exports.begin = function begin(browser, c) {
     discourse = browser;
-    trigger = new RegExp('@' + c.username + '\s+trust', 'ig');
+    trigger = new RegExp('@' + c.username + '\\s+trust', 'ig');
 };
 
 exports.onNotify = function (type, notification, topic, post, callback) {
     if (['private_message', 'mentioned', 'replied'].indexOf(type) < 0) {
         return callback();
     }
-    if (!trigger.test(post.cleaned)) {
+    var isRequest = trigger.test(post.cleaned);
+    if (!isRequest) {
+        console.log('aborting');
         return callback();
     }
     discourse.getUserData(post.username, function (err, user) {
