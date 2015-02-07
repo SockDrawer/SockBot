@@ -266,7 +266,8 @@ function pollNotifications(callback) {
                             TL1Timer[user] = now + conf.TL1Cooldown;
                         }
                         //Disallow other bots
-                        if (post.primary_group_name === 'bots') {
+                        if (post.primary_group_name === 'bots' &&
+                            post.username !== 'SummonBot') {
                             return flow('ignore', 'Poster is a Bot');
                         }
                     }
