@@ -483,3 +483,12 @@ exports.getNotifications = function getNotifications(callback) {
         callback(err, resp, notifications);
     });
 };
+
+exports.getUserData = function getUserData(username, callback) {
+    dGet('admin/users/' + username + '.json', function (err, resp, user) {
+        if (err || resp.statusCode >= 300) {
+            err = err || resp.statusCode + ' Error Retrieving User Info';
+        }
+        callback(err, user);
+    });
+};
