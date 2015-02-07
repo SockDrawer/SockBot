@@ -67,7 +67,7 @@ function getReportBase(user) {
             'Posts Read: %posts_read%/%min_posts_read%\n' +
             'Posts Read (all time): %posts_read_all_time%/' +
             '%min_posts_read_all_time%\n' +
-            'Falgged: %num_flagged_posts%/%max_flagged_posts% (max)\n' +
+            'Falagged: %num_flagged_posts%/%max_flagged_posts% (max)\n' +
             'Flagged By: %num_flagged_by_users%/' +
             '%max_flagged_by_users% (max)\n' +
             'Likes Given: %num_likes_given%/%min_likes_given%\n' +
