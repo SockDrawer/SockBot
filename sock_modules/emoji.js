@@ -30,7 +30,6 @@ exports.onMessage = function onMessage(message, post, callback) {
     if (message.data && message.data.topic_id && message.data.message_type === 'latest') {
         discourse.getLastPosts(message.data.topic_id, function (post, flow) {
             if (post.yours) {
-                discourse.log("Replacing emoji in post " + post.id);
                 flow(null, true);
             }
             else {
