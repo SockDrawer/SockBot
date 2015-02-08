@@ -3,12 +3,13 @@ var fs = require('fs'),
     path = require('path'),
     async = require('async'),
     nodehun = require('nodehun'),
-    spellchecker = require('nodehun-sentences');
+    spellcheck = require('nodehun-sentences');
 var discourse,
     configuration,
     dictionary,
     username,
-    spellcheckerActive = false;
+    spellcheckerActive = false,
+    spellardSig = "<!-- Spellar'd by";
 
 exports.description = 'Automaticly trak adn corect speling misteaks';
 
@@ -93,7 +94,7 @@ exports.registerListeners = function registerListeners(callback) {
 exports.onMessage = function onMessage(message, post, callback) {
     if (message.data && message.data.topic_id && message.data.message_type === 'latest') {
         discourse.getLastPosts(message.data.topic_id, function (post, flow) {
-            if (configuration.checkOwnPosts && post.yours) {
+            if (configuration.checkOwnPosts && post.yours && post.raw.indexOf(spellardSig) < 0) {
                 spellCheckPost(post, flow);
                 flow(null, true);
             }
@@ -126,6 +127,9 @@ function spellCheckPost(post, callback) {
             //   - `length`: Word length (integer)
         });
         discourse.log("Psot " + post.id + " spellard");
-        callback();
+        
+        //Sign the post so we don't spellar it again
+        post.raw += "\n\n" + spellardSig + " " + exports.name + " " + exports.version + "-->";
+        discourse.editPost(post.id, post.raw, "Spellard", callback);
     });
 };
