@@ -12,7 +12,7 @@ var discourse,
 
 exports.begin = function begin(browser, c) {
     discourse = browser;
-    trigger = '@' + c.username + 'trust';
+    trigger = '@' + c.username + ' trust';
 };
 
 exports.onNotify = function (type, notification, topic, post, callback) {
