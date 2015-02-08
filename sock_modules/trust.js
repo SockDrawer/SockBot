@@ -12,14 +12,15 @@ var discourse,
 
 exports.begin = function begin(browser, c) {
     discourse = browser;
-    trigger = new RegExp('@' + c.username + '\\s+trust', 'ig');
+    trigger = '@' + c.username + 'trust';
 };
 
 exports.onNotify = function (type, notification, topic, post, callback) {
     if (['private_message', 'mentioned', 'replied'].indexOf(type) < 0) {
         return callback();
     }
-    var isRequest = trigger.test(post.cleaned);
+    var txt = post.cleaned.replace(/\s+/g,' ');
+    var isRequest = txt.indexOf(trigger >=0);
     if (!isRequest) {
         console.log(trigger);
         console.log(post.cleaned);
