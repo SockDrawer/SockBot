@@ -13,7 +13,7 @@ var discourse,
     cooldownTimers = [];
 exports.name = 'StatsPorn';
 exports.version = '0.5.0';
-exports.description = 'Provide stats about TDWTF and it\'s users';
+exports.description = 'Provide stats about TDWTF and its users';
 exports.configuration = {
     enabled: false,
     plotlyuser: 'PlotlyUsername',
@@ -248,7 +248,7 @@ function listQueries(notification, callback) {
                 break;
             }
         }
-        return q.name + ' ' + args + ':\tAvaliable to trust level ' +
+        return q.name + ' ' + args + ':\tAvailable to trust level ' +
             q.config.trust_level + '+';
     });
     res.unshift('Available queries:');
