@@ -224,3 +224,10 @@
       y: posts
       type: bar
       name: posts
+- query: 
+  config:
+    trust_level: 1
+    defaults:
+      1: ['']
+  name: trust
+  

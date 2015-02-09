@@ -102,6 +102,9 @@ function parseCmd(post) {
     if (!q || (post.trust_level < q.config.trust_level)) {
         return null;
     }
+    if (!q.query) {
+        return null;
+    }
     discourse.log('   Query found: ' + q.name);
     res.args = parseArgs(parts, q, post);
     res.query = q;
