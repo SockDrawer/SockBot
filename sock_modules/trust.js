@@ -43,11 +43,12 @@ function formatReport(user) {
     txt = txt.replace('%USERNAME%', user.username);
     txt = txt.replace('%TRUST%', user.trust_level);
     txt = txt.replace('%TRUST_LOCK%', user.trust_level_locked ? 'LOCKED' :
-        'UNLOCKED');
+        'Not locked');
     if (user.tl3_requirements) {
         for (var key in user.tl3_requirements) {
             txt = txt.replace('%' + key + '%', user.tl3_requirements[key]);
         }
+        txt = txt.replace('%analysis%', promotionAnalysis(user));
     }
     return txt;
 }
@@ -77,8 +78,66 @@ function getReportBase(user) {
             'Liked on Days: %num_likes_received_days%/' +
             '%min_likes_received_days%\n' +
             'Liked by users: %num_likes_received_users%/' +
-            '%min_likes_received_users%\n';
+            '%min_likes_received_users%\n' +
+            '\n' +
+            'Status: %analysis%\n';
     }
     base += '```\n';
     return base;
+}
+
+var promotionTable = {
+    locked: "Trust level is locked, promotion disabled.",
+    tl0: "Analysis not available for Trust Level 0.",
+    tl1: "Analysis not available for Trust Level 1.",
+    tl4: "Trust level is 4.",
+    grace_period: {
+        below: "Not being demoted due to grace period.",
+        middle: "Above low water mark. (also on grace period)",
+        above: "Above requirements. (also on grace period)"
+    },
+    tl2: {
+        below: "Below requirements.",
+        middle: "Within 90% of requirements, may be promoted soon!",
+        above: "Met requirements, should be promoted soon!"
+    },
+    tl3: {
+        below: "Below requirements, should be demoted soon!",
+        middle: "Above low water mark. In danger of demotion!",
+        above: "Above requirements."
+    }
+};
+
+function promotionAnalysis(user) {
+    if (user.trust_level_locked) {
+        return promotionTable.locked;
+    }
+    if (user.trust_level < 2 || user.trust_level === 4) {
+        switch (user.trust_level) {
+            case 0:
+                return promotionTable.tl0;
+            case 1:
+                return promotionTable.tl1;
+            case 4:
+                return promotionTable.tl4;
+        }
+    }
+
+    var subTable;
+
+    if (user.trust_level === 3 && user.tl3_requirements.on_grace_period) {
+        subTable = promotionTable.grace_period;
+    } else if (user.trust_level === 3) {
+        subTable = promotionTable.tl3;
+    } else if (user.trust_level === 2) {
+        subTable = promotionTable.tl2;
+    }
+
+    if (user.tl3_requirements.requirements_lost) {
+        return subTable.below;
+    } else if (user.tl3_requirements.requirements_met) {
+        return subTable.above;
+    } else {
+        return subTable.middle;
+    }
 }
