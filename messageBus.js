@@ -36,7 +36,8 @@ var modules = [],
         module: null,
         moduleTime: null
     },
-    responsive = true;
+    responsive = true,
+    resetOn = 0;
 
 function watchdog(callback) {
         var now = Date.now();
@@ -94,7 +95,9 @@ function pollMessages(callback) {
     discourse.getMessageBus(channels, function (err, resp, messages) {
         if (err) {
             discourse.warn('Error in message-bus: ' + err);
-            return setTimeout(callback, 30 * 1000);
+            return updateRegistrations(function () {
+                return setTimeout(callback, 30 * 1000);
+            }, true);
         }
         // Update channels so we don't get the same nessages all the time
         messages.forEach(function (m) {
@@ -340,8 +343,11 @@ function updateChannels(message, post, callback) {
 }
 
 //Poll all sock_modules for channels they are interested in
-function updateRegistrations(callback) {
+function updateRegistrations(callback, force) {
     var reg = {};
+    if (force) {
+        resetOn = Date.now();
+    }
     // /__status is required and handled by message-bus
     reg['/__status'] = [{
         name: 'message_bus.updateChannels()',
@@ -382,7 +388,7 @@ function updateRegistrations(callback) {
         registrations = reg;
         var chan = {};
         for (var channel in reg) {
-            chan[channel] = channels[channel] || -1;
+            chan[channel] = ((!false) && channels[channel]) || -1;
         }
         channels = chan;
         process.nextTick(callback);
@@ -410,5 +416,17 @@ exports.begin = function begin(sockModules) {
                 });
             });
         }
-    });
+        /*
+        async.forever(function (next) {
+            function doNext() {
+                setTimeout(next, 1 * 60 * 1000);
+            }
+            var trigger = Date.now() - 24 * 60 * 60 * 1000;
+            if (resetOn < trigger) {
+                return updateRegistrations(doNext, true);
+            }
+            doNext();
+        });
+        */
+    }, true);
 };
