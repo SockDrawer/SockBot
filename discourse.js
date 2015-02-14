@@ -268,7 +268,7 @@ exports.editPost = function editPost(postId, raw, editReason, callback) {
         editReason = '';
     }
     var form = {
-        'post' : {
+        'post': {
             'raw': raw,
             'edit_reason': editReason
         }
@@ -420,15 +420,17 @@ exports.getTopic = function getTopic(topicId, callback) {
 };
 
 exports.getLastPosts = function getLastPosts(topicId, eachPost, complete) {
-    dGet('t/' + topicId + '/last.json?include_raw=1', function (err, resp, topic) {
+    var url = 't/' + topicId + '/last.json?include_raw=1';
+    dGet(url, function (err, resp, topic) {
         if (err || resp.statusCode >= 400) {
             err = err || 'Error ' + resp.statusCode;
         }
         //Reverse posts so the most recent ones are first
-        async.eachSeries(topic.post_stream.posts.reverse(), function (post, flow) {
-            eachPost(post, function (err, handled) {
+        var posts = topic.post_stream.posts.reverse();
+        async.eachSeries(posts, function (post, flow) {
+            eachPost(post, function (err2, handled) {
                 //Stop processing posts if the caller flags it handled
-                flow(err || handled);
+                flow(err2 || handled);
             });
         }, complete);
     });

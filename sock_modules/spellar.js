@@ -7,7 +7,10 @@ var fs = require('fs'),
 var discourse,
     configuration,
     dictionary,
-    username,
+    baseDictLocation,
+    baseDictName,
+    extraDictLocation,
+    extraDictNames,
     spellcheckerActive = false,
     spellardSig = '<!-- Spellar\'d by';
 
@@ -19,44 +22,49 @@ exports.configuration = {
     baseDictLocation: 'dictionaries',
     baseDictName: 'en_US',
     extraDictLocation: 'dictionaries',
-    extraDictNames: [],
+    extraDictNames: []
 };
 
 exports.name = 'Spellar';
 exports.priority = undefined;
 exports.version = '0.1.0';
 
+var fullName = exports.name + ' ' + exports.version;
+
 exports.begin = function begin(browser, config) {
     discourse = browser;
     configuration = config.modules[exports.name];
-    username = config.username;
-    
+    baseDictLocation = configuration.baseDictLocation;
+    baseDictName = configuration.baseDictName;
+    extraDictLocation = configuration.extraDictLocation;
+    extraDictNames = configuration.extraDictNames;
     if (configuration.enabled) {
         initialiseDictionary();
     }
-}
+};
 
 function initialiseDictionary() {
-    fs.readFile(path.join(configuration.baseDictLocation, configuration.baseDictName + '.aff'), function (err, data) {
+    var affFile = path.join(baseDictLocation, baseDictName + '.aff');
+    var dicFile = path.join(baseDictLocation, baseDictName + '.dic');
+    fs.readFile(affFile, function (err, data) {
         if (err) {
             discourse.error(err);
             return;
         }
         var aff = data;
-        fs.readFile(path.join(configuration.baseDictLocation, configuration.baseDictName + '.dic'), function (err, data) {
-            if (err) {
-                discourse.error(err);
+        fs.readFile(dicFile, function (err2, data2) {
+            if (err2) {
+                discourse.error(err2);
                 return;
             }
-            var dic = data;
-            nodehun.createNewNodehun(aff, dic, function (err, dict) {
-                if (err) {
-                    discourse.error(err);
+            nodehun.createNewNodehun(aff, data2, function (err3, dict) {
+                if (err3) {
+                    discourse.error(err3);
                     return;
                 }
                 dictionary = dict;
                 spellcheckerActive = true;
-                discourse.log('Laoded dictonary ' + configuration.baseDictName);
+                discourse.log('Laoded dictonary ' + baseDictName);
                 discourse.log('Spellar iz aktiv');
                 loadAddtitionalDictionaries();
             });
@@ -65,10 +73,10 @@ function initialiseDictionary() {
 }
 
 function loadAddtitionalDictionaries() {
-    var dicts = configuration.extraDictNames;
-    if (Array.isArray(dicts)) {
-        async.eachSeries(dicts, function (dict, flow) {
-            fs.readFile(path.join(configuration.extraDictLocation, dict + '.dic'), function (err, data) {
+    if (Array.isArray(extraDictNames)) {
+        async.eachSeries(extraDictNames, function (dict, flow) {
+            var dicFile = path.join(extraDictLocation, dict + '.dic');
+            fs.readFile(dicFile, function (err, data) {
                 if (err) {
                     discourse.error(err);
                 } else {
@@ -89,15 +97,16 @@ exports.registerListeners = function registerListeners(callback) {
     } else {
         callback();
     }
-}
+};
 
 exports.onMessage = function onMessage(message, post, callback) {
-    if (message.data && message.data.topic_id && message.data.message_type === 'latest') {
-        discourse.getLastPosts(message.data.topic_id, function (post, flow) {
-            if (configuration.checkOwnPosts && post.yours && post.raw.indexOf(spellardSig) < 0) {
-                spellCheckPost(post, flow);
-            }
-            else {
+    if (spellcheckerActive && message.data && message.data.topic_id
+        && message.data.message_type === 'latest') {
+        discourse.getLastPosts(message.data.topic_id, function (post2, flow) {
+            if (configuration.checkOwnPosts && post2.yours
+                && post2.raw.indexOf(spellardSig) < 0) {
+                spellCheckPost(post2, flow);
+            } else {
                 flow();
             }
         }, function () {
@@ -116,22 +125,22 @@ function spellCheckPost(post, callback) {
             discourse.error(err);
             callback();
         }
-        // `typos` is an array of all typos, each one an object containing:
-        //   - `word`: the word which was considered a typo (string)
-        //   - `suggestions`: list of suggestions (array of strings)
-        //   - `positions`: list of positions where the typo was found (array of objects)
+        // `typos` is an array, each one containing:
+        // - `word`: the typo (string)
+        // - `suggestions`: list of suggestions (string[])
+        // - `positions`: list of positions (object[])
         typos.forEach(function (typo) {
-            // Each entry in `typo.positions` contains the following keys:
-            //   - `from`: The start offset for the typo within the text (integer)
-            //   - `to`: The end offset for the typo within the text (integer)
-            //   - `length`: Word length (integer)
+            // `typo.positions` contains:
+            // - `from`: start offset (int)
+            // - `to`: end offset (int)
+            // - `length`: length (int)
         });
         discourse.log('Psot ' + post.id + ' spellard');
-        
+
         //Sign the post so we don't spellar it again
-        raw += '\n\n' + spellardSig + ' ' + exports.name + ' ' + exports.version + '-->';
-        discourse.editPost(post.id, raw, exports.name + ' ' + exports.version, function () {
+        raw += '\n\n' + spellardSig + ' ' + fullName + '-->';
+        discourse.editPost(post.id, raw, fullName, function () {
             callback(null, true);
         });
     });
-};
+}
