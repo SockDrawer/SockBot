@@ -2,7 +2,7 @@
 var async = require('async');
 var discourse,
     configuration,
-    emojiSig = "<!-- Emoji'd by";
+    emojiSig = '<!-- Emoji\'d by';
 
 exports.description = 'Automatically replace emoji with Discourse emoji codes';
 
@@ -39,8 +39,8 @@ exports.onMessage = function onMessage(message, post, callback) {
                 }
 
                 //Sign the post so we don't process it again
-                raw += "\n\n" + emojiSig + " " + exports.name + " " + exports.version + "-->";
-                discourse.editPost(post.id, raw, exports.name + " " + exports.version, function () {
+                raw += '\n\n' + emojiSig + ' ' + exports.name + ' ' + exports.version + '-->';
+                discourse.editPost(post.id, raw, exports.name + ' ' + exports.version, function () {
                     flow(null, true);
                 });
 
@@ -49,11 +49,11 @@ exports.onMessage = function onMessage(message, post, callback) {
                 //    discourse.log(item);
                 //    callback();
                 //}, function () {
-                //    discourse.log("Emoji in post " + post.id + " replaced");
+                //    discourse.log('Emoji in post ' + post.id + ' replaced');
                     
                 //    //Sign the post so we don't process it again
-                //    raw += "\n\n" + emojiSig + " " + exports.name + " " + exports.version + "-->";
-                //    discourse.editPost(post.id, raw, exports.name + " " + exports.version, function () {
+                //    raw += '\n\n' + emojiSig + ' ' + exports.name + ' ' + exports.version + '-->';
+                //    discourse.editPost(post.id, raw, exports.name + ' ' + exports.version, function () {
                 //        flow(null, true);
                 //    });
                 //});
@@ -70,6 +70,6 @@ exports.onMessage = function onMessage(message, post, callback) {
 };
 
 var emojiLookup = {
-    "☺": ":smile:",
-    "☹": ":frowning:"
+    '☺': ':smile:',
+    '☹': ':frowning:'
 };

@@ -9,7 +9,7 @@ var discourse,
     dictionary,
     username,
     spellcheckerActive = false,
-    spellardSig = "<!-- Spellar'd by";
+    spellardSig = '<!-- Spellar\'d by';
 
 exports.description = 'Automaticly trak adn corect speling misteaks';
 
@@ -56,8 +56,8 @@ function initialiseDictionary() {
                 }
                 dictionary = dict;
                 spellcheckerActive = true;
-                discourse.log("Laoded dictonary " + configuration.baseDictName);
-                discourse.log("Spellar iz aktiv");
+                discourse.log('Laoded dictonary ' + configuration.baseDictName);
+                discourse.log('Spellar iz aktiv');
                 loadAddtitionalDictionaries();
             });
         });
@@ -73,12 +73,12 @@ function loadAddtitionalDictionaries() {
                     discourse.error(err);
                 } else {
                     dictionary.addDictionary(data);
-                    discourse.log("Laoded dictonary " + dict);
+                    discourse.log('Laoded dictonary ' + dict);
                 }
                 flow(err);
             });
         }, function () {
-            discourse.log("Al dictonaries laoded");
+            discourse.log('Al dictonaries laoded');
         });
     }
 }
@@ -109,7 +109,7 @@ exports.onMessage = function onMessage(message, post, callback) {
 };
 
 function spellCheckPost(post, callback) {
-    discourse.log("Spellaring psot " + post.id);
+    discourse.log('Spellaring psot ' + post.id);
     var raw = post.raw;
     spellcheck(dictionary, raw, function (err, typos) {
         if (err) {
@@ -126,10 +126,10 @@ function spellCheckPost(post, callback) {
             //   - `to`: The end offset for the typo within the text (integer)
             //   - `length`: Word length (integer)
         });
-        discourse.log("Psot " + post.id + " spellard");
+        discourse.log('Psot ' + post.id + ' spellard');
         
         //Sign the post so we don't spellar it again
-        raw += "\n\n" + spellardSig + " " + exports.name + " " + exports.version + "-->";
-        discourse.editPost(post.id, raw, exports.name + " " + exports.version, callback(null, true));
+        raw += '\n\n' + spellardSig + ' ' + exports.name + ' ' + exports.version + '-->';
+        discourse.editPost(post.id, raw, exports.name + ' ' + exports.version, callback(null, true));
     });
 };
