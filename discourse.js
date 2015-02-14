@@ -102,6 +102,15 @@ function dPost(url, form, callback, delayAfter) {
 }
 exports.postForm = dPost;
 
+function dPut(url, form, callback, delayAfter) {
+    schedule(function () {
+        browser.put(urlbase + url, {
+            form: form
+        }, handleResponse(callback));
+    }, delayAfter);
+}
+exports.putForm = dPut;
+
 function dDelete(url, form, callback, delayAfter) {
     schedule(function () {
         browser.post(urlbase + url, {
@@ -262,7 +271,7 @@ exports.editPost = function editPost(postId, raw, editReason, callback) {
         'raw': raw,
         'edit_reason': editReason
     };
-    dPost('posts/' + postId, form, function (err, resp, post) {
+    dPut('posts/' + postId, form, function (err, resp, post) {
         post = cleanPost(post);
         callback(err, resp, post);
     }, 6000);
