@@ -37,6 +37,7 @@ exports.onMessage = function onMessage(message, post, callback) {
                 for (var emoji in emojiLookup) {
                     raw = raw.replace(emoji, emojiLookup[emoji]);
                 }
+                discourse.log('Emoji in post ' + post.id + ' replaced');
 
                 //Sign the post so we don't process it again
                 raw += '\n\n' + emojiSig + ' ' + exports.name + ' ' + exports.version + '-->';
