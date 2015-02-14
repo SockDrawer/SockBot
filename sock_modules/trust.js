@@ -1,5 +1,5 @@
 'use strict';
-
+/*eslint camelcase:0, max-len: [1, 90, 4] */
 exports.name = 'TrustCheck';
 exports.version = '0.5.0';
 exports.description = 'Provide reports of trust levels';
@@ -87,24 +87,24 @@ function getReportBase(user) {
 }
 
 var promotionTable = {
-    locked: "Trust level is locked, promotion disabled.",
-    tl0: "Analysis not available for Trust Level 0.",
-    tl1: "Analysis not available for Trust Level 1.",
-    tl4: "Trust level is 4.",
+    locked: 'Trust level is locked, promotion disabled.',
+    tl0: 'Analysis not available for Trust Level 0.',
+    tl1: 'Analysis not available for Trust Level 1.',
+    tl4: 'Trust level is 4.',
     grace_period: {
-        below: "Not being demoted due to grace period.",
-        middle: "Above low water mark. (also on grace period)",
-        above: "Above requirements. (also on grace period)"
+        below: 'Not being demoted due to grace period.',
+        middle: 'Above low water mark. (also on grace period)',
+        above: 'Above requirements. (also on grace period)'
     },
     tl2: {
-        below: "Below requirements.",
-        middle: "Within 90% of requirements, may be promoted soon!",
-        above: "Met requirements, should be promoted soon!"
+        below: 'Below requirements.',
+        middle: 'Within 90% of requirements, may be promoted soon!',
+        above: 'Met requirements, should be promoted soon!'
     },
     tl3: {
-        below: "Below requirements, should be demoted soon!",
-        middle: "Above low water mark. In danger of demotion!",
-        above: "Above requirements."
+        below: 'Below requirements, should be demoted soon!',
+        middle: 'Above low water mark. In danger of demotion!',
+        above: 'Above requirements.'
     }
 };
 
