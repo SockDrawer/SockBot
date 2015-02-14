@@ -1,7 +1,8 @@
 'use strict';
 var async = require('async');
 var discourse,
-    configuration;
+    configuration,
+    emojiSig = "<!-- Emoji'd by";
 
 exports.description = 'Automatically replace emoji with Discourse emoji codes';
 
@@ -19,7 +20,7 @@ exports.begin = function begin(browser, config) {
 }
 
 exports.registerListeners = function registerListeners(callback) {
-    if (configuration.enabled && configuration.checkOwnPosts) {
+    if (configuration.enabled) {
         callback(null, ['/latest']);
     } else {
         callback();
@@ -29,8 +30,33 @@ exports.registerListeners = function registerListeners(callback) {
 exports.onMessage = function onMessage(message, post, callback) {
     if (message.data && message.data.topic_id && message.data.message_type === 'latest') {
         discourse.getLastPosts(message.data.topic_id, function (post, flow) {
-            if (post.yours) {
-                flow(null, true);
+            if (post.yours && post.raw.indexOf(emojiSig) < 0) {
+                var raw = post.raw;
+                
+                //Synchronous implementation to be made async later
+                for (var emoji in emojiLookup) {
+                    raw = raw.replace(emoji, emojiLookup[emoji]);
+                }
+
+                //Sign the post so we don't process it again
+                raw += "\n\n" + emojiSig + " " + exports.name + " " + exports.version + "-->";
+                discourse.editPost(post.id, raw, exports.name + " " + exports.version, function () {
+                    flow(null, true);
+                });
+
+                //Asynchronous implementation that doesn't work yet
+                //async.each(emojiLookup, function (item, callback) {
+                //    discourse.log(item);
+                //    callback();
+                //}, function () {
+                //    discourse.log("Emoji in post " + post.id + " replaced");
+                    
+                //    //Sign the post so we don't process it again
+                //    raw += "\n\n" + emojiSig + " " + exports.name + " " + exports.version + "-->";
+                //    discourse.editPost(post.id, raw, exports.name + " " + exports.version, function () {
+                //        flow(null, true);
+                //    });
+                //});
             }
             else {
                 flow();
@@ -41,4 +67,9 @@ exports.onMessage = function onMessage(message, post, callback) {
     } else {
         callback();
     }
+};
+
+var emojiLookup = {
+    "☺": ":smile:",
+    "☹": ":frowning:"
 };

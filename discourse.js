@@ -268,8 +268,10 @@ exports.editPost = function editPost(postId, raw, editReason, callback) {
         editReason = '';
     }
     var form = {
-        'raw': raw,
-        'edit_reason': editReason
+        'post' : {
+            'raw': raw,
+            'edit_reason': editReason
+        }
     };
     dPut('posts/' + postId, form, function (err, resp, post) {
         post = cleanPost(post);

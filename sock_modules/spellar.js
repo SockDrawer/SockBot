@@ -96,7 +96,6 @@ exports.onMessage = function onMessage(message, post, callback) {
         discourse.getLastPosts(message.data.topic_id, function (post, flow) {
             if (configuration.checkOwnPosts && post.yours && post.raw.indexOf(spellardSig) < 0) {
                 spellCheckPost(post, flow);
-                flow(null, true);
             }
             else {
                 flow();
@@ -111,7 +110,8 @@ exports.onMessage = function onMessage(message, post, callback) {
 
 function spellCheckPost(post, callback) {
     discourse.log("Spellaring psot " + post.id);
-    spellcheck(dictionary, post.raw, function (err, typos) {
+    var raw = post.raw;
+    spellcheck(dictionary, raw, function (err, typos) {
         if (err) {
             discourse.error(err);
             callback();
@@ -129,7 +129,7 @@ function spellCheckPost(post, callback) {
         discourse.log("Psot " + post.id + " spellard");
         
         //Sign the post so we don't spellar it again
-        post.raw += "\n\n" + spellardSig + " " + exports.name + " " + exports.version + "-->";
-        discourse.editPost(post.id, post.raw, "Spellard", callback);
+        raw += "\n\n" + spellardSig + " " + exports.name + " " + exports.version + "-->";
+        discourse.editPost(post.id, raw, exports.name + " " + exports.version, callback(null, true));
     });
 };
