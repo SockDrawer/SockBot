@@ -187,7 +187,7 @@ function pollNotifications(callback) {
     discourse.getNotifications(function (err, resp, notifications) {
         if (err) {
             discourse.warn('Error in notifications: ' + err);
-            return callback(err);
+            return callback();
         }
         if (!notifications || !Array.isArray(notifications)) {
             return callback('No notifications');
