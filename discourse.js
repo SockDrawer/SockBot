@@ -268,8 +268,10 @@ exports.editPost = function editPost(postId, raw, editReason, callback) {
         editReason = '';
     }
     var form = {
-        'raw': raw,
-        'edit_reason': editReason
+        'post' : {
+            'raw': raw,
+            'edit_reason': editReason
+        }
     };
     dPut('posts/' + postId, form, function (err, resp, post) {
         post = cleanPost(post);
@@ -414,6 +416,21 @@ exports.getTopic = function getTopic(topicId, callback) {
             }
         }
         return callback(err, resp, topic);
+    });
+};
+
+exports.getLastPosts = function getLastPosts(topicId, eachPost, complete) {
+    dGet('t/' + topicId + '/last.json?include_raw=1', function (err, resp, topic) {
+        if (err || resp.statusCode >= 400) {
+            err = err || 'Error ' + resp.statusCode;
+        }
+        //Reverse posts so the most recent ones are first
+        async.eachSeries(topic.post_stream.posts.reverse(), function (post, flow) {
+            eachPost(post, function (err, handled) {
+                //Stop processing posts if the caller flags it handled
+                flow(err || handled);
+            });
+        }, complete);
     });
 };
 
