@@ -130,6 +130,8 @@ function spellCheckPost(post, callback) {
         
         //Sign the post so we don't spellar it again
         raw += '\n\n' + spellardSig + ' ' + exports.name + ' ' + exports.version + '-->';
-        discourse.editPost(post.id, raw, exports.name + ' ' + exports.version, callback(null, true));
+        discourse.editPost(post.id, raw, exports.name + ' ' + exports.version, function () {
+            callback(null, true);
+        });
     });
 };
