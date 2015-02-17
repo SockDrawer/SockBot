@@ -135,12 +135,12 @@ function queryToTable(cmd, query, date, rows, callback) {
     if (rows && rows[0]) {
         res.push(Object.keys(rows[0]).map(function (k) {
             //16 spaces
-            return (k + "                ").slice(-16);
+            return (k + "                ").slice(16);
         }).join('\t| '));
         res = res.concat(rows.map(function (r) {
             return Object.keys(r).map(function (k) {
                 //16 spaces
-                return (toString(r[k]) + "                ").slice(-16);
+                return (toString(r[k]) + "                ").slice(16);
             }).join('| ');
         }));
     } else {
