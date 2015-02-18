@@ -87,7 +87,7 @@ var emojiLookup = {
     '🙌': ':raising_hand:',
     '🙍': ':person_frowning:',
     '🙎': ':person_with_pouting_face:',
-    '🙏': ':pray:',
+    '🙏': ':pray:'
 };
 
 exports.description = 'Automatically replace emoji with Discourse emoji codes';
