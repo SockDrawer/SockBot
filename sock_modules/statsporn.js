@@ -136,7 +136,7 @@ function queryToTable(cmd, query, date, rows, callback) {
         res.push(Object.keys(rows[0]).map(function (k) {
             //16 spaces
             return (k + "                ").slice(0, 16);
-        }).join('\t| '));
+        }).join('| '));
         res = res.concat(rows.map(function (r) {
             return Object.keys(r).map(function (k) {
                 //16 spaces
