@@ -169,8 +169,14 @@ exports.load = function (callback) {
             files.filter(function (name) {
                 return name[0] !== '.' && /[.]js$/.test(name);
             }).forEach(function (name) {
-                var module = require('./admin_modules/' + name);
-                adminModules.push(module);
+                try {
+                    var module = require('./admin_modules/' + name);
+                    adminModules.push(module);
+                } catch (e) {
+                    var msg = e.message;
+                    console.log('Error in Admin Module' + name + ': ' + msg);
+                    return;
+                }
             });
             adminModules.sort();
             commands = {};
