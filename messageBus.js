@@ -37,7 +37,7 @@ var modules = [],
         moduleTime: null
     },
     responsive = true,
-    resetOn = 0;
+    notificationTime = Date.now();
 
 function watchdog(callback) {
         var now = Date.now();
@@ -50,6 +50,18 @@ function watchdog(callback) {
                 '\n\n```\n' +
                 JSON.stringify(messageInfo, undefined, 4) + '\n```\n',
                 callback);
+        }
+        if (conf.notifications && notificationTime + 10 * 60 * 1000 < now) {
+            return discourse.createPrivateMessage(conf.admin.owner,
+                'Help, I\'ve fallen and I can\'t Get Up',
+                'Notifications has not been polled for more than ten minutes.' +
+                ' Terminating bot.',
+                function () {
+                    discourse.warn('Terminating bot due to failure to poll');
+                    /* eslint-disable no-process-exit */
+                    process.exit(0);
+                    /* eslint-able no-process-exit */
+                });
         }
         callback();
     }
@@ -181,6 +193,7 @@ function pollNotifications(callback) {
         return callback();
     }
     notificationsActive = true;
+    notificationTime = Date.now();
     if (conf.verbose) {
         discourse.log('Polling for Notifications');
     }
@@ -190,7 +203,7 @@ function pollNotifications(callback) {
             return callback();
         }
         if (!notifications || !Array.isArray(notifications)) {
-            return callback('No notifications');
+            return callback(null, 'No notifications');
         }
         // Sort the notifications to prevent bubbled notifications
         // throwing things off
@@ -345,9 +358,6 @@ function updateChannels(message, post, callback) {
 //Poll all sock_modules for channels they are interested in
 function updateRegistrations(callback, force) {
     var reg = {};
-    if (force) {
-        resetOn = Date.now();
-    }
     // /__status is required and handled by message-bus
     reg['/__status'] = [{
         name: 'message_bus.updateChannels()',
@@ -388,7 +398,7 @@ function updateRegistrations(callback, force) {
         registrations = reg;
         var chan = {};
         for (var channel in reg) {
-            chan[channel] = ((!false) && channels[channel]) || -1;
+            chan[channel] = ((!force) && channels[channel]) || -1;
         }
         channels = chan;
         process.nextTick(callback);
