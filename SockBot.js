@@ -18,7 +18,13 @@
             files.filter(function (name) {
                 return name[0] !== '.' && /[.]js$/.test(name);
             }).forEach(function (name) {
-                var module = require('./sock_modules/' + name);
+                var module;
+                try {
+                    module = require('./sock_modules/' + name);
+                } catch (e) {
+                    console.log('Error in Module' + name + ': ' + e.message);
+                    return;
+                }
                 if (isNaN(module.priority)) {
                     module.priority = 50;
                 }
