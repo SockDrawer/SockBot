@@ -224,6 +224,51 @@
       y: posts
       type: bar
       name: posts
+- query: |
+    WITH exclusions AS ( /* Which categories to exclude from counters */
+        SELECT user_id, id, topic_id, post_number
+        FROM posts
+        WHERE raw LIKE '%c09fa970-5a9a-11e4-8ed6-0800200c9a66%' AND
+        user_id IN  (
+                SELECT gu.user_id
+                FROM group_users gu
+                WHERE group_id IN(
+                        SELECT g.id
+                        FROM groups g
+                        WHERE g.name IN ('admins')
+                )
+        )
+    )
+    SELECT count(*) AS posts, to_char(created_at,'YYYY-MM-DD') AS day
+    FROM badge_posts bp
+    WHERE bp.topic_id NOT IN ( /* short topics */
+          SELECT topic_id FROM badge_posts GROUP BY topic_id HAVING count(topic_id) <10
+       ) AND bp.topic_id NOT IN ( /* Ineligible topics */
+          SELECT topic_id
+          FROM exclusions
+       ) AND bp.user_id in (SELECT id FROM users WHERE username ILIKE $1::varchar)
+    WHERE created_at >= (CURRENT_DATE - 30)
+    GROUP BY to_char(created_at,'YYYY-MM-DD')
+    ORDER BY to_char(created_at,'YYYY-MM-DD')
+  config:
+    trust_level: 1
+    defaults:
+      1: ['%username%']
+  name: PostDays
+  chart:
+    filename: Posts/Day %1% %date%
+    layout:
+      title: Posts/Day %1%
+      xaxis:
+        title: Day
+        tickangle: 45
+      yaxis:
+        title: Count
+    data:
+    - x: day
+      y: posts
+      type: bar
+      name: posts
 - query: 
   config:
     trust_level: 1
