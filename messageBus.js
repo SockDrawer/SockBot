@@ -210,7 +210,6 @@ function pollNotifications(callback) {
         notifications.sort(function (a, b) {
             return (b.created_at + 1) - (a.created_at + 1);
         });
-        // Filter out notifications that are too old or already acted on
         notifications = notifications.filter(function (n) {
             n.createdAt = Date.parse(n.created_at);
             return (notifyTypes[n.notification_type] === 'private_message' ||
@@ -222,6 +221,23 @@ function pollNotifications(callback) {
             notifyTime = notifications[0].createdAt + 1;
         }
         async.each(notifications, function (notification, next) {
+            function markRead(nextfn) {
+                // If notification has a post. mark it read
+                //TODO: figure out how to handle this for badges too
+                if (notification.topic_id && notification.post_number) {
+                    var nbr = notification.post_number;
+                    if (notification.notification_type === 6) {
+                        nbr = convertPostNumbers(notification.post_number);
+                    }
+                    return discourse.readPosts(notification.topic_id,
+                        nbr,
+                        function () {
+                            nextfn();
+                        });
+                }
+                nextfn();
+
+            }
             async.waterfall([
                 // If notification is associated with a post, load it
                 function (flow) {
@@ -235,13 +251,14 @@ function pollNotifications(callback) {
                         // Do not allow muted topics
                         // shouldn't be getting notifications for these anyway
                         if (topic.details.notification_level_text === 'muted') {
-                            return flow('ignore', 'Topic Was Muted');
+                            return flow('ignore', 'Topic Was Muted', markRead);
                         }
                         var ignore = conf.admin.ignore;
                         var user = topic.details.created_by.username;
                         // Do not allow topics when creator is on ignore list
                         if (ignore.indexOf(user) >= 0) {
-                            return flow('ignore', 'Topic Creator Ignored');
+                            return flow('ignore', 'Topic Creator Ignored',
+                            markRead);
                         }
                     }
                     return flow(null, topic);
@@ -267,24 +284,24 @@ function pollNotifications(callback) {
                             user = post.username;
                         // Do not allow users on the ignore list
                         if (ignore.indexOf(user) >= 0) {
-                            return flow('ignore', 'Poster Ignored');
+                            return flow('ignore', 'Poster Ignored', markRead);
                         }
                         // Do not allow TL0 users
                         if (post.trust_level < 1) {
-                            return flow('ignore', 'Poster is TL0');
+                            return flow('ignore', 'Poster is TL0', markRead);
                         }
                         //Rate limit TL1 users
                         if (post.trust_level === 1) {
                             if (TL1Timer[user] && now < TL1Timer[user]) {
                                 return flow('ignore',
-                                    'Poster is TL1 on Cooldown');
+                                    'Poster is TL1 on Cooldown', markRead);
                             }
                             TL1Timer[user] = now + conf.TL1Cooldown;
                         }
                         //Disallow other bots
                         if (post.primary_group_name === 'bots' &&
                             post.username !== 'SummonBot') {
-                            return flow('ignore', 'Poster is a Bot');
+                            return flow('ignore', 'Poster is a Bot', markRead);
                         }
                     }
                     return flow(null, topic, post);
@@ -293,27 +310,19 @@ function pollNotifications(callback) {
                     // Hand notification off to sock_modules for processing
                     handleNotification(notification, topic, post,
                         function (err2, handled) {
-                            // If notification has a post. mark it read
-                            //TODO: figure out how to handle this for badges too
-                            if (post && post.post_number) {
-                                var nbr = post.post_number;
-                                if (notification.notification_type === 6) {
-                                    nbr = convertPostNumbers(post.post_number);
-                                }
-                                return discourse.readPosts(post.topic_id,
-                                    nbr,
-                                    function () {
-                                        flow(err2, handled);
-                                    });
-                            }
-                            return flow(err2, handled);
+                            markRead(function () {
+                                return flow(err2, handled);
+                            });
                         });
                 }
-            ], function (err2, reason) {
+            ], function (err2, reason, marker) {
                 if (err2 === 'ignore') {
                     discourse.warn('Notification Ignored: ' + reason);
                 } else if (err2) {
                     discourse.warn('Error processing notification: ' + err2);
+                }
+                if (marker) {
+                    return marker(next);
                 }
                 // error processing message should not flow over to
                 // rest of message processing

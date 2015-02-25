@@ -508,7 +508,9 @@ exports.getNotifications = function getNotifications(callback) {
         if (err || resp.statusCode >= 300) {
             err = err || 'Unknown notifications error';
         }
-        callback(err, resp, notifications);
+        dPost('notifications/reset-new', '', function (err2) {
+            callback(err || err2, resp, notifications);
+        });
     });
 };
 
