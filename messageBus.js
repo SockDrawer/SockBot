@@ -51,6 +51,18 @@ function watchdog(callback) {
                 JSON.stringify(messageInfo, undefined, 4) + '\n```\n',
                 callback);
         }
+        if (messageInfo.poll + 10 * 60 * 1000 < now && !responsive) {
+            return discourse.createPrivateMessage(conf.admin.owner,
+                'Help, I\'ve fallen and I can\'t Get Up',
+                'MessageBus has not been polled for more than ten minutes.' +
+                ' Terminating bot.',
+                function () {
+                    discourse.warn('Terminating bot due to failure to poll');
+                    /* eslint-disable no-process-exit */
+                    process.exit(0);
+                    /* eslint-able no-process-exit */
+                });
+        }
         if (conf.notifications && notificationTime + 10 * 60 * 1000 < now) {
             return discourse.createPrivateMessage(conf.admin.owner,
                 'Help, I\'ve fallen and I can\'t Get Up',
