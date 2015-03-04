@@ -93,7 +93,9 @@ function getConfig(file) {
         }
         return yml.safeLoad(contents);
     } catch (e) {
+        /* eslint-disable no-console */
         console.warn('Configuration file (`' + file + '`) not found: ' + e);
+        /* eslint-enable no-console */
         return {};
     }
 }
@@ -102,8 +104,10 @@ exports.loadConfiguration =
     function loadConfiguration(modules, admin, configuration) {
         var userconf;
         if (!configuration) {
+            /* eslint-disable no-console */
             console.error('No user configuration file specified. ' +
                 'Sockbot will likely not work!');
+            /* eslint-enable no-console */
             userconf = {};
         } else {
             if (configuration[0] !== '/') {

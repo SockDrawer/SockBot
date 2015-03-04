@@ -76,6 +76,7 @@ exports.version = function () {
     return version;
 };
 
+/* eslint-disable no-console */
 exports.log = function log(message) {
     console.log(addTimestamp(message));
 };
@@ -85,6 +86,7 @@ exports.warn = function warn(message) {
 exports.error = function error(message) {
     console.error(addTimestamp(message));
 };
+/* eslint-enable no-console */
 
 function dGet(url, callback, delayAfter) {
     schedule(function () {

@@ -21,9 +21,6 @@ exports.onNotify = function (type, notification, topic, post, callback) {
     }
     var isRequest = trigger.test(post.cleaned);
     if (!isRequest) {
-        console.log(trigger);
-        console.log(post.cleaned);
-        console.log('aborting');
         return callback();
     }
     discourse.getUserData(post.username, function (err, user) {
