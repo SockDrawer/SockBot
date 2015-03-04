@@ -4,7 +4,8 @@
     var fs = require('fs'),
         async = require('async'),
         config = require('./configuration'),
-        admin = require('./admin');
+        admin = require('./admin'),
+        commands = require('./commands');
     var browser,
         messageBus,
         sockModules = [];
@@ -51,6 +52,8 @@
                 return config.modules[module.name].enabled;
             });
             sockModules.unshift(admin);
+            sockModules.unshift(commands);
+            commands.loadModules(sockModules);
             admin.setModules(sockModules);
             cb();
         },
