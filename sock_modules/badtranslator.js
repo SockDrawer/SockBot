@@ -24,6 +24,19 @@ function randomize() {
     return Math.floor(Math.random() * 3) - 1;
 }
 
+function guessLanguage(text, callback) {
+    var key = 'b9f08badbbd87567f65d97538a0838aa';
+    request.get('http://ws.detectlanguage.com/0.2/detect?q=' +
+            encodeURIComponent(text) + '&key=' + key,
+            function (err, resp, body) {
+                if (err || resp.statusCode >= 300) {
+                    return callback(err || 'error response');
+                }
+                var lang = (JSON.parse(body)).data.detections[0];
+                callback(lang);
+            });
+}
+
 function loadLanguages(callback) {
     request.get('http://ackuna.com/cjs/badtranslator.js',
         function (err, resp, body) {
@@ -58,14 +71,22 @@ function getTranslator() { //languages) {
     return translators[0];*/
 }
 
-function getLanguages(languages, num, translator) {
-    var english = languages.filter(function (v) {
-            return v.name === 'English';
-        })[0],
+function getLanguages(languages, detected, num, translator) {
+    var findDetected = function (v) {
+        var found = v[translator] === detected.language;
+        if (found) {
+            v.name += '(Confidence: ' + detected.confidence + ' )';
+        }
+        return found;
+    },
+        findEnglish = function (v) {
+        return v.name === 'English';
+    },
+        first = languages.filter(detected ? findDetected : findEnglish)[0],
         langs = languages.filter(function (v) {
-            return v.name !== 'English' && v[translator];
+            return (v.name !== 'English' || v !== first) && v[translator];
         }),
-        res = [english],
+        res = [first],
         i;
     if (configuration.randomizeOrder) {
         langs.sort(randomize);
@@ -73,7 +94,7 @@ function getLanguages(languages, num, translator) {
     for (i = 0; i < num && langs.length > 0; i += 1) {
         res.push(langs.pop());
     }
-    res.push(english);
+    res.push(languages.filter(findEnglish)[0]);
     return res;
 }
 
@@ -122,27 +143,27 @@ exports.onNotify = function (type, notification, topic, post, callback) {
     }
     var cleaner = /(<\/?[a-z][^>]*>)/ig;
     var text = post.cleaned.replace(cleaner, '').substring(0, 250);
-    loadLanguages(function (err, languages) {
-        if (err) {
-            return callback();
-        }
-        var trans = getTranslator(languages),
-            langs = getLanguages(languages, configuration.translations, trans);
-        translate(text, langs, trans, function (err2, result) {
-            if (err2) {
-                discourse.log(err2);
+    guessLanguage(text, function(detectedLanguage){
+        loadLanguages(function (err, languages) {
+            if (err) {
                 return callback();
             }
-            discourse.createPost(notification.topic_id,
-                notification.post_number, result, function () {
-                    callback(true);
-                });
+            var trans = getTranslator(languages),
+                langs = getLanguages(languages, detectedLanguage, configuration.translations, trans);
+            translate(text, langs, trans, function (err2, result) {
+                if (err2) {
+                    discourse.log(err2);
+                    return callback();
+                }
+                discourse.createPost(notification.topic_id,
+                    notification.post_number, result, function () {
+                        callback(true);
+                    });
+            });
         });
     });
-
-
-
 };
+
 exports.begin = function begin(browser, config) {
     configuration = config.modules[exports.name];
     errors = config.errors;
