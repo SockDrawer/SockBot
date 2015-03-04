@@ -88,20 +88,20 @@ info.muteable = false;
 info.prefix = false;
 
 
-function handleCommand(post, match, callback) {
-    if (!commands[match.command]) {
-        return callback('Unrecognized command `' + match.command + '`');
+function handleCommand(post, command, args, callback) {
+    if (!commands[command]) {
+        return callback('Unrecognized command `' + command + '`');
     }
-    var cmd = commands[match.command];
+    var cmd = commands[command];
     if (post.trust_level < cmd.trustLevel) {
-        return callback('Unauthorized command `' + match.command + '`');
+        return callback('Unauthorized command `' + command + '`');
     }
-    cmd(match.arguments, function (err, msg) {
+    cmd(args, function (err, msg) {
         if (err) {
-            return callback('Error executing `' + match.command + '`');
+            return callback('Error executing `' + command + '`');
         }
         if (cmd.prefix) {
-            msg = '> ' + match.command + ': ' + msg;
+            msg = '> ' + command + ': ' + msg;
         }
         callback(msg, cmd.muteable);
     });
@@ -114,33 +114,18 @@ exports.onNotify = function notify(type, notification, topic, post, callback) {
     if (post && post.raw) {
         discourse.log('\t' + (post.raw || '').split('\n')[0]);
     }
-    if (type !== 'private_message') {
+    callback();
+};
+
+exports.onCommand = function onCommand(type, command, args, data, callback) {
+    if (type !== 'private_message'){
         return callback();
     }
-    var res = [],
-        muteable = true;
-    parser(post.raw, function (match, flow) {
-        handleCommand(post, match, function (msg, ismuteable) {
-            if (ismuteable === undefined) {
-                ismuteable = true;
-            }
-            muteable = muteable && ismuteable;
-            if (msg) {
-                res.push(msg);
-            }
-            flow();
-        });
-    }, function () {
-        if (res.length > 0) {
-            return discourse.createPost(notification.topic_id,
-                notification.post_number, res.join('\n'),
-                function () {
-                    callback(true);
-                }, !muteable);
-        }
-        callback();
+    handleCommand(data.post, command, args, function(msg, muteable){
+        callback(null, msg, !muteable);
     });
 };
+
 
 function addCommand(fn) {
     if (typeof fn === 'function' &&
@@ -174,15 +159,19 @@ exports.load = function (callback) {
                     adminModules.push(module);
                 } catch (e) {
                     var msg = e.message;
+                    /* eslint-disable no-console */
                     console.log('Error in Admin Module' + name + ': ' + msg);
+                    /* eslint-enable no-console */
                     return;
                 }
             });
             adminModules.sort();
             commands = {};
             adminModules.forEach(function (module) {
+                /* eslint-disable no-console */
                 console.log('Loaded admin module: ' +
                     module.name + ' v' + module.version);
+                /* eslint-enable no-console */
                 for (var name in module) {
                     addCommand(module[name]);
                 }
