@@ -1,12 +1,10 @@
 'use strict';
-var regexp = require('xregexp').XRegExp,
-    async = require('async'),
+var async = require('async'),
     fs = require('fs');
 var sockModules,
     adminModules,
     conf,
     discourse,
-    parser,
     commands;
 
 exports.description = 'Admin Module';
@@ -15,35 +13,6 @@ exports.configuration = {
     enabled: true
 };
 exports.version = '1.0.0';
-
-(function () {
-    var exp = regexp('^!admin (?<command>\\S+)(?<arguments>( +\\S+)+)?$', 'mn'),
-        splitter = regexp('\\s+');
-    parser = function parser(input, each, complete) {
-        var match = 1,
-            pos = 0;
-        async.forever(
-            function (next) {
-                match = exp.xexec(input, pos);
-                if (!match) {
-                    return next(true);
-                }
-                if (match.arguments) {
-                    match.arguments = match.arguments.split(splitter);
-                    match.arguments.shift();
-                }
-                if (!match.arguments) {
-                    match.arguments = [];
-                }
-
-                pos = match.index + match[0].length - 1;
-                each(match, next);
-            },
-            function () {
-                complete();
-            });
-    };
-}());
 
 function help(args, callback) {
     var res = [],
