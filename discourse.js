@@ -144,7 +144,7 @@ function cleanPost(post) {
         post.cleaned = xRegExp.replace(post.raw, rQuote, '');
         post.cleaned = xRegExp.replace(post.cleaned, rCloseQuote, '');
     }
-    // Don't have a choice about using camelcase here...
+    // Don't have a choice about using non-camelcase here...
     /*eslint-disable camelcase, max-depth */
     if (post.username === conf.admin.owner) {
         post.trust_level = 9;
@@ -157,6 +157,9 @@ function cleanPost(post) {
     } else if (conf.admin.ignore.indexOf(post.username) >= 0) {
         post.trust_level = 0;
     }
+
+    post.url = urlbase + 't/' + post.topic_slug + '/' + post.topic_id +
+        '/' + post.post_number;
     /*eslint-enable camelcase, max-depth */
     return post;
 }
@@ -226,7 +229,12 @@ exports.login = function login(callback) {
     ], callback);
 };
 
-exports.createPost = function createPost(topic, replyTo,
+
+exports.reply = function reply(post, raw, callback){
+    createPost(post.topic_id, post.post_number, raw, callback);
+};
+
+function createPost(topic, replyTo,
     raw, callback, nomute) {
     if (!nomute && new Date().getTime() < sleepUntil) {
         return callback('Muted');
@@ -244,7 +252,8 @@ exports.createPost = function createPost(topic, replyTo,
         post = cleanPost(post);
         callback(err, resp, post);
     }, 6000);
-};
+}
+exports.createPost = createPost;
 
 exports.createPrivateMessage = function createPrivateMessage(to, title,
     raw, callback) {
@@ -405,18 +414,19 @@ exports.getTopic = function getTopic(topicId, callback) {
         delete topic.details.links;
         delete topic.details.participants;
         delete topic.details.suggested_topics;
-        // Don't have a choice about using camelcase here...
+        // Don't have a choice about using non-camelcase here...
         /*eslint-disable camelcase */
         topic.details.notification_level_text = 'unknown';
         /*eslint-enable camelcase */
         for (var type in notificationLevels) {
             if (notificationLevels[type] === topic.details.notification_level) {
-                // Don't have a choice about using camelcase here...
+                // Don't have a choice about using non-camelcase here...
                 /*eslint-disable camelcase */
                 topic.details.notification_level_text = type;
                 /*eslint-enable camelcase */
             }
         }
+        topic.url = urlbase + 't/' + topic.slug + '/' + topic.id;
         return callback(err, resp, topic);
     });
 };

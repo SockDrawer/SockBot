@@ -23,14 +23,14 @@ async.waterfall([
             try {
                 module = require('./sock_modules/' + name);
             } catch (e) {
-                console.log('Error in Module' + name + ': ' + e.message);
+                console.log('Error in Module ' + name + ': ' + e.message);
                 return;
             }
             if (isNaN(module.priority)) {
                 module.priority = 50;
             }
             if (!module.configuration || module.configuration.enabled) {
-                console.warn('Ingoring module: `' + (module.name || name) +
+                console.warn('Ignoring module: `' + (module.name || name) +
                     '` Does not default to disabled');
             } else {
                 sockModules.push(module);
