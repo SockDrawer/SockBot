@@ -129,6 +129,7 @@ function queryToTable(cmd, query, date, rows, callback) {
     var res = [];
     res.push('```');
     res.push(cmd.str);
+    res.push('Backup Date: ' + toString(date));
     res.push('```');
     res.push('<details><summary>Query</summary>');
     res.push('```');
@@ -151,8 +152,6 @@ function queryToTable(cmd, query, date, rows, callback) {
     } else {
         res.push('No Results Found');
     }
-    res.push('');
-    res.push('Backup Date: ' + toString(date));
     res.push('```');
     callback(null, res.join('\n'));
 }
@@ -199,16 +198,21 @@ function queryToChart(cmd, query, date, filename, rows, callback) {
             return callback(err);
         }
         var res = [];
+        res.push('```');
         res.push(cmd.str);
-        res.push('');
+        res.push('Backup Date: ' + toString(date));
+        res.push('```');
+        res.push('<details><summary>Query</summary>');
+        res.push('```');
         res.push(query.query.replace(/c09fa970-5a9a-11e4-8ed6-0800200c9a66/g,
             '[Magic Exclusion UUID]'));
-        res.push('');
-        res.push('Backup Date: ' + toString(date));
-        res = '\n```\n' + res.join('\n') + '\n```\n';
+        res.push('```');
+        res.push('</details>');
         var txt = '[<img src="%%.svg" height="500" width="700" /><br/>';
         txt += 'Click for interactive graph.](%%)';
-        callback(null, res + txt.replace(/%%/g, msg.url));
+        txt = txt.replace(/%%/g, msg.url);
+        res.push(txt);
+        callback(null, res.join('\n'));
     });
 }
 
