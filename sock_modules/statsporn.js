@@ -146,8 +146,8 @@ function queryToTable(cmd, query, date, rows, callback) {
     } else {
         res.push('No Results Found');
     }
-    callback(null, '\n```\n' + res.join('\n') + '\n\nBackup Date: ' +
-        toString(date) + '\n```\n');
+    callback(null, '\n<details>\n```\n' + res.join('\n') + '\n\nBackup Date: ' +
+        toString(date) + '\n```\n</details>\n');
 }
 
 function queryToChart(cmd, query, date, filename, rows, callback) {
