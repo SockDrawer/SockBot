@@ -126,18 +126,19 @@ function toString(o) {
 
 function queryToTable(cmd, query, date, rows, callback) {
 
-    var res = [];
-    res.push('```');
-    res.push(cmd.str);
-    res.push('Backup Date: ' + toString(date));
-    res.push('```');
-    res.push('<details><summary>Query</summary>');
-    res.push('```');
-    res.push(query.query.replace(/c09fa970-5a9a-11e4-8ed6-0800200c9a66/g,
-        '[Magic Exclusion UUID]'));
-    res.push('```');
-    res.push('</details>');
-    res.push('```');
+    var res = [
+        '```',
+        cmd.str,
+        'Backup Date: ' + toString(date),
+        '```',
+        '<details><summary>Query</summary>',
+        '```',
+        query.query.replace(/c09fa970-5a9a-11e4-8ed6-0800200c9a66/g,
+            '[Magic Exclusion UUID]'),
+        '```',
+        '</details>',
+        '```'
+    ];
     if (rows && rows[0]) {
         res.push(Object.keys(rows[0]).map(function (k) {
             //16 spaces
@@ -197,19 +198,20 @@ function queryToChart(cmd, query, date, filename, rows, callback) {
         if (err) {
             return callback(err);
         }
-        var res = [];
-        res.push('```');
-        res.push(cmd.str);
-        res.push('Backup Date: ' + toString(date));
-        res.push('```');
-        res.push('<details><summary>Query</summary>');
-        res.push('```');
-        res.push(query.query.replace(/c09fa970-5a9a-11e4-8ed6-0800200c9a66/g,
-            '[Magic Exclusion UUID]'));
-        res.push('```');
-        res.push('</details>');
-        var txt = '[<img src="%%.svg" height="500" width="700" /><br/>';
-        txt += 'Click for interactive graph.](%%)';
+        var res = [
+            '```',
+            cmd.str,
+            'Backup Date: ' + toString(date),
+            '```',
+            '<details><summary>Query</summary>',
+            '```',
+            query.query.replace(/c09fa970-5a9a-11e4-8ed6-0800200c9a66/g,
+                '[Magic Exclusion UUID]'),
+            '```',
+            '</details>'
+        ];
+        var txt = '[<img src="%%.svg" height="500" width="700" /><br/>' +
+            'Click for interactive graph.](%%)';
         txt = txt.replace(/%%/g, msg.url);
         res.push(txt);
         callback(null, res.join('\n'));
