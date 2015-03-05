@@ -146,7 +146,7 @@ function queryToTable(cmd, query, date, rows, callback) {
     } else {
         res.push('No Results Found');
     }
-    callback(null, '\n<details>\n```\n' + res.join('\n') + '\n\nBackup Date: ' +
+    callback(null, '\n<details><summary>Query</summary>\n```\n' + res.join('\n') + '\n\nBackup Date: ' +
         toString(date) + '\n```\n</details>\n');
 }
 
