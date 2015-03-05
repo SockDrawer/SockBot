@@ -9,6 +9,7 @@
     "async": "~0.2.8",
     "js-yaml": "^3.2.3",
     "request": "^2.42.0",
+    "sqlite3": "^3.0.5",
     "xregexp": "^2.0.0"
   },
   "optionalDependencies": {
