@@ -18,6 +18,7 @@
         enabled: false,
         autoTimeout: 60 * 1000,
         userTimeout: 60 * 60 * 1000,
+        probability: 1,
         messages: [
             '@%__username__% has summoned me, and so I appear.',
             'Yes master %__name__%, I shall appear as summoned.',
@@ -56,7 +57,7 @@
 
     exports.onNotify = function onNotify(type, notification, topic,
         post, callback) {
-        if (type === 'mentioned') {
+        if (type === 'mentioned' && Math.random() < configuration.probability) {
             var now = (new Date().getTime()),
                 r = Math.floor(Math.random() * configuration.messages.length),
                 s = configuration.messages[r];
