@@ -78,15 +78,16 @@ function getLanguages(languages, detected, num, translator) {
             v.name += '(Confidence: ' + detected.confidence + ' )';
         }
         return found;
-    },
+        },
         findEnglish = function (v) {
-        return v.name === 'English';
-    },
-        first = languages.filter(detected ? findDetected : findEnglish)[0],
+        return v[translator] === 'en';
+        },
+        english = languages.filter(findEnglish)[0],
+        first = detected && languages.filter(findDetected)[0],
         langs = languages.filter(function (v) {
-            return (v.name !== 'English' || v !== first) && v[translator];
+            return (v[translator] === 'en' || v !== first) && v[translator];
         }),
-        res = [first],
+        res = [first || english],
         i;
     if (configuration.randomizeOrder) {
         langs.sort(randomize);
@@ -94,7 +95,8 @@ function getLanguages(languages, detected, num, translator) {
     for (i = 0; i < num && langs.length > 0; i += 1) {
         res.push(langs.pop());
     }
-    res.push(languages.filter(findEnglish)[0]);
+    
+    res.push(english);
     return res;
 }
 
@@ -108,7 +110,6 @@ function translate(text, languages, translator, callback) {
         return languages.length > 0;
     }, function (nextStep) {
         next = languages.shift();
-
         request.get('http://ackuna.com/pages/ajax_translate?type=' +
             translator.toLowerCase() + '&text=' + encodeURIComponent(text) +
             '&src=' + prev[translator] + '&dst=' + next[translator],
