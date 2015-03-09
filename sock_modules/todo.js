@@ -188,7 +188,7 @@ function getDetails(task) {
             format('**Resolved:** %resolved%', task),
             task.parent ? format('**Parent:** %parent%\n', task) : '',
             format('%description%', task),
-            '', '---', task.comments.filter(function (comment) {
+            '', '---', (task.comments || []).filter(function (comment) {
                 return (comment.comment || '').trim().length > 0;
             }).map(function (comment) {
                 return format('[%user%@%time%](%post%): %comment%', comment);
@@ -215,7 +215,7 @@ function createDocument(post, topic) {
         topic: topic.url,
         post: post.url,
         parent: null,
-        notes: [],
+        comments: [],
         references: ref,
         title: match.title,
         category: match.category || 'uncategorized',
