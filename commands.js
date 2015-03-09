@@ -3,9 +3,11 @@ var regexp = require('xregexp').XRegExp,
     async = require('async');
 
 var discourse,
-    parser = regexp('^!(?<mod>\\w+)\\s+(?<cmd>\\w+)(?<args>(\\s+\\w+)+)?$',
-        'mn'),
-    splitter = regexp('\\s+'),
+    spaces = '[ \f\r\t\v\u00a0\u1680\u180e\u2000-\u200a' +
+    '\u2028\u2029\u202f\u205f\u3000]',
+    parser = regexp('^!(?<mod>\\w+)' + spaces + '+(?<cmd>\\w+)(?<args>(' +
+        spaces + '\\w+)+)?\\s*$', 'mn'),
+    splitter = regexp(spaces + '+'),
     sockModules = {};
 
 exports.description = 'The Command Parser Module';
@@ -36,8 +38,11 @@ function parseCommands(input) {
 
 exports.loadModules = function loadModules(modules) {
     modules.forEach(function (module) {
-        if (typeof module.onCommand === 'function') {
-            sockModules[module.name.toLowerCase()] = module.onCommand;
+        var name = module.name.toLowerCase();
+        if (module.commands) {
+            sockModules[name] = commandHelper(module.commands);
+        } else if (typeof module.onCommand === 'function') {
+            sockModules[name] = module.onCommand;
         }
     });
 };
@@ -46,9 +51,10 @@ exports.onNotify = function notify(type, notification, topic, post, callback) {
     if (!post || !post.raw) {
         return callback();
     }
-    var cmds = parseCommands(post.raw),
+    var cmds = parseCommands(post.cleaned),
         response = [],
         muted = discourse.sleep() > Date.now();
+    post.cleaned = post.cleaned.replace(parser, '');
     async.each(cmds, function (command, next) {
         sockModules[command.mod](type, command.cmd, command.args, {
             notification: notification,
@@ -74,6 +80,53 @@ exports.onNotify = function notify(type, notification, topic, post, callback) {
     });
 };
 
-exports.begin = function begin(browser){
+exports.begin = function begin(browser) {
     discourse = browser;
 };
+
+function makeHelp(definition) {
+    var help = [],
+        cmd, keys = Object.keys(definition);
+    keys.push('help');
+    keys.sort();
+    keys.forEach(function (key) {
+        if (key === 'help') {
+            help.push('help: List All Available Commands');
+        } else if (key[0] !== '_') {
+            cmd = definition[key];
+            help.push(key + ' ' + cmd.params.join(' ') +
+                ': ' + cmd.description);
+        }
+    });
+    help.unshift('```text');
+    help.unshift('Available Commands:');
+    help.push('```');
+    return help.join('\n');
+}
+
+function commandHelper(definition) {
+    return function runCommand(type, command, args, data, callback) {
+        if (command === 'help') {
+            callback(null, makeHelp(definition));
+        } else if (!definition[command]) {
+            callback('Unknown Command: ' + command);
+        } else {
+            var cmd = definition[command],
+                payload = JSON.parse(JSON.stringify(cmd.defaults));
+            payload.$type = type;
+            payload.$command = command;
+            cmd.params.forEach(function (n) {
+                if (args.length <= 0) {
+                    return;
+                }
+                var name = /\[?(\w+)/.exec(n)[1];
+                payload[name] = args.shift();
+            });
+            payload.$arguments = args;
+            payload.$notification = data.notification;
+            payload.$topic = data.topic;
+            payload.$post = data.post;
+            cmd.handler(payload, callback);
+        }
+    };
+}
