@@ -24,6 +24,7 @@ function uuid() {
             return v.toString(16);
         });
 }
+exports.uuid = uuid;
 
 var fs = require('fs');
 var request = require('request'),
@@ -158,8 +159,9 @@ function cleanPost(post) {
         post.trust_level = 0;
     }
 
-    post.url = urlbase + 't/' + post.topic_slug + '/' + post.topic_id +
-        '/' + post.post_number;
+    post.url = urlbase + 't/' + post.topic_slug + '/' + post.topic_id + '/';
+    post.reply_to = post.url + (post.reply_to_post_number || '');
+    post.url += post.post_number;
     /*eslint-enable camelcase, max-depth */
     return post;
 }
@@ -230,7 +232,7 @@ exports.login = function login(callback) {
 };
 
 
-exports.reply = function reply(post, raw, callback){
+exports.reply = function reply(post, raw, callback) {
     createPost(post.topic_id, post.post_number, raw, callback);
 };
 

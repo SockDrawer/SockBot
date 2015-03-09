@@ -17,6 +17,7 @@
     "nodehun": "^1.0.2",
     "nodehun-sentences": "^1.0.0",
     "pg": "^4.1.1",
-    "plotly": "^0.2.15"
+    "plotly": "^0.2.15",
+    "tingodb": "^0.3.4"
   }
 }

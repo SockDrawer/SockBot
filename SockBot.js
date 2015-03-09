@@ -5,7 +5,8 @@ var fs = require('fs'),
     async = require('async'),
     config = require('./configuration'),
     admin = require('./admin'),
-    commands = require('./commands');
+    commands = require('./commands'),
+    database = require('./database');
 var browser,
     messageBus,
     sockModules = [];
@@ -68,6 +69,7 @@ async.waterfall([
             throw 'Login failed';
         }
         console.log('Logged in as: ' + config.user.user.username);
+        database.begin(browser, config);
         sockModules.forEach(function (module) {
             if (typeof module.begin !== 'function') {
                 return;
