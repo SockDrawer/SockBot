@@ -248,6 +248,7 @@
           FROM exclusions
        ) AND bp.user_id in (SELECT id FROM users WHERE username ILIKE $1::varchar)
     AND created_at >= (CURRENT_DATE - 30)
+    AND created_at < CURRENT_DATE
     GROUP BY to_char(created_at,'YYYY-MM-DD')
     ORDER BY to_char(created_at,'YYYY-MM-DD')
   config:

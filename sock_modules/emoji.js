@@ -6,7 +6,7 @@ var discourse,
 
 var emojiLookup = {
     //Miscellaneous Symbols block (U+2600–U+26FF)
-    '☹': ':frowning:',
+    '☹': ':worried:',
     '☺': ':smile:',
     '☻': ':smile:',
     //Emoticons block (U+1F600-U+1F64F)
@@ -98,7 +98,7 @@ exports.configuration = {
 
 exports.name = 'MobileEmoji';
 exports.priority = undefined;
-exports.version = '0.2.0';
+exports.version = '0.2.1';
 
 var fullName = exports.name + ' ' + exports.version;
 
