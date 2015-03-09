@@ -154,7 +154,7 @@ function makeSafe(fn) {
 }
 
 exports.onNotify = function onNotify(type, notifiy, topic, post, callback) {
-    if (!ready) {
+    if (!ready || !post) {
         return callback();
     }
     var doc = createDocument(post, topic);
