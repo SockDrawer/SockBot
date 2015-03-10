@@ -3,7 +3,8 @@
 var async = require('async');
 var discourse,
     conf,
-    currentBingeCap = 0;
+    currentBingeCap = 0,
+    bingeIgnoreList = [];
 
 exports.description = 'Issue Likes to all posts in a thread';
 
@@ -43,11 +44,8 @@ function binge(callback) {
 function innerBinge(topic, callback) {
     var msg = 'Liking /t/%TOPIC%/%POST% by @%USER%';
     discourse.getAllPosts(topic, function (err, posts, next) {
-        if (err) {
+        if (err || currentBingeCap <= 0) {
             return next(true);
-        }
-        if (currentBingeCap <= 0) {
-            next(true);
         }
         var likeables = posts.filter(function (x) {
             var action = x.actions_summary.filter(function (y) {
@@ -57,16 +55,20 @@ function innerBinge(topic, callback) {
         });
         likeables = likeables.slice(0, currentBingeCap);
         async.each(likeables, function (post, flow) {
-            discourse.log(format(msg, {
-                'TOPIC': post.topic_id,
-                'POST': post.post_number,
-                'USER': post.username
-            }));
-            discourse.postAction('like', post.id, function (err2, resp) {
-                flow(err2 || resp.statusCode === 429);
-            });
+            if (bingeIgnoreList.indexOf(post.username) >= 0) {
+                flow();
+            } else {
+                discourse.log(format(msg, {
+                    'TOPIC': post.topic_id,
+                    'POST': post.post_number,
+                    'USER': post.username
+                }));
+                discourse.postAction('like', post.id, function (err2, resp) {
+                    flow(err2 || resp.statusCode === 429);
+                });
+                currentBingeCap--;
+            }
         }, next);
-        currentBingeCap -= likeables.length;
     }, function () {
         callback();
     });
@@ -135,6 +137,7 @@ exports.begin = function begin(browser, config) {
     conf = config.modules[exports.name];
     discourse = browser;
     if (conf.enabled && conf.binge) {
+        bingeIgnoreList = config.admin.ignore;
         scheduleBinges();
     }
 };

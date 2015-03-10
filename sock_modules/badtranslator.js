@@ -95,7 +95,7 @@ function getLanguages(languages, detected, num, translator) {
     for (i = 0; i < num && langs.length > 0; i += 1) {
         res.push(langs.pop());
     }
-    
+
     res.push(english);
     return res;
 }
@@ -150,7 +150,8 @@ exports.onNotify = function (type, notification, topic, post, callback) {
                 return callback();
             }
             var trans = getTranslator(languages),
-                langs = getLanguages(languages, detectedLanguage, configuration.translations, trans);
+                langs = getLanguages(languages, detectedLanguage,
+                    configuration.translations, trans);
             translate(text, langs, trans, function (err2, result) {
                 if (err2) {
                     discourse.log(err2);
