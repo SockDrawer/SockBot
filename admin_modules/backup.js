@@ -137,11 +137,6 @@ function startBackup(callback) {
 }
 
 function exec(command, args, pipeTo, callback) {
-    function split(data) {
-        return ('' + data).split('\n').filter(function (i) {
-            return !!i;
-        });
-    }
     if (!callback) {
         callback = pipeTo;
         pipeTo = null;
@@ -150,16 +145,10 @@ function exec(command, args, pipeTo, callback) {
         stderr = [],
         process;
     process = spawn(command, args);
-    process.stderr.on('data', function (data) {
-        if (!pipeTo) {
-            stderr = stderr.concat(split(data));
-        }
-    });
     process.stdout.on('data', function (data) {
         if (pipeTo) {
             return pipeTo.stdin.write(data);
         }
-        stdout = stdout.concat(split(data));
     });
     process.on('close', function (code) {
         if (pipeTo) {
