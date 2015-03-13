@@ -126,12 +126,12 @@ exports.onMessage = function onMessage(message, post, callback) {
                     raw = raw.replace(emoji, emojiLookup[emoji]);
                 }
                 discourse.log('Emoji in post ' + post2.id + ' replaced');
-                
-                if (original != raw)
+
+                if (original !== raw) {
                     discourse.editPost(post2.id, raw, fullName, function () {
                         flow(null, true);
                     });
-                else {
+                } else {
                     flow(null, true);
                 }
             } else {
