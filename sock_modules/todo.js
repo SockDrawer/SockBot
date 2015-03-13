@@ -90,6 +90,15 @@ exports.commands = {
         params: ['key'],
         description: 'Comment on task'
     },
+    category: {
+        handler: manipulateTask(function (payload, doc, callback) {
+            doc.category = payload.category || 'uncategorized';
+            addComment(payload, doc, callback);
+        }),
+        defaults: {},
+        params: ['key', 'category'],
+        description: 'Comment on task'
+    },
     describe: {
         handler: manipulateTask(function (payload, doc, callback) {
             var txt = payload.$post.cleaned.trim();
