@@ -134,7 +134,7 @@ function queryToTable(cmd, query, date, rows, callback) {
         '<details><summary>Query</summary>',
         '```',
         query.query.replace(/c09fa970-5a9a-11e4-8ed6-0800200c9a66/g,
-            '[Magic Exclusion UUID]'),
+            '[Magic Exclusion UUID]').trim(),
         '```',
         '</details>',
         '```'
@@ -206,7 +206,7 @@ function queryToChart(cmd, query, date, filename, rows, callback) {
             '<details><summary>Query</summary>',
             '```',
             query.query.replace(/c09fa970-5a9a-11e4-8ed6-0800200c9a66/g,
-                '[Magic Exclusion UUID]'),
+                '[Magic Exclusion UUID]').trim(),
             '```',
             '</details>'
         ];
