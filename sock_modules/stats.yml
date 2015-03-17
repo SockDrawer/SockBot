@@ -276,4 +276,40 @@
     defaults:
       1: ['']
   name: trust
+- query: |
+    WITH badge_counts AS (
+            SELECT count(*), b.name, u.username
+            FROM user_badges ub
+            JOIN badges b ON ub.badge_id=b.id
+            JOIN users u ON ub.user_id=u.id
+            WHERE u.username ILIKE $1::varchar
+            GROUP BY u.username, b.name
+            ORDER BY u.username ASC, count(*) DESC
+    )
+    SELECT * FROM badge_counts
+    UNION
+    SELECT SUM(count), 'Total', username
+    FROM badge_counts
+    GROUP BY username
+    ORDER BY username ASC, count DESC
+  config:
+    trust_level: 1
+    defaults:
+      1: ['%username%']
+  name: UserBadges
+  chart:
+    filename: User Badges %1% %date%
+    layout:
+      title: User Badges %1%
+      xaxis:
+        title: name
+        tickangle: 45
+      yaxis:
+        title: count
+    data:
+    - x: name
+      y: count
+      text: %username%: %name%
+      type: bar
+      name: posts
   
