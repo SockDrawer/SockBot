@@ -26,13 +26,15 @@ function randomize() {
 
 function guessLanguage(text, callback) {
     var key = 'b9f08badbbd87567f65d97538a0838aa';
-    request.get('http://ws.detectlanguage.com/0.2/detect?q=' +
-            encodeURIComponent(text) + '&key=' + key,
+    console.log(text);
+    request.post({url: 'http://ws.detectlanguage.com/0.2/detect',
+            form: {'q':escape(text),'key':key} },
             function (err, resp, body) {
                 if (err || resp.statusCode >= 300) {
                     return callback(err || 'error response');
                 }
                 var lang = (JSON.parse(body)).data.detections[0];
+                console.log(lang);
                 callback(lang);
             });
 }
