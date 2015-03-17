@@ -309,7 +309,7 @@
     data:
     - x: name
       y: count
-      text: %username%: %name%
+      text: '%username%: %name%'
       type: bar
       name: posts
   
