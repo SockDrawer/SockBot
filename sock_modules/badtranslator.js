@@ -74,23 +74,23 @@ function getTranslator() { //languages) {
 }
 
 function getLanguages(languages, detected, num, translator) {
-    var findDetected = function (v) {
-        var found = v[translator] === detected.language;
-        if (found) {
-            v.name += '(Confidence: ' + detected.confidence + ' )';
-        }
-        return found;
-        },
-        findEnglish = function (v) {
-        return v[translator] === 'en';
-        },
-        english = languages.filter(findEnglish)[0],
-        first = detected && languages.filter(findDetected)[0],
+    var english,
+        first,
         langs = languages.filter(function (v) {
-            return (v[translator] === 'en' || v !== first) && v[translator];
+            if (v[translator] === detected.language) {
+                first = JSON.parse(JSON.stringify(v));
+                first.name += '(Confidence: ' + detected.confidence + ' )';
+            }
+            if(v[translator] === 'en') {
+                english = v;
+            }
+            
+            return v[translator] !== detected.language && v[translator] !== 'en' && v[translator];
         }),
-        res = [first || english],
         i;
+
+    var res = [first || english];
+    
     if (configuration.randomizeOrder) {
         langs.sort(randomize);
     }
