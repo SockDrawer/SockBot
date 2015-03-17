@@ -190,7 +190,8 @@ function queryToChart(cmd, query, date, filename, rows, callback) {
         }
     });
     for (i = 0; i <= (query.args || []).length; i += 1) {
-        title = title.replace('%' + (i + 1) + '%', query.args[i]);
+        //TODO: fix this later
+        //title = title.replace('%' + (i + 1) + '%', query.args[i]);
     }
     layout.title = title;
     var layout2 = {
