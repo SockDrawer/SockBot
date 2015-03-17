@@ -185,8 +185,8 @@ function queryToChart(cmd, query, date, filename, rows, callback) {
             });
         }
     });
-    for (i = 1; i <= (query.args || []).length; i += 1) {
-        title = title.replace('%' + i + '%', query.args[i]);
+    for (i = 0; i <= (query.args || []).length; i += 1) {
+        title = title.replace('%' + (i + 1) + '%', query.args[i]);
     }
     layout.title = title;
     var layout2 = {
