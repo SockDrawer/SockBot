@@ -96,6 +96,10 @@ function parseCmd(post) {
         'str': null
     };
     discourse.log('   Query selected: ' + res.name);
+    if (!queries) {
+        discourse.warn('Queries not loaded');
+        return null;
+    }
     var q = queries.filter(function (qi) {
         return qi.name.toLowerCase() === res.name;
     })[0];
