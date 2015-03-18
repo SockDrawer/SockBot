@@ -306,6 +306,7 @@
         tickangle: 45
       yaxis:
         title: count
+        type: log
     data:
     - x: name
       y: count
