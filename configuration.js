@@ -10,7 +10,7 @@ var def = {
     timestamp: true,
     datestamp: false,
     processActed: false,
-    TL1Cooldown: 10 * 60 * 60,
+    TL1Cooldown: 10 * 60 * 60 * 1000,
     modules: {},
     admin: {
         owner: 'accalia',
