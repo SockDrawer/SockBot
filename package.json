@@ -1,15 +1,14 @@
 {
-  "name": "sock-adept",
+  "name": "sockbot",
   "version": "0.0.1",
   "description": "A sockpuppet bot to use on http://what.thedailywtf.com.",
-  "main": "puppet.js",
+  "main": "SockBot.js",
   "repository": "https://github.com/AccaliaDeElementia/SockBot",
   "author": "Accalia Elementia <Accalia.de.elementia>",
   "dependencies": {
     "async": "~0.2.8",
     "js-yaml": "^3.2.3",
     "request": "^2.42.0",
-    "sqlite3": "^3.0.5",
     "xregexp": "^2.0.0"
   },
   "optionalDependencies": {

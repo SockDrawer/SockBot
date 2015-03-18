@@ -26,13 +26,14 @@ function randomize() {
 
 function guessLanguage(text, callback) {
     var key = 'b9f08badbbd87567f65d97538a0838aa';
-    request.get('http://ws.detectlanguage.com/0.2/detect?q=' +
-            encodeURIComponent(text) + '&key=' + key,
+    request.post({url: 'http://ws.detectlanguage.com/0.2/detect',
+            form: {'q': escape(text), 'key': key}},
             function (err, resp, body) {
                 if (err || resp.statusCode >= 300) {
                     return callback(err || 'error response');
                 }
                 var lang = (JSON.parse(body)).data.detections[0];
+                log(lang.language);
                 callback(lang);
             });
 }
@@ -72,23 +73,25 @@ function getTranslator() { //languages) {
 }
 
 function getLanguages(languages, detected, num, translator) {
-    var findDetected = function (v) {
-        var found = v[translator] === detected.language;
-        if (found) {
-            v.name += '(Confidence: ' + detected.confidence + ' )';
-        }
-        return found;
-        },
-        findEnglish = function (v) {
-        return v[translator] === 'en';
-        },
-        english = languages.filter(findEnglish)[0],
-        first = detected && languages.filter(findDetected)[0],
+    var english,
+        first,
         langs = languages.filter(function (v) {
-            return (v[translator] === 'en' || v !== first) && v[translator];
+            if (v[translator] === detected.language) {
+                first = JSON.parse(JSON.stringify(v));
+                first.name += '(Confidence: ' + detected.confidence + ' )';
+            }
+            if (v[translator] === 'en') {
+                english = v;
+            }
+
+            return v[translator] !== detected.language &&
+                    v[translator] !== 'en' &&
+                    v[translator];
         }),
-        res = [first || english],
         i;
+
+    var res = [first || english];
+
     if (configuration.randomizeOrder) {
         langs.sort(randomize);
     }
