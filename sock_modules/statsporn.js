@@ -152,7 +152,7 @@ function queryToTable(cmd, query, date, rows, callback) {
             return Object.keys(r).map(function (k) {
                 //16 spaces
                 var s = (toString(r[k]) + '                ').slice(0, 16);
-                if (s.indexof('\u202E') > -1) s += '\u202D';
+                if (s.indexOf('\u202E') > -1) s += '\u202D';
                 return s;
             }).join('| ');
         }));
