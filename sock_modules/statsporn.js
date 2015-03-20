@@ -150,10 +150,9 @@ function queryToTable(cmd, query, date, rows, callback) {
         }).join('| '));
         res = res.concat(rows.map(function (r) {
             return Object.keys(r).map(function (k) {
+                var s = toString(r[k]).replace(/\u202E/g, '');
                 //16 spaces
-                var s = (toString(r[k]) + '                ').slice(0, 16);
-                if (s.indexOf('\u202E') > -1) s += '\u202D';
-                return s;
+                return (s + '                ').slice(0, 16);
             }).join('| ');
         }));
     } else {
