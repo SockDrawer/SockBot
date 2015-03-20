@@ -151,7 +151,9 @@ function queryToTable(cmd, query, date, rows, callback) {
         res = res.concat(rows.map(function (r) {
             return Object.keys(r).map(function (k) {
                 //16 spaces
-                return (toString(r[k]) + '                ').slice(0, 16);
+                var s = (toString(r[k]) + '                ').slice(0, 16);
+                if (s.indexof('\u202E') > -1) s += '\u202D';
+                return s;
             }).join('| ');
         }));
     } else {
