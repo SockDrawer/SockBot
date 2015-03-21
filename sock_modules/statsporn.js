@@ -145,8 +145,9 @@ function queryToTable(cmd, query, date, rows, callback) {
         }).join('| '));
         res = res.concat(rows.map(function (r) {
             return Object.keys(r).map(function (k) {
+                var s = toString(r[k]).replace(/\u202E/g, '');
                 //16 spaces
-                return (toString(r[k]) + '                ').slice(0, 16);
+                return (s + '                ').slice(0, 16);
             }).join('| ');
         }));
     } else {
