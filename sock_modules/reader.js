@@ -21,7 +21,7 @@ function readify(callback) {
     discourse.getAllTopics(function (topics, next) {
         async.eachSeries(topics, function (topic, flow) {
             discourse.log('Reading topic `' + topic.slug + '`');
-            discourse.getLastPosts(topic, function (nxt) {
+            discourse.getLastPosts(topic.id, function (ignored, nxt) {
                 nxt();
             }, function () {
                 readTopicPosts(topic.id, flow);
