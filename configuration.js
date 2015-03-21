@@ -6,7 +6,7 @@ var def = {
     username: 'username',
     password: 'passwordpassword',
     notifications: true,
-    verbose: true,
+    verbose: false,
     timestamp: true,
     datestamp: false,
     processActed: false,
