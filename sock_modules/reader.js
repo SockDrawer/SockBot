@@ -21,7 +21,11 @@ function readify(callback) {
     discourse.getAllTopics(function (topics, next) {
         async.eachSeries(topics, function (topic, flow) {
             discourse.log('Reading topic `' + topic.slug + '`');
-            readTopic(topic.id, flow);
+            discourse.getLastPosts(topic, function (nxt) {
+                nxt();
+            }, function () {
+                readTopicPosts(topic.id, flow);
+            });
         }, next);
     }, function (err) {
         if (err) {
@@ -31,7 +35,7 @@ function readify(callback) {
     });
 }
 
-function readTopic(topic, callback) {
+function readTopicPosts(topic, callback) {
     var now = new Date().getTime() - configuration.readWait;
     discourse.getAllPosts(topic, function (err, posts, next) {
         if (err) {
