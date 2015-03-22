@@ -434,7 +434,7 @@ exports.getTopic = function getTopic(topicId, callback) {
 };
 
 exports.getLastPosts = function getLastPosts(topicId, eachPost, complete) {
-    var url = 't/' + topicId + '/last.json?include_raw=1';
+    var url = 't/' + topicId + '/last.json?include_raw=1&track_visit=true';
     dGet(url, function (err, resp, topic) {
         if (err || resp.statusCode >= 400) {
             err = err || 'Error ' + resp.statusCode;

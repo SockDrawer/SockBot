@@ -95,7 +95,6 @@ function parseCmd(post) {
         'query': null,
         'str': null
     };
-    discourse.log('   Query selected: ' + res.name);
     if (!queries) {
         discourse.warn('Queries not loaded');
         return null;
@@ -103,13 +102,9 @@ function parseCmd(post) {
     var q = queries.filter(function (qi) {
         return qi.name.toLowerCase() === res.name;
     })[0];
-    if (!q || (post.trust_level < q.config.trust_level)) {
+    if (!q || (post.trust_level < q.config.trust_level) || !q.query) {
         return null;
     }
-    if (!q.query) {
-        return null;
-    }
-    discourse.log('   Query found: ' + q.name);
     res.args = parseArgs(parts, q, post);
     res.query = q;
     res.str = q.name + ' ' + res.args.join(' ');
@@ -190,9 +185,9 @@ function queryToChart(cmd, query, date, filename, rows, callback) {
             });
         }
     });
-    for (i = 0; i <= (query.args || []).length; i += 1) {
+    for (i = 0; cmd.args && i <= cmd.args.length; i += 1) {
         //TODO: fix this later
-        //title = title.replace('%' + (i + 1) + '%', query.args[i]);
+        title = title.replace('%' + (i + 1) + '%', cmd.args[i]);
     }
     layout.title = title;
     var layout2 = {

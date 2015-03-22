@@ -33,7 +33,6 @@ function guessLanguage(text, callback) {
                     return callback(err || 'error response');
                 }
                 var lang = (JSON.parse(body)).data.detections[0];
-                log(lang.language);
                 callback(lang);
             });
 }
