@@ -14,7 +14,8 @@ var def = {
     modules: {},
     admin: {
         owner: 'accalia',
-        ignore: ['blakeyrat', 'PaulaBean']
+        ignore: ['blakeyrat', 'PaulaBean'],
+        categoryIgnore: [23]
     },
     errors: [
         'Response confused me :-( error), please try again',

@@ -270,7 +270,14 @@ function pollNotifications(callback) {
                         // Do not allow topics when creator is on ignore list
                         if (ignore.indexOf(user) >= 0) {
                             return flow('ignore', 'Topic Creator Ignored',
-                            markRead);
+                                markRead);
+                        }
+                        var categoryIgnore = conf.admin.categoryIgnore;
+                        var category = topic.category_id;
+                        // Do not allow topics when category is on ignore list
+                        if (categoryIgnore.indexOf(category) >= 0) {
+                            return flow('ignore', 'Topic Category Ignored',
+                                markRead);
                         }
                     }
                     return flow(null, topic);
