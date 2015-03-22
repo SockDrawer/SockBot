@@ -15,7 +15,7 @@ var def = {
     admin: {
         owner: 'accalia',
         ignore: ['blakeyrat', 'PaulaBean'],
-        categoryIgnore: [23]
+        categoryIgnore: [8, 23]
     },
     errors: [
         'Response confused me :-( error), please try again',
