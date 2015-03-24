@@ -231,6 +231,16 @@ function pollNotifications(callback) {
         notificationsPending = true;
         return callback();
     }
+    function complete(err, msg) {
+        notificationsActive = false;
+            if (notificationsPending) {
+                notificationsPending = false;
+                setTimeout(function () {
+                    pollNotifications(function () {});
+                }, 0);
+            }
+            callback(err, msg);
+    }
     notificationsActive = true;
     notificationTime = Date.now();
     if (conf.verbose) {
@@ -239,10 +249,10 @@ function pollNotifications(callback) {
     discourse.getNotifications(function (err, resp, notifications) {
         if (err) {
             discourse.warn('Error in notifications: ' + err);
-            return callback();
+            return complete();
         }
         if (!notifications || !Array.isArray(notifications)) {
-            return callback(null, 'No notifications');
+            return complete(null, 'No notifications');
         }
         // Sort the notifications to prevent bubbled notifications
         // throwing things off
@@ -375,14 +385,7 @@ function pollNotifications(callback) {
                 next();
             });
         }, function () {
-            notificationsActive = false;
-            if (notificationsPending) {
-                notificationsPending = false;
-                setTimeout(function () {
-                    pollNotifications(function () {});
-                }, 0);
-            }
-            callback();
+            complete();
         });
     });
 }
