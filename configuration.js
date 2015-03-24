@@ -6,6 +6,7 @@ var def = {
     username: 'username',
     password: 'passwordpassword',
     notifications: true,
+    cyborg: false,
     verbose: false,
     sendErrorPMs: false,
     timestamp: true,

@@ -3,6 +3,7 @@
 var async = require('async');
 var discourse,
     conf,
+    delay,
     currentBingeCap = 0,
     bingeIgnoreList = [];
 
@@ -15,7 +16,8 @@ exports.configuration = {
     bingeHour: 23,
     bingeMinute: 30,
     bingeCap: 10000,
-    topic: 1000
+    topic: 1000,
+    cyborgDelay: 30 * 1000
 };
 
 exports.name = 'AutoLikes';
@@ -113,7 +115,7 @@ exports.onMessage = function onMessage(message, post, callback) {
         }
         setTimeout(function () {
             discourse.postAction('like', message.data.id, callback);
-        }, Math.floor(Math.random() * 5 * 1000));
+        }, Math.floor(Math.random() * 5 * 1000) * delay);
     } else {
         callback();
     }
@@ -136,6 +138,7 @@ exports.registerListeners = function registerListeners(callback) {
 exports.begin = function begin(browser, config) {
     conf = config.modules[exports.name];
     discourse = browser;
+    delay = conf.cyborg ? conf.cyborgDelay : 0;
     if (conf.enabled && conf.binge) {
         bingeIgnoreList = config.admin.ignore;
         scheduleBinges();
