@@ -115,7 +115,7 @@ exports.onMessage = function onMessage(message, post, callback) {
         }
         setTimeout(function () {
             discourse.postAction('like', message.data.id, callback);
-        }, Math.floor(Math.random() * 5 * 1000) * delay);
+        }, Math.floor(Math.random() * 5 * 1000) + delay);
     } else {
         callback();
     }
