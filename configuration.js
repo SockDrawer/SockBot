@@ -7,6 +7,7 @@ var def = {
     password: 'passwordpassword',
     notifications: true,
     verbose: false,
+    sendErrorPMs: false,
     timestamp: true,
     datestamp: false,
     processActed: false,

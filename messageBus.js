@@ -40,44 +40,71 @@ var modules = [],
     notificationTime = Date.now();
 
 function watchdog(callback) {
-        var now = Date.now();
-        //trigger if no poll in 5 minutes
-        if (messageInfo.poll + 5 * 60 * 1000 < now && responsive) {
-            responsive = false;
-            return discourse.createPrivateMessage(conf.admin.owner,
-                'Help, I\'ve fallen and I can\'t Get Up',
-                'MessageBus has not been polled for more than five minutes.' +
-                '\n\n```\n' +
-                JSON.stringify(messageInfo, undefined, 4) + '\n```\n',
-                callback);
-        }
-        if (messageInfo.poll + 10 * 60 * 1000 < now && !responsive) {
-            return discourse.createPrivateMessage(conf.admin.owner,
-                'Help, I\'ve fallen and I can\'t Get Up',
-                'MessageBus has not been polled for more than ten minutes.' +
-                ' Terminating bot.',
-                function () {
-                    discourse.warn('Terminating bot due to failure to poll');
-                    /* eslint-disable no-process-exit */
-                    process.exit(0);
-                    /* eslint-able no-process-exit */
-                });
-        }
-        if (conf.notifications && notificationTime + 10 * 60 * 1000 < now) {
-            return discourse.createPrivateMessage(conf.admin.owner,
-                'Help, I\'ve fallen and I can\'t Get Up',
-                'Notifications has not been polled for more than ten minutes.' +
-                ' Terminating bot.',
-                function () {
-                    discourse.warn('Terminating bot due to failure to poll');
-                    /* eslint-disable no-process-exit */
-                    process.exit(0);
-                    /* eslint-able no-process-exit */
-                });
-        }
-        callback();
+    var now = Date.now();
+    //trigger if no poll in 5 minutes
+    if (messageInfo.poll + 5 * 60 * 1000 < now && responsive) {
+        responsive = false;
+        return async.waterfall([
+            function (cb) {
+                if (conf.sendErrorPMs) {
+                    discourse.createPrivateMessage(conf.admin.owner,
+                        'Help, I\'ve fallen and I can\'t Get Up',
+                        'MessageBus has not been polled for' +
+                        ' more than five minutes.\n\n```\n' +
+                        JSON.stringify(messageInfo, undefined, 4) + '\n```\n',
+                        cb);
+                } else {
+                    cb();
+                }
+            }
+        ], callback);
     }
-    //trigger watchdog every minute.
+    if (messageInfo.poll + 10 * 60 * 1000 < now && !responsive) {
+        return async.waterfall([
+            function (cb) {
+                if (conf.sendErrorPMs) {
+                    discourse.createPrivateMessage(conf.admin.owner,
+                        'Help, I\'ve fallen and I can\'t Get Up',
+                        'MessageBus has not been polled for more' +
+                        ' than ten minutes. Terminating bot.',
+                        cb);
+                } else {
+                    cb();
+                }
+            },
+            function () {
+                discourse.warn('Terminating bot due to failure to poll');
+                /* eslint-disable no-process-exit */
+                process.exit(0);
+                /* eslint-able no-process-exit */
+            }
+        ], callback);
+    }
+    if (conf.notifications && notificationTime + 10 * 60 * 1000 < now) {
+        return async.waterfall([
+            function (cb) {
+                if (conf.sendErrorPMs) {
+                    discourse.createPrivateMessage(conf.admin.owner,
+                        'Help, I\'ve fallen and I can\'t Get Up',
+                        'Notifications have not been polled for' +
+                        ' more than ten minutes. Terminating bot.',
+                        cb);
+                } else {
+                    cb();
+                }
+            },
+            function () {
+                discourse.warn('Terminating bot due to failure to poll');
+                /* eslint-disable no-process-exit */
+                process.exit(0);
+                /* eslint-able no-process-exit */
+            }
+        ], callback);
+    }
+    callback();
+}
+
+//trigger watchdog every minute.
 async.forever(function (next) {
     watchdog(function () {
         setTimeout(next, 60 * 1000);
