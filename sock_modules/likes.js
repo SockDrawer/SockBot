@@ -138,7 +138,7 @@ exports.registerListeners = function registerListeners(callback) {
 exports.begin = function begin(browser, config) {
     conf = config.modules[exports.name];
     discourse = browser;
-    delay = conf.cyborg ? conf.cyborgDelay : 0;
+    delay = conf.cyborg ? conf.cyborgDelay : 1;
     if (conf.enabled && conf.binge) {
         bingeIgnoreList = config.admin.ignore;
         scheduleBinges();
