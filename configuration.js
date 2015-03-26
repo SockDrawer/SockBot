@@ -7,6 +7,7 @@ var def = {
     password: 'passwordpassword',
     maxLoginAttempts: 5,
     retryLoginDelay: 1 * 60 * 1000,
+    extendRetryLoginDelay: false,
     notifications: true,
     cyborg: false,
     verbose: false,

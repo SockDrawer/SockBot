@@ -70,6 +70,7 @@ async.waterfall([
                     }
                     cb();
                 } else {
+                    var delay = config.extendRetryLoginDelay
                         ? tries * config.retryLoginDelay
                         : config.retryLoginDelay;
                     setTimeout(loggerIn, delay);
