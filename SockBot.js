@@ -64,7 +64,7 @@ async.waterfall([
         });
     },
     function (cb) {
-        if (!config.user) {
+        if (!config.user || !config.user.user) {
             // login failed. what can we do?
             throw 'Login failed';
         }
