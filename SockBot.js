@@ -59,14 +59,31 @@ async.waterfall([
         cb();
     },
     function (cb) {
-        browser.login(function () {
-            cb();
-        });
+        var tries = 0;
+        var loggerIn = function () {
+            tries++;
+            browser.login(function () {
+                if (config.user && config.user.user
+                    || tries >= config.maxLoginAttempts) {
+                    if (config.verbose) {
+                        console.log('Login attempts: ' + tries);
+                    }
+                    cb();
+                } else {
+                        ? tries * config.retryLoginDelay
+                        : config.retryLoginDelay;
+                    setTimeout(loggerIn, delay);
+                }
+            });
+        };
+        loggerIn();
     },
     function (cb) {
         if (!config.user || !config.user.user) {
-            // login failed. what can we do?
-            throw 'Login failed';
+            console.log('Terminating bot due to failure to log in');
+            /* eslint-disable no-process-exit */
+            process.exit(0);
+            /* eslint-able no-process-exit */
         }
         console.log('Logged in as: ' + config.user.user.username);
         database.begin(browser, config);

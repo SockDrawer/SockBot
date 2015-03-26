@@ -5,6 +5,8 @@ var fs = require('fs'),
 var def = {
     username: 'username',
     password: 'passwordpassword',
+    maxLoginAttempts: 5,
+    retryLoginDelay: 1 * 60 * 1000,
     notifications: true,
     cyborg: false,
     verbose: false,
