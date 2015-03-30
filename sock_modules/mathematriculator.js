@@ -19,10 +19,6 @@ exports.commands = {
 
 exports.begin = function begin() { };
 
-function doMath(expression) {
-    try {
-        return math.parse(expression);
-    } catch (e) {
-        return e.message;
-    }
+function doMath(payload, callback) {
+    callback(null, math.parse(payload.expression));
 }
