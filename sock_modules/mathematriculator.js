@@ -10,7 +10,7 @@ exports.configuration = {
 };
 
 exports.commands = {
-    domath: {
+    calc: {
         handler: calc,
         defaults: {},
         params: ['expression'],
