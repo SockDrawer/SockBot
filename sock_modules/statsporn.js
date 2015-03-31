@@ -260,6 +260,14 @@ exports.onNotify = function (type, notification, topic, post, callback) {
 };
 
 function listQueries(notification, callback) {
+    if (!queries) {
+        discourse.warn('Queries not loaded');
+        return discourse.createPost(notification.topic_id,
+            notification.post_number, 'No queries available',
+            function () {
+            callback(true);
+        });
+    }
     var res = queries.map(function (q) {
         var args;
         for (var i = 0; i <= 10; i += 1) {
