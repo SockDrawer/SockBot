@@ -34,7 +34,8 @@ function calc(payload, callback) {
                     'Expression: ',
                     realExpression.trim(),
                     '\nResult: ',
-                    result
+                    result,
+                    ''
                 ];
                 callback(null, message.join('\n'));
             } catch (e) {
