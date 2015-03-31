@@ -44,7 +44,7 @@ var def = {
         'the floppy controller.',
         'Operation completed successfully.',
         'FILE_NOT_FOUND',
-        'An exception has occurred. Please press <kdb>Alt</kbd>' +
+        'An exception has occurred. Please press <kbd>Alt</kbd>' +
         '+<kbd>F4</kbd> to retry.',
         'Hard disk fluid reservoir empty.',
         'Expected success, but found success instead.',
