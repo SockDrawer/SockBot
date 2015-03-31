@@ -358,7 +358,7 @@
     data:
     - x: day
       y: mine
-      text: %username%'s
+      text: "%username%'s"
       type: bar
       name: users
     - x: day
