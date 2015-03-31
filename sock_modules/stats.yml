@@ -313,3 +313,61 @@
       text: '%username%: %name%'
       type: bar
       name: posts
+- query: |
+    WITH like_buckets AS (
+            SELECT ua.id,
+            CASE 
+                    WHEN ua.user_id IN (SELECT id FROM users WHERE username ILIKE $1::varchar) THEN 1
+                    ELSE 0 
+            END AS mine, 
+            CASE
+                    WHEN mine = 1 THEN 0 
+                    WHEN ua.target_topic_id = 1000 THEN 1
+                    ELSE 0
+            END AS likes_thread,
+            CASE
+                    WHEN mine = 1 THEN 0
+                    WHEN likes_thread = 1 THEN 0
+                    ELSE 1
+            END AS others,
+            ua.created_at
+            FROM user_actions ua
+            WHERE ua.action_type = 2
+            AND ua.created_at >= (CURRENT_DATE - 30)
+            AND ua.created_at < CURRENT_DATE
+    )
+    SELECT to_char(created_at,'YYYY-MM-DD') AS day, SUM(mine) AS mine, SUM(likes_thread) AS likes_thread, SUM(others) AS others
+    FROM like_buckets
+    GROUP BY to_char(created_at,'YYYY-MM-DD')
+    ORDER BY to_char(created_at,'YYYY-MM-DD')
+  config:
+    trust_level: 1
+    defaults:
+      1: ['%username%']
+  name: Likes
+  chart:
+    filename: Likes/Day %1% %date%
+    layout:
+      title: Likes/Day
+      barmode: stack
+      xaxis:
+        title: Day
+        tickangle: 45
+      yaxis:
+        title: Count
+    data:
+    - x: day
+      y: mine
+      text: %username%'s
+      type: bar
+      name: users
+    - x: day
+      y: likes_thread
+      text: Likes Thread
+      type: bar
+      name: thread
+    - x: day
+      y: others
+      text: Others
+      type: bar
+      name: others
