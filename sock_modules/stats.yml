@@ -321,13 +321,13 @@
                     ELSE 0 
             END AS mine, 
             CASE
-                    WHEN mine = 1 THEN 0 
+                    WHEN ua.user_id IN (SELECT id FROM users WHERE username ILIKE $1::varchar) THEN 0 
                     WHEN ua.target_topic_id = 1000 THEN 1
                     ELSE 0
             END AS likes_thread,
             CASE
-                    WHEN mine = 1 THEN 0
-                    WHEN likes_thread = 1 THEN 0
+                    WHEN ua.user_id IN (SELECT id FROM users WHERE username ILIKE $1::varchar) THEN 0
+                    WHEN ua.target_topic_id = 1000 THEN 0
                     ELSE 1
             END AS others,
             ua.created_at
@@ -358,16 +358,13 @@
     data:
     - x: day
       y: mine
-      text: "%username%'s"
       type: bar
-      name: users
+      name: "%username%'s"
     - x: day
       y: likes_thread
-      text: Likes Thread
       type: bar
-      name: thread
+      name: Likes Thread
     - x: day
       y: others
-      text: Others
       type: bar
-      name: others
+      name: Others
