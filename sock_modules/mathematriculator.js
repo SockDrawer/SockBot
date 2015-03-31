@@ -1,9 +1,10 @@
 'use strict';
-var math = require('mathjs');
+var math = require('mathjs'),
+    async = require('async');
 var errors;
 
 exports.name = 'Math';
-exports.version = '0.1.0';
+exports.version = '0.1.1';
 exports.description = 'Do mathematics!';
 exports.configuration = {
     enabled: false
@@ -23,19 +24,23 @@ exports.begin = function begin(_, config) {
 };
 
 function calc(payload, callback) {
-    try {
-        var args = payload.$arguments;
-        args.unshift(payload.expression);
-        var realExpression = args.join(' ');
-        var result = math.eval(realExpression);
-        var message = [
-            'Expression: ',
-            realExpression.trim(),
-            '\nResult: ',
-            result
-        ];
-        callback(null, message.join('\n'));
-    } catch (e) {
-        callback(null, errors[Math.floor(Math.random() * errors.length)]);
-    }
+    async.series([function () {
+            try {
+                var args = payload.$arguments;
+                args.unshift(payload.expression);
+                var realExpression = args.join(' ');
+                var result = math.eval(realExpression);
+                var message = [
+                    'Expression: ',
+                    realExpression.trim(),
+                    '\nResult: ',
+                    result
+                ];
+                callback(null, message.join('\n'));
+            } catch (e) {
+                var error = errors[Math.floor(Math.random() * errors.length)];
+                callback(null, error);
+            }
+        }
+    ]);
 }
