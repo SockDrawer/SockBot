@@ -1,19 +1,18 @@
 /*jslint node: true, indent: 4, regexp: true */
+/* vim: set ts=4 et: */
 'use strict';
-var async = require('async'),
-    request = require('request');
 var configuration,
-    discourse,
-    errors;
-    
+    discourse;
+
 var crypts = {
     'rot13': function(s) {
         return s.replace( /[A-Za-z]/g, function(c) {
-            return String.fromCharCode( c.charCodeAt(0) + (c.toUpperCase() <= "M" ? 13 : -13 ) );
+            return String.fromCharCode(
+                c.charCodeAt(0) + (c.toUpperCase() <= 'M' ? 13 : -13 ) );
         } );
     },
     'reverse': function(s) {
-        return s.split("").reverse().join("");
+        return s.split('').reverse().join('');
     }
 };
 
@@ -42,7 +41,7 @@ exports.onNotify = function (type, notification, topic, post, callback) {
     var cleaner = /(<\/?[a-z][^>]*>)/ig;
     var text = post.cleaned.replace(cleaner, '');
     var crypt = randCrypt()(text);
-    
+
     discourse.createPost(notification.topic_id,
         notification.post_number, crypt, function() {
             callback(true);
@@ -51,6 +50,5 @@ exports.onNotify = function (type, notification, topic, post, callback) {
 
 exports.begin = function begin(browser, config) {
     configuration = config.modules[exports.name];
-    errors = config.errors;
     discourse = browser;
 };
