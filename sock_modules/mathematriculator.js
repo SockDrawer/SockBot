@@ -4,7 +4,7 @@ var math = require('mathjs'),
 var errors;
 
 exports.name = 'Math';
-exports.version = '0.1.1';
+exports.version = '0.1.2';
 exports.description = 'Do mathematics!';
 exports.configuration = {
     enabled: false
@@ -25,10 +25,10 @@ exports.begin = function begin(_, config) {
 
 function calc(payload, callback) {
     async.series([function () {
+            var args = payload.$arguments;
+            args.unshift(payload.expression);
+            var realExpression = args.join(' ');
             try {
-                var args = payload.$arguments;
-                args.unshift(payload.expression);
-                var realExpression = args.join(' ');
                 var result = math.eval(realExpression);
                 var message = [
                     'Expression: ',
@@ -39,8 +39,12 @@ function calc(payload, callback) {
                 ];
                 callback(null, message.join('\n'));
             } catch (e) {
-                var error = errors[Math.floor(Math.random() * errors.length)];
-                callback(null, error);
+                var error = [
+                    'Unable to evaluate expression ' + realExpression,
+                    errors[Math.floor(Math.random() * errors.length)],
+                    ''
+                ];
+                callback(null, error.join('\n'));
             }
         }
     ]);
