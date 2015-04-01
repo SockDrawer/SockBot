@@ -4,7 +4,7 @@ var math = require('mathjs'),
 var errors;
 
 exports.name = 'Math';
-exports.version = '0.1.2';
+exports.version = '0.1.3';
 exports.description = 'Do mathematics!';
 exports.configuration = {
     enabled: false
