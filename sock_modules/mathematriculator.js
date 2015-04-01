@@ -25,15 +25,8 @@ exports.begin = function begin(_, config) {
     });
 };
 
-<<<<<<< HEAD
-function calc(payload, callback) {
-    async.series([function (cb) {
-            var args = payload.$arguments;
-            args.unshift(payload.expression);
-=======
 function calc(args, callback) {
-    async.series([function () {
->>>>>>> origin/master
+    async.series([function (cb) {
             var realExpression = args.join(' ');
             try {
                 var result = math.eval(realExpression);
@@ -56,6 +49,10 @@ function calc(args, callback) {
         }
     ],
     function (err, results) {
-        callback(err, results);
+        if (err) {
+            callback(err, null);
+        } else {
+            callback(null, results[0]);
+        }
     });
 }
