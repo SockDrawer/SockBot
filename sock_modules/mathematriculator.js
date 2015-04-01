@@ -21,6 +21,10 @@ exports.commands = {
 
 exports.begin = function begin(_, config) {
     errors = config.errors;
+    math.config({
+        number: 'bignumber',
+        precision: 4096
+    });
 };
 
 function calc(payload, callback) {
