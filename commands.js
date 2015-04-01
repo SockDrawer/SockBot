@@ -119,7 +119,7 @@ function commandHelper(definition) {
                 if (args.length <= 0) {
                     return;
                 }
-                var name = /\[?(\w+)/.exec(n)[1];
+                var name = /\[?(\S+)/.exec(n)[1];
                 payload[name] = args.shift();
             });
             payload.$arguments = args;
