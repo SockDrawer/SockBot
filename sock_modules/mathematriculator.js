@@ -10,13 +10,11 @@ exports.configuration = {
     enabled: false
 };
 
-exports.commands = {
-    calc: {
-        handler: calc,
-        defaults: {},
-        params: ['expression'],
-        description: 'The mathematical expression to calculate.'
+exports.onCommand = function onCommand(_, command, args, __, callback) {
+    if (command.toLowerCase() !== 'calc'){
+        args.unshift(command);
     }
+    calc(args, callback);
 };
 
 exports.begin = function begin(_, config) {
@@ -27,10 +25,15 @@ exports.begin = function begin(_, config) {
     });
 };
 
+<<<<<<< HEAD
 function calc(payload, callback) {
     async.series([function (cb) {
             var args = payload.$arguments;
             args.unshift(payload.expression);
+=======
+function calc(args, callback) {
+    async.series([function () {
+>>>>>>> origin/master
             var realExpression = args.join(' ');
             try {
                 var result = math.eval(realExpression);
