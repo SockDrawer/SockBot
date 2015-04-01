@@ -28,7 +28,7 @@ exports.begin = function begin(_, config) {
 };
 
 function calc(payload, callback) {
-    async.series([function () {
+    async.series([function (cb) {
             var args = payload.$arguments;
             args.unshift(payload.expression);
             var realExpression = args.join(' ');
@@ -41,15 +41,18 @@ function calc(payload, callback) {
                     result,
                     ''
                 ];
-                callback(null, message.join('\n'));
+                cb(null, message.join('\n'));
             } catch (e) {
                 var error = [
                     'Unable to evaluate expression ' + realExpression,
                     errors[Math.floor(Math.random() * errors.length)],
                     ''
                 ];
-                callback(null, error.join('\n'));
+                cb(null, error.join('\n'));
             }
         }
-    ]);
+    ],
+    function (err, results) {
+        callback(err, results);
+    });
 }
