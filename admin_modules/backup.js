@@ -136,24 +136,12 @@ function startBackup(callback) {
     });
 }
 
-function exec(command, args, pipeTo, callback) {
-    if (!callback) {
-        callback = pipeTo;
-        pipeTo = null;
-    }
+function exec(command, args, callback) {
     var stdout = [],
         stderr = [],
         process;
     process = spawn(command, args);
-    process.stdout.on('data', function (data) {
-        if (pipeTo) {
-            return pipeTo.stdin.write(data);
-        }
-    });
     process.on('close', function (code) {
-        if (pipeTo) {
-            pipeTo.stdin.end();
-        }
         callback(code, stdout, stderr);
     });
     return process;
@@ -219,7 +207,7 @@ function downloadLatestBackup(isauto, callback) {
                     return flow(err);
                 }
                 async.each(files.filter(function (i) {
-                    return /tar[.]gz$/.test(i);
+                    return /tar[.]gz([.]log)?$/.test(i);
                 }).map(function (i) {
                     return config.download_dir + '/' + i;
                 }), fs.unlink, function (err2) {
@@ -231,7 +219,7 @@ function downloadLatestBackup(isauto, callback) {
             });
         },
         function (flow) {
-            discourse.getForm('admin/backups.json', function (err, b, data) {
+            discourse.getForm('admin/backups.json', function (err, _, data) {
                 if (err) {
                     messages.push('DOWNLOAD: Error Loading Backups');
                     return flow(err);
@@ -280,50 +268,15 @@ function restoreBackup(callback) {
             });
         },
         function (flow) {
-            exec('psql', [
-                '-d', 'discourse', '-c',
-                'DROP SCHEMA backup CASCADE'
-            ], function () {
-                messages.push('RESTORE: Dropped Old `restore` Schema');
-                flow();
-            });
-        },
-        function (flow) {
-            var psql = exec('psql', ['-d', 'discourse'], function (err) {
+            exec('bash', [
+                'admin_modules/backup.sh',
+                src,
+                src + '.log'
+            ], function (err) {
                 if (err) {
-                    messages.push('RESTORE: Load to `restore` Schema Failed');
-                    return flow(err);
+                    messages.push('RESTORE: Restoring failed. Check log file');
                 }
-                messages.push('RESTORE: Load to `restore` Schema Done');
-                flow();
-            });
-            exec('tar', ['-xOzf', src, 'dump.sql'], psql, function () {});
-        },
-        function (flow) {
-            exec('psql', [
-                '-d', 'discourse', '-c',
-                'ALTER SCHEMA public RENAME TO backup'
-            ], function (err, out, errors) {
-                if (err) {
-                    messages.push('RESTORE: Rename Current Schema Failed');
-                    messages = messages.concat(errors);
-                    return flow(err);
-                }
-                messages.push('RESTORE: Rename Current Schema Succeded');
-                flow();
-            });
-        },
-        function (flow) {
-            exec('psql', [
-                '-d', 'discourse', '-c',
-                'ALTER SCHEMA restore RENAME TO public'
-            ], function (err, out, errors) {
-                if (err) {
-                    messages.push('RESTORE: Restore Database Failed');
-                    messages = messages.concat(errors);
-                    return flow(err);
-                }
-                messages.push('RESTORE: Restore Database Succeded');
+                messages.push('RESTORE: Log file: ' + src + '.log');
                 flow();
             });
         }
