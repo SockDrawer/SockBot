@@ -1,8 +1,7 @@
 /*jslint node: true, indent: 4, regexp: true */
 /* vim: set ts=4 et: */
 'use strict';
-var configuration,
-    discourse;
+var discourse;
 
 exports.description = 'Encryptor';
 
@@ -18,19 +17,21 @@ exports.version = '0.1.0';
 
 exports.commands = {
     rot13: {
-        handler: cryptCmd(function(s) {
-            return s.replace( /[A-Za-z]/g, function(c) {
-                return String.fromCharCode(
-                    c.charCodeAt(0) + (c.toUpperCase() <= 'M' ? 13 : -13 ) );
-            });
+        handler: cryptCmd(function(s, payload, callback) {
+            callback(null,
+                s.replace( /[A-Za-z]/g, function(c) {
+                    return String.fromCharCode(c.charCodeAt(0)
+                        + (c.toUpperCase() <= 'M' ? 13 : -13 ));
+                })
+            );
         }),
         defaults: {},
         params: [],
         description: 'Rot13 encoding.'
     },
     reverse: {
-        handler: cryptCmd(function(s) {
-            return s.split('').reverse().join('');
+        handler: cryptCmd(function(s, payload, callback) {
+            callback(null, s.split('').reverse().join(''));
         }),
         defaults: {},
         params: [],
@@ -42,7 +43,7 @@ exports.commands = {
             var keys = Object.keys(exports.commands);
             var id = Math.floor((keys.length - 1) * Math.random());
             payload.$command = 'random(' + keys[id] + ')';
-            return exports.commands[keys[id]].handler(payload, callback);
+            exports.commands[keys[id]].handler(payload, callback);
         },
         defaults: {},
         params: [],
@@ -51,6 +52,12 @@ exports.commands = {
 };
 
 exports.onNotify = function (type, notification, topic, post, callback) {
+    if (!post || !post.cleaned ||
+        ['private_message', 'mentioned', 'replied'].indexOf(type) === -1) {
+        return callback();
+    }
+    discourse.log('Randomly encrypting post\n');
+
     exports.commands.random.handler({
         $post: post,
         $type: type,
@@ -66,29 +73,18 @@ exports.onNotify = function (type, notification, topic, post, callback) {
 
 function cryptCmd(handler) {
     return function(payload, callback) {
-        if ((!configuration.enabled ||
-                    !payload.$post || !payload.$post.cleaned) ||
-                (['private_message', 'mentioned', 'replied']
-                 .indexOf(payload.$type) === -1)) {
-            return callback();
-        }
-
-        discourse.log('Encrypting using: '
-            + payload.$command + ', args: ' + payload.$arguments);
-
-        var cleaner = /(<\/?[a-z][^>]*>)/ig;
-        var text = (payload.$draft || payload.$post.cleaned)
-            .replace(cleaner, '');
-
-        callback(null, {
-            replaceMsg: true,
-            msg: handler(text, payload),
-            log: [payload.$command]
-        });
+        handler(payload.$draft || payload.$post.cleaned,
+                payload,
+                function(err, msg) {
+                    callback(err, {
+                        replaceMsg: true,
+                        msg: msg,
+                        log: [payload.$command]
+                    });
+                });
     };
 }
 
-exports.begin = function begin(browser, config) {
-    configuration = config.modules[exports.name];
+exports.begin = function begin(browser) {
     discourse = browser;
 };
