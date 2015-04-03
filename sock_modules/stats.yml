@@ -375,10 +375,10 @@
     SELECT to_char(created_at,'YYYY-MM-DD') AS day, 
         -1 * SUM(liker_eligible) AS liker_eligible, 
         SUM(likee_eligible) AS likee_eligible, 
-        -1 * SUM(liker_likes) AS liker_likes, 
-        SUM(likee_likes) AS likee_likes, 
-        -1 * SUM(liker_hidden) AS liker_hidden, 
-        SUM(likee_hidden) AS likee_hidden
+        -1 * (SUM(liker_likes) + SUM(liker_eligible)) AS liker_likes, 
+        (SUM(likee_likes) + SUM(likee_eligible)) AS likee_likes, 
+        -1 * (SUM(liker_hidden) + SUM(liker_likes) + SUM(liker_eligible)) AS liker_hidden, 
+        (SUM(likee_hidden) + SUM(likee_likes) + SUM(likee_eligible)) AS likee_hidden
     FROM buckets
     GROUP BY to_char(created_at,'YYYY-MM-DD')
     ORDER BY to_char(created_at,'YYYY-MM-DD')
@@ -391,13 +391,33 @@
     filename: Daily Likes %1% %date%
     layout:
       title: %1%'s Likes/Day
-      barmode: stack
+      barmode: overlay
       xaxis:
         title: Day
         tickangle: 45
       yaxis:
         title: Count
     data:
+    - x: day
+      y: liker_hidden
+      type: bar
+      name: All Likes Given
+      marker: {color: rgb(247, 136, 136) }
+    - x: day
+      y: likee_hidden
+      type: bar
+      name: All Likes Received
+      marker: {color: rgb(92, 130, 159) }
+    - x: day
+      y: liker_likes
+      type: bar
+      name: Eligible + Likes Given in the Likes Thread
+      marker: {color: rgb(209, 92, 92) }
+    - x: day
+      y: likee_likes
+      type: bar
+      name: Eligible + Likes Received in the Likes Thread
+      marker: {color: rgb(64, 104, 134) }
     - x: day
       y: liker_eligible
       type: bar
@@ -408,26 +428,6 @@
       type: bar
       name: Badge-Eligible Likes Received
       marker: {color: rgb(23, 58, 84) }
-    - x: day
-      y: liker_likes
-      type: bar
-      name: Likes Given in the Likes Thread
-      marker: {color: rgb(209, 92, 92) }
-    - x: day
-      y: likee_likes
-      type: bar
-      name: Likes Received in the Likes Thread
-      marker: {color: rgb(64, 104, 134) }
-    - x: day
-      y: liker_hidden
-      type: bar
-      name: Other Likes Given
-      marker: {color: rgb(247, 136, 136) }
-    - x: day
-      y: likee_hidden
-      type: bar
-      name: Other Likes Received
-      marker: {color: rgb(92, 130, 159) }
 #- query: |
 #    WITH like_buckets AS (
 #            SELECT ua.id,
