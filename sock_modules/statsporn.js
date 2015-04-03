@@ -27,7 +27,7 @@ exports.begin = function begin(browser, c) {
     discourse = browser;
     plotly = plotly(config.plotlyuser, config.plotlypass);
     cmdMatcher = new XRegExp('@' + c.username +
-        '(?<type>\\s+(graph|table))?\\s+(?<stats>\\w+)(?<args>(\\s+(\\w+))*)',
+        '(?<type>\\s+(graph|table))?\\s+(?<stats>\\S+)(?<args>(\\s+(\\S+))*)',
         'ig');
     helpMatcher = new XRegExp('@' + c.username + ' (list|list queries)', 'ig');
     async.forever(function (nextTick) {
