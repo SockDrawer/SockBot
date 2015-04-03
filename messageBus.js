@@ -211,6 +211,11 @@ function handleNotification(notification, topic, post, callback) {
     if (post && post.raw) {
         discourse.log('\t' + (post.raw || '').split('\n')[0]);
     }
+    if (type === 'replied' && post.raw.toLowerCase().indexOf(
+            '@' + conf.username.toLowerCase()) > -1) {
+        type = 'mentioned';
+        discourse.log('switching from "reply" to "mentioned"');
+    }
     async.eachSeries(modules, function (module, complete) {
         if (typeof module.onNotify === 'function') {
             module.onNotify(type, notification, topic, post, complete);
