@@ -298,7 +298,7 @@ exports.registerListeners = function registerListeners(callback) {
     callback(null, ['/admin/backups/logs']);
 };
 
-exports.onMessage = function onMessage(message, post, callback) {
+exports.onMessage = function onMessage(message, _, callback) {
     if (!config.enabled) {
         return callback();
     }
