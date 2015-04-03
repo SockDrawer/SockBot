@@ -314,30 +314,72 @@
       type: bar
       name: posts
 - query: |
-    WITH like_buckets AS (
-            SELECT ua.id,
-            CASE 
-                    WHEN ua.user_id IN (SELECT id FROM users WHERE username ILIKE $1::varchar) THEN 1
-                    ELSE 0 
-            END AS mine, 
-            CASE
-                    WHEN ua.user_id IN (SELECT id FROM users WHERE username ILIKE $1::varchar) THEN 0 
-                    WHEN ua.target_topic_id = 1000 THEN 1
-                    ELSE 0
-            END AS likes_thread,
-            CASE
-                    WHEN ua.user_id IN (SELECT id FROM users WHERE username ILIKE $1::varchar) THEN 0
-                    WHEN ua.target_topic_id = 1000 THEN 0
-                    ELSE 1
-            END AS others,
-            ua.created_at
-            FROM user_actions ua
-            WHERE ua.action_type = 2
-            AND ua.created_at >= (CURRENT_DATE - 30)
-            AND ua.created_at < CURRENT_DATE
-    )
-    SELECT to_char(created_at,'YYYY-MM-DD') AS day, SUM(mine) AS mine, SUM(likes_thread) AS likes_thread, SUM(others) AS others
-    FROM like_buckets
+    WITH exclusions AS ( /* Which categories to exclude from counters */
+        SELECT user_id, id, topic_id, post_number
+        FROM posts
+        WHERE raw LIKE '%c09fa970-5a9a-11e4-8ed6-0800200c9a66%' AND
+        user_id IN  (
+                SELECT gu.user_id
+                FROM group_users gu
+                WHERE group_id IN(
+                        SELECT g.id
+                        FROM groups g
+                        WHERE g.name IN ('admins')
+                )
+        )
+    ),
+    buckets AS ( SELECT
+        CASE 
+          WHEN ua.username ILIKE $1::varchar AND (
+            a.target_topic_id NOT IN ( SELECT topic_id FROM badge_posts GROUP BY topic_id HAVING count(topic_id) < 10 )
+            AND a.target_topic_id NOT IN ( SELECT topic_id FROM exclusions )
+            AND a.target_topic_id != 1000
+            AND NOT c.read_restricted)
+          THEN 1 ELSE 0 END AS liker_eligible, 
+        CASE 
+          WHEN ut.username ILIKE $1::varchar AND (
+            a.target_topic_id NOT IN ( SELECT topic_id FROM badge_posts GROUP BY topic_id HAVING count(topic_id) < 10 )
+            AND a.target_topic_id NOT IN ( SELECT topic_id FROM exclusions )
+            AND a.target_topic_id != 1000
+            AND NOT c.read_restricted)
+          THEN 1 ELSE 0 END AS likee_eligible, 
+        CASE 
+          WHEN ua.username ILIKE $1::varchar
+            AND a.target_topic_id = 1000
+          THEN 1 ELSE 0 END AS liker_likes, 
+        CASE 
+          WHEN ut.username ILIKE $1::varchar
+            AND a.target_topic_id = 1000
+          THEN 1 ELSE 0 END AS likee_likes, 
+        CASE 
+          WHEN ua.username ILIKE $1::varchar AND a.target_topic_id != 1000 AND (
+            a.target_topic_id IN ( SELECT topic_id FROM badge_posts GROUP BY topic_id HAVING count(topic_id) < 10 )
+            OR a.target_topic_id IN ( SELECT topic_id FROM exclusions )
+            OR c.read_restricted)
+          THEN 1 ELSE 0 END AS liker_hidden, 
+        CASE 
+          WHEN ut.username ILIKE $1::varchar AND a.target_topic_id != 1000 AND (
+            a.target_topic_id IN ( SELECT topic_id FROM badge_posts GROUP BY topic_id HAVING count(topic_id) < 10 )
+            OR a.target_topic_id IN ( SELECT topic_id FROM exclusions )
+            OR c.read_restricted)
+          THEN 1 ELSE 0 END AS likee_hidden,
+        a.created_at
+        FROM user_actions a
+        INNER JOIN users ua ON a.acting_user_id = ua.id
+        INNER JOIN users ut ON a.user_id = ut.id
+        INNER JOIN topics t ON a.target_topic_id = t.id
+        INNER JOIN categories c ON t.category_id = c.id
+        WHERE a.action_type = 2
+        AND a.created_at > CURRENT_DATE - INTERVAL '1 month'
+        )
+    SELECT to_char(created_at,'YYYY-MM-DD') AS day, 
+        -1 * SUM(liker_eligible) AS liker_eligible, 
+        SUM(likee_eligible) AS likee_eligible, 
+        -1 * (SUM(liker_likes) + SUM(liker_eligible)) AS liker_likes, 
+        (SUM(likee_likes) + SUM(likee_eligible)) AS likee_likes, 
+        -1 * (SUM(liker_hidden) + SUM(liker_likes) + SUM(liker_eligible)) AS liker_hidden, 
+        (SUM(likee_hidden) + SUM(likee_likes) + SUM(likee_eligible)) AS likee_hidden
+    FROM buckets
     GROUP BY to_char(created_at,'YYYY-MM-DD')
     ORDER BY to_char(created_at,'YYYY-MM-DD')
   config:
@@ -346,9 +388,99 @@
       1: ['%username%']
   name: Likes
   chart:
-    filename: Likes/Day %1% %date%
+    filename: Daily Likes %1% %date%
     layout:
-      title: Likes/Day
+      title: %1%'s Likes/Day
+      barmode: overlay
+      xaxis:
+        title: Day
+        tickangle: 45
+      yaxis:
+        title: Count
+    data:
+    - x: day
+      y: liker_hidden
+      type: bar
+      name: All Likes Given
+      marker: {color: rgb(247, 136, 136) }
+    - x: day
+      y: likee_hidden
+      type: bar
+      name: All Likes Received
+      marker: {color: rgb(92, 130, 159) }
+    - x: day
+      y: liker_likes
+      type: bar
+      name: Eligible + Likes Given in the Likes Thread
+      marker: {color: rgb(209, 92, 92) }
+    - x: day
+      y: likee_likes
+      type: bar
+      name: Eligible + Likes Received in the Likes Thread
+      marker: {color: rgb(64, 104, 134) }
+    - x: day
+      y: liker_eligible
+      type: bar
+      name: Badge-Eligible Likes Given
+      marker: {color: rgb(131, 30, 30) }
+    - x: day
+      y: likee_eligible
+      type: bar
+      name: Badge-Eligible Likes Received
+      marker: {color: rgb(23, 58, 84) }
+- query: |
+    WITH exclusions AS ( /* Which categories to exclude from counters */
+        SELECT user_id, id, topic_id, post_number
+        FROM posts
+        WHERE raw LIKE '%c09fa970-5a9a-11e4-8ed6-0800200c9a66%' AND
+        user_id IN  (
+                SELECT gu.user_id
+                FROM group_users gu
+                WHERE group_id IN(
+                        SELECT g.id
+                        FROM groups g
+                        WHERE g.name IN ('admins')
+                )
+        )
+    ),
+    buckets AS ( SELECT
+        CASE 
+          WHEN (
+            a.target_topic_id NOT IN ( SELECT topic_id FROM badge_posts GROUP BY topic_id HAVING count(topic_id) < 10 )
+            AND a.target_topic_id NOT IN ( SELECT topic_id FROM exclusions )
+            AND a.target_topic_id != 1000
+            AND NOT c.read_restricted)
+          THEN 1 ELSE 0 END AS liker_eligible, 
+        CASE 
+          WHEN a.target_topic_id = 1000
+          THEN 1 ELSE 0 END AS liker_likes, 
+        CASE 
+          WHEN a.target_topic_id != 1000 AND (
+            a.target_topic_id IN ( SELECT topic_id FROM badge_posts GROUP BY topic_id HAVING count(topic_id) < 10 )
+            OR a.target_topic_id IN ( SELECT topic_id FROM exclusions )
+            OR c.read_restricted)
+          THEN 1 ELSE 0 END AS liker_hidden, 
+        a.created_at
+        FROM user_actions a
+        INNER JOIN topics t ON a.target_topic_id = t.id
+        INNER JOIN categories c ON t.category_id = c.id
+        WHERE a.action_type = 2
+        AND a.created_at > CURRENT_DATE - INTERVAL '1 month'
+        )
+    SELECT to_char(created_at,'YYYY-MM-DD') AS day, 
+        SUM(liker_eligible) AS liker_eligible, 
+        SUM(liker_likes) AS liker_likes, 
+        SUM(liker_hidden) AS liker_hidden
+    FROM buckets
+    GROUP BY to_char(created_at,'YYYY-MM-DD')
+    ORDER BY to_char(created_at,'YYYY-MM-DD')
+  config:
+    trust_level: 1
+  name: AllLikes
+  chart:
+    filename: Daily Likes %date%
+    layout:
+      title: Overall Likes/Day
       barmode: stack
       xaxis:
         title: Day
@@ -357,14 +489,17 @@
         title: Count
     data:
     - x: day
-      y: mine
+      y: liker_eligible
       type: bar
-      name: "%username%'s"
+      name: Badge-Eligible Likes
+      marker: {color: rgb(131, 30, 30) }
     - x: day
-      y: likes_thread
+      y: liker_likes
       type: bar
-      name: Likes Thread
+      name: Likes in the Likes Thread
+      marker: {color: rgb(209, 92, 92) }
     - x: day
-      y: others
+      y: liker_hidden
       type: bar
-      name: Others
+      name: Other Likes
+      marker: {color: rgb(247, 136, 136) }

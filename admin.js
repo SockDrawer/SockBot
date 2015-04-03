@@ -76,16 +76,6 @@ function handleCommand(post, command, args, callback) {
     });
 }
 
-exports.onNotify = function notify(type, notification, topic, post, callback) {
-    discourse.log('Notification ' + type + ' from ' +
-        notification.data.display_username + ' in "' +
-        notification.data.topic_title + '"');
-    if (post && post.raw) {
-        discourse.log('\t' + (post.raw || '').split('\n')[0]);
-    }
-    callback();
-};
-
 exports.onCommand = function onCommand(type, command, args, data, callback) {
     if (type !== 'private_message'){
         return callback();
