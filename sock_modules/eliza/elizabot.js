@@ -209,7 +209,7 @@ ElizaBot.prototype.transform = function(text) {
 	this.quit=false;
 	// unify text string
 	text=text.toLowerCase();
-	text=text.replace(/@#\$%\^&\*\(\)_\+=~`\{\[\}\]\|:;<>\/\\\t/g, ' ');
+	text=text.replace(/[@#\$%\^&\*\(\)_\+=~`\{\[\}\]\|:;<>\/\\\t]/g, ' ');
 	text=text.replace(/\s+-+\s+/g, '.');
 	text=text.replace(/\s*[,\.\?!;]+\s*/g, '.');
 	text=text.replace(/\s*\bbut\b\s*/g, '.');
