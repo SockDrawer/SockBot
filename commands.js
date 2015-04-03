@@ -6,7 +6,7 @@ var discourse,
     spaces = '[ \f\r\t\v\u00a0\u1680\u180e\u2000-\u200a' +
     '\u2028\u2029\u202f\u205f\u3000]+',
     parser = regexp('^!(?<mod>\\w+)' + spaces + '(?<cmd>\\S+)(?<args>(' +
-        spaces + '\\S+)+)?\\s*$', 'mn'),
+        spaces + '\\S+)+)?\\s*$', 'mng'),
     splitter = regexp(spaces),
     sockModules = {};
 
@@ -53,23 +53,39 @@ exports.onNotify = function notify(type, notification, topic, post, callback) {
     }
     var cmds = parseCommands(post.cleaned),
         response = [],
+        log = [],
         muted = discourse.sleep() > Date.now();
     post.cleaned = post.cleaned.replace(parser, '');
     async.each(cmds, function (command, next) {
         sockModules[command.mod](type, command.cmd, command.args, {
             notification: notification,
             topic: topic,
-            post: post
+            post: post,
+            draft: response.join('\n')
         }, function (err, msg, forcePost) {
             if (err) {
                 discourse.warn('Command error in `' + command.mod + '` ' + msg);
             } else if (msg && (!muted || forcePost)) {
-                response.push(msg);
+                if (typeof msg == 'string') {
+                    response.push(msg);
+                } else {
+                    if (msg.replaceMsg) {
+                        response = [msg.msg];
+                    } else {
+                        response.push(msg.msg);
+                    }
+                    if (msg.log) {
+                        log = log.concat(msg.log);
+                    }
+                }
             }
             next();
         });
     }, function () {
         if (response.length > 0) {
+            if (log.length > 0) {
+                response.push('\n<small>Filed under: ' + log.join(' → '));
+            }
             return discourse.createPost(notification.topic_id,
                 notification.post_number, response.join('\n'),
                 function () {
@@ -126,6 +142,7 @@ function commandHelper(definition) {
             payload.$notification = data.notification;
             payload.$topic = data.topic;
             payload.$post = data.post;
+            payload.$draft = data.draft;
             cmd.handler(payload, callback);
         }
     };
