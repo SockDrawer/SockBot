@@ -203,10 +203,17 @@ function pollMessages(callback) {
 
 // Handle notifications
 function handleNotification(notification, topic, post, callback) {
+    var type = notifyTypes[notification.notification_type];
+
+    discourse.log('Notification ' + type + ' from ' +
+        notification.data.display_username + ' in "' +
+        notification.data.topic_title + '"');
+    if (post && post.raw) {
+        discourse.log('\t' + (post.raw || '').split('\n')[0]);
+    }
     async.eachSeries(modules, function (module, complete) {
         if (typeof module.onNotify === 'function') {
-            module.onNotify(notifyTypes[notification.notification_type],
-                notification, topic, post, complete);
+            module.onNotify(type, notification, topic, post, complete);
         } else {
             complete();
         }
