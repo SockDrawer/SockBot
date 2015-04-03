@@ -489,17 +489,17 @@
         title: Count
     data:
     - x: day
-      y: liker_hidden
+      y: liker_eligible
       type: bar
-      name: Other Likes
-      marker: {color: rgb(247, 136, 136) }
+      name: Badge-Eligible Likes
+      marker: {color: rgb(131, 30, 30) }
     - x: day
       y: liker_likes
       type: bar
       name: Likes in the Likes Thread
       marker: {color: rgb(209, 92, 92) }
     - x: day
-      y: liker_eligible
+      y: liker_hidden
       type: bar
-      name: Badge-Eligible Likes
-      marker: {color: rgb(131, 30, 30) }
+      name: Other Likes
+      marker: {color: rgb(247, 136, 136) }
