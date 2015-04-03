@@ -48,7 +48,8 @@ exports.loadModules = function loadModules(modules) {
 };
 
 exports.onNotify = function notify(type, notification, topic, post, callback) {
-    if (!post || !post.raw) {
+    if (!post || !post.raw ||
+        ['private_message', 'mentioned', 'replied'].indexOf(type) === -1) {
         return callback();
     }
     var cmds = parseCommands(post.cleaned),
@@ -57,6 +58,9 @@ exports.onNotify = function notify(type, notification, topic, post, callback) {
         muted = discourse.sleep() > Date.now();
     post.cleaned = post.cleaned.replace(parser, '');
     async.each(cmds, function (command, next) {
+        discourse.log('Processing command ' + command.cmd
+            + '(' + command.args + ')');
+
         sockModules[command.mod](type, command.cmd, command.args, {
             notification: notification,
             topic: topic,
