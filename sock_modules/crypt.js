@@ -42,7 +42,7 @@ exports.onCommand = function onCommand(type, command, args, data, callback) {
 
     args.unshift(command);
 
-    doCrypt(data.post, args, callback);
+    doCrypt(data.draft || data.post.cleaned, args, callback);
 };
 
 exports.onNotify = function (type, notification, topic, post, callback) {
@@ -51,7 +51,7 @@ exports.onNotify = function (type, notification, topic, post, callback) {
         return callback();
     }
 
-    doCrypt(post, ['random'], function(_, text) {
+    doCrypt(post.cleaned, ['random'], function(_, text) {
             discourse.createPost(notification.topic_id,
                 notification.post_number, text, function() {
                     callback(true);
@@ -60,21 +60,23 @@ exports.onNotify = function (type, notification, topic, post, callback) {
 
 };
 
-function doCrypt(post, commands, callback) {
+function doCrypt(msg, commands, callback) {
     var cleaner = /(<\/?[a-z][^>]*>)/ig;
-    var text = post.cleaned.replace(cleaner, '');
-    var log = '\n\n→ clean → ';
+    var text = msg.replace(cleaner, '');
+    var log = [];
 
     commands.forEach( function(command) {
         if (crypts[command] !== undefined) {
             text = crypts[command](text);
-            log += command + ' → ';
+            log.push(command);
         }
     });
 
-    text += log;
-
-    callback(null, text);
+    callback(null, {
+        replaceMsg: true,
+        msg: text,
+        log: log
+    });
 }
 
 exports.begin = function begin(browser, config) {
