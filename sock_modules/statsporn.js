@@ -9,7 +9,6 @@ var discourse,
     config,
     queries,
     cmdMatcher,
-    helpMatcher,
     cooldownTimers = [];
 exports.name = 'StatsPorn';
 exports.version = '0.5.0';
@@ -29,7 +28,6 @@ exports.begin = function begin(browser, c) {
     cmdMatcher = new XRegExp('@' + c.username +
         '(?<type>\\s+(graph|table))?\\s+(?<stats>\\S+)(?<args>(\\s+(\\S+))*)',
         'ig');
-    helpMatcher = new XRegExp('@' + c.username + ' (list|list queries)', 'ig');
     async.forever(function (nextTick) {
         loadConfig(function () {
             setTimeout(nextTick, 10 * 60 * 1000);
@@ -244,10 +242,7 @@ exports.onNotify = function (type, notification, topic, post, callback) {
     }
     var cmd = parseCmd(post);
     if (!cmd || !cmd.query) {
-        if (helpMatcher.test(post.cleaned)) {
-            return listQueries(notification, callback);
-        }
-        return callback();
+        return listQueries(notification, callback);
     }
     callback(true);
     if (type === 'private_message' || checkCooldown(notification.data ?
@@ -263,7 +258,8 @@ function listQueries(notification, callback) {
     if (!queries) {
         discourse.warn('Queries not loaded');
         return discourse.createPost(notification.topic_id,
-            notification.post_number, 'No queries available',
+            notification.post_number, 'No queries available;'
+            + 'someone probably @&shy;accalia\'d the YAML :blush:',
             function () {
             callback(true);
         });
