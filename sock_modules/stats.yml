@@ -390,7 +390,7 @@
   chart:
     filename: Daily Likes %1% %date%
     layout:
-      title: %1%'s Likes/Day
+      title: "%1%'s Likes/Day"
       barmode: overlay
       xaxis:
         title: Day
