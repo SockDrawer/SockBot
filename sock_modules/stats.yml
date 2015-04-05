@@ -401,33 +401,33 @@
     - x: day
       y: liker_hidden
       type: bar
-      name: All Likes Given
-      marker: {color: rgb(247, 136, 136) }
+      name: All Given
+      marker: {color: 'rgb(247, 136, 136)' }
     - x: day
       y: likee_hidden
       type: bar
-      name: All Likes Received
-      marker: {color: rgb(92, 130, 159) }
+      name: All Received
+      marker: {color: 'rgb(92, 130, 159)' }
     - x: day
       y: liker_likes
       type: bar
-      name: Eligible + Likes Given in the Likes Thread
-      marker: {color: rgb(209, 92, 92) }
+      name: 'Badge, T1000 Given'
+      marker: {color: 'rgb(209, 92, 92)' }
     - x: day
       y: likee_likes
       type: bar
-      name: Eligible + Likes Received in the Likes Thread
-      marker: {color: rgb(64, 104, 134) }
+      name: 'Badge, T1000 Received'
+      marker: {color: 'rgb(64, 104, 134)' }
     - x: day
       y: liker_eligible
       type: bar
-      name: Badge-Eligible Likes Given
-      marker: {color: rgb(131, 30, 30) }
+      name: Badge Given
+      marker: {color: 'rgb(131, 30, 30)' }
     - x: day
       y: likee_eligible
       type: bar
-      name: Badge-Eligible Likes Received
-      marker: {color: rgb(23, 58, 84) }
+      name: Badge Received
+      marker: {color: 'rgb(23, 58, 84)' }
 - query: |
     WITH exclusions AS ( /* Which categories to exclude from counters */
         SELECT user_id, id, topic_id, post_number
@@ -491,15 +491,15 @@
     - x: day
       y: liker_eligible
       type: bar
-      name: Badge-Eligible Likes
-      marker: {color: rgb(131, 30, 30) }
+      name: Badge
+      marker: {color: 'rgb(131, 30, 30)' }
     - x: day
       y: liker_likes
       type: bar
-      name: Likes in the Likes Thread
-      marker: {color: rgb(209, 92, 92) }
+      name: Likes Thread
+      marker: {color: 'rgb(209, 92, 92)' }
     - x: day
       y: liker_hidden
       type: bar
-      name: Other Likes
-      marker: {color: rgb(247, 136, 136) }
+      name: Others
+      marker: {color: 'rgb(247, 136, 136)' }
