@@ -42,10 +42,12 @@ function parseArgs(parts, query, post) {
     if (parts.args) {
         parts.args = parts.args.trim().split(' ');
     }
-    for (; trust >= 0; trust -= 1) {
-        if (query.config.defaults[trust]) {
-            defaults = query.config.defaults[trust].slice();
-            break;
+    if (query.config.defaults) {
+        for (; trust >= 0; trust -= 1) {
+            if (query.config.defaults[trust]) {
+                defaults = query.config.defaults[trust].slice();
+                break;
+            }
         }
     }
     if (post.trust_level >= 4 && parts.args) {
@@ -266,14 +268,16 @@ function listQueries(notification, callback) {
     }
     var res = queries.map(function (q) {
         var args;
-        q.config.defaults = q.config.defaults || [];
-        for (var i = 0; i <= 10; i += 1) {
-            if (q.config.defaults[i]) {
-                args = '\'' + q.config.defaults[i].join('\' \'') + '\'';
-                break;
+        if (q.config.defaults) {
+            for (var i = 0; i <= 10; i += 1) {
+                if (q.config.defaults[i]) {
+                    args = '\'' + q.config.defaults[i].join('\' \'') + '\'';
+                    break;
+                }
             }
         }
-        return q.name + ' ' + args + ':\tAvailable to trust level ' +
+        var query = args ? q.name + ' ' + args : q.name;
+        return query + ':\tAvailable to trust level ' +
             q.config.trust_level + '+';
     });
     res.unshift('Available queries:');
