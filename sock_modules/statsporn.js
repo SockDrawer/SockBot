@@ -239,7 +239,7 @@ function checkCooldown(topic) {
 }
 
 exports.onNotify = function (type, notification, topic, post, callback) {
-    if (['private_message', 'mentioned', 'replied'].indexOf(type) < 0) {
+    if (['private_message', 'mentioned'].indexOf(type) < 0) {
         return callback();
     }
     var cmd = parseCmd(post);
