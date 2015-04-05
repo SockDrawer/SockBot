@@ -27,7 +27,7 @@ exports.onNotify = function (type, notification, topic, post, callback) {
         return callback();
     }
 
-    var jbofihe = spawn('jbofihe', ['-x', '-b', '-w', '110']);
+    var jbofihe = spawn('jbofihe', ['-x', '-b', '-w', '80', '-ie']);
     var result = '    ';
     jbofihe.stdout.on('data', function(data) {
         result += data;
