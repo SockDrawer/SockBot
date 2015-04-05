@@ -110,8 +110,6 @@
     FROM QUERY
   config:
     trust_level: 1
-    defaults:
-      1: []
   name: MonthPosts
   chart:
     filename: MonthPosts %date%
@@ -273,8 +271,6 @@
 - query: 
   config:
     trust_level: 1
-    defaults:
-      1: ['']
   name: trust
 - query: |
     WITH badge_counts AS (
