@@ -259,13 +259,14 @@ function listQueries(notification, callback) {
         discourse.warn('Queries not loaded');
         return discourse.createPost(notification.topic_id,
             notification.post_number, 'No queries available;'
-            + 'someone probably @&shy;accalia\'d the YAML :blush:',
+                + ' someone probably @&shy;accalia\'d the YAML :blush:',
             function () {
-            callback(true);
-        });
+                callback(true);
+            });
     }
     var res = queries.map(function (q) {
         var args;
+        q.config.defaults = q.config.defaults || [];
         for (var i = 0; i <= 10; i += 1) {
             if (q.config.defaults[i]) {
                 args = '\'' + q.config.defaults[i].join('\' \'') + '\'';
