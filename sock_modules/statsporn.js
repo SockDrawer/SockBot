@@ -258,7 +258,8 @@ function listQueries(notification, callback) {
     if (!queries) {
         discourse.warn('Queries not loaded');
         return discourse.createPost(notification.topic_id,
-            notification.post_number, 'No queries available;' + 'someone probably @&shy;accalia\'d the YAML :blush:',
+            notification.post_number, 'No queries available;'
+                + ' someone probably @&shy;accalia\'d the YAML :blush:',
             function () {
                 callback(true);
             });
