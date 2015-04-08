@@ -15,6 +15,10 @@ var browser,
     messageBus,
     sockModules = [];
 
+process.on('exit', function() {
+    console.log(version.bootString);
+});
+
 async.waterfall([
     admin.load,
     function (cb) {

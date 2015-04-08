@@ -24,22 +24,30 @@ var offset = -1;
 //0 for 'is this version', -1 for 'no idea'.
 var hash = '';
 var committer = '';
-var timestamp = Date.now() / 1000 | 0;
+var timestamp = new Date();
 
-var autoversion = true;
+var versource = 'export';
 var describe = '';
 
 if (verspec.indexOf('%') !== -1 ) {
-    var childProcess = require('child_process');
+    var execSync = require('sync-exec');
+    versource = 'auto';
     try {
-        describe = childProcess.execSync('git describe --tags --long --always',
+        var describex = execSync('git describe --tags --long --always',
             {cwd: __dirname});
-        //If Git is unavailable or unable to describe, this will fail here
-        //and Git Log won't get a chance to overwrite the verspec.
-        verspec = ' ' + childProcess.execSync(
-            'git log -n 1 --pretty=%d|%h|%ae|%ct', {cwd: __dirname}); 
+        if (describex && describex.status === 0) {
+            describe = describex.stdout.slice(0, -1);
+        }
+        var verspecx = execSync(
+            'git log -n 1 --pretty="%d|%h|%ae|%ct"', {cwd: __dirname});
+        if (verspecx && verspecx.status === 0) {
+            verspec = verspecx.stdout.slice(0, -1);
+        }
+        if (!describex || describex.status !== 0 ||
+            !verspecx || verspecx.status !== 0)
+        versource = 'manual';
     } catch (e) {
-        autoversion = false;
+        versource = 'manual';
     }
 }
 
@@ -49,11 +57,11 @@ if (describe.length === 1) {
 } else if (describe.length === 3) {
     version = describe[0];
     offset = Number(describe[1]);
-    hash = describe[2].substr(1);
+    hash = describe[2].slice(1);
 }
 
-if (verspec.indexOf('%') !== -1){
-    verspec = verspec.substr(1).split('|');
+if (verspec.indexOf('%') === -1){
+    verspec = verspec.slice(1).split('|');
     var verspecResult = /(?:\(| )tag: ([^,)]+)/.exec(verspec[0]);
     if (verspecResult) {
         version = verspecResult[1];
@@ -71,23 +79,26 @@ exports.version = {
     'hash': hash || null,
     'committer': committer || null,
     'timestamp': timestamp,
-    'guess': !autoversion
+    'source': versource
 };
 
-exports.signature = '\n\n<!-- Posted by ' + codename + ' ' + version.substr(1) +
+exports.signature = ('\n\n<!-- Posted by ' + codename + ' ' + version.slice(1) +
     (vernames[version] ? ' "' + vernames[version] + '"' : '') +
-    ((offset !== 0 && hash) ? ' (' + ((offset === -1) ? '?' : ('+' + offset)) +
-        ':' + hash + ')' : '') +
-    ' on behalf of &#x40;{{conf.admin.owner}} -->';
+    ((offset !== 0 && hash && versource !== 'export') ?
+        ' (' + ((offset === -1) ? '?' : ('+' + offset)) + ':' + hash + ')'
+        : '') +
+    ' on behalf of &#x40;{{conf.admin.owner}} -->');
 
-exports.userAgent = codename + '/' + version.substr(1) + ' (' +
+exports.userAgent = (codename + '/' + version.slice(1) + ' (' +
     (vernames[version] ? vernames[version] + '; ' : '') +
     (hash ? 'rv:' + hash + '; ' : '') +
     'owner:@{{conf.admin.owner}}) @{{conf.username}}/' +
-    timestamp.toISOString().replace(/-/, '').substr(0, 8);
+    timestamp.toISOString().replace(/-/g, '').slice(0, 8));
 
-exports.bootString = codename + ' ' + version.substr(1) +
+exports.bootString = ('\n' + codename + ' ' + version.slice(1) +
     ((offset > 0) ? '+' + offset : '') +
     (vernames[version] ? ' "' + vernames[version] + '"' : '') +
     ((hash && committer) ? '\n' + hash + ' <' + committer + '>' : '') +
-    (!autoversion ? '\n(Detailed versioning not available)' : '');
+    ((versource === 'manual') ? '\n(Detailed versioning not available)' : '')) +
+    '\n';
+
