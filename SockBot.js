@@ -1,6 +1,10 @@
 /*jslint node: true, indent: 4 */
 /* eslint-disable no-console */
 'use strict';
+
+var version = require('./version');
+console.log(version.bootString);
+
 var fs = require('fs'),
     async = require('async'),
     config = require('./configuration'),
