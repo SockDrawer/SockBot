@@ -34,7 +34,7 @@
       WHERE NOT EXISTS (
          SELECT *
          FROM user_visits AS B
-         WHERE B.visited_at = A.visited_at - 1 AND
+         WHERE B.visited_at = A.visited_at - INTERVAL '1 day' AND
          B.user_id = A.user_id
       )
     ),
@@ -44,11 +44,11 @@
       WHERE NOT EXISTS (
          SELECT *
          FROM user_visits AS B
-         WHERE B.visited_at = A.visited_at + 1 AND
+         WHERE B.visited_at = A.visited_at + INTERVAL '1 day' AND
          B.user_id = A.user_id
       )
     )
-    SELECT u.username, S.visited_at AS start_range, E.visited_at AS end_range, (E.visited_at - S.visited_at +1) AS Days
+    SELECT u.username, S.visited_at AS start_range, E.visited_at AS end_range, (E.visited_at - S.visited_at + 1) AS Days
     FROM StartingPoints AS S
     JOIN EndingPoints AS E ON E.rownum = S.rownum
     JOIN users u ON u.id=S.user_id AND
