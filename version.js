@@ -44,8 +44,9 @@ if (verspec.indexOf('%') !== -1 ) {
             verspec = verspecx.stdout.slice(0, -1);
         }
         if (!describex || describex.status !== 0 ||
-            !verspecx || verspecx.status !== 0)
-        versource = 'manual';
+            !verspecx || verspecx.status !== 0) {
+            versource = 'manual';
+        }
     } catch (e) {
         versource = 'manual';
     }
@@ -60,7 +61,7 @@ if (describe.length === 1) {
     hash = describe[2].slice(1);
 }
 
-if (verspec.indexOf('%') === -1){
+if (verspec.indexOf('%') === -1) {
     verspec = verspec.slice(1).split('|');
     var verspecResult = /(?:\(| )tag: ([^,)]+)/.exec(verspec[0]);
     if (verspecResult) {
