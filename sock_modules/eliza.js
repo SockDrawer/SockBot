@@ -4,8 +4,8 @@
     var discourse,
         summons = {},
         configuration,
-        ElizaBot = require('./eliza/elizabot').ElizaBot,
         eliza;
+    var ElizaBot = require('./eliza/elizabot').ElizaBot;
 
     /**
      * @var {string} description Brief description of this module for Help Docs
@@ -25,7 +25,7 @@
         /** Vocabulary file is loaded via require() in elizabot.js. This implies
          *  the path is  relative to 'sock_modules/eliza' :(
          *  TODO: load data in a better way. */
-        vocabulary: 'elizadata',
+        vocabulary: 'elizadata'
     };
 
     /**
@@ -60,7 +60,8 @@
     exports.onNotify = function onNotify(type, notification, topic,
         post, callback) {
         if ( post && post.cleaned &&
-                (['private_message', 'mentioned', 'replied'].indexOf(type) !== -1) &&
+                (['private_message', 'mentioned', 'replied'].indexOf(type)
+                    !== -1) &&
                 (Math.random() < configuration.probability)) {
             var now = (new Date().getTime());
             var cleaner = /(<\/?[a-z][^>]*>)/ig;
