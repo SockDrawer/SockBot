@@ -37,6 +37,40 @@ exports.commands = {
         params: [],
         description: 'Reverse input.'
     },
+    xorbc: {
+        handler: cryptCmd(function(s, payload, callback) {
+            var key = payload.key,
+                iv = 0;
+            callback(null,
+                s.replace( /./g, function(c, _, i) {
+                    var k = key.charCodeAt(i % key.length) ^ iv;
+                    iv = c.charCodeAt(0);
+                    return String.fromCharCode(iv ^ k);
+                }),
+                payload.$command + '(' + key + ')'
+            );
+        }),
+        defaults: {key: '42'},
+        params: ['[key'],
+        description: 'XOR with block chaining.'
+    },
+    rxorbc: {
+        handler: cryptCmd(function(s, payload, callback) {
+            var key = payload.key,
+                iv = 0;
+            callback(null,
+                s.replace( /./g, function(c, _, i) {
+                    var k = key.charCodeAt(i % key.length) ^ iv;
+                    iv = c.charCodeAt(0) ^ k;
+                    return String.fromCharCode(iv);
+                }),
+                payload.$command + '(' + key + ')'
+            );
+        }),
+        defaults: {key: '42'},
+        params: ['[key'],
+        description: 'reverse XOR with block chaining.'
+    },
     /* must be last - prevent random from randomly calling random */
     random: {
         handler: function(payload, callback) {
@@ -73,13 +107,15 @@ exports.onNotify = function (type, notification, topic, post, callback) {
 
 function cryptCmd(handler) {
     return function(payload, callback) {
+        discourse.log('Encrypt ' + (payload.$draft ? 'draft' : 'post')
+                + ' with ' + payload.$command);
         handler(payload.$draft || payload.$post.cleaned,
                 payload,
-                function(err, msg) {
+                function(err, msg, log) {
                     callback(err, {
                         replaceMsg: true,
                         msg: msg,
-                        log: [payload.$command]
+                        log: [log || payload.$command]
                     });
                 });
     };
