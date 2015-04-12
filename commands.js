@@ -68,7 +68,8 @@ exports.onNotify = function notify(type, notification, topic, post, callback) {
             draft: response.join('\n')
         }, function (err, msg, forcePost) {
             if (err) {
-                discourse.warn('Command error in `' + command.mod + '` ' + msg);
+                discourse.warn('Command error in `' + command.mod + '`: '
+                    + err);
             } else if (msg && (!muted || forcePost)) {
                 if (typeof msg == 'string') {
                     response.push(msg);
