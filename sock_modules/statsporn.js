@@ -37,7 +37,7 @@ exports.begin = function begin(browser, c) {
     });
 };
 
-function parseArgs(parts, query, post) {
+function parseArgs(parts, query, post) { //eslint-disable-line max-statements
     var defaults = [],
         trust = post.trust_level,
         i;

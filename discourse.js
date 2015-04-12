@@ -201,7 +201,7 @@ function handleResponse(callback) {
         }
         try {
             body = JSON.parse(body);
-        } catch (e) {}
+        } catch (e) {} //eslint-disable-line no-empty
         callback(err, resp, body);
     };
 }

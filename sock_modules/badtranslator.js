@@ -1,4 +1,5 @@
 /*jslint node: true, indent: 4, regexp: true */
+/*global escape*/
 'use strict';
 var async = require('async'),
     request = require('request');
