@@ -117,6 +117,8 @@ exports.onMessage = function onMessage(message, post, callback) {
     }
 };
 
+/*TODO: actually spellar psots */
+/*eslint-disable no-unused-vars*/
 function spellCheckPost(post, callback) {
     discourse.log('Spellaring psot ' + post.id);
     var raw = post.raw;
@@ -144,3 +146,4 @@ function spellCheckPost(post, callback) {
         });
     });
 }
+/*eslint-enable no-unused-vars*/
