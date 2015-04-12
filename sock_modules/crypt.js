@@ -65,7 +65,7 @@ exports.commands = {
                 return exports.commands[k].randomPickable;
             });
             var id = Math.floor(keys.length * Math.random());
-            payload.$command = 'random(' + keys[id] + ')';
+            payload.$command = 'random:' + keys[id];
             exports.commands[keys[id]].handler(payload, callback);
         },
         defaults: {},
