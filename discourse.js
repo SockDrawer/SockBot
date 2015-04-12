@@ -37,6 +37,7 @@ var version = 'SockBot 0.16 "Hazardous Hera"',
     clientId = uuid(),
     urlbase = conf.url || 'http://what.thedailywtf.com/',
     browser = request.defaults({
+        rejectUnauthorized: false,
         jar: jar,
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
