@@ -35,7 +35,7 @@ help.muteable = false;
 help.prefix = false;
 
 function info(args, callback) {
-    var ret = discourse.version(),
+    var ret = discourse.version().bootString,
         sleepy = new Date(discourse.sleep()),
         now = new Date();
     ret += '\nCurrent time:\t' + now.toUTCString();
