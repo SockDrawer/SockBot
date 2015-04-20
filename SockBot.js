@@ -95,6 +95,12 @@ async.waterfall([
     },
     function (cb) {
         if (!config.user || !config.user.user) {
+            if (config.user) {
+                if (typeof (config.user) === 'object') {
+                    config.user = JSON.stringify(config.user);
+                }
+                console.log('Login error: ' + config.user);
+            }
             console.log('Terminating bot due to failure to log in');
             /* eslint-disable no-process-exit */
             process.exit(0);
