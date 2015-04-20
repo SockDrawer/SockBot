@@ -78,6 +78,12 @@ async.waterfall([
                     }
                     cb();
                 } else {
+                    if (config.user) {
+                        if (typeof (config.user) === 'object') {
+                            config.user = JSON.stringify(config.user);
+                        }
+                        console.log('Login error: ' + config.user);
+                    }
                     var delay = config.extendRetryLoginDelay
                         ? tries * config.retryLoginDelay
                         : config.retryLoginDelay;
