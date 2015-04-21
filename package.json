@@ -6,7 +6,8 @@
   "repository": "https://github.com/AccaliaDeElementia/SockBot",
   "author": "Accalia Elementia <Accalia.de.elementia>",
   "contributors": [
-    "Yamikuronue <yamikuronue> (http://github.com/yamikuronue)"
+    "RaceProUK <RaceProUK> (https://github.com/RaceProUK)",
+    "Yamikuronue <yamikuronue> (https://github.com/yamikuronue)"
   ],
   "dependencies": {
     "async": "~0.2.8",
