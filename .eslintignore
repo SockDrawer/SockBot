@@ -1,3 +1,5 @@
 test.js
 sock_modules/eliza/**
 Gruntfile.js
+site/**
+docs/**
