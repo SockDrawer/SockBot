@@ -32,7 +32,8 @@ exports.version = '1.13.0';
 
 /**
  * Bootstrap the module.
- * @param {string} browser - 
+ * @param {string} browser - The browser I guess?
+ * @param { object} config - The config I guess?
  */
 exports.begin = function begin(browser, config) {
     discourse = browser;

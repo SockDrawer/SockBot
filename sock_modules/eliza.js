@@ -8,13 +8,12 @@
     var ElizaBot = require('./eliza/elizabot').ElizaBot;
 
     /**
-     * @var {string} description Brief description of this module for Help Docs
+     * Brief description of this module for Help Docs
      */
     exports.description = 'Elizabot module';
 
     /**
-     * @var {object} configuration Default Configuration settings for this
-     * sock_module
+     * Default Configuration settings for this sock_module
      */
     exports.configuration = {
         enabled: false,
@@ -29,12 +28,12 @@
     };
 
     /**
-     * @var {string} name The name of this sock_module
+     * The name of this sock_module
      */
     exports.name = 'Eliza';
 
     /**
-     * @var {number} priority If defined by a sock_module it is the priority
+     * If defined by a sock_module it is the priority
      * of the module with respect to other modules.
      *
      * sock_modules **should not** define modules with negative permissions.
@@ -43,7 +42,7 @@
     exports.priority = 1000;
 
     /**
-     * @var {string} version The version of this sock_module
+     * The version of this sock_module
      */
     exports.version = '0.0.1';
 

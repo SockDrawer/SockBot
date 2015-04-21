@@ -21,7 +21,6 @@ exports.description = 'Allow bot to play with dice';
 
 /**
  * Default Configuration settings for this sock_module
- * @var {object}
  */
 exports.configuration = {
     enabled: false,
@@ -32,7 +31,6 @@ exports.configuration = {
 
 /**
  * The name of this sock_module
- * @var {string}
  */
 exports.name = 'DiceMaster';
 
@@ -41,8 +39,7 @@ exports.name = 'DiceMaster';
  * the module with respect to other modules.
  *
  * sock_modules **should not** define modules with negative permissions.
- * Default value is 50 with lower numbers being higher priority.
- * @var {number} 
+ * Default value is 50 with lower numbers being higher priority. 
  */
 exports.priority = undefined;
 
