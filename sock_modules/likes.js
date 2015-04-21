@@ -2,7 +2,10 @@
 'use strict';
 var async = require('async');
 var discourse,
-    conf;
+    conf,
+    delay,
+    currentBingeCap = 0,
+    bingeIgnoreList = [];
 
 exports.description = 'Issue Likes to all posts in a thread';
 
@@ -12,14 +15,16 @@ exports.configuration = {
     binge: false,
     bingeHour: 23,
     bingeMinute: 30,
-    topic: 1000
+    bingeCap: 10000,
+    topic: 1000,
+    cyborgDelay: 30 * 1000
 };
 
 exports.name = 'AutoLikes';
 
 exports.priority = 0;
 
-exports.version = '1.13.0';
+exports.version = '1.14.0';
 
 function format(str, dict) {
     for (var name in dict) {
@@ -29,23 +34,42 @@ function format(str, dict) {
 }
 
 function binge(callback) {
+    if (typeof conf.topic === 'number') {
+        innerBinge(conf.topic, callback);
+    } else {
+        async.each(conf.topic, function (topic, next) {
+            return innerBinge(topic, next);
+        }, callback);
+    }
+}
+
+function innerBinge(topic, callback) {
     var msg = 'Liking /t/%TOPIC%/%POST% by @%USER%';
-    discourse.getAllPosts(conf.topic, function (posts, next) {
+    discourse.getAllPosts(topic, function (err, posts, next) {
+        if (err || currentBingeCap <= 0) {
+            return next(true);
+        }
         var likeables = posts.filter(function (x) {
             var action = x.actions_summary.filter(function (y) {
                 return y.id === 2;
             });
             return action && action[0].can_act;
         });
+        likeables = likeables.slice(0, currentBingeCap);
         async.each(likeables, function (post, flow) {
-            discourse.log(format(msg, {
-                'TOPIC': post.topic_id,
-                'POST': post.post_number,
-                'USER': post.username
-            }));
-            discourse.postAction('like', post.id, function (err, resp) {
-                flow(err || resp.statusCode === 429);
-            });
+            if (bingeIgnoreList.indexOf(post.username) >= 0) {
+                flow();
+            } else {
+                discourse.log(format(msg, {
+                    'TOPIC': post.topic_id,
+                    'POST': post.post_number,
+                    'USER': post.username
+                }));
+                discourse.postAction('like', post.id, function (err2, resp) {
+                    flow(err2 || resp.statusCode === 429);
+                });
+                currentBingeCap--;
+            }
         }, next);
     }, function () {
         callback();
@@ -74,6 +98,7 @@ function scheduleBinges() {
         discourse.log('Like Binge scheduled for ' + hours + 'h' +
             minutes + 'm from now');
         setTimeout(function () {
+            currentBingeCap = conf.bingeCap;
             binge(cb);
         }, utc - now);
     });
@@ -88,7 +113,9 @@ exports.onMessage = function onMessage(message, post, callback) {
         } else {
             discourse.log('Liking Post #' + message.data.id);
         }
-        discourse.postAction('like', message.data.id, callback);
+        setTimeout(function () {
+            discourse.postAction('like', message.data.id, callback);
+        }, Math.floor(Math.random() * 5 * 1000) + delay);
     } else {
         callback();
     }
@@ -96,7 +123,13 @@ exports.onMessage = function onMessage(message, post, callback) {
 
 exports.registerListeners = function registerListeners(callback) {
     if (conf.enabled && conf.follow) {
-        callback(null, ['/topic/' + conf.topic]);
+        if (typeof conf.topic === 'number') {
+            callback(null, ['/topic/' + conf.topic]);
+        } else {
+            callback(null, conf.topic.map(function (v) {
+                return '/topic/' + v;
+            }));
+        }
     } else {
         callback();
     }
@@ -105,7 +138,9 @@ exports.registerListeners = function registerListeners(callback) {
 exports.begin = function begin(browser, config) {
     conf = config.modules[exports.name];
     discourse = browser;
+    delay = conf.cyborg ? conf.cyborgDelay : 1;
     if (conf.enabled && conf.binge) {
+        bingeIgnoreList = config.admin.ignore;
         scheduleBinges();
     }
 };

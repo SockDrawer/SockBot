@@ -3,12 +3,14 @@
     'use strict';
     var discourse,
         summons = {},
-        configuration;
+        configuration,
+        eliza;
+    var ElizaBot = require('./eliza/elizabot').ElizaBot;
 
     /**
      * @var {string} description Brief description of this module for Help Docs
      */
-    exports.description = 'Allow Summoning of bot to play in certain threads';
+    exports.description = 'Elizabot module';
 
     /**
      * @var {object} configuration Default Configuration settings for this
@@ -16,20 +18,20 @@
      */
     exports.configuration = {
         enabled: false,
-        autoTimeout: 60 * 1000,
+        autoTimeout: 30 * 1000,
         userTimeout: 60 * 60 * 1000,
+        waitTime: 25 * 1000,
         probability: 1,
-        messages: [
-            '@%__username__% has summoned me, and so I appear.',
-            'Yes master %__name__%, I shall appear as summoned.',
-            'Yes mistress %__name__%, I shall appear as summoned.'
-        ]
+        /** Vocabulary file is loaded via require() in elizabot.js. This implies
+         *  the path is  relative to 'sock_modules/eliza' :(
+         *  TODO: load data in a better way. */
+        vocabulary: 'elizadata'
     };
 
     /**
      * @var {string} name The name of this sock_module
      */
-    exports.name = 'Summoner';
+    exports.name = 'Eliza';
 
     /**
      * @var {number} priority If defined by a sock_module it is the priority
@@ -43,7 +45,7 @@
     /**
      * @var {string} version The version of this sock_module
      */
-    exports.version = '1.1.0';
+    exports.version = '0.0.1';
 
     function purgeMemory() {
         var lastHour = (new Date().getTime()) - 60 * 60 * 1000, // an hour ago;
@@ -57,28 +59,28 @@
 
     exports.onNotify = function onNotify(type, notification, topic,
         post, callback) {
-        if (type === 'mentioned' && Math.random() < configuration.probability) {
-            var now = (new Date().getTime()),
-                r = Math.floor(Math.random() * configuration.messages.length),
-                s = configuration.messages[r];
+        if ( post && post.cleaned &&
+                (['private_message', 'mentioned', 'replied'].indexOf(type)
+                    !== -1) &&
+                (Math.random() < configuration.probability)) {
+            var now = (new Date().getTime());
+            var cleaner = /(<\/?[a-z][^>]*>)/ig;
+            var text = post.cleaned.replace(cleaner, '');
+            var msg = eliza.transform(text);
             if (summons[notification.topic_id] &&
                 now < summons[notification.topic_id]) {
                 return callback();
             }
             discourse.log(notification.data.display_username +
-                ' summoned me to play in ' + notification.slug);
-            s = s.replace(/%__(\w+)__%/g, function (m, key) {
-                if (post.hasOwnProperty(key)) {
-                    return post[key];
-                }
-                return m;
-            });
+                ' talked to me in ' + notification.slug);
             summons[notification.topic_id] = now + configuration.autoTimeout;
-            discourse.createPost(notification.topic_id,
-                notification.post_number, s,
-                function () {
-                    callback(true);
-                });
+            setTimeout(function() {
+                discourse.createPost(notification.topic_id,
+                    notification.post_number, msg,
+                    function () {
+                    });
+            }, configuration.waitTime);
+            callback(true);
         } else {
             callback();
         }
@@ -86,6 +88,8 @@
     exports.begin = function begin(browser, config) {
         configuration = config.modules[exports.name];
         discourse = browser;
+        discourse.log('Loading vocabulary from: ' + configuration.vocabulary);
+        eliza = new ElizaBot(configuration.vocabulary);
         setInterval(purgeMemory, 30 * 60 * 1000);
     };
 }());

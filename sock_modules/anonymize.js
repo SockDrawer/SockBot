@@ -24,15 +24,16 @@ exports.begin = function begin(browser, config) {
     conf = config.modules[exports.name];
 };
 
-exports.onNotify = function (type, notification, post, callback) {
+exports.onNotify = function (type, notification, topic, post, callback) {
     if ((!conf.enabled || !post) ||
         (!post.cleaned || type !== 'private_message')) {
         return callback();
     }
     var match = rQuote.xexec(post.raw);
-    if (!match) {
+    if (!match || post.topic_id.toString() === match.topic_id) {
         return callback();
     }
+
     var anon = 'Anonymizied Reply Sent. Thank you for using Anonymizer, ' +
         'a SockIndustries application.';
     discourse.log('Posting anonymously to ' + match.topic_id);
