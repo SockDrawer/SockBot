@@ -1,4 +1,7 @@
 'use strict';
+
+var XRegExp = require('xregexp').XRegExp;
+
 /*eslint camelcase:0, max-len: [1, 90, 4] */
 exports.name = 'TrustCheck';
 exports.version = '0.5.0';
@@ -12,18 +15,25 @@ var discourse,
 
 exports.begin = function begin(browser, c) {
     discourse = browser;
-    trigger = new RegExp('@' + c.username + '\\s+trust');
+    trigger = new XRegExp('@' + c.username + '\\s+trust(?<args>(\\s+(\\S+))*)');
 };
 
 exports.onNotify = function (type, notification, topic, post, callback) {
     if (['private_message', 'mentioned', 'replied'].indexOf(type) < 0) {
         return callback();
     }
-    var isRequest = trigger.test(post.cleaned);
-    if (!isRequest) {
+    var username = post.username;
+    var parts = trigger.xexec(post.cleaned);
+    if (!parts) {
         return callback();
     }
-    discourse.getUserData(post.username, function (err, user) {
+    if (post.trust_level >= 4 && parts.args) {
+        parts.args = parts.args.trim().split(' ');
+        if (parts.args.length > 0) {
+            username = parts.args[0];
+        }
+    }
+    discourse.getUserData(username, function (err, user) {
         if (err) {
             return callback();
         }
