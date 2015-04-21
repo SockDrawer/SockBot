@@ -5,9 +5,18 @@
   "main": "puppet.js",
   "repository": "https://github.com/AccaliaDeElementia/SockBot",
   "author": "Accalia Elementia <Accalia.de.elementia>",
+  "contributors": [
+	"Yamikuronue <yamikuronue> (http://github.com/yamikuronue)"
+  ],
   "dependencies": {
     "async": "~0.2.8",
     "request": "^2.42.0",
     "xregexp": "^2.0.0"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.5",
+    "grunt-git": "~0.3.4",
+    "grunt-jsdoc": "~0.5.8",
+    "grunt-github-pages": "~0.0.4"
   }
 }

@@ -28,7 +28,12 @@ var modules = [],
         11: 'linked',
         12: 'granted_badge'
     };
-
+/** 
+ * Handle a message
+ * @param {string} message - The message to handle
+ * @param {string} post - Some sort of post
+ * @param {function} callback - The callback to call after the message has been handled
+ */
 function handleMessage(message, post, callback) {
     var interestedModules = registrations[message.channel];
     async.eachSeries(interestedModules, function (module, innerNext) {

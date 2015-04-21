@@ -29,3 +29,6 @@ SockBot.conf.json
 
 #scratch ideas file
 test.js
+
+#Docs. For grunt task.
+docs/*
