@@ -31,4 +31,4 @@ SockBot.conf.json
 test.js
 
 #Docs. For grunt task.
-docs/*
+site/*
