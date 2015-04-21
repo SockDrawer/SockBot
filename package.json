@@ -6,7 +6,7 @@
   "repository": "https://github.com/AccaliaDeElementia/SockBot",
   "author": "Accalia Elementia <Accalia.de.elementia>",
   "contributors": [
-	"Yamikuronue <yamikuronue> (http://github.com/yamikuronue)"
+    "Yamikuronue <yamikuronue> (http://github.com/yamikuronue)"
   ],
   "dependencies": {
     "async": "~0.2.8",
@@ -15,8 +15,8 @@
   },
   "devDependencies": {
     "grunt": "~0.4.5",
+    "grunt-gh-pages": "^0.10.0",
     "grunt-git": "~0.3.4",
-    "grunt-jsdoc": "~0.5.8",
-    "grunt-github-pages": "~0.0.4"
+    "grunt-jsdoc": "~0.5.8"
   }
 }

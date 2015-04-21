@@ -19,24 +19,24 @@ module.exports = function(grunt) {
             }
         }
     },
-	githubPages: {
-		docs: {
-			options: {
-				// The default commit message for the gh-pages branch
-				commitMessage: 'push documentation automatically'
-			},
-			// The folder where your gh-pages repo is
-			src: 'docs'
-		}
+	'gh-pages': {
+		options: {
+			// The default commit message for the gh-pages branch
+			base: 'docs',
+			message: 'push documentation automatically',
+			repo: 'https://' + process.env.GH_TOKEN + '@github.com/SockDrawer/SockBot'
+		},
+		src: "**"
 	}
   });
 
   // Load the plugins
   grunt.loadNpmTasks('grunt-git');
   grunt.loadNpmTasks('grunt-jsdoc');
-  grunt.loadNpmTasks('grunt-github-pages');
+  grunt.loadNpmTasks('grunt-gh-pages');
 
   // Default task(s).
-  grunt.registerTask('generate-docs', ['gitclone:docs', 'jsdoc', 'githubPages:docs']);
+  grunt.registerTask('generate-docs', ['jsdoc', 'gh-pages']);
+  grunt.registerTask('default', ['jsdoc', 'gh-pages']);
 
 };
