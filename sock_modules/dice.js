@@ -1,6 +1,10 @@
 /*jslint node: true, indent: 4, todo: true */
 
 'use strict';
+/**
+ * Dice module. Responsible for rolling dice in PMs.
+ * @module dice
+ */
 
 var async = require('async'),
     xRegExp = require('xregexp').XRegExp,
@@ -11,13 +15,12 @@ var parser,
     configuration;
 
 /**
- * @var {string} description Brief description of this module for Help Docs
+ * Brief description of this module for Help Docs
  */
 exports.description = 'Allow bot to play with dice';
 
 /**
- * @var {object} configuration Default Configuration settings for this
- * sock_module
+ * Default Configuration settings for this sock_module
  */
 exports.configuration = {
     enabled: false,
@@ -27,21 +30,21 @@ exports.configuration = {
 };
 
 /**
- * @var {string} name The name of this sock_module
+ * The name of this sock_module
  */
 exports.name = 'DiceMaster';
 
 /**
- * @var {number} priority If defined by a sock_module it is the priority of
+ * If defined by a sock_module it is the priority of
  * the module with respect to other modules.
  *
  * sock_modules **should not** define modules with negative permissions.
- * Default value is 50 with lower numbers being higher priority.
+ * Default value is 50 with lower numbers being higher priority. 
  */
 exports.priority = undefined;
 
 /**
- * @var {string} version The version of this sock_module
+ * The version of this sock_module
  */
 exports.version = '1.5.0';
 
@@ -164,10 +167,20 @@ function getDiceFromServer(num, sides, rerollGreater, callback) {
 
 }
 
+/**
+ * Get a random error message. Adds quirkiness to the bot.
+ * @return {string} The error string.
+ */
 function getError() {
     return conf.errors[Math.floor(Math.random() * conf.errors.length)];
 }
 
+/**
+ * Pre-roll dice. To get bad streaks out early :)
+ * @param  {number} num The number of dice to roll
+ * @param  {number} sides The size of dice to roll
+ * @return {number} How many dice were rolled
+ */
 function prerollDice(num, sides) {
     var dice,
         ct = 0,
@@ -189,6 +202,14 @@ function prerollDice(num, sides) {
     return ct;
 }
 
+/**
+ * Roll White Wolf-style dice
+ * @param  {object} match Information about how to match
+ * @param  {string} match.reroll Whether to reroll 10s (exploding dice)
+ * @param  {number} match.num How many dice to roll. Defaults to ten.
+ * @param  {number} match.target The target number for the roll
+ * @param  {Function} callback The callback to call when complete
+ */
 function rollWolfDice(match, callback) {
     var criticals,
         result;
@@ -236,6 +257,12 @@ function rollWolfDice(match, callback) {
     });
 }
 
+/**
+ * Roll Fudge dice
+ * @param  {object} match Information about how to match
+ * @param  {number} match.num How many dice to roll. Defaults to four
+ * @param  {Function} callback The callback to call when complete
+ */
 function rollFudgeDice(match, callback) {
     if (!match.num) {
         match.num = 4;
@@ -281,7 +308,13 @@ function rollFudgeDice(match, callback) {
     });
 }
 
-
+/**
+ * Roll arbitrary d20-style dice
+ * @param  {object} match Information about how to match
+ * @param  {number} match.sides What size dice to roll
+ * @param  {number} match.num How many dice to roll
+ * @param  {Function} callback The callback to call when complete
+ */
 function rollXDice(match, callback) {
     var num = match.num,
         sides = match.sides,
@@ -331,6 +364,12 @@ function rollXDice(match, callback) {
     });
 }
 
+/**
+ * Determine what dice to roll and outsource the logic
+ * @param  {object} match Information about how to roll
+ * @param  {string} match.method What method to use to roll dice
+ * @param  {Function} callback The callback to call when complete.
+ */
 function rollDice(match, callback) {
     if (!match.method) {
         rollXDice(match, callback);
@@ -343,6 +382,11 @@ function rollDice(match, callback) {
     }
 }
 
+/**
+ * Roll as many dice as can be parsed. 
+ * @param  {string} input The input string to parse
+ * @param  {Function} callback The callback to call when complete
+ */
 function rollAllDice(input, callback) {
     var results = [];
     parser(input,
@@ -361,6 +405,16 @@ function rollAllDice(input, callback) {
             callback(results);
         });
 }
+
+/**
+ * Runs on notification. If the dice module is not enabled or is not triggered via PM, 
+ * it early aborts. Otherwise, it tries to respond with the result of the dice roll.
+ * @param {string} type - The type of event. Only responds if this is 'private_message'
+ * @param {string} notification - The notification to respond to
+ * @param {string} topic - Unused. PM-only.
+ * @param {string} post - The post the notification was for
+ * @param {function} callback - The callback to notify when processing is complete.
+ */
 exports.onNotify = function (type, notification, topic, post, callback) {
     if (!configuration.enabled || !post || !post.cleaned) {
         return callback();
@@ -382,6 +436,12 @@ exports.onNotify = function (type, notification, topic, post, callback) {
         }
     });
 };
+
+/**
+ * Bootstrap the module
+ * @param  {string} browser - discourse.
+ * @param  {object} config - The configuration to use
+ */
 exports.begin = function begin(browser, config) {
     configuration = config.modules[exports.name];
     conf = config;
