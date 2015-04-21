@@ -29,7 +29,14 @@ node_modules
 
 #scratch ideas file
 test.js
+
 test.txt
+
+#Docs. For grunt task.
+
+site/*
+docs/*
+
 
 #Sockbot admin Baskups downloads directory
 backups/

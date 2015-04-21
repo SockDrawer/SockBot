@@ -112,6 +112,13 @@ async.forever(function (next) {
 });
 
 // Handle a single message for all interested modules
+/**
+ * Handle a message
+ * @param {string} message - The message to handle
+ * @param {string} post - Some sort of post
+ * @param {function} callback - The callback to call after the
+ *  message has been handled
+ */
 function handleMessage(message, post, callback) {
     var interestedModules = registrations[message.channel];
     // Run modules in sequence, not in parallel
@@ -243,15 +250,16 @@ function pollNotifications(callback) {
         notificationsPending = true;
         return callback();
     }
+
     function complete(err, msg) {
         notificationsActive = false;
-            if (notificationsPending) {
-                notificationsPending = false;
-                setTimeout(function () {
-                    pollNotifications(function () {});
-                }, 0);
-            }
-            callback(err, msg);
+        if (notificationsPending) {
+            notificationsPending = false;
+            setTimeout(function () {
+                pollNotifications(function () {});
+            }, 0);
+        }
+        callback(err, msg);
     }
     notificationsActive = true;
     notificationTime = Date.now();
