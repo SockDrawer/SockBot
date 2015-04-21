@@ -1,4 +1,5 @@
 /*jslint node: true, indent: 4, regexp: true */
+/*global escape*/
 'use strict';
 var async = require('async'),
     request = require('request');
@@ -22,6 +23,19 @@ exports.version = '1.13.0';
 
 function randomize() {
     return Math.floor(Math.random() * 3) - 1;
+}
+
+function guessLanguage(text, callback) {
+    var key = 'b9f08badbbd87567f65d97538a0838aa';
+    request.post({url: 'http://ws.detectlanguage.com/0.2/detect',
+            form: {'q': escape(text), 'key': key}},
+            function (err, resp, body) {
+                if (err || resp.statusCode >= 300) {
+                    return callback(err || 'error response');
+                }
+                var lang = (JSON.parse(body)).data.detections[0];
+                callback(lang);
+            });
 }
 
 function loadLanguages(callback) {
@@ -58,21 +72,33 @@ function getTranslator() { //languages) {
     return translators[0];*/
 }
 
-function getLanguages(languages, num, translator) {
-    var english = languages.filter(function (v) {
-            return v.name === 'English';
-        })[0],
+function getLanguages(languages, detected, num, translator) {
+    var english,
+        first,
         langs = languages.filter(function (v) {
-            return v.name !== 'English' && v[translator];
+            if (v[translator] === detected.language) {
+                first = JSON.parse(JSON.stringify(v));
+                first.name += '(Confidence: ' + detected.confidence + ' )';
+            }
+            if (v[translator] === 'en') {
+                english = v;
+            }
+
+            return v[translator] !== detected.language &&
+                    v[translator] !== 'en' &&
+                    v[translator];
         }),
-        res = [english],
         i;
+
+    var res = [first || english];
+
     if (configuration.randomizeOrder) {
         langs.sort(randomize);
     }
     for (i = 0; i < num && langs.length > 0; i += 1) {
         res.push(langs.pop());
     }
+
     res.push(english);
     return res;
 }
@@ -87,7 +113,6 @@ function translate(text, languages, translator, callback) {
         return languages.length > 0;
     }, function (nextStep) {
         next = languages.shift();
-
         request.get('http://ackuna.com/pages/ajax_translate?type=' +
             translator.toLowerCase() + '&text=' + encodeURIComponent(text) +
             '&src=' + prev[translator] + '&dst=' + next[translator],
@@ -115,34 +140,35 @@ function translate(text, languages, translator, callback) {
 }
 
 
-exports.onNotify = function (type, notification, post, callback) {
+exports.onNotify = function (type, notification, topic, post, callback) {
     if ((!configuration.enabled || !post || !post.cleaned) ||
         (['private_message', 'mentioned', 'replied'].indexOf(type) === -1)) {
         return callback();
     }
     var cleaner = /(<\/?[a-z][^>]*>)/ig;
     var text = post.cleaned.replace(cleaner, '').substring(0, 250);
-    loadLanguages(function (err, languages) {
-        if (err) {
-            return callback();
-        }
-        var trans = getTranslator(languages),
-            langs = getLanguages(languages, configuration.translations, trans);
-        translate(text, langs, trans, function (err, result) {
+    guessLanguage(text, function(detectedLanguage){
+        loadLanguages(function (err, languages) {
             if (err) {
-                discourse.log(err);
                 return callback();
             }
-            discourse.createPost(notification.topic_id,
-                notification.post_number, result, function () {
-                    callback(true);
-                });
+            var trans = getTranslator(languages),
+                langs = getLanguages(languages, detectedLanguage,
+                    configuration.translations, trans);
+            translate(text, langs, trans, function (err2, result) {
+                if (err2) {
+                    discourse.log(err2);
+                    return callback();
+                }
+                discourse.createPost(notification.topic_id,
+                    notification.post_number, result, function () {
+                        callback(true);
+                    });
+            });
         });
     });
-
-
-
 };
+
 exports.begin = function begin(browser, config) {
     configuration = config.modules[exports.name];
     errors = config.errors;

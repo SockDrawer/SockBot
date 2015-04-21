@@ -21,7 +21,11 @@ function readify(callback) {
     discourse.getAllTopics(function (topics, next) {
         async.eachSeries(topics, function (topic, flow) {
             discourse.log('Reading topic `' + topic.slug + '`');
-            readTopic(topic.id, flow);
+            discourse.getLastPosts(topic.id, function (ignored, nxt) {
+                nxt();
+            }, function () {
+                readTopicPosts(topic.id, flow);
+            });
         }, next);
     }, function (err) {
         if (err) {
@@ -31,9 +35,12 @@ function readify(callback) {
     });
 }
 
-function readTopic(topic, callback) {
+function readTopicPosts(topic, callback) {
     var now = new Date().getTime() - configuration.readWait;
     discourse.getAllPosts(topic, function (err, posts, next) {
+        if (err) {
+            return next(err);
+        }
         posts = posts.filter(function (post) {
             return !post.read &&
                 Date.parse(post.created_at) < now;
@@ -52,10 +59,13 @@ exports.begin = function begin(browser, config) {
     configuration = config.modules[exports.name];
 
     if (configuration.enabled) {
-        async.forever(function (next) {
-            readify(function () {
-                setTimeout(next, 24 * 60 * 60 * 1000);
+        var day = 24 * 60 * 60 * 1000;
+        setTimeout(function () {
+            async.forever(function (next) {
+                readify(function () {
+                    setTimeout(next, day);
+                });
             });
-        });
+        }, Math.floor(Math.random() * day));
     }
 };
