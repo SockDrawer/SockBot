@@ -6,6 +6,7 @@ node_js:
 before_script:
 - git config --global user.email "yamikuronue@gmail.com"
 - git config --global user.name "Travis-CI via Yami"
+- npm install -g grunt-cli
 after_script:
 - git config credential.helper "store --file=.git/credentials"
 - echo "https://${GH_TOKEN}:@github.com" > .git/credentials
