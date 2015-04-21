@@ -21,7 +21,7 @@ module.exports = function(grunt) {
 	},
 	jsdoc : {
         dist : {
-            src: ['*.js', 'sock-modules/**/*.js'],
+            src: ['*.js', 'sock_modules/*.js', 'sock_modules/**/*.js'],
             options: {
                 destination: 'site/docs'
             }
@@ -39,7 +39,7 @@ module.exports = function(grunt) {
   });
 
   // Load the plugins
-    grunt.loadNpmTasks('grunt-mkdocs');
+  grunt.loadNpmTasks('grunt-mkdocs');
   grunt.loadNpmTasks('grunt-git');
   grunt.loadNpmTasks('grunt-jsdoc');
   grunt.loadNpmTasks('grunt-gh-pages');
