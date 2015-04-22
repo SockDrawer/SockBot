@@ -1,7 +1,7 @@
 // Based on Norbert Landsteiner's ElizaBot (http://www.masswerk.at/elizabot/)
 // ported to node.js by tar 2015.
 
-/*
+/**
   elizabot.js v.1.1 - ELIZA JS library (N.Landsteiner 2005)
   Eliza is a mock Rogerian psychotherapist.
   Original program by Joseph Weizenbaum in MAD-SLIP for "Project MAC" at MIT.
@@ -46,6 +46,8 @@
 
   vers 1.1: lambda functions in RegExps are currently a problem with too many browsers.
             changed code to work around.
+
+* @module eliza.Elizabot
 */
 'use strict';
 var elizadata;// = require('./elizadata.new');
@@ -74,6 +76,9 @@ ElizaBot.prototype.reset = function() {
 
 ElizaBot.prototype._dataParsed = false;
 
+/**
+ * Initialize the bot
+ */
 ElizaBot.prototype._init = function() {
 	// install ref to global object
 	//var global=ElizaBot.prototype.global=self;
@@ -194,6 +199,12 @@ ElizaBot.prototype._init = function() {
 	ElizaBot.prototype._dataParsed=true;
 }
 
+/**
+ * Sort keywords by rank or original index (tiebreaker)
+ * @param  {Object} a Keyword 1
+ * @param  {Object} b Keyword 2
+ * @return {Number} As per sorting algorithm
+ */
 ElizaBot.prototype._sortKeywords = function(a,b) {
 	// sort by rank
 	if (a[1]>b[1]) return -1
