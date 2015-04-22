@@ -1,3 +1,7 @@
+/**
+ * Spellar module. Responsible for automatically correcting spelling errors
+ * @module spellar
+ */
 'use strict';
 var fs = require('fs'),
     path = require('path'),
@@ -14,8 +18,18 @@ var discourse,
     spellcheckerActive = false,
     spellardSig = '<!-- Spellar\'d by';
 
+/** Description of the module */
 exports.description = 'Automaticly trak adn corect speling misteaks';
 
+/** 
+ * Configuration properties.
+ * @property enabled - Whether to use Spellar or not. Defaults to false.
+ * @property checkOwnPosts - Whether to use check the user's own posts or not. Defaults to false.
+ * @property baseDictLocation - The directory containing the base dictionary. Defaults to dictionaries.
+ * @property baseDictLocation - The name of the base dictionary. Defaults to en_US.
+ * @property baseDictLocation - The directory containing extra dictionaries. Defaults to dictionaries.
+ * @property baseDictLocation - An array of names of extra dictionaries. Defaults to an empty array.
+ */
 exports.configuration = {
     enabled: false,
     checkOwnPosts: false,
@@ -25,12 +39,22 @@ exports.configuration = {
     extraDictNames: []
 };
 
+/** Name of the module */
 exports.name = 'Spellar';
+
+/** Priority of the module */
 exports.priority = undefined;
+
+/** Module version */
 exports.version = '0.1.0';
 
 var fullName = exports.name + ' ' + exports.version;
 
+/**
+ * Bootstrap the module.
+ * @param {object} browser - The Discourse interface object
+ * @param {object} config - The SockBot config object
+ */
 exports.begin = function begin(browser, config) {
     discourse = browser;
     configuration = config.modules[exports.name];
@@ -43,6 +67,9 @@ exports.begin = function begin(browser, config) {
     }
 };
 
+/**
+ * Initialise the dictionary.
+ */
 function initialiseDictionary() {
     var affFile = path.join(baseDictLocation, baseDictName + '.aff');
     var dicFile = path.join(baseDictLocation, baseDictName + '.dic');
@@ -72,6 +99,9 @@ function initialiseDictionary() {
     });
 }
 
+/**
+ * Load additional dictionaries, if provided.
+ */
 function loadAddtitionalDictionaries() {
     if (Array.isArray(extraDictNames)) {
         async.eachSeries(extraDictNames, function (dict, flow) {
@@ -91,6 +121,10 @@ function loadAddtitionalDictionaries() {
     }
 }
 
+/**
+ * Register the required listeners.
+ * @param {function} callback - The callback to use once the action is complete
+ */
 exports.registerListeners = function registerListeners(callback) {
     if (configuration.enabled && configuration.checkOwnPosts) {
         callback(null, ['/latest']);
@@ -99,6 +133,12 @@ exports.registerListeners = function registerListeners(callback) {
     }
 };
 
+/**
+ * Handle received messages.
+ * @param {object} message - An object representing the message that was received
+ * @param {object} post - An object representing the post that the message was about
+ * @param {function} callback - The callback to use once the action is complete
+ */
 exports.onMessage = function onMessage(message, post, callback) {
     if (spellcheckerActive && message.data && message.data.topic_id
         && message.data.message_type === 'latest') {
@@ -119,6 +159,11 @@ exports.onMessage = function onMessage(message, post, callback) {
 
 /*TODO: actually spellar psots */
 /*eslint-disable no-unused-vars*/
+/**
+ * Spell-check the post, sending an edit if anything has been changed
+ * @param {object} post - An object representing the post
+ * @param {function} callback - The callback to use once the action is complete
+ */
 function spellCheckPost(post, callback) {
     discourse.log('Spellaring psot ' + post.id);
     var raw = post.raw;
