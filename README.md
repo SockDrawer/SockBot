@@ -4,6 +4,7 @@ SockBot
 
 Sockbot - A sock puppet Robot worthy of TheDailyWTF that interfaces with what.thedailywtf.com. SO META!
 
+Docs: http://sockdrawer.github.io/SockBot/
 
 NOTA BENE
 =========
