@@ -1,5 +1,11 @@
 /*jslint node: true, indent: 4 */
 (function () {
+
+/**
+ * Sumon module. Summons the bot.
+ * @module sumon
+ */
+
     'use strict';
     var discourse,
         summons = {},
@@ -10,10 +16,7 @@
      */
     exports.description = 'Allow Summoning of bot to play in certain threads';
 
-    /**
-     * 
-     */
-    
+
     /**
      * Default Configuration settings for this sock_module
      * @type {Object}
