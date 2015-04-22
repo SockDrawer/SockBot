@@ -1,21 +1,30 @@
+'use strict';
 /**
- * @module browser
- * @class brower
+ * Used for communicating to discourse and the web.
+ * @module discourse
  * @author Accalia
  * @license MIT
- * @overview Used for communicating to discourse and the web.
  */
-'use strict';
 
+/**
+ * Discourse Request Callback
+ * @callback discourse~request
+ * @param {?Exception} err Error encountered processing request
+ * @param resp Raw response object from npm `request/request` package
+ * @param {Object|String} body response body. If valid JSON will be parsed.
+ */
 
 /**
  * Generate a type 4 UUID.
+ *
  * I don't understand how this does what it does, but it works.
  * It's a lot slower than using node-uuid but i only need one
  * of these so its good enough
  * Source: http://jsperf.com/node-uuid-performance/19
+ *
+ * @returns {String} A type 4 UUID
  */
-function uuid() {
+exports.uuid = function uuid() {
 
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,
         function (c) {
@@ -23,8 +32,7 @@ function uuid() {
                 v = c === 'x' ? r : (r & 0x3 | 0x8);
             return v.toString(16);
         });
-}
-exports.uuid = uuid;
+};
 
 var fs = require('fs');
 var request = require('request'),
@@ -34,7 +42,7 @@ var request = require('request'),
     version = require('./version');
 var csrf,
     jar = request.jar(),
-    clientId = uuid(),
+    clientId = exports.uuid(),
     urlbase = conf.url || 'http://what.thedailywtf.com/',
     browser = request.defaults({
         rejectUnauthorized: false,
@@ -42,8 +50,8 @@ var csrf,
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
             'User-Agent': version.userAgent.
-                replace('{{conf.admin.owner}}', conf.admin.owner).
-                replace('{{conf.username}}', conf.username)
+            replace('{{conf.admin.owner}}', conf.admin.owner).
+            replace('{{conf.username}}', conf.username)
         }
     }),
     tag = version.signature.replace('{{conf.admin.owner}}', conf.admin.owner),
@@ -51,6 +59,12 @@ var csrf,
     rCloseQuote = xRegExp('\\[/quote\\]', 'sgi'),
     delayUntil = new Date().getTime(),
     sleepUntil = new Date().getTime() - 1,
+    /**
+     * Known Post Actions
+     *
+     * @alias discourse.PostAction
+     * @enum {Number}
+     */
     postActionTypes = {
         'bookmark': 1,
         'like': 2,
@@ -69,6 +83,15 @@ var csrf,
     },
     delays = {};
 
+/**
+ * Set the bot to muted status until a time or query sleep status.
+ *
+ * Most actions that would create a post will fail with error 'Muted' if bot is
+ * asleep
+ *
+ * @param {Number} until Unix Timestamp representing time for the bot to unmute
+ * @returns {Number} current timestamp the bot is set to sleep until
+ */
 exports.sleep = function sleep(until) {
     if (until !== undefined) {
         sleepUntil = until;
@@ -76,22 +99,51 @@ exports.sleep = function sleep(until) {
     return sleepUntil;
 };
 
+/**
+ * Get the current version information
+ *
+ * @returns {Version} Active Version module
+ */
 exports.version = function () {
     return version;
 };
 
 /* eslint-disable no-console */
+/**
+ * Log a message to the console
+ *
+ * @param {*} message Message to log
+ */
 exports.log = function log(message) {
     console.log(addTimestamp(message));
 };
+
+/**
+ * Log a warning to the console
+ *
+ * @param {*} message Warning to log
+ */
 exports.warn = function warn(message) {
     console.warn(addTimestamp(message));
 };
+
+/**
+ * Log an error to the console
+ *
+ * @param {*} message Error to log
+ */
 exports.error = function error(message) {
     console.error(addTimestamp(message));
 };
 /* eslint-enable no-console */
 
+/**
+ * Schedule a GET request to discourse
+ *
+ * @param {String} url Site relative URL to fetch
+ * @param {discourse~request} callback Response callback
+ * @param {Number} [delayAfter=0] Apply this rate limiting to requests
+ */
 function dGet(url, callback, delayAfter) {
     schedule(function () {
         browser.get(urlbase + url, handleResponse(callback));
@@ -99,6 +151,14 @@ function dGet(url, callback, delayAfter) {
 }
 exports.getForm = dGet;
 
+/**
+ * Schedule a POST request to discourse
+ *
+ * @param {String} url Site relative URL to post to
+ * @param {Object} form Form to post
+ * @param {discourse~request} callback Response callback
+ * @param {Number} [delayAfter=0] Apply this rate limiting to requests
+ */
 function dPost(url, form, callback, delayAfter) {
     schedule(function () {
         browser.post(urlbase + url, {
@@ -108,6 +168,14 @@ function dPost(url, form, callback, delayAfter) {
 }
 exports.postForm = dPost;
 
+/**
+ * Schedule a POST request to discourse
+ *
+ * @param {String} url Site relative URL to post to
+ * @param {Object} form Form to post
+ * @param {discourse~request} callback Response callback
+ * @param {Number} [delayAfter=0] Apply this rate limiting to requests
+ */
 function dPut(url, form, callback, delayAfter) {
     schedule(function () {
         browser.put(urlbase + url, {
@@ -115,8 +183,15 @@ function dPut(url, form, callback, delayAfter) {
         }, handleResponse(callback));
     }, delayAfter);
 }
-exports.putForm = dPut;
 
+/**
+ * Schedule a DELETE request to discourse
+ *
+ * @param {String} url Site relative URL to post to
+ * @param {Object} form Form to post
+ * @param {discourse~request} callback Response callback
+ * @param {Number} [delayAfter=0] Apply this rate limiting to requests
+ */
 function dDelete(url, form, callback, delayAfter) {
     schedule(function () {
         browser.post(urlbase + url, {
@@ -124,14 +199,30 @@ function dDelete(url, form, callback, delayAfter) {
         }, handleResponse(callback));
     }, delayAfter);
 }
-exports.deleteForm = dDelete;
 
+/**
+ * Issue a GET request and save result to filesystem
+ *
+ * @param {String} url Url to fetch
+ * @param {String} filename Filename to save to
+ * @param callback Completion callback
+ */
 exports.saveFile = function saveFile(url, filename, callback) {
     var strm = fs.createWriteStream(filename);
     strm.on('close', callback);
     browser.get(url).pipe(strm);
 };
 
+/**
+ * Add timestamp to message.
+ *
+ * if `datestamp` configuration setting is truthy add UTC date and time, else
+ * if `timestamp` configuration setting is truthy add UTC time, else
+ * return message unaltered
+ *
+ * @param {*} message Message to timestamp
+ * @returns {String} timestamped input message
+ */
 function addTimestamp(message) {
     var date = new Date().toISOString().replace(/\..+$/, '');
     if (conf.datestamp) {
@@ -142,14 +233,30 @@ function addTimestamp(message) {
     return message;
 }
 
-
+/**
+ * Apply normalization to a post.
+ *
+ * Add `cleaned` key that contains post raw with bbcode quotes removed
+ * Alter trust_level key as follows:<br/>
+ *<br/>
+ * * If poster matches `admin.owner` configuration setting set TL to 9<br/>
+ * * Else if poster is an admin set TL to 8<br/>
+ * * Else if poster is a moderator set TL to 7<br/>
+ * * Else if poster is a staff member set TL to 6<br/>
+ * * Else if poster is a member of `admin.ignore` configuration list set TL to 0
+ *<br/><br/>
+ * add `url` and `reply_to` keys to the post
+ *
+ * @param {Post} post Discourse Post Object
+ * @returns {CleanedPost} Cleaned Discourse Post Object
+ */
 function cleanPost(post) {
     if (post.raw) {
         post.cleaned = xRegExp.replace(post.raw, rQuote, '');
         post.cleaned = xRegExp.replace(post.cleaned, rCloseQuote, '');
     }
     // Don't have a choice about using non-camelcase here...
-    /*eslint-disable camelcase, max-depth */
+    /*eslint-disable camelcase*/
     if (post.username === conf.admin.owner) {
         post.trust_level = 9;
     } else if (post.admin) {
@@ -165,10 +272,20 @@ function cleanPost(post) {
     post.url = urlbase + 't/' + post.topic_slug + '/' + post.topic_id + '/';
     post.reply_to = post.url + (post.reply_to_post_number || '');
     post.url += post.post_number;
-    /*eslint-enable camelcase, max-depth */
+    /*eslint-enable camelcase*/
     return post;
 }
 
+/**
+ * Schedule a task
+ *
+ * if `delayGroup` is provided will schedule such that tasks with the same value
+ * for `delayGroup` will be executed at most once per `delayGroup` milliseconds
+ *
+ * @param {Function} task Task to schedule
+ * @param {Number} [delayGroup] Ensure task is rate limited to this rate
+ *
+ */
 function schedule(task, delaygroup) {
     var now = new Date().getTime();
     if (delaygroup) {
@@ -190,7 +307,20 @@ function schedule(task, delaygroup) {
     }
 }
 
+/**
+ * Create a handler for HTTP requests
+ *
+ * @private
+ * @param {discourse~request} callback Handler that should handle
+ * @returns {discourse~request} Handler that processes response then hands
+ *                              response to `callback`
+ */
 function handleResponse(callback) {
+    /**
+     * Handle response.
+     *
+     * Parse response body as JSON if response can be parsed as JSON
+     */
     return function handleIt(err, resp, body) {
         if (!resp) {
             err = err || 'Unknown network error';
@@ -208,11 +338,17 @@ function handleResponse(callback) {
     };
 }
 
+/**
+ * Log into Discourse
+ *
+ * Uses `username` and `password` configuration settings to login to discourse
+ *
+ * @param {discourse~request} callback Completion callback
+ */
 exports.login = function login(callback) {
     async.waterfall([
-
         function (next) {
-            dGet('session/csrf.json', function (err, resp, obj) {
+            dGet('session/csrf.json', function (err, _, obj) {
                 csrf = (obj || {}).csrf;
                 browser = browser.defaults({
                     headers: {
@@ -234,11 +370,26 @@ exports.login = function login(callback) {
     ], callback);
 };
 
-
+/**
+ * Reply to a post.
+ *
+ * @param {Post} post Post object to reply to
+ * @param {string} raw Raw post data
+ * @param {discourse~request} callback Completion callback
+ */
 exports.reply = function reply(post, raw, callback) {
     createPost(post.topic_id, post.post_number, raw, callback);
 };
 
+/**
+ * Create a post.
+ *
+ * @param {Number} topic Id of the topic to reply to
+ * @param {Number} [replyTo=undefined] Post_number of the post replyied to
+ * @param {String} raw Raw post data
+ * @param {discourse~request} callback Completion callback
+ * @param {Boolean} [nomute] INTERNAL USE ONLY. Do not set!
+ */
 function createPost(topic, replyTo,
     raw, callback, nomute) {
     if (!nomute && new Date().getTime() < sleepUntil) {
@@ -260,6 +411,14 @@ function createPost(topic, replyTo,
 }
 exports.createPost = createPost;
 
+/**
+ * Create a new private message.
+ *
+ * @param {String|String[]} to Username or names to create PM to
+ * @param {String} title Title of the Private Message
+ * @param {String} raw Raw post data
+ * @param {discourse~request} callback Completion callback
+ */
 exports.createPrivateMessage = function createPrivateMessage(to, title,
     raw, callback) {
     var form = {
@@ -275,6 +434,14 @@ exports.createPrivateMessage = function createPrivateMessage(to, title,
     }, 6000);
 };
 
+/**
+ * Edit an existing post.
+ *
+ * @param {Number} postId Id number of the post to edit
+ * @param {String} raw New raw post data
+ * @param {String} [editReason] Optional Edit Reason that no one ever uses
+ * @param {discourse~request} callback Completion callback
+ */
 exports.editPost = function editPost(postId, raw, editReason, callback) {
     if (new Date().getTime() < sleepUntil) {
         return callback('Muted');
@@ -295,6 +462,12 @@ exports.editPost = function editPost(postId, raw, editReason, callback) {
     }, 6000);
 };
 
+/**
+ * Delete an existing post.
+ *
+ * @param {Number} postId Id of the post to delete
+ * @param {discourse~request} callback Completion callback
+ */
 exports.deletePost = function deletePost(postId, callback) {
     if (new Date().getTime() < sleepUntil) {
         return callback('Muted');
@@ -305,6 +478,14 @@ exports.deletePost = function deletePost(postId, callback) {
     dDelete('posts/' + postId, form, callback, 6000);
 };
 
+/**
+ * Perform a post action on a post
+ *
+ * @param {PostAction} action Action to perform
+ * @param {Number} postId Id of the post to act on
+ * @param {String} message Content of any applicable moderation message
+ * @param {discourse~request} callback Completion callback
+ */
 exports.postAction = function postAction(action, postId, message, callback) {
     if (typeof message === 'function') {
         callback = message;

@@ -1,5 +1,8 @@
+/**
+ * MobileEmoji module. Responsible for automatically replacing emoji with Discourse emoji codes
+ * @module emoji
+ */
 'use strict';
-//var async = require('async');
 var discourse,
     configuration;
 
@@ -89,23 +92,42 @@ var emojiLookup = {
     '🙏': ':pray:'
 };
 
+/** Description of the module */
 exports.description = 'Automatically replace emoji with Discourse emoji codes';
 
+/** 
+ * Configuration properties.
+ * @property enabled - Whether to use MobileEmoji or not. Defaults to false.
+ */
 exports.configuration = {
     enabled: false
 };
 
+/** Name of the module */
 exports.name = 'MobileEmoji';
+
+/** Priority of the module */
 exports.priority = undefined;
+
+/** Module version */
 exports.version = '0.3.0';
 
 var fullName = exports.name + ' ' + exports.version;
 
+/**
+ * Bootstrap the module.
+ * @param {object} browser - The Discourse interface object
+ * @param {object} config - The SockBot config object
+ */
 exports.begin = function begin(browser, config) {
     discourse = browser;
     configuration = config.modules[exports.name];
 };
 
+/**
+ * Register the required listeners.
+ * @param {function} callback - The callback to use once the action is complete
+ */
 exports.registerListeners = function registerListeners(callback) {
     if (configuration.enabled) {
         callback(null, ['/latest']);
@@ -114,6 +136,12 @@ exports.registerListeners = function registerListeners(callback) {
     }
 };
 
+/**
+ * Handle received messages.
+ * @param {object} message - An object representing the message that was received
+ * @param {object} post - An object representing the post that the message was about
+ * @param {function} callback - The callback to use once the action is complete
+ */
 exports.onMessage = function onMessage(message, post, callback) {
     if (message.data && message.data.topic_id
         && message.data.message_type === 'latest') {
