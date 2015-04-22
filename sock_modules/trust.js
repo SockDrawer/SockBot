@@ -1,23 +1,65 @@
 'use strict';
+/**
+ * Trust level report generation module
+ * @module trust
+ */
+
 
 var XRegExp = require('xregexp').XRegExp;
 
 /*eslint camelcase:0, max-len: [1, 90, 4] */
+
+/**
+ * The name of the sockbot module
+ * @type {String}
+ */
 exports.name = 'TrustCheck';
+
+/**
+ * The version of this sockbot module
+ * @type {String}
+ */
 exports.version = '0.5.0';
+
+/**
+ * Description of the module, for help text
+ * @type {String}
+ */
 exports.description = 'Provide reports of trust levels';
+
+/**
+ * Configuration options
+ * @type {Object}
+ */
 exports.configuration = {
+    /**
+     * Is the module enabled?
+     * @type {Boolean}
+     */
     enabled: false
 };
 
 var discourse,
     trigger;
-
+ /**
+ * Bootstrap the module
+ * @param  {string} browser - discourse.
+ * @param  {object} config - The configuration to use
+ */
 exports.begin = function begin(browser, c) {
     discourse = browser;
     trigger = new XRegExp('@' + c.username + '\\s+trust(?<args>(\\s+(\\S+))*)');
 };
 
+/**
+ * Runs on notification. Only responds to private_message, mention, or reply.
+ * This also only replies to requests for your own report unless you're TL4 or higher. 
+ * @param {string} type - The type of event.
+ * @param {string} notification - The notification to respond to
+ * @param {string} topic - Unused.
+ * @param {string} post - The post the notification was for
+ * @param {function} callback - The callback to notify when processing is complete.
+ */
 exports.onNotify = function (type, notification, topic, post, callback) {
     if (['private_message', 'mentioned', 'replied'].indexOf(type) < 0) {
         return callback();
@@ -45,6 +87,11 @@ exports.onNotify = function (type, notification, topic, post, callback) {
     });
 };
 
+/**
+ * Format the report to send out.
+ * @param  {Object} user The user whose report this is for
+ * @return {String} The report text, formatted pretty
+ */
 function formatReport(user) {
     var txt = getReportBase(user);
     txt = txt.replace('%USERNAME%', user.username);
@@ -60,6 +107,11 @@ function formatReport(user) {
     return txt;
 }
 
+/**
+ * Get the basic report information for the user
+ * @param  {Object} user Basic info about the user
+ * @return {String} The information about the user
+ */
 function getReportBase(user) {
     var base = '```text\n' +
         'username: %USERNAME%\n' +
@@ -93,6 +145,10 @@ function getReportBase(user) {
     return base;
 }
 
+/**
+ * List of description text for a given promotion table
+ * @type {Object}
+ */
 var promotionTable = {
     locked: 'Trust level is locked, promotion disabled.',
     tl0: 'Analysis not available for Trust Level 0.',
@@ -115,6 +171,11 @@ var promotionTable = {
     }
 };
 
+/**
+ * Get information about the trust level for the user
+ * @param  {Object} user The user to get information about
+ * @return {String} The promotion text for that user.
+ */
 function promotionAnalysis(user) {
     if (user.trust_level_locked) {
         return promotionTable.locked;
