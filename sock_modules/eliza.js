@@ -1,4 +1,10 @@
 /*jslint node: true, indent: 4 */
+
+/**
+ * Elizabot - a virtual therapist. 
+ * @module eliza
+ */
+
 (function () {
     'use strict';
     var discourse,
@@ -16,14 +22,41 @@
      * Default Configuration settings for this sock_module
      */
     exports.configuration = {
+        /**
+         * Whether to enable this bot
+         * @type {Boolean}
+         */
         enabled: false,
+
+        /**
+         * The default timeout
+         * @type {Number}
+         */
         autoTimeout: 30 * 1000,
+
+        /**
+         * Timeout per user
+         * @type {Number}
+         */
         userTimeout: 60 * 60 * 1000,
+
+        /**
+         * WAit time for a reply
+         * @type {Number}
+         */
         waitTime: 25 * 1000,
+
+        /**
+         * Probability of answering, from 0 to 1
+         * @type {Number}
+         */
         probability: 1,
-        /** Vocabulary file is loaded via require() in elizabot.js. This implies
+        /**
+         *  Vocabulary file is loaded via require() in elizabot.js. This implies
          *  the path is  relative to 'sock_modules/eliza' :(
-         *  TODO: load data in a better way. */
+         *  TODO: load data in a better way. 
+         *  @type {String} 
+         */
         vocabulary: 'elizadata'
     };
 
@@ -56,6 +89,15 @@
         }
     }
 
+    /**
+     * Runs on notification. Uses a random chance of appearing to determine if it should appear or not, 
+     * controlled by the module configuration.
+     * @param {string} type - The type of event. Only responds if this is 'mentioned', PM, or reply
+     * @param {string} notification - The notification to respond to
+     * @param {string} topic - Unused.
+     * @param {string} post - The post the notification was for
+     * @param {function} callback - The callback to notify when processing is complete.
+     */
     exports.onNotify = function onNotify(type, notification, topic,
         post, callback) {
         if ( post && post.cleaned &&
@@ -84,6 +126,12 @@
             callback();
         }
     };
+
+ /**
+ * Bootstrap the module.
+ * @param {object} browser - The Discourse interface object
+ * @param {object} config - The SockBot config object
+ */
     exports.begin = function begin(browser, config) {
         configuration = config.modules[exports.name];
         discourse = browser;
