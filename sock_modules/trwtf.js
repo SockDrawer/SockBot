@@ -1,5 +1,10 @@
 /*jslint node: true, indent: 4 */
 /*eslint max-statements:0 */
+
+/**
+ * TRWTF module. Tells people they are TRWTF
+ * @module trwtf
+ */
 (function () {
     'use strict';
     var discourse,
@@ -7,14 +12,15 @@
         configuration;
 
     /**
-     * @var {string} description Brief description of this module for Help Docs
+     * Brief description of this module for Help Docs
+     * @type {String}
      */
     exports.description =
         'Allow Summoning of bot to play in certain threads';
 
     /**
-     * @var {object} configuration Default Configuration settings for this
-     * sock_module
+     * Default Configuration settings for this sock_module
+     * @type {Object}
      */
     exports.configuration = {
         enabled: false,
@@ -25,24 +31,30 @@
     };
 
     /**
-     * @var {string} name The name of this sock_module
+     * The name of this sock_module
+     * @type {String}
      */
     exports.name = 'TRWTF';
 
     /**
-     * @var {number} priority If defined by a sock_module it is the priority
+     * If defined by a sock_module it is the priority
      * of the module with respect to other modules.
      *
      * sock_modules **should not** define modules with negative permissions.
      * Default value is 50 with lower numbers being higher priority.
+     * @type {Number}
      */
     exports.priority = 1000;
 
     /**
-     * @var {string} version The version of this sock_module
+     * The version of this sock_module
+     * @type {String}
      */
     exports.version = '0.9.5';
 
+    /**
+     * Purge old summons. For performance reasons.
+     */
     function purgeMemory() {
         var lastHour = (new Date().getTime()) - 60 * 60 * 1000, // an hour ago;
             k; //key
@@ -52,13 +64,42 @@
             }
         }
     }
+
+    /**
+     * Reply options
+     * @type {Object}
+     */
     var replyOptions = {
+        /**
+         * Enable or disable "amirite"
+         * @type {Boolean}
+         */
         amirite: false,
+
+        /**
+         * Enable or disable "newb mode" (which provides extra abbr tags)
+         * @type {Boolean}
+         */
         newb: false,
+
+        /**
+         * Enable or disable bolding
+         * @type {Boolean}
+         */
         bold: false,
+
+        /**
+         * Enable or disable ahref the white whale
+         * @type {String}
+         */
         ahref: null
     };
 
+    /**
+     * Check for a mention of this bot in the reply. If there is none, the reply is ignored.
+     * @param  {String} replyText The reply text to check
+     * @return {Boolean} Whether there was a mention or not
+     */
     function checkForMentionInReply(replyText) {
         var mention = /\@trwtfbot.*/g;
         var found = replyText.match(mention);
@@ -77,6 +118,10 @@
         }
     }
 
+    /**
+     * Process new options, for remote control of the bot's config
+     * @param  {String} postRaw The raw post
+     */
     function processOptions(postRaw) {
         //First, process and remove hrefs...
         var hrefRegex = /(-ah) .* ?/g;
@@ -107,6 +152,14 @@
             'ahref: ' + replyOptions.ahref);
     }
 
+  /**
+     * Runs on notification. If there is a mention of this bot, replies with the canned text.
+     * @param {string} type - The type of event. Only responds if this is 'mentioned'
+     * @param {string} notification - The notification to respond to
+     * @param {string} topic - Unused.
+     * @param {string} post - The post the notification was for
+     * @param {function} callback - The callback to notify when processing is complete.
+     */
     exports.onNotify = function onNotify(type, notification, topic,
         post, callback) {
         var customOptions = false;
@@ -185,6 +238,12 @@
             callback();
         }
     };
+
+     /**
+     * Bootstrap the module
+     * @param  {string} browser - discourse.
+     * @param  {object} config - The configuration to use
+     */
     exports.begin = function begin(browser, config) {
         configuration = config.modules[exports.name];
         discourse = browser;

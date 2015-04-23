@@ -1,8 +1,9 @@
 /**
+ * Used for dealing with long poll notifications from discourse.
  * @module messageBus
  * @author Accalia
  * @license MIT
- * @overview Used for dealing with long poll notifications from discourse.
+ * 
  */
 'use strict';
 

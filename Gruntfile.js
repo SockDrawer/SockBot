@@ -48,6 +48,7 @@ module.exports = function(grunt) {
 
   // Default task(s).
   grunt.registerTask('generate-docs', ['mkdocs', 'jsdoc', 'gh-pages']);
+  grunt.registerTask('local', ['mkdocs', 'jsdoc']);
   grunt.registerTask('default', ['mkdocs', 'jsdoc', 'gh-pages']);
 
 };

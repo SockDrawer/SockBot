@@ -1,29 +1,65 @@
 /*jslint node: true, indent: 4, regexp: true */
 /* vim: set ts=4 et: */
+
+/**
+ * Crypt module. Does various encryption things
+ * @module crypt
+ */
 'use strict';
 var discourse;
 
+/**
+ * Description, for help text.
+ * @type {String}
+ */
 exports.description = 'Encryptor';
 
+/**
+ * The config for the module
+ * @type {Object}
+ */
 exports.configuration = {
+    /**
+     * Should the module be enabled?
+     * @type {Boolean}
+     */
     enabled: false
 };
 
+/**
+ * The name of this sock module
+ * @type {String}
+ */
 exports.name = 'Crypt';
 
+/**
+ * The priority of the sock module
+ * @type {Number}
+ */
 exports.priority = undefined;
 
+/**
+ * The version of this module
+ * @type {String}
+ */
 exports.version = '0.1.0';
 
-/* Each command is an encryption mechanism and has the following properties:
+/**
+ *  Each command is an encryption mechanism and has the following properties:
  * - handler:        The encryption function.
  * - defaults:       Default values of parameters
  * - params:         Named parameters for this function
  * - randomPickable: If true, random encryption can select this function.
  *                   NOTE: random currently does not support parameters.
  * - description:    A description of this function for the help
+ *
+ * @type {Object}
  */
 exports.commands = {
+    /**
+     * ROT13 "encryption"
+     * @type {Object}
+     */
     rot13: {
         handler: cryptCmd(function(s, payload, callback) {
             callback(null,
@@ -38,6 +74,10 @@ exports.commands = {
         randomPickable: true,
         description: 'Rot13 encoding.'
     },
+    /**
+     * Reverse the string
+     * @type {Object}
+     */
     reverse: {
         handler: cryptCmd(function(s, payload, callback) {
             callback(null, s.split('').reverse().join(''));
@@ -47,18 +87,30 @@ exports.commands = {
         randomPickable: true,
         description: 'Reverse input.'
     },
+    /**
+     * XOR with block chaining
+     * @type {Object}
+     */
     xorbc: {
         handler: cryptCmd(xorbc(false)),
         defaults: {key: '42', iv: false},
         params: ['[key', '[iv'],
         description: 'XOR with block chaining.'
     },
+    /**
+     * Reverse XOR with block chaining
+     * @type {Object}
+     */
     rxorbc: {
         handler: cryptCmd(xorbc(true)),
         defaults: {key: '42', iv: false},
         params: ['[key', '[iv'],
         description: 'reverse XOR with block chaining.'
     },
+    /**
+     * Random other command
+     * @type {Object}
+     */
     random: {
         handler: function(payload, callback) {
             var keys = Object.keys(exports.commands).filter(function(k) {
@@ -74,7 +126,11 @@ exports.commands = {
     }
 };
 
-/* Helper to chain encryptions */
+/** 
+ * Helper to chain encryptions 
+ * @param  {function} handler The handler
+ * @return {function} A curried version of that handler, assuming this author is using the word "curried" correctly
+ */
 function cryptCmd(handler) {
     return function(payload, callback) {
         discourse.log('Encrypt ' + (payload.$draft ? 'draft' : 'post')
@@ -91,7 +147,11 @@ function cryptCmd(handler) {
     };
 }
 
-/* xorbc implementatioon. Homegrown and weak as shit but who cares */
+/**
+ * xorbc implementatioon. Homegrown and weak as shit but who cares 
+ * @param  {[type]}
+ * @return {[type]}
+ */
 function xorbc(decrypt) {
     return function(s, payload, callback) {
         /* Key is always passed as argument. */
@@ -124,14 +184,22 @@ function xorbc(decrypt) {
     };
 }
 
-/* Convert string to array of character codes */
+/**
+ * Convert string to array of character codes
+ * @param  {string} s The string
+ * @return {Array} an array of character codes
+ */
 function toCharCodes(s) {
     return s.split('').map(function(c) {
         return c.charCodeAt(0);
     });
 }
 
-/* Create array with constant value */
+/**
+ * Create array with constant value
+ * @param  {Number} l The length of the array to make
+ * @return {Array} an array of all 0s
+ */
 function zeroArray(l) {
     var a = [];
     for (var i = 0; i < l; i++) {
@@ -140,7 +208,14 @@ function zeroArray(l) {
     return a;
 }
 
-/* Use a random encryption when PMed/mentioned/replied without command */
+/**
+ * Use a random encryption when PMed/mentioned/replied without command
+ * @param {string} type - The type of event. Only responds if this is 'mentioned'
+ * @param {string} notification - The notification to respond to
+ * @param {string} topic - Unused.
+ * @param {string} post - The post the notification was for
+ * @param {function} callback - The callback to notify when processing is complete.
+ */
 exports.onNotify = function (type, notification, topic, post, callback) {
     if (!post || !post.cleaned ||
         ['private_message', 'mentioned', 'replied'].indexOf(type) === -1) {
@@ -161,6 +236,12 @@ exports.onNotify = function (type, notification, topic, post, callback) {
     });
 };
 
+
+/**
+ * Bootstrap the module
+ * @param  {string} browser - discourse.
+ * @param  {object} config - The configuration to use
+ */
 exports.begin = function begin(browser) {
     discourse = browser;
 };

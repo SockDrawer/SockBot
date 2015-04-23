@@ -1,6 +1,6 @@
 /**
  * Mathematriculator module. Responsible for automatically performing mathematical operations and unit conversions
- * @module markov
+ * @module mathematriculator
  */
 'use strict';
 var math = require('mathjs'),
