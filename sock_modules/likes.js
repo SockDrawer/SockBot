@@ -7,6 +7,11 @@ var discourse,
     currentBingeCap = 0,
     bingeIgnoreList = [];
 
+/**
+ * Likes module. The  autoliker
+ * @module likes
+ */
+
  /**
  * Brief description of this module for Help Docs
  */
