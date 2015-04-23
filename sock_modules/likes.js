@@ -59,7 +59,7 @@ exports.configuration = {
     topic: 1000,
     /**
      * How long to delay before liking in cyborg mode.
-     * @type {[type]}
+     * @type {Number}
      */
     cyborgDelay: 30 * 1000
 };
