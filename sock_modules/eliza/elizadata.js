@@ -1,10 +1,18 @@
-// Based on Norbert Landsteiner's ElizaBot (http://www.masswerk.at/elizabot/)
-// ported to node.js by tar 2015.
+/**
+ * Based on Norbert Landsteiner's ElizaBot (http://www.masswerk.at/elizabot/)
+ * ported to node.js by tar 2015.
 
 // data for elizabot.js
 // entries prestructured as layed out in Weizenbaum's description 
 // [cf: Communications of the ACM, Vol. 9, #1 (January 1966): p 36-45.]
+
+* @author  tar
+* @module  eliza.ElizaData
+ */
+// 
 'use strict';
+
+
 
 /**
  * Initial sentences used when starting a conversation
