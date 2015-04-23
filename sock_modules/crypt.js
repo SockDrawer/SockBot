@@ -149,8 +149,7 @@ function cryptCmd(handler) {
 
 /**
  * xorbc implementatioon. Homegrown and weak as shit but who cares 
- * @param  {[type]}
- * @return {[type]}
+ * @param  {boolean} decrypt - Whether this should be decrypted or not
  */
 function xorbc(decrypt) {
     return function(s, payload, callback) {

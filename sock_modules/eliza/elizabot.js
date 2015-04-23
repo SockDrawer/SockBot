@@ -52,6 +52,12 @@
 'use strict';
 var elizadata;// = require('./elizadata.new');
 
+/**
+ * The logic class behind the Eliza module
+ * @param {String} datapath - The path to Elizabot's data
+ * @param {boolean} noRandomFlag - True if you don't want to be random. False if not.
+ * @constructor
+ */
 var ElizaBot = exports.ElizaBot = function ElizaBot(datapath, noRandomFlag) {
 	elizadata = require('./' + datapath);
 	this.noRandom= (noRandomFlag)? true:false;
@@ -63,6 +69,9 @@ var ElizaBot = exports.ElizaBot = function ElizaBot(datapath, noRandomFlag) {
 	this.reset();
 }
 
+/**
+ * Reset Elizabot, making her forget what she's already said.
+ */
 ElizaBot.prototype.reset = function() {
 	this.quit=false;
 	this.mem=[];
@@ -74,6 +83,10 @@ ElizaBot.prototype.reset = function() {
 	}
 }
 
+/**
+ * Whether the data files have been parsed yet.
+ * @type {Boolean}
+ */
 ElizaBot.prototype._dataParsed = false;
 
 /**
@@ -215,6 +228,11 @@ ElizaBot.prototype._sortKeywords = function(a,b) {
 	else return 0;
 }
 
+/**
+ * This would appear to be the main function that takes in a sentence and comes up with a reply
+ * @param  {String} text - The input
+ * @return {String} The reply from Eliza
+ */
 ElizaBot.prototype.transform = function(text) {
 	var rpl='';
 	this.quit=false;
@@ -271,6 +289,11 @@ ElizaBot.prototype.transform = function(text) {
 	return (rpl!='')? rpl : 'I am at a loss for words.';
 }
 
+/**
+ * Execute a rule
+ * @param  {Number} k - The rule to execute
+ * @return {String} The reply for that rule
+ */
 ElizaBot.prototype._execRule = function(k) {
 	var rule=elizadata.Keywords[k];
 	var decomps=rule[2];
@@ -334,6 +357,11 @@ ElizaBot.prototype._execRule = function(k) {
 	return '';
 }
 
+/**
+ * Clean up after transforming.
+ * @param  {String} s - I think the reply stream?
+ * @return {String} s but more transformy
+ */
 ElizaBot.prototype._postTransform = function(s) {
 	// final cleanings
 	s=s.replace(/\s{2,}/g, ' ');
@@ -353,6 +381,11 @@ ElizaBot.prototype._postTransform = function(s) {
 	return s;
 }
 
+/**
+ * Find the index of a rule from the key. Converts from object lookup to array lookup.
+ * @param  {String} key - the key
+ * @return {Number} The index
+ */
 ElizaBot.prototype._getRuleIndexByKey = function(key) {
 	for (var k=0; k<elizadata.Keywords.length; k++) {
 		if (elizadata.Keywords[k][0]==key) return k;
@@ -360,11 +393,19 @@ ElizaBot.prototype._getRuleIndexByKey = function(key) {
 	return -1;
 }
 
+/**
+ * Save into memory
+ * @param  {String} t - The item to save
+ */
 ElizaBot.prototype._memSave = function(t) {
 	this.mem.push(t);
 	if (this.mem.length>this.memSize) this.mem.shift();
 }
 
+/**
+ * Get from memory
+ * @return {String} the item
+ */
 ElizaBot.prototype._memGet = function() {
 	if (this.mem.length) {
 		if (this.noRandom) return this.mem.shift();
@@ -379,11 +420,19 @@ ElizaBot.prototype._memGet = function() {
 	else return '';
 }
 
+/**
+ * Get a random signoff used when ending a conversation
+ * @return {String} The signoff
+ */
 ElizaBot.prototype.getFinal = function() {
 	if (!elizadata.Finals) return '';
 	return elizadata.Finals[Math.floor(Math.random()*elizadata.Finals.length)];
 }
 
+/**
+ * Get a greeting used when starting a conversation
+ * @return {String} The greeting
+ */
 ElizaBot.prototype.getInitial = function() {
 	if (!elizadata.Initials) return '';
 	return elizadata.Initials[Math.floor(Math.random()*elizadata.Initials.length)];

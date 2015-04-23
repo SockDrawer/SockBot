@@ -1,11 +1,23 @@
-// Based on Norbert Landsteiner's ElizaBot (http://www.masswerk.at/elizabot/)
-// ported to node.js by tar 2015.
+/**
+ * Based on Norbert Landsteiner's ElizaBot (http://www.masswerk.at/elizabot/)
+ * ported to node.js by tar 2015.
 
 // data for elizabot.js
 // entries prestructured as layed out in Weizenbaum's description 
 // [cf: Communications of the ACM, Vol. 9, #1 (January 1966): p 36-45.]
+
+* @author  tar
+* @module  eliza.ElizaData
+ */
+// 
 'use strict';
 
+
+
+/**
+ * Initial sentences used when starting a conversation
+ * @type {Array}
+ */
 exports.Initials = [
 "How do you do.  Please tell me your problem.",
 // additions (not original)
@@ -13,6 +25,10 @@ exports.Initials = [
 "Is something troubling you ?"
 ];
 
+/**
+ * Final sentences used when ending a conversation
+ * @type {Array}
+ */
 exports.Finals = [
 "Goodbye.  It was nice talking to you.",
 // additions (not original)
@@ -22,6 +38,10 @@ exports.Finals = [
 "Maybe we could discuss this moreover in our next session ?   Goodbye."
 ];
 
+/**
+ * Things to say when exiting.
+ * @type {Array}
+ */
 exports.Quits = [
 "bye",
 "goodbye",
@@ -30,6 +50,10 @@ exports.Quits = [
 "quit"
 ];
 
+/**
+ * Prefixes?
+ * @type {Array}
+ */
 exports.Pres = [
 "dont", "don't",
 "cant", "can't",
@@ -51,6 +75,10 @@ exports.Pres = [
 "equivalent", "alike"
 ];
 
+/**
+ * Post-fixes?
+ * @type {Array}
+ */
 exports.Posts = [
 "am", "are",
 "your", "my",
@@ -63,6 +91,10 @@ exports.Posts = [
 "i'm", "you are"
 ];
 
+/**
+ * Synonyms to add variance to the sentences to make them less canned.
+ * @type {Object}
+ */
 exports.Synons = {
 "be": ["am", "is", "are", "was"],
 "belief": ["feel", "think", "believe", "wish"],
@@ -76,8 +108,9 @@ exports.Synons = {
 
 exports.Keywords = [
 
-/*
-  Array of
+/**
+ * Keywords to use.
+ *  Array of
   ["<key>", <rank>, [
     ["<decomp>", [
       "<reasmb>",
@@ -90,7 +123,7 @@ exports.Keywords = [
       "<reasmb>"
     ]]
   ]]
-*/
+ */
 
 ["xnone", 0, [
  ["*", [
@@ -599,9 +632,12 @@ exports.Keywords = [
 ]]
 
 ];
-
-// regexp/replacement pairs to be performed as final cleanings
-// here: cleanings for multiple bots talking to each other
+ 
+/**
+ * regexp/replacement pairs to be performed as final cleanings
+ * here: cleanings for multiple bots talking to each other
+ * @type {Array}
+ */
 exports.PostTransforms = [
 	/ old old/g, " old",
 	/\bthey were( not)? me\b/g, "it was$1 me",
