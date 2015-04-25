@@ -779,7 +779,7 @@ exports.getUserData = function getUserData(username, callback) {
 /**
  * Discourse List Enumeration Callback
  * @callback discourse~enumeration
- * @param {*[]} data Data items to be processed
+ * @param {*} data Data items to be processed
  * @param {discourse~cancellable} callback Completion callback
  */
 
