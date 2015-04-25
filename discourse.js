@@ -7,14 +7,6 @@
  */
 
 /**
- * Discourse Request Callback
- * @callback discourse~request
- * @param {?Exception} err Error encountered processing request
- * @param resp Raw response object from npm `request/request` package
- * @param {Object|String} body response body. If valid JSON will be parsed.
- */
-
-/**
  * Generate a type 4 UUID.
  *
  * I don't understand how this does what it does, but it works.
@@ -22,7 +14,7 @@
  * of these so its good enough
  * Source: http://jsperf.com/node-uuid-performance/19
  *
- * @returns {String} A type 4 UUID
+ * @returns {string} A type 4 UUID
  */
 exports.uuid = function uuid() {
 
@@ -63,7 +55,7 @@ var csrf,
      * Known Post Actions
      *
      * @alias discourse.PostAction
-     * @enum {Number}
+     * @enum {number}
      */
     postActionTypes = {
         'bookmark': 1,
@@ -89,8 +81,8 @@ var csrf,
  * Most actions that would create a post will fail with error 'Muted' if bot is
  * asleep
  *
- * @param {Number} until Unix Timestamp representing time for the bot to unmute
- * @returns {Number} current timestamp the bot is set to sleep until
+ * @param {number} until Unix Timestamp representing time for the bot to unmute
+ * @returns {number} current timestamp the bot is set to sleep until
  */
 exports.sleep = function sleep(until) {
     if (until !== undefined) {
@@ -140,9 +132,9 @@ exports.error = function error(message) {
 /**
  * Schedule a GET request to discourse
  *
- * @param {String} url Site relative URL to fetch
+ * @param {string} url Site relative URL to fetch
  * @param {discourse~request} callback Response callback
- * @param {Number} [delayAfter=0] Apply this rate limiting to requests
+ * @param {number} [delayAfter=0] Apply this rate limiting to requests
  */
 function dGet(url, callback, delayAfter) {
     schedule(function () {
@@ -154,10 +146,10 @@ exports.getForm = dGet;
 /**
  * Schedule a POST request to discourse
  *
- * @param {String} url Site relative URL to post to
+ * @param {string} url Site relative URL to post to
  * @param {Object} form Form to post
  * @param {discourse~request} callback Response callback
- * @param {Number} [delayAfter=0] Apply this rate limiting to requests
+ * @param {number} [delayAfter=0] Apply this rate limiting to requests
  */
 function dPost(url, form, callback, delayAfter) {
     schedule(function () {
@@ -171,10 +163,10 @@ exports.postForm = dPost;
 /**
  * Schedule a POST request to discourse
  *
- * @param {String} url Site relative URL to post to
+ * @param {string} url Site relative URL to post to
  * @param {Object} form Form to post
  * @param {discourse~request} callback Response callback
- * @param {Number} [delayAfter=0] Apply this rate limiting to requests
+ * @param {number} [delayAfter=0] Apply this rate limiting to requests
  */
 function dPut(url, form, callback, delayAfter) {
     schedule(function () {
@@ -187,10 +179,10 @@ function dPut(url, form, callback, delayAfter) {
 /**
  * Schedule a DELETE request to discourse
  *
- * @param {String} url Site relative URL to post to
+ * @param {string} url Site relative URL to post to
  * @param {Object} form Form to post
  * @param {discourse~request} callback Response callback
- * @param {Number} [delayAfter=0] Apply this rate limiting to requests
+ * @param {number} [delayAfter=0] Apply this rate limiting to requests
  */
 function dDelete(url, form, callback, delayAfter) {
     schedule(function () {
@@ -203,8 +195,8 @@ function dDelete(url, form, callback, delayAfter) {
 /**
  * Issue a GET request and save result to filesystem
  *
- * @param {String} url Url to fetch
- * @param {String} filename Filename to save to
+ * @param {string} url Url to fetch
+ * @param {string} filename Filename to save to
  * @param callback Completion callback
  */
 exports.saveFile = function saveFile(url, filename, callback) {
@@ -221,7 +213,7 @@ exports.saveFile = function saveFile(url, filename, callback) {
  * return message unaltered
  *
  * @param {*} message Message to timestamp
- * @returns {String} timestamped input message
+ * @returns {string} timestamped input message
  */
 function addTimestamp(message) {
     var date = new Date().toISOString().replace(/\..+$/, '');
@@ -283,7 +275,7 @@ function cleanPost(post) {
  * for `delayGroup` will be executed at most once per `delayGroup` milliseconds
  *
  * @param {Function} task Task to schedule
- * @param {Number} [delayGroup] Ensure task is rate limited to this rate
+ * @param {number} [delayGroup] Ensure task is rate limited to this rate
  *
  */
 function schedule(task, delaygroup) {
@@ -384,11 +376,11 @@ exports.reply = function reply(post, raw, callback) {
 /**
  * Create a post.
  *
- * @param {Number} topic Id of the topic to reply to
- * @param {Number} [replyTo=undefined] Post_number of the post replyied to
- * @param {String} raw Raw post data
+ * @param {number} topic Id of the topic to reply to
+ * @param {number} [replyTo=undefined] Post_number of the post replyied to
+ * @param {string} raw Raw post data
  * @param {discourse~request} callback Completion callback
- * @param {Boolean} [nomute] INTERNAL USE ONLY. Do not set!
+ * @param {boolean} [nomute] INTERNAL USE ONLY. Do not set!
  */
 function createPost(topic, replyTo,
     raw, callback, nomute) {
@@ -414,9 +406,9 @@ exports.createPost = createPost;
 /**
  * Create a new private message.
  *
- * @param {String|String[]} to Username or names to create PM to
- * @param {String} title Title of the Private Message
- * @param {String} raw Raw post data
+ * @param {string|string[]} to Username or names to create PM to
+ * @param {string} title Title of the Private Message
+ * @param {string} raw Raw post data
  * @param {discourse~request} callback Completion callback
  */
 exports.createPrivateMessage = function createPrivateMessage(to, title,
@@ -437,9 +429,9 @@ exports.createPrivateMessage = function createPrivateMessage(to, title,
 /**
  * Edit an existing post.
  *
- * @param {Number} postId Id number of the post to edit
- * @param {String} raw New raw post data
- * @param {String} [editReason] Optional Edit Reason that no one ever uses
+ * @param {number} postId Id number of the post to edit
+ * @param {string} raw New raw post data
+ * @param {string} [editReason] Optional Edit Reason that no one ever uses
  * @param {discourse~request} callback Completion callback
  */
 exports.editPost = function editPost(postId, raw, editReason, callback) {
@@ -465,7 +457,7 @@ exports.editPost = function editPost(postId, raw, editReason, callback) {
 /**
  * Delete an existing post.
  *
- * @param {Number} postId Id of the post to delete
+ * @param {number} postId Id of the post to delete
  * @param {discourse~request} callback Completion callback
  */
 exports.deletePost = function deletePost(postId, callback) {
@@ -482,8 +474,8 @@ exports.deletePost = function deletePost(postId, callback) {
  * Perform a post action on a post
  *
  * @param {PostAction} action Action to perform
- * @param {Number} postId Id of the post to act on
- * @param {String} message Content of any applicable moderation message
+ * @param {number} postId Id of the post to act on
+ * @param {string} [message] Content of any applicable moderation message
  * @param {discourse~request} callback Completion callback
  */
 exports.postAction = function postAction(action, postId, message, callback) {
@@ -507,6 +499,14 @@ exports.postAction = function postAction(action, postId, message, callback) {
     dPost('post_actions', form, callback);
 };
 
+/**
+ * Remove a post action from a post
+ *
+ * @param {PostAction} action Action to perform
+ * @param {number} postId Id of the post to act on
+ * @param {string} [message] Content of any applicable moderation message
+ * @param {discourse~request} callback Completion callback
+ */
 exports.deletePostAction = function deletePostAction(action,
     postId, message, callback) {
     if (typeof message === 'function') {
@@ -529,6 +529,13 @@ exports.deletePostAction = function deletePostAction(action,
     dDelete('post_actions', form, callback);
 };
 
+/**
+ * Read a lists of posts from a topic
+ *
+ * @param {number} topicId The topic the posts are from
+ * @param {number[]} posts List of post_number fields from posts to read
+ * @param {discourse~request} callback Completion callback
+ */
 exports.readPosts = function readPosts(topicId, posts, callback) {
     if (typeof posts === 'number') {
         posts = [posts];
@@ -537,7 +544,7 @@ exports.readPosts = function readPosts(topicId, posts, callback) {
         return posts.length > 0;
     }, function (next) {
         var part = [];
-        while (posts.length > 0 && part.length < 5) {
+        while (posts.length > 0 && part.length < 200) {
             part.push(posts.shift());
         }
         var form = {
@@ -559,38 +566,24 @@ exports.readPosts = function readPosts(topicId, posts, callback) {
     }, callback);
 };
 
+/**
+ * Get a specific post
+ *
+ * @param {number} postId Id of the post to retrieve
+ * @param {discourse~request} callback Completion callback
+ */
 exports.getPost = function getPost(postId, callback) {
     dGet('posts/' + postId + '.json', function (err, resp, post) {
         callback(err, resp, cleanPost(post));
     });
 };
 
-exports.getPosts = function getPosts(topicId, start, number, callback) {
-    var base = 't/' + topicId + '/posts.json';
-    dGet(base + '?post_ids=0', function (err, resp, topic) {
-        if (err || resp.statusCode >= 400) {
-            err = err || 'Error ' + resp.statusCode;
-            return callback(err, resp, topic);
-        }
-        var posts = topic.post_stream.stream,
-            part = [],
-            i;
-        for (i = start - 1; i < start + number && posts[i]; i += 1) {
-            part.push(posts[i]);
-        }
-        part = part.join('&post_ids[]=');
-        dGet(base + '?post_ids[]=' + part, function (err2, resp2, posts2) {
-            if (err2 || resp2.statusCode >= 400) {
-                err2 = err2 || 'Error ' + resp2.statusCode;
-                return callback(err2, resp2, posts2);
-            }
-            callback(null, posts2.post_stream.posts.map(function (p) {
-                return cleanPost(p);
-            }));
-        });
-    });
-};
-
+/**
+ * Get topic information
+ *
+ * @param {number} topicId Id of topic to get information about
+ * @param {discourse~request} callback Completion callback
+ */
 exports.getTopic = function getTopic(topicId, callback) {
     dGet('t/' + topicId + '.json?include_raw=1', function (err, resp, topic) {
         if (err || resp.statusCode >= 400) {
@@ -617,6 +610,13 @@ exports.getTopic = function getTopic(topicId, callback) {
     });
 };
 
+/**
+ * Get the last page of a topic.
+ *
+ * @param {number} topicId Id of topic to get information about
+ * @param {discourse~singleenumeration} eachPost Callback to handle each post
+ * @param {function} callback Completion callback
+ */
 exports.getLastPosts = function getLastPosts(topicId, eachPost, complete) {
     var url = 't/' + topicId + '/last.json?include_raw=1&track_visit=true';
     dGet(url, function (err, resp, topic) {
@@ -634,6 +634,13 @@ exports.getLastPosts = function getLastPosts(topicId, eachPost, complete) {
     });
 };
 
+/**
+ * Get all posts in a topic
+ *
+ * @param {number} topicId Id of topic to get information about
+ * @param {discourse~enumeration} eachChunk Callback to handle each chunk
+ * @param {function} callback Completion callback
+ */
 exports.getAllPosts = function getAllPosts(topicId, eachChunk, complete) {
     var base = 't/' + topicId + '/posts.json?include_raw=1';
     dGet(base + '&post_ids=0', function (err, resp, topic) {
@@ -648,6 +655,7 @@ exports.getAllPosts = function getAllPosts(topicId, eachChunk, complete) {
             },
             function (next) {
                 var part = [];
+                //TODO: i bet i can make this better by using Array.slice
                 while (part.length < 200 && posts.length > 0) {
                     part.push(posts.shift());
                 }
@@ -674,6 +682,12 @@ exports.getAllPosts = function getAllPosts(topicId, eachChunk, complete) {
     });
 };
 
+/**
+ * Get all topics visible to current user from /latest
+ *
+ * @param {discourse~enumeration} eachChunk Callback to handle each chunk
+ * @param {function} callback Completion callback
+ */
 exports.getAllTopics = function getAllTopics(eachChunk, complete) {
     var url = '/latest.json?no_definitions=true';
     async.whilst(function () {
@@ -690,6 +704,12 @@ exports.getAllTopics = function getAllTopics(eachChunk, complete) {
     }, complete);
 };
 
+/**
+ * Poll message-bus for messages
+ *
+ * @param {Object.<string, number>} channels Channels of interest
+ * @param {discourse~request} callback Completion callback
+ */
 exports.getMessageBus = function getMessageBus(channels, callback) {
     var url = 'message-bus/' + clientId + '/poll';
     dPost(url, channels, function (err, resp, messages) {
@@ -701,6 +721,11 @@ exports.getMessageBus = function getMessageBus(channels, callback) {
     });
 };
 
+/**
+ * Poll for notifications
+ *
+ * @param {discourse~request} callback Completion callback
+ */
 exports.getNotifications = function getNotifications(callback) {
     dGet('notifications', function (err, resp, notifications) {
         if (err || resp.statusCode >= 300) {
@@ -712,6 +737,13 @@ exports.getNotifications = function getNotifications(callback) {
     });
 };
 
+/**
+ * Get user data for an arbitrary user. Will fail if bot is not at least
+ * moderator status
+ *
+ * @param {string} username Target Username
+ * @param {discourse~request} callback Completion callback
+ */
 exports.getUserData = function getUserData(username, callback) {
     username = username.toLowerCase();
     dGet('admin/users/' + username + '.json', function (err, resp, user) {
@@ -721,3 +753,33 @@ exports.getUserData = function getUserData(username, callback) {
         callback(err, user);
     });
 };
+
+/**
+ * Discourse Request Callback
+ * @callback discourse~request
+ * @param {Exception} [err=null] Error encountered processing request
+ * @param resp Raw response object from npm `request/request` package
+ * @param {Object|string} body response body. If valid JSON will be parsed.
+ */
+
+/**
+ * Discourse Cancellable Callback
+ * @callback discourse~cancellable
+ * @param {Exception} [err] Error encountered processing request
+ * @param {boolean} [cancel] If truthy cancel enumeration
+ */
+
+/**
+ * Discourse Single Enumeration Callback
+ * @callback discourse~singleenumeration
+ * @param {*} data Data item to be processed
+ * @param {discourse~cancellable} callback Completion callback
+ */
+
+/**
+ * Discourse List Enumeration Callback
+ * @callback discourse~enumeration
+ * @param {*[]} data Data items to be processed
+ * @param {discourse~cancellable} callback Completion callback
+ */
+
