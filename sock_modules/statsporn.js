@@ -10,7 +10,9 @@ var discourse,
     queries,
     cmdMatcher,
     helpMatcher,
-    cooldownTimers = [];
+    cooldownTimers = [],
+    spaces = '[ \f\r\t\v\u00a0\u1680\u180e\u2000-\u200a' +
+        '\u2028\u2029\u202f\u205f\u3000]+';
 exports.name = 'StatsPorn';
 exports.version = '0.5.0';
 exports.description = 'Provide stats about TDWTF and its users';
@@ -27,7 +29,8 @@ exports.begin = function begin(browser, c) {
     discourse = browser;
     plotly = plotly(config.plotlyuser, config.plotlypass);
     cmdMatcher = new XRegExp('@' + c.username +
-        '(?<type>\\s+(graph|table))?\\s+(?<stats>\\S+)(?<args>(\\s+(\\S+))*)',
+        '(?<type>' + spaces + '(graph|table))?' + spaces +
+        '(?<stats>\\S+)(?<args>(' + spaces + '(\\S+))*)',
         'ig');
     helpMatcher = new XRegExp('@' + c.username + ' (list|list queries)', 'ig');
     async.forever(function (nextTick) {
