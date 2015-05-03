@@ -125,7 +125,7 @@ function translate(text, languages, translator, callback) {
                     path.push('Error');
                 } else {
                     text = body;
-                    path.push(next.name);
+                    path.push('<abbr title="'+text+'">'+next.name+'</abbr>');
                 }
                 prev = next;
                 nextStep();
