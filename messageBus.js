@@ -349,6 +349,7 @@ function pollNotifications(callback) {
             discourse.warn('Error in notifications: ' + err);
             return complete();
         }
+        notifications = notifications.notifications;
         if (!notifications || !Array.isArray(notifications)) {
             return complete(null, 'No notifications');
         }
