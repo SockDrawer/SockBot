@@ -31,6 +31,13 @@ exports.begin = function begin(browser, config) {
         '\\s+([$](?<category>\\S+)\\s+)?(?<title>\\S.+)$', 'im');
 };
 
+exports.additionalHelp = function additionalHelp() {
+    var text = [];
+    text.push('To create a new task: @todo [description]');
+    text.push('To create a new categorised task: @todo $[category] [description]');
+    return text.join('\n');
+}
+
 exports.commands = {
     list: {
         handler: makeSafe(listTasks),
