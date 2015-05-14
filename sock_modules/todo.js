@@ -97,7 +97,7 @@ exports.commands = {
         }),
         defaults: {},
         params: ['key', 'category'],
-        description: 'Comment on task'
+        description: 'Set the task category'
     },
     describe: {
         handler: manipulateTask(function (payload, doc, callback) {
@@ -135,7 +135,7 @@ exports.commands = {
         }),
         defaults: {},
         params: ['key'],
-        description: 'Set Task Description'
+        description: 'Display task details'
     }
 };
 
