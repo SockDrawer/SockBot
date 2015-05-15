@@ -44,6 +44,12 @@ exports.loadModules = function loadModules(modules) {
         } else if (typeof module.onCommand === 'function') {
             sockModules[name] = module.onCommand;
         }
+        if (typeof module.additionalHelp === 'function') {
+            var result = module.additionalHelp();
+            if (typeof result === 'string') {
+                sockModules[name] += '\n' + result;
+            }
+        }
     });
 };
 

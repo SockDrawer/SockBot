@@ -342,10 +342,18 @@ exports.login = function login(callback) {
         function (next) {
             dGet('session/csrf.json', function (err, _, obj) {
                 csrf = (obj || {}).csrf;
+                //Turns out we sometimes have to explicity
+                //re-set headers and the cookie jar
+                //So we may as well do it every time!
                 browser = browser.defaults({
                     headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'User-Agent': version.userAgent.
+                            replace('{{conf.admin.owner}}', conf.admin.owner).
+                            replace('{{conf.username}}', conf.username),
                         'X-CSRF-Token': csrf
-                    }
+                    },
+                    jar: jar
                 });
                 next(err);
             });
@@ -782,4 +790,3 @@ exports.getUserData = function getUserData(username, callback) {
  * @param {*} data Data items to be processed
  * @param {discourse~cancellable} callback Completion callback
  */
-
