@@ -7,7 +7,8 @@ exports.configuration = {
     enabled: false
 };
 
-var XRegExp = require('xregexp').XRegExp;
+var XRegExp = require('xregexp').XRegExp,
+    async = require('async');
 var database = require('../database');
 var discourse,
     db,
@@ -116,7 +117,7 @@ exports.commands = {
     parent: {
         handler: manipulateTask(function (payload, doc, callback) {
             payload.key = payload.parent;
-            getTask(function (payload2, parent, innercallback) {
+            getTask(function (_, parent, innercallback) {
                 if (parent.parent) {
                     return innercallback(null, 'Cannot assign a child task ' +
                         'as a parent task. Aborting!');
@@ -130,12 +131,42 @@ exports.commands = {
         description: 'Assign task to a parent task'
     },
     details: {
-        handler: getTask(function (payload, doc, callback) {
+        handler: getTask(function (_, doc, callback) {
             callback(null, getDetails(doc));
         }),
         defaults: {},
         params: ['key'],
         description: 'Display task details'
+    },
+    remind: {
+        handler: manipulateTask(function (payload, doc, callback) {
+            doc.remind = true;
+            payload.$arguments = ['Set Reminder Flag'];
+            addComment(payload, doc, callback);
+        }),
+        defaults: {},
+        params: ['key'],
+        description: 'Set task to remind via PM once.'
+    },
+    nag: {
+        handler: manipulateTask(function (payload, doc, callback) {
+            doc.remind = 2;
+            payload.$arguments = ['Set Repeating Reminder Flag'];
+            addComment(payload, doc, callback);
+        }),
+        defaults: {},
+        params: ['key'],
+        description: 'Set task to remind via PM daily.'
+    },
+    unremind: {
+        handler: manipulateTask(function (payload, doc, callback) {
+            doc.remind = false;
+            payload.$arguments = ['Unset Reminder Flag'];
+            addComment(payload, doc, callback);
+        }),
+        defaults: {},
+        params: ['key'],
+        description: 'Remove all PM reminders.'
     }
 };
 
@@ -162,7 +193,7 @@ function makeSafe(fn) {
     };
 }
 
-exports.onNotify = function onNotify(type, notifiy, topic, post, callback) {
+exports.onNotify = function onNotify(_, __, topic, post, callback) {
     if (!ready || !post) {
         return callback();
     }
@@ -326,3 +357,65 @@ function listTasks(payload, callback) {
         callback(err, res.join('\n'));
     });
 }
+
+function reminders(callback) {
+    var query = {
+        resolved: false,
+        $or: [{
+            remind: true
+        }, {
+            remind: 2
+        }]
+    };
+    db.find({
+        $query: query
+    }, {
+        limit: 2
+    }).toArray(function (err, docs) {
+        if (err) {
+            return callback();
+        }
+        async.each(docs, function (document, next) {
+            var txt = getDetails(document),
+                payload = {
+                    '$post': {
+                        'created_at': new Date()
+                    }
+                };
+            if (document.remind === true) {
+                document.remind = false;
+                payload.$arguments = [
+                    'Sent Scheduled Reminder and Unset Reminder Flag'
+                ];
+            } else {
+                payload.$arguments = ['Sent Scheduled Reminder'];
+            }
+            addComment(payload, document, function () {
+                discourse.createPrivateMessage(document.owner,
+                    'Reminder For: ' + document.title, txt,
+                    function () {
+                        setTimeout(next, 5.1 * 1000);
+                    });
+            });
+        }, function () {
+            callback();
+        });
+    });
+}
+
+function scheduleReminders() {
+    async.forever(function (next) {
+        var now = Date.now(),
+            utc = new Date();
+        utc.setUTCHours(0);
+        utc.setUTCMinutes(0);
+        utc.setUTCSeconds(0);
+        utc.setMilliseconds(0);
+        utc = utc.getTime() + 24 * 60 * 60 * 1000;
+        setTimeout(function () {
+            reminders(next);
+        }, utc - now);
+    });
+}
+
+scheduleReminders();
