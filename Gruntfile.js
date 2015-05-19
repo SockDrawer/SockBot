@@ -37,6 +37,16 @@ module.exports = function(grunt) {
 			repo: 'https://' + process.env.GH_TOKEN + '@github.com/SockDrawer/SockBot'
 		},
 		src: "**"
+	},
+	simplemocha: {
+		options: {
+			globals: ['expect'],
+			timeout: 3000,
+			ignoreLeaks: false,
+			ui: 'bdd',
+			reporter: 'spec'
+		},
+		all: { src: ['tests/*.js'] }
 	}
   });
 
@@ -45,10 +55,12 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-git');
   grunt.loadNpmTasks('grunt-jsdoc');
   grunt.loadNpmTasks('grunt-gh-pages');
+  grunt.loadNpmTasks('grunt-simple-mocha')
 
   // Default task(s).
   grunt.registerTask('generate-docs', ['mkdocs', 'jsdoc', 'gh-pages']);
   grunt.registerTask('local', ['mkdocs', 'jsdoc']);
   grunt.registerTask('default', ['mkdocs', 'jsdoc', 'gh-pages']);
+  grunt.registerTask('test', ['simplemocha']);
 
 };
