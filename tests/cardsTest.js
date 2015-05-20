@@ -1,6 +1,6 @@
 var Deck = require('../sock_modules/cardDeck.js');
 var cardsModule = require('../sock_modules/cards.js');
-var assert = require('chai').assert
+var assert = require('chai').assert;
 
 describe("Deck", function() {
 	it("should exist", function() {
@@ -48,9 +48,38 @@ describe("Deck", function() {
 })
 
 describe("DeckModule", function() {
+	var responseRegex = /^Success! Your deck is (\w+)$/;
+	
 	it("should be able to create a deck", function(done) {
-		cardsModule.createDeck("Notification", "new", ["French52"], null, function(err, response) {
+		cardsModule.createDeck({Type: "French52"}, function(err, response) {
 			assert.include(response,"Success");
+			done();
+		});
+	});
+	
+	it("should reject a bad deck type", function(done) {
+		cardsModule.createDeck({Type: "banana"}, function(err, response) {
+			assert.notInclude(response,"Success");
+			done();
+		});
+	});
+	
+	it("should be able to draw a card", function(done) {
+		cardsModule.createDeck({Type: "French52"}, function(err, response) {
+			assert.isTrue(responseRegex.test(response));
+			var result = response.match(responseRegex);
+			var deckName = result[1];
+			
+			cardsModule.drawCard({deck: deckName}, function(err, response) {
+				assert.include(response,"Your card: ");
+				done();
+			});
+		});
+	});
+	
+	it("should not be able to draw a card from a nonexistant deck", function(done) {
+		cardsModule.drawCard({deck: "banana"}, function(err, response) {
+			assert.notInclude(response,"Your card: ");
 			done();
 		});
 	});
