@@ -1,4 +1,5 @@
 var Deck = require('../sock_modules/cardDeck.js');
+var cardsModule = require('../sock_modules/cards.js');
 var assert = require('chai').assert
 
 describe("Deck", function() {
@@ -43,5 +44,14 @@ describe("Deck", function() {
 		d.shuffle();
 		var card4 = d.draw();
 		assert.isDefined(card4);
+	});
+})
+
+describe("DeckModule", function() {
+	it("should be able to create a deck", function(done) {
+		cardsModule.createDeck("Notification", "new", ["French52"], null, function(err, response) {
+			assert.include(response,"Success");
+			done();
+		});
 	});
 })
