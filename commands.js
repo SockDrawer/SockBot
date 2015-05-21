@@ -40,7 +40,8 @@ exports.loadModules = function loadModules(modules) {
     modules.forEach(function (module) {
         var name = module.name.toLowerCase();
         if (module.commands) {
-            sockModules[name] = commandHelper(module.commands);
+            sockModules[name] =
+                commandHelper(module.commands, module.additionalHelp);
         } else if (typeof module.onCommand === 'function') {
             sockModules[name] = module.onCommand;
         }
@@ -105,7 +106,7 @@ exports.begin = function begin(browser) {
     discourse = browser;
 };
 
-function makeHelp(definition) {
+function makeHelp(definition, additionalHelp) {
     var help = [],
         cmd, keys = Object.keys(definition);
     keys.push('help');
@@ -122,13 +123,17 @@ function makeHelp(definition) {
     help.unshift('```text');
     help.unshift('Available Commands:');
     help.push('```');
+    if (additionalHelp && typeof additionalHelp === 'function') {
+        help.push('Additional Info:');
+        help.push(additionalHelp());
+    }
     return help.join('\n');
 }
 
-function commandHelper(definition) {
+function commandHelper(definition, additionalHelp) {
     return function runCommand(type, command, args, data, callback) {
         if (command === 'help') {
-            callback(null, makeHelp(definition));
+            callback(null, makeHelp(definition, additionalHelp));
         } else if (!definition[command]) {
             callback('Unknown Command: ' + command);
         } else {
