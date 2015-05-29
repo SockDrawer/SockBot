@@ -11,25 +11,30 @@ var XRegExp = require('xregexp').XRegExp,
     async = require('async');
 var database = require('../database');
 var discourse,
+    configuration,
     db,
     trigger,
     ready = false;
 
 exports.begin = function begin(browser, config) {
     discourse = browser;
-    database.getDatabase(exports.name, function (err, data) {
-        ready = !err;
-        db = data;
-        db.createIndex({
-            modified: -1,
-            owner: 1
-        });
-        if (err) {
-            discourse.warn('ToDo Startup Error: ' + err);
-        }
-    });
+    configuration = config.modules[exports.name];
     trigger = new XRegExp('^@' + config.username +
         '\\s+([$](?<category>\\S+)\\s+)?(?<title>\\S.+)$', 'im');
+    if (configuration.enabled) {
+        scheduleReminders();
+        database.getDatabase(exports.name, function (err, data) {
+            ready = !err;
+            db = data;
+            db.createIndex({
+                modified: -1,
+                owner: 1
+            });
+            if (err) {
+                discourse.warn('ToDo Startup Error: ' + err);
+            }
+        });
+    }
 };
 
 exports.additionalHelp = function additionalHelp() {
@@ -424,5 +429,3 @@ function scheduleReminders() {
         }, utc - now);
     });
 }
-
-scheduleReminders();

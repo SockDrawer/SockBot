@@ -116,6 +116,12 @@ function getReportBase(user) {
     var base = '```text\n' +
         'username: %USERNAME%\n' +
         'trust level: %TRUST% (%TRUST_LOCK%)\n';
+    if (user.admin) {
+        base += 'is admin: true\n';
+    }
+    if (user.moderator) {
+        base += 'is moderator: true\n';
+    }
     if (!user.tl3_requirements) {
         base += '\n-- no trust level 3 requirements info--\n';
     } else {
