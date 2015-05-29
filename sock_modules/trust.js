@@ -95,7 +95,15 @@ exports.onNotify = function (type, notification, topic, post, callback) {
 function formatReport(user) {
     var txt = getReportBase(user);
     txt = txt.replace('%USERNAME%', user.username);
-    txt = txt.replace('%TRUST%', user.trust_level);
+    if (user.admin) {
+        txt = txt.replace('%TRUST%', 'Admin (' + user.trust_level + ')');
+    }
+    else if (user.moderator) {
+        txt = txt.replace('%TRUST%', 'Moderator (' + user.trust_level + ')');
+    }
+    else {
+        txt = txt.replace('%TRUST%', user.trust_level);
+    }
     txt = txt.replace('%TRUST_LOCK%', user.trust_level_locked ? 'LOCKED' :
         'Not locked');
     if (user.tl3_requirements) {
