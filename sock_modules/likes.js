@@ -138,7 +138,9 @@ function innerBinge(topic, callback) {
                     'USER': post.username
                 }));
                 discourse.postAction('like', post.id, function (err2, resp) {
-                    flow(err2 || resp.statusCode === 429);
+                    setTimeout(function () {
+                        flow(err2 || resp.statusCode === 429);
+                    }, 100);
                 });
                 currentBingeCap--;
             }
