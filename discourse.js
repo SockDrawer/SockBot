@@ -320,7 +320,14 @@ function handleResponse(callback) {
             throw err;
         }
         if (resp.statusCode === 429) {
-            exports.warn('E429: Too Many Requests');
+            var msg = 'E429: Too Many Requests';
+            if (resp.method) {
+                msg += ', Method: ' + resp.method;
+            }
+            if (resp.url) {
+                msg += ', URL: ' + resp.url;
+            }
+            exports.warn(msg);
             delayUntil = new Date().getTime() + 2 * 60 * 1000;
         }
         try {
