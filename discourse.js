@@ -317,7 +317,7 @@ function handleResponse(callback) {
         if (!resp) {
             err = err || 'Unknown network error';
             exports.error('Critical error: ' + err);
-            throw err;
+            resp = {};
         }
         if (resp.statusCode === 429) {
             var msg = 'E429: Too Many Requests';
