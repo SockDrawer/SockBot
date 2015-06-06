@@ -321,11 +321,14 @@ function handleResponse(callback) {
         }
         if (resp.statusCode === 429) {
             var msg = 'E429: Too Many Requests';
-            if (resp.method) {
-                msg += ', Method: ' + resp.method;
-            }
-            if (resp.url) {
-                msg += ', URL: ' + resp.url;
+            if (resp.request) {
+                var request = resp.request;
+                if (request.method) {
+                    msg += ', Method: ' + request.method;
+                }
+                if (request.url) {
+                    msg += ', URL: ' + request.url;
+                }
             }
             exports.warn(msg);
             delayUntil = new Date().getTime() + 2 * 60 * 1000;
