@@ -35,7 +35,7 @@ var request = require('request'),
 var csrf,
     jar = request.jar(),
     clientId = exports.uuid(),
-    urlbase = conf.url || 'http://what.thedailywtf.com/',
+    urlbase = conf.url || 'https://what.thedailywtf.com/',
     browser = request.defaults({
         rejectUnauthorized: false,
         jar: jar,
