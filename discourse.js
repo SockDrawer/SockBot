@@ -356,6 +356,7 @@ exports.login = function login(callback) {
                 //re-set headers and the cookie jar
                 //So we may as well do it every time!
                 browser = browser.defaults({
+                    rejectUnauthorized: false,
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
                         'User-Agent': version.userAgent.
