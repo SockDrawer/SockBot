@@ -13,9 +13,9 @@
   "dependencies": {},
   "optionalDependencies": {},
   "devDependencies": {
-    "chai": "^2.3.0",
+    "chai": "^3.0.0",
     "coveralls": "^2.11.2",
-    "eslint": "^0.21.2",
+    "eslint": "^0.23.0",
     "istanbul-harmony": "^0.3.12",
     "jsdoc-to-markdown": "^1.1.1",
     "mocha": "^2.2.5",
