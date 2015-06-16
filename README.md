@@ -3,8 +3,9 @@ SockBot
 [![Build Status](https://travis-ci.org/SockDrawer/SockBot.svg?branch=es6-dev)](https://travis-ci.org/SockDrawer/SockBot)
 [![Coverage Status](https://coveralls.io/repos/SockDrawer/SockBot/badge.svg?branch=es6-dev)](https://coveralls.io/r/SockDrawer/SockBot?branch=es6-dev)
 [![Docs Status](https://readthedocs.org/projects/sockbot/badge/?version=es6-dev)](http://sockbot.readthedocs.org/)
-[![Dependencies Status](https://david-dm.org/SockDrawer/SockBot/es6-dev.svg#info=dependencies&view=table)](https://david-dm.org/SockDrawer/SockBot/es6-dev#info=dependencies&view=table)
-[![Dev Dependencies Status](https://david-dm.org/SockDrawer/SockBot/es6-dev.svg#info=devDependencies&view=table)](https://david-dm.org/SockDrawer/SockBot/es6-dev#info=devDependencies&view=table)
+[![Dependency Status](https://david-dm.org/SockDrawer/SockBot/es6-dev.svg)](https://david-dm.org/SockDrawer/SockBot/es6-dev)
+[![devDependency Status](https://david-dm.org/SockDrawer/SockBot/es6-dev/dev-status.svg)](https://david-dm.org/SockDrawer/SockBot/es6-dev#info=devDependencies)
+[![optionalDependency Status](https://david-dm.org/SockDrawer/SockBot/es6-dev/optional-status.svg)](https://david-dm.org/SockDrawer/SockBot/es6-dev#info=optionalDependencies)
 
 Sockbot - A sock puppet Robot worthy of TheDailyWTF that interfaces with what.thedailywtf.com. SO META!
 
