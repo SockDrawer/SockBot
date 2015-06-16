@@ -1,38 +1,30 @@
 {
   "name": "sockbot",
-  "version": "0.0.1",
+  "version": "2.0.0",
   "description": "A sockpuppet bot to use on http://what.thedailywtf.com.",
   "main": "SockBot.js",
-  "repository": "https://github.com/AccaliaDeElementia/SockBot",
+  "repository": "https://github.com/SockDrawer/SockBot",
   "author": "Accalia Elementia <Accalia.de.elementia>",
+  "license": "MIT",
   "contributors": [
     "RaceProUK <RaceProUK> (https://github.com/RaceProUK)",
     "Yamikuronue <yamikuronue> (https://github.com/yamikuronue)"
   ],
-  "dependencies": {
-    "async": "~0.2.8",
-    "js-yaml": "^3.2.3",
-    "request": "^2.42.0",
-    "xregexp": "^2.0.0",
-    "sync-exec": "^0.5.0"
-  },
+  "dependencies": {},
+  "optionalDependencies": {},
   "devDependencies": {
     "chai": "^2.3.0",
-    "grunt": "~0.4.5",
-    "grunt-gh-pages": "^0.10.0",
-    "grunt-git": "~0.3.4",
-    "grunt-jsdoc": "~0.5.8",
-    "grunt-mkdocs": "^0.1.0",
-    "grunt-simple-mocha": "^0.4.0"
+    "coveralls": "^2.11.2",
+    "eslint": "^0.21.2",
+    "istanbul-harmony": "^0.3.12",
+    "jsdoc-to-markdown": "^1.1.1",
+    "mocha": "^2.2.5",
+    "sinon": "^1.14.1"
   },
-  "optionalDependencies": {
-    "mathjs": "^1.5.0",
-    "mkdirp": "^0.5.0",
-    "nodehun": "^1.0.2",
-    "nodehun-sentences": "^1.0.0",
-    "pg": "^4.1.1",
-    "plotly": "^0.2.15",
-    "request-debug": "^0.1.1",
-    "tingodb": "^0.3.4"
+  "scripts": {
+    "start": "node --harmony SockBot.js",
+    "lint": "eslint .",
+    "test": "node --harmony --harmony_arrow_functions node_modules/.bin/istanbul cover _mocha -- --recursive",
+    "docs": "find . -not \\( \\( -path ./node_modules -o -path ./test -o -path ./docs -o -path ./bin -o -path ./include -o -path ./lib -o -path ./local \\) -prune \\) -name \\*.js|while read i; do mkdir -p \"docs/api/`dirname $i`\";jsdoc2md \"$i\">\"docs/api/`basename \"$i\" .js`.md\"; done"
   }
 }
