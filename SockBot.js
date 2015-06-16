@@ -6,3 +6,4 @@
  * @license MIT
  */
 
+exports.version = 'v2.0.0';
