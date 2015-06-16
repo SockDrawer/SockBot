@@ -7,6 +7,11 @@ SockBot
 [![devDependency Status](https://david-dm.org/SockDrawer/SockBot/es6-dev/dev-status.svg)](https://david-dm.org/SockDrawer/SockBot/es6-dev#info=devDependencies)
 [![optionalDependency Status](https://david-dm.org/SockDrawer/SockBot/es6-dev/optional-status.svg)](https://david-dm.org/SockDrawer/SockBot/es6-dev#info=optionalDependencies)
 
+
+[![Stories in Ready](https://badge.waffle.io/sockdrawer/sockbot.png?label=ready&title=Ready)](https://waffle.io/sockdrawer/sockbot)
+[![Stories in Progress](https://badge.waffle.io/sockdrawer/sockbot.png?label=in%20progress&title=In%20Progress)](https://waffle.io/sockdrawer/sockbot)
+
+
 Sockbot - A sock puppet Robot worthy of TheDailyWTF that interfaces with what.thedailywtf.com. SO META!
 
 Docs: https://sockbot.readthedocs.org/en/es6-dev/
