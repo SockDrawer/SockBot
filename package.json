@@ -25,6 +25,6 @@
     "start": "node --harmony SockBot.js",
     "lint": "eslint .",
     "test": "node --harmony --harmony_arrow_functions node_modules/.bin/istanbul cover _mocha -- --recursive",
-    "docs": "find . -not \\( \\( -path ./node_modules -o -path ./test -o -path ./docs -o -path ./bin -o -path ./include -o -path ./lib -o -path ./local \\) -prune \\) -name \\*.js|while read i; do mkdir -p \"docs/api/`dirname $i`\";jsdoc2md \"$i\">\"docs/api/`basename \"$i\" .js`.md\"; done"
+    "docs": "find . -not \\( \\( -path ./node_modules -o -path ./test -o -path ./coverage -o -path ./docs -o -path ./bin -o -path ./include -o -path ./lib -o -path ./local \\) -prune \\) -name \\*.js|while read i; do mkdir -p \"docs/api/`dirname $i`\";jsdoc2md \"$i\">\"docs/api/`basename \"$i\" .js`.md\"; done"
   }
 }
