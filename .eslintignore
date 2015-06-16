@@ -1,2 +1,7 @@
 site/**
 docs/**
+bin/**
+include/**
+lib/**
+local/**
+coverage/**
