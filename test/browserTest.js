@@ -12,7 +12,7 @@ const browser = require('../browser');
 
 describe('browser', () => {
     describe('exports', () => {
-        let fns = ['uuid'],
+        let fns = [],
             objs = [],
             vals = [];
         describe('should export expected functions:', () => {
@@ -32,12 +32,6 @@ describe('browser', () => {
         });
         it('should export only expected keys', () => {
             browser.should.have.all.keys(fns.concat(objs, vals));
-        });
-    });
-    describe('uuid()', () => {
-        it('should generate correct format', () => {
-            const uuid = browser.uuid();
-            uuid.should.match(/^[\da-f]{8}-[\da-f]{4}-4[\da-f]{3}-[\da-f]{4}-[\da-f]{12}$/);
         });
     });
 });
