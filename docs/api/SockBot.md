@@ -16,5 +16,5 @@ asleep
 
 | Param | Type | Description |
 | --- | --- | --- |
-| until | <code>number</code> | nix Timestamp representing time for the bot to unmute |
+| until | <code>number</code> | unix Timestamp representing time for the bot to unmute |
 

@@ -1,5 +1,3 @@
-SockBot
-=======
 [![Build Status](https://travis-ci.org/SockDrawer/SockBot.svg?branch=es6-dev)](https://travis-ci.org/SockDrawer/SockBot)
 [![Coverage Status](https://coveralls.io/repos/SockDrawer/SockBot/badge.svg?branch=es6-dev)](https://coveralls.io/r/SockDrawer/SockBot?branch=es6-dev)
 [![Docs Status](https://readthedocs.org/projects/sockbot/badge/?version=es6-dev)](http://sockbot.readthedocs.org/)
@@ -12,9 +10,9 @@ SockBot
 [![Stories in Progress](https://badge.waffle.io/sockdrawer/sockbot.png?label=in%20progress&title=In%20Progress)](https://waffle.io/sockdrawer/sockbot)
 
 
+SockBot
+=======
 Sockbot - A sock puppet Robot worthy of TheDailyWTF that interfaces with what.thedailywtf.com. SO META!
-
-Docs: https://sockbot.readthedocs.org/en/es6-dev/
 
 NOTA BENE
 =========
