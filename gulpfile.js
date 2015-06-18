@@ -16,7 +16,7 @@ const sockFiles = ['*.js', '!./gulpfile.js', 'plugins/**/*.js'],
     sockReadme = ['docs/badges.md.tmpl', 'docs/index.md', 'docs/Special Thanks.md'];
 
 const JobNumber = process.env.TRAVIS_JOB_NUMBER,
-    runDocs = !!JobNumber || /[.]1$/.test(JobNumber),
+    runDocs = /[.]1$/.test(JobNumber||''),
     logger = gutil.log;
 
 console.log(JobNumber);
