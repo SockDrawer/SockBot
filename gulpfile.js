@@ -61,6 +61,7 @@ gulp.task('gitConfig', (done) => {
 });
 
 gulp.task('gitBranch', (done) => {
+    let complete = false;
     if (!runDocs) {
         return done();
     }
@@ -69,8 +70,10 @@ gulp.task('gitBranch', (done) => {
         return done();
     }
     git.checkout(branch, () => {
-        git.pull('origin', branch,()=>done());
-        done();
+        git.pull('origin', branch, () => {
+            complete || done();
+            complete = true;
+        });
     });
 });
 
