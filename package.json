@@ -34,7 +34,6 @@
     "start": "node --harmony SockBot.js",
     "lint": "node --harmony --harmony_arrow_functions node_modules/.bin/gulp lint",
     "test": "node --harmony --harmony_arrow_functions node_modules/.bin/gulp test",
-    "pushDocs": "node --harmony --harmony_arrow_functions node_modules/.bin/gulp pushDocs",
-    "buildDocs": "node --harmony --harmony_arrow_functions node_modules/.bin/gulp buildDocs"
+    "gulp": "node --harmony --harmony_arrow_functions node_modules/.bin/gulp"
   }
 }

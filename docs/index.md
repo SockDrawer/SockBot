@@ -4,7 +4,7 @@ Sockbot - A rebuild of a sock puppet robot worthy of TheDailyWTF in EcmaScript 6
 
 Developers
 ==========
-SockBot is debeloped by members of [SockDrawer](https://github.com/SockDrawer)
+SockBot is developed by members of [SockDrawer](https://github.com/SockDrawer)
 
 NOTA BENE
 =========

@@ -9,7 +9,7 @@ const gulp = require('gulp'),
     git = require('gulp-git'),
     concat = require('gulp-concat');
 
-const sockFiles = ['*.js', 'plugins/**/*.js'],
+const sockFiles = ['*.js', '!./gulpfile.js', 'plugins/**/*.js'],
     sockDocs = ['README.md', 'docs/**/*.md'],
     sockTests = ['test/**/*.js'],
     sockReadme = ['docs/badges.md.tmpl', 'docs/index.md', 'docs/Special Thanks.md'];
@@ -39,21 +39,34 @@ gulp.task('lint', (done) => {
         .on('error', done);
 });
 
-gulp.task('pushDocs', (done) => {
-    const username = process.env.GITHUB_USERNAME,
-        token = process.env.GITHUB_TOKEN;
+gulp.task('commitDocs', (done) => {
     gulp.src(sockDocs)
         .pipe(git.add())
         .pipe(git.commit('Automatically push updated documentation'))
-        .on('error', () => done())
-        .pipe(git.addRemote('github', 'https://' + username + ':' + token +
-            '@github.com/SockDrawer/SockBot.git', (e) => {
-                if (e) {
-                    console.log(e); //eslint-disable-line no-console
+        .on('error', (err) => {
+            if (err) {
+                console.log(err); //eslint-disable-line no-console
+            }
+        })
+        .on('finish', done);
+});
+gulp.task('pushDocs', ['commitDocs'], (done) => {
+    const username = process.env.GITHUB_USERNAME,
+        token = process.env.GITHUB_TOKEN;
+    git.addRemote('github', 'https://' + username + ':' + token +
+        '@github.com/SockDrawer/SockBot.git', (e) => {
+            if (e) {
+                console.log(e); //eslint-disable-line no-console
+            }
+            git.push('github', 'es6-dev', {
+                args: ['-q']
+            }, (err) => {
+                if (err) {
+                    console.log(err); //eslint-disable-line no-console
                 }
-                git.push('github', 'es6-dev');
-            }))
-        .on('error', done);
+                done();
+            });
+        });
 });
 
 gulp.task('test', (done) => {
@@ -70,3 +83,6 @@ gulp.task('test', (done) => {
 });
 
 gulp.task('buildDocs', ['readme', 'docs'], () => 0);
+gulp.task('preBuild', ['buildDocs', 'lint'], () => 0);
+gulp.task('postBuild', ['pushDocs'], () => 0);
+gulp.task('default', ['lint'], () => 0);
