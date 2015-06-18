@@ -16,6 +16,14 @@
     "chai": "^3.0.0",
     "coveralls": "^2.11.2",
     "eslint": "^0.23.0",
+    "gulp": "^3.9.0",
+    "gulp-eslint": "^0.14.0",
+    "gulp-git": "^1.2.4",
+    "gulp-istanbul": "^0.10.0",
+    "gulp-jsdoc-to-markdown": "^1.1.1",
+    "gulp-mocha": "^2.1.1",
+    "gulp-rename": "^1.2.2",
+    "gulp-util": "^3.0.5",
     "istanbul-harmony": "^0.3.12",
     "jsdoc-to-markdown": "^1.1.1",
     "mocha": "^2.2.5",
@@ -23,8 +31,8 @@
   },
   "scripts": {
     "start": "node --harmony SockBot.js",
-    "lint": "eslint .",
-    "test": "node --harmony --harmony_arrow_functions node_modules/.bin/istanbul cover _mocha -- --recursive",
-    "docs": "find . -not \\( \\( -path ./node_modules -o -path ./test -o -path ./coverage -o -path ./docs -o -path ./bin -o -path ./include -o -path ./lib -o -path ./local \\) -prune \\) -name \\*.js|while read i; do mkdir -p \"docs/api/`dirname $i`\";jsdoc2md \"$i\">\"docs/api/`basename \"$i\" .js`.md\"; done"
+    "lint": "node --harmony --harmony_arrow_functions node_modules/.bin/gulp lint",
+    "test": "node --harmony --harmony_arrow_functions node_modules/.bin/gulp test",
+    "docs": "node --harmony --harmony_arrow_functions node_modules/.bin/gulp docs"
   }
 }
