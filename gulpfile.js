@@ -54,14 +54,23 @@ gulp.task('docs', ['gitBranch'], function (done) {
 });
 
 /**
- * Run all js fules through eslint and report status.
+ * Run all js files through eslint and report status.
  */
 gulp.task('lint', (done) => {
-    gulp.src(sockFiles)
+    return gulp.src(sockFiles)
         .pipe(eslint())
         .pipe(eslint.format())
-        .pipe(eslint.failAfterError())
-        .on('error', done);
+        .pipe(eslint.failAfterError());
+});
+
+/**
+ * Run all tests through eslint and report status.
+ */
+gulp.task('lintTests', (done) => {
+    return gulp.src(sockTests)
+        .pipe(eslint())
+        .pipe(eslint.format())
+        .pipe(eslint.failAfterError());
 });
 
 /**
@@ -114,7 +123,7 @@ gulp.task('gitBranch', (done) => {
  *
  * Add CI tag to commit to prevent CI jobs from being created by checking in docs
  */
-gulp.task('commitDocs', (done) => {
+gulp.task('commitDocs', ['gitConfig'], (done) => {
     gulp.src(sockDocs)
         .pipe(git.add())
         .pipe(git.commit('Automatically push updated documentation [ci skip]'))
@@ -156,7 +165,7 @@ gulp.task('pushDocs', ['gitConfig', 'commitDocs'], (done) => {
 /**
  * Run code coverage instrumented tests
  */
-gulp.task('test', (done) => {
+gulp.task('test', ['lint', 'lintTests'], (done) => {
     gulp.src(sockFiles)
         // Instrument code files with istanbulHarmony
         .pipe(istanbul({
@@ -168,6 +177,7 @@ gulp.task('test', (done) => {
             // Run all tests
             gulp.src(sockTests)
                 .pipe(mocha())
+                .on('error', done)
                 // Write code coverage reports
                 .pipe(istanbul.writeReports())
                 .on('finish', done);
@@ -176,6 +186,6 @@ gulp.task('test', (done) => {
 
 // Meta tasks
 gulp.task('buildDocs', ['readme', 'docs'], () => 0);
-gulp.task('preBuild', ['buildDocs', 'lint'], () => 0);
+gulp.task('preBuild', ['buildDocs'], () => 0);
 gulp.task('postBuild', ['pushDocs'], () => 0);
-gulp.task('default', ['lint'], () => 0);
+gulp.task('default', ['lint', 'lintTests'], () => 0);
