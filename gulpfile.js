@@ -39,6 +39,18 @@ gulp.task('lint', (done) => {
         .on('error', done);
 });
 
+gulp.task('gitConfig', (done) => {
+    git.exec({
+        args: 'config user.name "Travis-CI"'
+    }, () => {
+        git.exec({
+            args: 'config user.email "Travis-CI@servercooties.com"'
+        }, () => {
+            done();
+        });
+    });
+});
+
 gulp.task('commitDocs', (done) => {
     gulp.src(sockDocs)
         .pipe(git.add())
@@ -50,7 +62,7 @@ gulp.task('commitDocs', (done) => {
         })
         .on('finish', done);
 });
-gulp.task('pushDocs', ['commitDocs'], (done) => {
+gulp.task('pushDocs', ['gitConfig', 'commitDocs'], (done) => {
     const username = process.env.GITHUB_USERNAME,
         token = process.env.GITHUB_TOKEN;
     git.addRemote('github', 'https://' + username + ':' + token +
