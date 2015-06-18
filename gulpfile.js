@@ -46,6 +46,9 @@ gulp.task('lint', (done) => {
 });
 
 gulp.task('gitConfig', (done) => {
+    if (!JobNumber) {
+        return done();
+    }
     git.exec({
         args: 'config user.name "Travis-CI"'
     }, () => {
@@ -65,7 +68,10 @@ gulp.task('gitBranch', (done) => {
     if (!branch) {
         return done();
     }
-    git.checkout(branch, () => done());
+    git.checkout(branch, () => {
+        git.pull('origin', branch,()=>done());
+        done();
+    });
 });
 
 gulp.task('commitDocs', (done) => {
