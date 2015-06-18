@@ -20,7 +20,7 @@ gulp.task('readme', () => {
         .pipe(gulp.dest('.'));
 });
 
-gulp.task('docs', function (done) {
+gulp.task('docs', ['gitBranch'], function (done) {
     gulp.src(sockFiles)
         .pipe(gulpJsdoc2md({}))
         .on('error', done)
@@ -49,6 +49,14 @@ gulp.task('gitConfig', (done) => {
             done();
         });
     });
+});
+
+gulp.task('gitBranch', (done) => {
+    const branch = process.env.TRAVIS_BRANCH;
+    if (!branch) {
+        return done();
+    }
+    git.checkout(branch, () => done());
 });
 
 gulp.task('commitDocs', (done) => {
