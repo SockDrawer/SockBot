@@ -1,6 +1,6 @@
 'use strict';
 const gulp = require('gulp'),
-gutil = require('gulp-util'),
+    gutil = require('gulp-util'),
     gulpJsdoc2md = require('gulp-jsdoc-to-markdown'),
     rename = require('gulp-rename'),
     istanbul = require('gulp-istanbul'),
@@ -16,7 +16,8 @@ const sockFiles = ['*.js', '!./gulpfile.js', 'plugins/**/*.js'],
     sockReadme = ['docs/badges.md.tmpl', 'docs/index.md', 'docs/Special Thanks.md'];
 
 const JobNumber = process.env.TRAVIS_JOB_NUMBER,
-    runDocs = !!JobNumber || /[.]1$/.test(JobNumber),logger=gutil.log;
+    runDocs = !!JobNumber || /[.]1$/.test(JobNumber),
+    logger = gutil.log;
 
 gulp.task('readme', () => {
     gulp.src(sockReadme)
@@ -81,12 +82,8 @@ gulp.task('gitBranch', (done) => {
 gulp.task('commitDocs', (done) => {
     gulp.src(sockDocs)
         .pipe(git.add())
-        .pipe(git.commit('Automatically push updated documentation'))
-        .on('error', (err) => {
-            if (err) {
-                console.log(err); //eslint-disable-line no-console
-            }
-        })
+        .pipe(git.commit('Automatically push updated documentation [ci skip]'))
+        .on('error', () => 0)
         .on('finish', done);
 });
 gulp.task('pushDocs', ['gitConfig', 'commitDocs'], (done) => {
@@ -96,7 +93,7 @@ gulp.task('pushDocs', ['gitConfig', 'commitDocs'], (done) => {
     const username = process.env.GITHUB_USERNAME,
         token = process.env.GITHUB_TOKEN;
     //suppress output because sensitive things could get leaked
-    gutil.log=()=>0;
+    gutil.log = () => 0;
     git.addRemote('github', 'https://' + username + ':' + token +
         '@github.com/SockDrawer/SockBot.git', (e) => {
             if (e) {
@@ -104,7 +101,11 @@ gulp.task('pushDocs', ['gitConfig', 'commitDocs'], (done) => {
             }
             git.push('github', 'es6-dev', {
                 args: ['-q']
-            }, () => {gutil.log=logger;done();});
+            }, () => {
+                //restore logging for the rest of the build
+                gutil.log = logger;
+                done();
+            });
         });
 });
 
