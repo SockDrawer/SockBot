@@ -17,6 +17,7 @@
     "coveralls": "^2.11.2",
     "eslint": "^0.23.0",
     "gulp": "^3.9.0",
+    "gulp-concat": "^2.5.2",
     "gulp-eslint": "^0.14.0",
     "gulp-git": "^1.2.4",
     "gulp-istanbul": "^0.10.0",
@@ -33,6 +34,7 @@
     "start": "node --harmony SockBot.js",
     "lint": "node --harmony --harmony_arrow_functions node_modules/.bin/gulp lint",
     "test": "node --harmony --harmony_arrow_functions node_modules/.bin/gulp test",
-    "docs": "node --harmony --harmony_arrow_functions node_modules/.bin/gulp docs"
+    "pushDocs": "node --harmony --harmony_arrow_functions node_modules/.bin/gulp pushDocs",
+    "buildDocs": "node --harmony --harmony_arrow_functions node_modules/.bin/gulp buildDocs"
   }
 }

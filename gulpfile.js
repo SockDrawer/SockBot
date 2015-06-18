@@ -6,11 +6,20 @@ const gulp = require('gulp'),
     istanbulHarmony = require('istanbul-harmony'),
     mocha = require('gulp-mocha'),
     eslint = require('gulp-eslint'),
-    git = require('gulp-git');
+    git = require('gulp-git'),
+    concat = require('gulp-concat');
 
 const sockFiles = ['*.js', 'plugins/**/*.js'],
     sockDocs = ['README.md', 'docs/**/*.md'],
-    sockTests = ['test/**/*.js'];
+    sockTests = ['test/**/*.js'],
+    sockReadme = ['docs/badges.md.tmpl', 'docs/index.md', 'docs/Special Thanks.md'];
+
+gulp.task('readme', () => {
+    gulp.src(sockReadme)
+        .pipe(concat('README.md'))
+        .pipe(gulp.dest('.'));
+});
+
 gulp.task('docs', function (done) {
     gulp.src(sockFiles)
         .pipe(gulpJsdoc2md({}))
@@ -30,7 +39,7 @@ gulp.task('lint', (done) => {
         .on('error', done);
 });
 
-gulp.task('pushdocs', (done) => {
+gulp.task('pushDocs', (done) => {
     const username = process.env.GITHUB_USERNAME,
         token = process.env.GITHUB_TOKEN;
     gulp.src(sockDocs)
@@ -59,3 +68,5 @@ gulp.task('test', (done) => {
                 .on('finish', done);
         });
 });
+
+gulp.task('buildDocs', ['readme', 'docs'], () => 0);

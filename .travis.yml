@@ -7,8 +7,10 @@ node_js:
   - 'iojs-v2.1'
 before_script:
   - rm -rf ./coverage
+  - npm run buildDocs
   - npm run lint 2>/dev/null
 after_script:
+  - npm run pushDocs
   - test -e ./coverage/lcov.info && < ./coverage/lcov.info ./node_modules/coveralls/bin/coveralls.js
 branches:
   only:
