@@ -29,6 +29,7 @@ This bot should not be used without the forum owners consent, and any use of thi
 discontinued at the request of the forum owners or moderators. SockBot is not intended for any ill purposes, and the 
 designers of SockBot can not be held liable for abuses of the technology, or any software derived from it.
 
+
 Special Thanks
 ==============
 For hosting the forum and allowing our bots to flourish:
