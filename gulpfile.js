@@ -19,6 +19,13 @@ const JobNumber = process.env.TRAVIS_JOB_NUMBER,
     runDocs = !!JobNumber || /[.]1$/.test(JobNumber),
     logger = gutil.log;
 
+console.log(JobNumber);
+console.log(runDocs);
+/**
+ * Generate README.md.
+ * 
+ * Generate document by concatenating badges.md.tmpl, index.md, and special Thanks./md
+ */
 gulp.task('readme', () => {
     gulp.src(sockReadme)
         .pipe(concat('README.md'))
