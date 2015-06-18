@@ -14,6 +14,9 @@ const sockFiles = ['*.js', '!./gulpfile.js', 'plugins/**/*.js'],
     sockTests = ['test/**/*.js'],
     sockReadme = ['docs/badges.md.tmpl', 'docs/index.md', 'docs/Special Thanks.md'];
 
+const JobNumber = process.env.TRAVIS_JOB_NUMBER,
+    runDocs = !!JobNumber || /[.]1$/.test(JobNumber);
+
 gulp.task('readme', () => {
     gulp.src(sockReadme)
         .pipe(concat('README.md'))
@@ -21,6 +24,9 @@ gulp.task('readme', () => {
 });
 
 gulp.task('docs', ['gitBranch'], function (done) {
+    if (!runDocs) {
+        return done();
+    }
     gulp.src(sockFiles)
         .pipe(gulpJsdoc2md({}))
         .on('error', done)
@@ -52,6 +58,9 @@ gulp.task('gitConfig', (done) => {
 });
 
 gulp.task('gitBranch', (done) => {
+    if (!runDocs) {
+        return done();
+    }
     const branch = process.env.TRAVIS_BRANCH;
     if (!branch) {
         return done();
@@ -71,6 +80,9 @@ gulp.task('commitDocs', (done) => {
         .on('finish', done);
 });
 gulp.task('pushDocs', ['gitConfig', 'commitDocs'], (done) => {
+    if (!runDocs) {
+        return done();
+    }
     const username = process.env.GITHUB_USERNAME,
         token = process.env.GITHUB_TOKEN;
     git.addRemote('github', 'https://' + username + ':' + token +
