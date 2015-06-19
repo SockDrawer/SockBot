@@ -1,8 +1,8 @@
 
 Special Thanks
 ==============
-For hosting the forum and allowing our bots to flourish:
-[@apapadimoulis](http://what.thedailywtf.com/users/apapadimoulis)
+For hosting the forum and allowing our bots to flourish:<br />
+[@apapadimoulis](http://what.thedailywtf.com/users/apapadimoulis)<br />
 [@PJH](http://what.thedailywtf.com/users/PJH)
 
 For telling us that it couldn't be done:
