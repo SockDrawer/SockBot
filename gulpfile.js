@@ -53,6 +53,7 @@ gulp.task('buildContribs', ['gitBranch'], (done) => {
             let j = i.split('\t');
             return '| ' + j[1] + ' | ' + j[0] + ' |';
         }).join('\n');
+        console.log(res);
         fs.writeFile('docs/contributors.table.md.tmpl',
             '| Contributor | Commits |\n|---|---:|\n' + res, (err) => done(err));
     });
