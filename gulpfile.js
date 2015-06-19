@@ -171,15 +171,14 @@ gulp.task('pushDocs', ['gitConfig', 'commitDocs'], function (done) {
     // suppress output because sensitive things could get leaked
     // this could suppress other logging from parallel tasks.
     // that risk is deemed acceptable to prevent sensitive information leaking
-    gutil.log = function () {};
-    git.addRemote('github', 'https://' + username + ':' + token +
-        '@github.com/SockDrawer/SockBot.git',
+    //gutil.log = function () {};
+    git.addRemote('github', 'https://github.com/SockDrawer/SockBot.git',
         function (e) {
             if (e) {
                 gutil.log = logger;
                 return done();
             } else {
-                git.push('github', 'es6-dev', {
+                git.push('github', 'HEAD', {
                     args: ['-q']
                 }, function () {
                     //restore logging for the rest of the build
