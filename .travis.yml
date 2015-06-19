@@ -7,6 +7,8 @@ node_js:
   - 'iojs-v2.1'
 before_script:
   - rm -rf ./coverage
+  - git checkout $TRAVIS_BRANCH
+  - git pull
   - npm run gulp preBuild
 after_script:
   - npm run gulp postBuild
