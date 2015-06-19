@@ -10,7 +10,8 @@ const gulp = require('gulp'),
     git = require('gulp-git'),
     concat = require('gulp-concat');
 
-const exec = require('child_process').exec;
+const exec = require('child_process').exec,
+    fs = require('fs');
 
 const sockFiles = ['*.js', '!./gulpfile.js', 'plugins/**/*.js'],
     sockDocs = ['README.md', 'docs/**/*.md'],
@@ -52,9 +53,8 @@ gulp.task('buildContribs', ['gitBranch'], (done) => {
             let j = i.split('\t');
             return '| ' + j[1] + ' | ' + j[0] + ' |';
         }).join('\n');
-        vinyl('contributors.table.md.tmpl', '| Contributor | Commits |\n|---|---:|\n' + res)
-            .pipe(gulp.dest('docs/'))
-            .on('finish', done);
+        fs.writeFile('docs/contributors.table.md.tmpl',
+            '| Contributor | Commits |\n|---|---:|\n' + res, (err) => done(err));
     });
 });
 
