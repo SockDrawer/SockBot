@@ -322,12 +322,12 @@ function handleResponse(callback) {
         if (resp.statusCode === 429) {
             var msg = 'E429: Too Many Requests';
             if (resp.request) {
-                var request = resp.request;
-                if (request.method) {
-                    msg += ', Method: ' + request.method;
+                var req = resp.request;
+                if (req.method) {
+                    msg += ', Method: ' + req.method;
                 }
                 if (request.url) {
-                    msg += ', URL: ' + request.url;
+                    msg += ', URL: ' + req.url;
                 }
             }
             exports.warn(msg);
