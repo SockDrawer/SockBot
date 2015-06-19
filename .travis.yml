@@ -7,8 +7,9 @@ node_js:
   - 'iojs-v2.1'
 before_script:
   - rm -rf ./coverage
+  - git config credential.helper "store --file=.git/credentials"
+  - echo "https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@github.com" > .git/credentials
   - npm run gulp preBuild
-  - git log|egrep '^commit' -c
 after_script:
   - npm run gulp postBuild
   - test -e ./coverage/lcov.info && < ./coverage/lcov.info ./node_modules/coveralls/bin/coveralls.js

@@ -20,15 +20,14 @@ exports.uuid = function () {
 /**
  * Add timestamp to message.
  *
- * if `datestamp` configuration setting is truthy add UTC date and time, else
- * if `timestamp` configuration setting is truthy add UTC time, else
- * return message unaltered
- *
  * @param {*} message Message to timestamp
  * @returns {string} timestamped input message
  */
 function addTimestamp(message) {
     let date = new Date().toISOString().replace(/\..+$/, '');
+    if (typeof message !== 'string'){
+        message = JSON.stringify(message, null, '    ');
+    }
     message = '[' + date.replace(/^.+T/, '') + '] ' + message;
     return message;
 }

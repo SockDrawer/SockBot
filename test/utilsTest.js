@@ -45,6 +45,7 @@ describe('utils', () => {
             let message = utils.addTimestamp('message');
             message.should.match(/^\[\d{2}:\d{2}:\d{2}\] message$/);
         });
+
     });
     describe('log()', () => {
         it('should call console.log()', () => {

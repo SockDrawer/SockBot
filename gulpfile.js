@@ -169,19 +169,12 @@ gulp.task('pushDocs', ['gitConfig', 'commitDocs'], (done) => {
     if (!runDocs) {
         return done();
     }
-    const username = process.env.GITHUB_USERNAME,
-        token = process.env.GITHUB_TOKEN;
-    // suppress output because sensitive things could get leaked
-    // this could suppress other logging from parallel tasks.
-    // that risk is deemed acceptable to prevent sensitive information leaking
-    gutil.log = () => 0;
-    git.addRemote('github', 'https://' + username + ':' + token +
-        '@github.com/SockDrawer/SockBot.git', (e) => {
+    git.addRemote('github', 'https://github.com/SockDrawer/SockBot.git', (e) => {
             if (e) {
                 gutil.log = logger;
                 return done();
             } else {
-                git.push('github', 'es6-dev', {
+                git.push('github', 'HEAD', {
                     args: ['-q']
                 }, () => {
                     //restore logging for the rest of the build
