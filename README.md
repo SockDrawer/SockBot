@@ -37,3 +37,11 @@ For hosting the forum and allowing our bots to flourish:
 
 For telling us that it couldn't be done:
 [@Codinghorror](http://what.thedailywtf.com/users/Codinghorror)
+Contributors
+============
+
+
+| Contributor | Commits |
+|---|---:|
+| Accalia de Elementia | 46 |
+| Travis-CI | 6 |
