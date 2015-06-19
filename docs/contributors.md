@@ -4,5 +4,5 @@ Contributors
 
 | Contributor | Commits |
 |---|---:|
-| Accalia de Elementia | 45 |
-| Travis-CI | 8 |
+| Accalia de Elementia | 44 |
+| Travis-CI | 9 |
