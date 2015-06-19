@@ -55,10 +55,6 @@ Log an error to the console
 ### utils~addTimestamp(message) ⇒ <code>string</code>
 Add timestamp to message.
 
-if `datestamp` configuration setting is truthy add UTC date and time, else
-if `timestamp` configuration setting is truthy add UTC time, else
-return message unaltered
-
 **Kind**: inner method of <code>[utils](#module_utils)</code>  
 **Returns**: <code>string</code> - timestamped input message  
 
