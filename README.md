@@ -62,10 +62,10 @@ For providing the lovely and amusing Error messages that sockbot will occasional
 
 | Contributor | Commits |
 |---|---:|
+| RaceProUK | 185 |
 | Accalia Elementia | 181 |
-| RaceProUK | 181 |
 | Accalia | 150 |
-| Accalia de Elementia | 48 |
+| Accalia de Elementia | 52 |
 | Yamikuronue | 16 |
 | Andrew Cook | 15 |
 | PleegWat | 15 |
