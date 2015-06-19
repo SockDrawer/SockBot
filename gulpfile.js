@@ -153,7 +153,9 @@ gulp.task('gitBranch', (done) => {
         return done();
     }
     git.checkout(branch, () => {
-        git.pull('origin', branch, () => {
+        git.pull('origin', branch, {
+            args: '--unshallow'
+        }, () => {
             if (!complete) {
                 done();
             }

@@ -7,8 +7,8 @@ node_js:
   - 'iojs-v2.1'
 before_script:
   - rm -rf ./coverage
-  - git log|egrep '^commit' -c
   - npm run gulp preBuild
+  - git log|egrep '^commit' -c
 after_script:
   - npm run gulp postBuild
   - test -e ./coverage/lcov.info && < ./coverage/lcov.info ./node_modules/coveralls/bin/coveralls.js
