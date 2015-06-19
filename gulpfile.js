@@ -10,29 +10,72 @@ const gulp = require('gulp'),
     git = require('gulp-git'),
     concat = require('gulp-concat');
 
+const exec = require('child_process').exec;
+
 const sockFiles = ['*.js', '!./gulpfile.js', 'plugins/**/*.js'],
     sockDocs = ['README.md', 'docs/**/*.md'],
     sockTests = ['test/**/*.js'],
-    sockReadme = ['docs/badges.md.tmpl', 'docs/index.md', 'docs/Special Thanks.md'];
+    sockReadme = ['docs/badges.md.tmpl', 'docs/index.md', 'docs/Special Thanks.md', 'docs/contributors.md'],
+    sockContribs = ['docs/contributors.md.tmpl', 'docs/contributors.table.md.tmpl'];
 
 const JobNumber = process.env.TRAVIS_JOB_NUMBER,
     runDocs = !JobNumber || /[.]1$/.test(JobNumber),
     logger = gutil.log;
+
+function vinyl(filename, string) {
+    var src = require('stream').Readable({
+        objectMode: true
+    });
+    src._read = function () {
+        this.push(new gutil.File({
+            cwd: "",
+            base: "",
+            path: filename,
+            contents: new Buffer(string)
+        }));
+        this.push(null);
+    };
+    return src;
+}
+
+/**
+ * Read git log to get a up to date list of contributors
+ * 
+ * Output to a template file that's used to generate contributors.md
+ */
+gulp.task('buildContribs', (done) => {
+    exec('git shortlog -ns < /dev/tty', (err, out) => {
+        if (err) {
+            return done(err);
+        }
+        let res = out.replace(/^\s+/gm, '').split('\n').filter((i) => !!i).map((i) => {
+            let j = i.split('\t');
+            return '| ' + j[1] + ' | ' + j[0] + ' |';
+        }).join('\n');
+        vinyl('contributors.table.md.tmpl', '| Contributor | Commits |\n|---|---:|\n' + res)
+            .pipe(gulp.dest('docs/'))
+            .on('finish', done);
+    });
+});
+
+/**
+ * Generate docs/contributors.md
+ */
+gulp.task('contribs', ['buildContribs'], () => {
+    return gulp.src(sockContribs)
+        .pipe(concat('contributors.md'))
+        .pipe(gulp.dest('docs/'));
+});
 
 /**
  * Generate README.md.
  *
  * Generate document by concatenating badges.md.tmpl, index.md, and Special Thanks.md from docs/
  */
-gulp.task('readme', (done) => {
-    // Abort(successfully) early if running in CI and not job #1
-    if (!runDocs) {
-        return done();
-    }
-    gulp.src(sockReadme)
+gulp.task('readme', ['contribs'], (done) => {
+    return gulp.src(sockReadme)
         .pipe(concat('README.md'))
-        .pipe(gulp.dest('.'))
-        .on('finish', done);
+        .pipe(gulp.dest('.'));
 });
 
 /**
