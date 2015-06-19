@@ -35,7 +35,7 @@ var request = require('request'),
 var csrf,
     jar = request.jar(),
     clientId = exports.uuid(),
-    urlbase = conf.url || 'http://what.thedailywtf.com/',
+    urlbase = conf.url || 'https://what.thedailywtf.com/',
     browser = request.defaults({
         rejectUnauthorized: false,
         jar: jar,
@@ -356,6 +356,7 @@ exports.login = function login(callback) {
                 //re-set headers and the cookie jar
                 //So we may as well do it every time!
                 browser = browser.defaults({
+                    rejectUnauthorized: false,
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
                         'User-Agent': version.userAgent.
