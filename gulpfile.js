@@ -23,22 +23,6 @@ const JobNumber = process.env.TRAVIS_JOB_NUMBER,
     runDocs = !JobNumber || /[.]1$/.test(JobNumber),
     logger = gutil.log;
 
-function vinyl(filename, string) {
-    var src = require('stream').Readable({
-        objectMode: true
-    });
-    src._read = function () {
-        this.push(new gutil.File({
-            cwd: "",
-            base: "",
-            path: filename,
-            contents: new Buffer(string)
-        }));
-        this.push(null);
-    };
-    return src;
-}
-
 /**
  * Read git log to get a up to date list of contributors
  *
@@ -53,7 +37,6 @@ gulp.task('buildContribs', ['gitBranch'], (done) => {
             let j = i.split('\t');
             return '| ' + j[1] + ' | ' + j[0] + ' |';
         }).join('\n');
-        console.log(res);
         fs.writeFile('docs/contributors.table.md.tmpl',
             '| Contributor | Commits |\n|---|---:|\n' + res, (err) => done(err));
     });
@@ -153,6 +136,7 @@ gulp.task('gitBranch', (done) => {
         return done();
     }
     git.checkout(branch, () => {
+        // Make sure we have full log history.
         git.pull('origin', branch, {
             args: '--unshallow'
         }, () => {
