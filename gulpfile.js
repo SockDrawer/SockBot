@@ -40,10 +40,10 @@ function vinyl(filename, string) {
 
 /**
  * Read git log to get a up to date list of contributors
- * 
+ *
  * Output to a template file that's used to generate contributors.md
  */
-gulp.task('buildContribs', (done) => {
+gulp.task('buildContribs', ['gitBranch'], (done) => {
     exec('git shortlog -ns < /dev/tty', (err, out) => {
         if (err) {
             return done(err);
