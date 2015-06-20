@@ -24,7 +24,7 @@ exports.uuid = function () {
  * @returns {string} timestamped input message
  */
 function addTimestamp(message) {
-    let date = new Date().toISOString().replace(/\..+$/, '');
+    const date = new Date().toISOString().replace(/\..+$/, '');
     if (typeof message !== 'string'){
         message = JSON.stringify(message, null, '    ');
     }

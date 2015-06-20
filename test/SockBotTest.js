@@ -12,7 +12,7 @@ const SockBot = require('../SockBot');
 
 describe('SockBot', () => {
     describe('exports', () => {
-        let fns = [],
+        const fns = [],
             objs = [],
             vals = ['version'];
         describe('should export expected functions:', () => {

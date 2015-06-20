@@ -12,7 +12,7 @@ const browser = require('../browser');
 
 describe('browser', () => {
     describe('exports', () => {
-        let fns = [],
+        const fns = [],
             objs = [],
             vals = [];
         describe('should export expected functions:', () => {

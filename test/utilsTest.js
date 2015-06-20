@@ -12,7 +12,7 @@ const utils = require('../utils');
 
 describe('utils', () => {
     describe('exports', () => {
-        let fns = ['uuid', 'log', 'warn', 'error', 'addTimestamp'],
+        const fns = ['uuid', 'log', 'warn', 'error', 'addTimestamp'],
             objs = [],
             vals = [];
         describe('should export expected functions:', () => {
@@ -42,10 +42,22 @@ describe('utils', () => {
     });
     describe('addTimestamp()', () => {
         it('should add correct format time format', () => {
-            let message = utils.addTimestamp('message');
+            const message = utils.addTimestamp('message');
             message.should.match(/^\[\d{2}:\d{2}:\d{2}\] message$/);
         });
-
+        describe('should accept any object', () => {
+            [4, 9.2, false, undefined, null, [1, 2], {
+                a: 5
+            }, {
+                a: [1, {
+                    b: 5
+                }]
+            }].forEach((test) => {
+                const result = utils.addTimestamp(test),
+                    expected = JSON.stringify(test, null, '    ');
+                it('should accept input:' + test, () => result.should.contain(expected));
+            });
+        });
     });
     describe('log()', () => {
         it('should call console.log()', () => {
