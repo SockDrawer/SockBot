@@ -1,14 +1,14 @@
 {
   "env": {
-    "node": true,
-    "es6": true
+    "es6": true,
+    "node": true
   },
   "rules": {
-    "no-var": 2,
     "block-scoped-var": 2,
     "brace-style": [2, "1tbs"],
     "camelcase": 1,
-    "complexity": [1,],
+    "complexity": [1, ],
+    "consistent-return": 2,
     "curly": 2,
     "eol-last": 2,
     "eqeqeq": [2, "smart"],
@@ -19,13 +19,41 @@
     "no-console": 2,
     "no-extend-native": 2,
     "no-mixed-spaces-and-tabs": 2,
+    "no-shadow": 2,
+    "no-sync": 2,
     "no-trailing-spaces": 2,
     "no-use-before-define": [2, "nofunc"],
+    "no-undef": 2,
     "no-unused-vars": 1,
+    "no-var": 2,
+    "prefer-const": 2,
     "quotes": [2, "single", "avoid-escape"],
     "semi": [2, "always"],
     "space-after-keywords": [2, "always"],
     "space-in-brackets": [2, "never"],
-    "space-unary-ops": 2
+    "space-unary-ops": 2,
+    "valid-jsdoc": [2, {
+      "prefer": {
+        "arg": "param",
+        "argument": "param",
+        "constant": "const",
+        "constructor": "class",
+        "defaultvalue": "default",
+        "desc": "description",
+        "exception": "throws",
+        "extends": "augments",
+        "file": "overview",
+        "fileoverview": "overview",
+        "fires": "emits",
+        "func": "function",
+        "host": "external",
+        "method": "function",
+        "prop": "property",
+        "return": "returns",
+        "var": "member",
+        "virtual": "abstract"
+      },
+      "requireReturn": false
+    }]
   }
 }
