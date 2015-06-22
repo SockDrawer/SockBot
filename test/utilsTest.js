@@ -55,7 +55,7 @@ describe('utils', () => {
             }].forEach((test) => {
                 const result = utils.addTimestamp(test),
                     expected = JSON.stringify(test, null, '    ');
-                it('should accept input:' + test, () => result.should.contain(expected));
+                it('should accept input: ' + test, () => result.should.contain(expected));
             });
         });
     });
