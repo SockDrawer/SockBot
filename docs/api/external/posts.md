@@ -6,6 +6,7 @@ Documentation for discourse JSON objects
 
 * [posts](#external.module_posts)
   * [.PostType](#external.module_posts.PostType)
+  * [.PostActionType](#external.module_posts.PostActionType)
   * [.UserSummary](#external.module_posts.UserSummary) : <code>object</code>
   * [.ActionSummary](#external.module_posts.ActionSummary) : <code>object</code>
   * [.Post](#external.module_posts.Post) : <code>object</code>
@@ -23,6 +24,25 @@ Discourse Post Type Enum
 | --- | --- | --- |
 | regular | <code>1</code> | Represents a regular forum post |
 | moderator_action | <code>2</code> | Represents a post that is the result of a moderator action |
+
+<a name="external.module_posts.PostActionType"></a>
+### posts.PostActionType
+Discourse Post Action Type Enum
+
+**Kind**: static enum property of <code>[posts](#external.module_posts)</code>  
+**Read only**: true  
+**Properties**
+
+| Name | Default | Description |
+| --- | --- | --- |
+| bookmark | <code>1</code> | Bookmark Action |
+| like | <code>2</code> | Like Action |
+| off_topic | <code>3</code> | Flag Post as Off Topic |
+| inappropriate | <code>4</code> | Flag Post as Inappropriate |
+| vote | <code>5</code> | Vote in a poll |
+| notify_user | <code>6</code> | Send the post owner a message |
+| notify_moderators | <code>7</code> | Flag for moderator attention with custom message |
+| spam | <code>8</code> | Flag post as Spam |
 
 <a name="external.module_posts.UserSummary"></a>
 ### posts.UserSummary : <code>object</code>
@@ -44,7 +64,7 @@ Discourse Post Action Summary
 
 | Param | Type | Description |
 | --- | --- | --- |
-| id | <code>number</code> | ActionSummary Id |
+| id | <code>PostActionType</code> | ActionSummary Id |
 | count | <code>number</code> | Number of applied actions |
 | hidden | <code>boolean</code> | Is this action type hidden? |
 | can_act | <code>boolean</code> | Can currently logged in user perform this action? |
