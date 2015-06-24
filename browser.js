@@ -10,44 +10,6 @@ const request = require('request'),
 
 const utils = require('./utils');
 
-/**
- * BBcode Quote Tag Parsing/Stripping Regexp
- *
- * Contributed by Flabdablet
- *
- * A BBCode quote tag is like
- *     [quote]
- * or
- *     [quote=anything-that-isn't-a-closing-bracket]
- *
- * and the regex uses (=[^\]]*)? to deal with the difference. The section that matches the closing tag \[\/quote] is
- * straightforward.
- *
- * The regex is supposed to match only the innermost of any nested BBCode quotes, so between the matching parts for
- * opening and closing tags, it matches only text that doesn't contain the sequence [quote= or [quote].
- *
- * This is done by a *? lazy-repeat match on
- *
- * (        a group containing
- *
- * [^\[]    anything that isn't a [
- * |        or
- *     (        a group containing
- *     \[       an opening square bracket followed by
- *     [^q]     anything that isn't a q
- *     |        or
- *         (        a group containing
- *         q        a q followed by
- *         [^u]     anything that isn't a u
- * ...
- *
- * The net effect is to match on text made of chunks that can be [quote as long as that isn't part of [quote= or
- * [quote], or [quot that isn't part of [quote, or [quo that isn't part of [quot, and so on all the way back to single
- * characters that aren't [.
- *
- * And just for icing on the line noise cake, all groups are specified as non-capturing (?: for speed.
- */
-const rQuote = /\[quote(?:=[^\]]*)?](?:[^\[]|\[(?:[^q]|q(?:[^u]|u(?:[^o]|o(?:[^t]|t(?:[^e]|e[^=\]]))))))*?\[\/quote]/ig;
 const defaults = {
         rejectUnauthorized: false,
         jar: request.jar(),
@@ -60,10 +22,7 @@ const defaults = {
         request: request.defaults(defaults),
         queue: async.queue(queueWorker, 1),
         queueWorker: queueWorker,
-        defaults: defaults,
-        rQuote: rQuote,
-        rCode: /^```.*\n(?:.*\n)*?```\n/gm,
-        rNewLine: /\r\n/g
+        defaults: defaults
     };
 
 /**
@@ -92,55 +51,6 @@ function queueWorker(task, callback) {
         setTimeout(callback, 5000);
     });
 }
-
-/**
- * Strip [quote] tags from input
- *
- * @param {string} input Input string to strip
- * @returns {string} Input after stripping [quote] tags
- */
-function stripQuotes(input) {
-    /*
-    let result;
-    while ((result = input.replace(internals.rQuote, '')) !== input) {
-        input = result;
-    }
-    return result;
-    */
-    // Generate a string with no chance of pre-existing in the text.
-    const placeholder = utils.uuid();
-
-    // Repeatedly remove regex matches until nothing matches it
-    // any more, thereby stripping out BBCode quotes from the most
-    // deeply nested outward. Dump a placeholder into the text
-    // to mark each edit.
-    let edited;
-    while ((edited = input.replace(internals.rQuote, placeholder)) !== input) {
-        input = edited;
-    }
-
-    // Now strip out all the placeholders along with any unbalanced
-    // quote tags that lead them.
-    const garbage = new RegExp(
-        '(?:\\[quote(?:=[^\\]]*)?][^]*?)?' + placeholder,
-        'ig'
-    );
-    return edited.replace(garbage, '');
-}
-internals.stripQuotes = stripQuotes;
-
-/**
- * Strip GFM fenced code blocks from input
- *
- * @param {string} input Input string to strip
- * @returns {string} Input after stripping GFM code blocks tags
- */
-function stripCode(input) {
-    input = input + '\n';
-    const result = input.replace(internals.rCode, '');
-    return result.replace(/\n$/m, '');
-}
-internals.stripCode = stripCode;
 
 /**
  * Clean post raw

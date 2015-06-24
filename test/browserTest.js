@@ -36,7 +36,7 @@ describe('browser', () => {
     });
     describe('internals', () => {
         const fns = ['queueWorker', 'requestComplete', 'request', 'stripQuotes', 'stripCode', 'cleanPost'],
-            objs = ['defaults', 'queue', 'rQuote', 'rCode', 'rNewLine'],
+            objs = ['defaults', 'queue'],
             vals = [];
         describe('should include expected functions:', () => {
             fns.forEach((fn) => {
@@ -214,113 +214,6 @@ describe('browser', () => {
             it(stub + '() should be a stub function', () => internals[stub]());
         });
     });
-    describe('internals.rQuote', () => {
-        const rQuote = browser.internals.rQuote;
-        describe('should match known passing tests', () => {
-            ['[quote="accalia, post:108, topic:49440, full:true"][/quote]',
-                '[quote="accalia, post:108, topic:49440, full:true"]\nthis is a quote[/quote]',
-                '[quote="accalia, post:108, topic:49440, full:true"]\r\nthis is a quote\r\n\r\n[/quote]',
-                '[quote="accalia, post:108, topic:49440"][/quote]',
-                '[quote="accalia, post:108, topic:49440"]\nthis is a quote [/quote]',
-                '[quote="accalia, post:108, topic:49440"]this is a quote[/quote]',
-                '[quote="accalia, post:108"][/quote]', '[quote="accalia, post:108"]\nthis is a quote\n\r\n[/quote]',
-                '[quote="accalia"][/quote]', '[quote="accalia"]this is a quote\r\n\r\n[/quote]',
-                '[quote=accalia][/quote]', '[quote=accalia]this is a quote[/quote]',
-                '[quote][/quote]', '[quote]\n\nthis is a quote[/quote]'
-            ].forEach((quote) => {
-                it('should match: ' + quote, () => {
-                    rQuote.test(quote).should.be.true;
-                    quote.replace(rQuote, '').should.equal('');
-                });
-            });
-        });
-        describe('should not match known failing tests', () => {
-            ['[quote="accalia, post:108, topic:49440, full:true"]',
-                '[quote="accalia, post:108, topic:49440, full:true"this is a quote[/quote]',
-                '[quote="accalia, post:108, topic:49440, full:true"]this is a quote/quote]',
-                '[quote="accalia, post:108, topic:49440"][/quote',
-                '[quote="accalia, post:108, topic:49440"]this is a quote [quote]',
-                '[/quote]',
-                '[quoteaccalia, post:108"][/quote]'
-            ].forEach((quote) => {
-                it('should match: ' + quote, () => {
-                    rQuote.test(quote).should.be.false;
-                    quote.replace(rQuote, '').should.not.equal('');
-                });
-            });
-        });
-    });
-    describe('internals.stipQuotes', () => {
-        const stripQuotes = browser.internals.stripQuotes;
-        describe('should match known passing tests', () => {
-            [
-                ['[quote=a]i am stripped[/quote]', ''],
-                ['this is\n[quote=accalia][/quote] \r\na quote', 'this is\n \r\na quote'],
-                ['this[quote]nope[quote]no[/quote]nada[/quote] survives', 'this survives'],
-                ['i am not a [quote]', 'i am not a [quote]'],
-                ['this[quote]nope[quote]no[quote]nada[/quote] survives', 'this survives'],
-                ['[quote="accalia, post:108, topic:49440, full:true"]\nthis is a quote[/quote] inner words ' +
-                    '[quote="accalia, post:108, topic:49440, full:true"]\nthis is another quote[/quote]',
-                    ' inner words '
-                ],
-                ['before words\n[quote="accalia, post:108, topic:49440, full:true"]\nthis is a ' +
-                    'quote[/quote] inner words [quote="accalia, post:108, topic:49440, full:true"]\nthis is another ' +
-                    'quote[/quote]\nafter words',
-                    'before words\n inner words \nafter words'
-                ]
-            ].forEach((test) => {
-                const quote = test[0],
-                    result = test[1];
-                it('should clean: ' + quote, () => {
-                    stripQuotes(quote).should.equal(result);
-                });
-            });
-        });
-    });
-    describe('internals.stripCode()', () => {
-        const stripCode = browser.internals.stripCode;
-        describe('simple whole input matching tests', () => {
-            ['```\nfoo();\n```', '```javascript\nfoo();\n```', '```\n``\n```',
-                '```\n\n```', '```\n```', '``` \nfoo();\n```'
-            ].forEach((test) => {
-                it('should strip: ' + test, () => stripCode(test).should.equal(''));
-            });
-        });
-        describe('negative input matching tests', () => {
-            ['```\n```test', '```\n``` ', '```foo```',
-                '```\ntest();```', ' ```\ntest();\n```'
-            ].forEach((test) => {
-                it('should not strip: ' + test, () => stripCode(test).should.equal(test));
-            });
-        });
-        describe('test strip text', () => {
-            [
-                ['```\ncode\n```', ''],
-                ['before\n```\ncode\n```', 'before'],
-                ['before2\n```\ncode\n```\n', 'before2\n'],
-                ['```\ncode\n```\nbetween\n```\ncode\n```', 'between'],
-                ['```\ncode\n```\nbetween2\n```\ncode\n```\n', 'between2\n'],
-                ['```\ncode\n```\nafter', 'after'],
-                ['```type\ncode\n```', ''],
-                ['```\ncode\n```\nnotcode\n```\n', 'notcode\n```\n'],
-                ['before\n```\n```\nafter', 'before\nafter'],
-                ['before\n```\n```\nmiddle\n```\nafter', 'before\nmiddle\n```\nafter'],
-                ['before\n```\n1\n```\nmiddle\n```\n2\n```\nafter', 'before\nmiddle\nafter']
-            ].forEach((test => {
-                const input = test[0],
-                    output = test[1];
-                it('should strip: ' + input, () => stripCode(input).should.equal(output));
-            }));
-        });
-    });
-    describe('internals.rNewLine', () => {
-        const rNewLine = browser.internals.rNewLine;
-        it('should match windows style newline', () => rNewLine.test('\r\n').should.be.true);
-        it('should not match linux style newline', () => rNewLine.test('\r').should.be.false);
-        it('should not match mac style newline', () => rNewLine.test('\r').should.be.false);
-        it('should separated sentinal characters', () => rNewLine.test('\r \n').should.be.false);
-
-    });
     describe('internals.cleanPost()', () => {
         const cleanPost = browser.internals.cleanPost;
         it('should add `cleaned` attribute to input', () => {
@@ -334,6 +227,43 @@ describe('browser', () => {
         it('should accept empty post', () => cleanPost({}).cleaned.should.equal(''));
         describe('should pass match to sample tests', () => {
             [
+                ['Full quote empty', '[quote="accalia, post:108, topic:49440, full:true"][/quote]', ''],
+                ['Full quote with text', '[quote="accalia, post:108, topic:49440, full:true"]\nthis is ' +
+                    'a quote[/quote]', ''
+                ],
+                ['Full quote with multiline text', '[quote="accalia, post:108, topic:49440, full:true"]\r\n' +
+                    'this is a quote\r\n\r\n[/quote]', ''
+                ],
+                ['Partial quote empty', '[quote="accalia, post:108, topic:49440"][/quote]', ''],
+                ['Partial quote with text', '[quote="accalia, post:108, topic:49440"]this is a quote[/quote]', ''],
+                ['Partial quote with multiline text', '[quote="accalia, post:108, topic:49440"]\n' +
+                    'this is a quote [/quote]', ''
+                ],
+                ['Topic quote with multiline text', '[quote="accalia, post:108"]\nthis is a quote\n\r\n[/quote]', ''],
+                ['Topic quote empty', '[quote="accalia, post:108"][/quote]', ''],
+                ['Username quote empty', '[quote="accalia"][/quote]', ''],
+                ['Username quote with text', '[quote="accalia"]this is a quote\r\n\r\n[/quote]', ''],
+                ['Unquoted username quote empty', '[quote=accalia][/quote]', ''],
+                ['Unquoted username quote', '[quote=accalia]this is a quote[/quote]', ''],
+                ['Bare quote empty', '[quote][/quote]', ''],
+                ['Bare quote', '[quote]\n\nthis is a quote[/quote]', ''],
+                ['Only open quote', '[quote="accalia, post:108, topic:49440, full:true"]',
+                    '[quote="accalia, post:108, topic:49440, full:true"]'
+                ],
+                ['Malformed open quote', '[quote="accalia, post:108, topic:49440, full:true"this is a quote[/quote]',
+                    '[quote="accalia, post:108, topic:49440, full:true"this is a quote[/quote]'
+                ],
+                ['Malformed close quote', '[quote="accalia, post:108, topic:49440, full:true"]this is a quote/quote]',
+                    '[quote="accalia, post:108, topic:49440, full:true"]this is a quote/quote]'
+                ],
+                ['Malformed close quote 2', '[quote="accalia, post:108, topic:49440"][/quote',
+                    '[quote="accalia, post:108, topic:49440"][/quote'
+                ],
+                ['Malformed open quote 2', '[quote="accalia, post:108, topic:49440"]this is a quote [quote]',
+                    '[quote="accalia, post:108, topic:49440"]this is a quote [quote]'
+                ],
+                ['Only close quote', '[/quote]', '[/quote]'],
+                ['Malformed open quote 2', '[quoteaccalia, post:108"][/quote]', '[quoteaccalia, post:108"][/quote]'],
                 ['Only a quote', '[quote=a]i am stripped[/quote]', ''],
                 ['Embedded quote', 'this is\n[quote=accalia][/quote] \r\na quote', 'this is\n \na quote'],
                 ['Nested quote simple', 'this[quote]nope[quote]no[/quote]nada[/quote] survives', 'this survives'],
@@ -349,7 +279,28 @@ describe('browser', () => {
                     'quote[/quote] inner words [quote="accalia, post:108, topic:49440, full:true"]\nthis is another ' +
                     'quote[/quote]\nafter words',
                     'before words\n inner words \nafter words'
-                ]
+                ],
+                ['Only a GFM with embedded backticks', '```\n``\n```', ''],
+                ['Empty Line in a GFM block', '```\n\n```', ''],
+                ['Empty GFM block', '```\n```', ''],
+                ['GFM with space for typehint', '``` \nfoo();\n```', ''],
+                ['Only a GFM code block', '```\ncode\n```', ''],
+                ['GFM with text before', 'before\n```\ncode\n```', 'before'],
+                ['GFM with text before 2', 'before2\n```\ncode\n```\n', 'before2\n'],
+                ['GFM with text between', '```\ncode\n```\nbetween\n```\ncode\n```', 'between'],
+                ['GFM with text between 2', '```\ncode\n```\nbetween2\n```\ncode\n```\n', 'between2\n'],
+                ['GFM with text after', '```\ncode\n```\nafter', 'after'],
+                ['Only a type hinted GFM', '```type\ncode\n```', ''],
+                ['GFM with unpaired tripletic', '```\ncode\n```\nnotcode\n```\n', 'notcode\n```\n'],
+                ['GFM with before/after text', 'before\n```\n```\nafter', 'before\nafter'],
+                ['Multiple GFM blocks', 'before\n```\n```\nmiddle\n```\nafter', 'before\nmiddle\n```\nafter'],
+                ['Multiple GFM blocks 2', 'before\n```\n1\n```\nmiddle\n```\n2\n```\nafter', 'before\nmiddle\nafter'],
+                ['GFM with trailing text', '```\n```test', '```\n```test'],
+                ['GFM wit trailing space on close', '```\n``` ', '```\n``` '],
+                ['GFM without line breaks', '```foo```', '```foo```'],
+                ['GFM missing with close not on new line', '```\ntest();```', '```\ntest();```'],
+                ['GFM with space before open', ' ```\ntest();\n```', ' ```\ntest();\n```']
+
             ].forEach((test) => {
                 const name = test[0],
                     input = test[1],
