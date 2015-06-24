@@ -13,7 +13,8 @@ const gulp = require('gulp'),
 const exec = require('child_process').exec,
     fs = require('fs');
 
-const sockFiles = ['*.js', '!./gulpfile.js', 'plugins/**/*.js'],
+const sockFiles = ['*.js', '!./gulpfile.js', '**/plugins/**/*.js','!node_modules/**'],
+    sockExterns =['**/external/**/*.js'],
     sockDocs = ['README.md', 'docs/**/*.md'],
     sockTests = ['test/**/*.js'],
     sockReadme = ['docs/badges.md.tmpl', 'docs/index.md', 'docs/Special Thanks.md', 'docs/contributors.md'],
@@ -70,7 +71,7 @@ gulp.task('docs', ['gitBranch'], function (done) {
     if (!runDocs) {
         return done();
     }
-    gulp.src(sockFiles)
+    gulp.src(sockFiles.concat(sockExterns))
         .pipe(gulpJsdoc2md({}))
         .on('error', done)
         .pipe(rename((path) => {
