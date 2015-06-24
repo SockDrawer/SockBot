@@ -111,7 +111,7 @@ exports.Post = {};
 /**
  * Cleaned Discourse Post
  *
- * Created by SockBot from {@link external.module_posts.Post}. **Not Produced by Discourse**
+ * Created by SockBot from {@link #Post}. **Not Produced by Discourse**
  *
  * @augments {external.module_posts.Post}
  * @typedef {object}
