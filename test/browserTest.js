@@ -332,11 +332,38 @@ describe('browser', () => {
             post.should.have.any.key('cleaned');
         });
         it('should accept empty post', () => cleanPost({}).cleaned.should.equal(''));
+        describe('should pass match to sample tests', () => {
+            [
+                ['Only a quote', '[quote=a]i am stripped[/quote]', ''],
+                ['Embedded quote', 'this is\n[quote=accalia][/quote] \r\na quote', 'this is\n \na quote'],
+                ['Nested quote simple', 'this[quote]nope[quote]no[/quote]nada[/quote] survives', 'this survives'],
+                ['Unmatched quote block', 'i am not a [quote]', 'i am not a [quote]'],
+                ['Unmatched quote in valid quote', 'this[quote]nope[quote]no[quote]nada[/quote] survives',
+                    'this survives'
+                ],
+                ['Multiple quotes', '[quote="accalia, post:108, topic:49440, full:true"]\nthis is a quote[/quote] ' +
+                    'inner words [quote="accalia, post:108, topic:49440, full:true"]\nthis is another quote[/quote]',
+                    ' inner words '
+                ],
+                ['Multiple quotes 2', 'before words\n[quote="accalia, post:108, topic:49440, full:true"]\nthis is a ' +
+                    'quote[/quote] inner words [quote="accalia, post:108, topic:49440, full:true"]\nthis is another ' +
+                    'quote[/quote]\nafter words',
+                    'before words\n inner words \nafter words'
+                ]
+            ].forEach((test) => {
+                const name = test[0],
+                    input = test[1],
+                    expected = test[2];
+                it('should handle: ' + name, () => cleanPost({
+                    raw: input
+                }).cleaned.should.equal(expected));
+            });
+        });
         describe('should normalize newlines', () => {
             [
                 ['this is normal\r\n', 'this is normal\n'],
                 ['this is normal\r\n\r\n', 'this is normal\n\n'],
-                ['this\ris normal\r\n', 'this\ris normal\n'],
+                ['this\ris normal\r\n', 'this\nis normal\n'],
                 ['this is\nnormal\r\n', 'this is\nnormal\n'],
                 ['this\r\nis normal\r\n', 'this\nis normal\n']
             ].forEach((test) => {

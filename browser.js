@@ -150,11 +150,48 @@ internals.stripCode = stripCode;
  * @returns {external.module_posts.CleanedPost} input post with cleaned raw
  */
 function cleanPost(post) {
-    let text = post.raw || '';
-    text = text.replace(internals.rNewLine, '\n');
-    text = stripCode(text);
-    text = stripQuotes(text);
-    post.cleaned = text;
+    let text = post.raw || '',
+        edited = text.
+
+    // Normalize newlines
+    replace(/\r\n?/g, '\n').
+
+    // Remove low-ASCII control chars except \t (\011) and \n (\012)
+    replace(/[\0-\010\013-\037]/g, '').
+
+    // Remove GFM-fenced code blocks
+    replace(/^```.*\n(?:.*\n)*?```\n/gm, '').
+
+    // Disable bbcode tags inside inline code blocks
+    replace(
+        /([^`]*)(`[^`]*`)/g, (all, noncode, code) => noncode + code.replace(/\[/g, '[\x01')
+    ).
+
+    // Ease recognition of bbcode [quote] and
+    // [quote=whatever] start tags
+    replace(/\[quote(?:=[^\]]*)?]/ig, '\x02$&').
+
+    // Ease recognition of bbcode [/quote] end tags
+    replace(/\[\/quote]/ig, '$&\x03');
+
+    // Repeatedly strip non-nested quoted blocks until
+    // no more remain; this removes nested blocks from
+    // the innermost outward. Leave markers in places
+    // where blocks were removed.
+    do {
+        text = edited;
+        edited = text.replace(/\02[^\02\03]*\03/g, '\x04');
+    } while (edited !== text);
+
+    post.cleaned = text.
+
+    // Remove any leftover unbalanced quoted text,
+    // treating places where blocks were removed
+    // as if they were the missing end tags
+    replace(/\02[^\04]*\04/g, '').
+
+    // Remove leftover recognition helpers
+    replace(/[\01-\04]/g, '');
     return post;
 }
 internals.cleanPost = cleanPost;
