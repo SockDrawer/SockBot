@@ -110,7 +110,7 @@ Discourse Topic Summary
 | unread | <code>number</code> | Number of posts that have not been read that were created before last visit to topic |
 | new_posts | <code>number</code> | Number of posts created since last visit to topic |
 | pinned | <code>boolean</code> | Is topic pinned? |
-| unpinned | <code>\*</code> | Unknown, appears to always be null |
+| unpinned | <code>string</code> &#124; <code>null</code> | ISO formatted timestamp that the current user dismissed the pin on the topic |
 | visible | <code>boolean</code> | Is topic visible? |
 | closed | <code>boolean</code> | Is topic closed? |
 | archived | <code>boolean</code> | Is topic archived? |
@@ -135,7 +135,7 @@ Discourse Topic Link
 | fancy_title | <code>string</code> | HTML safe title |
 | internal | <code>boolean</code> | Is link internal to this discourse instance? |
 | attachment | <code>boolean</code> | Is this link an attachment? |
-| reflection | <code>boolean</code> | Unsure, seems to be always false |
+| reflection | <code>boolean</code> | Is this an incoming, internal link? |
 | clicks | <code>number</code> | Number of times link has been visited |
 | user_id | <code>number</code> | Use Id of the posting user |
 | domain | <code>string</code> | Domain of the link |
@@ -149,8 +149,8 @@ Discourse Topic Details
 | Param | Type | Description |
 | --- | --- | --- |
 | auto_close_at | <code>string</code> &#124; <code>null</code> | ISO formatted time that topic will autoclose at |
-| auto_close_hours | <code>\*</code> | Unsure, seems to always be null |
-| auto_close_based_on_last_post | <code>boolean</code> | Unsure, seems to always be false |
+| auto_close_hours | <code>number</code> &#124; <code>null</code> | number of hours before topic closes relative to topic creation |
+| auto_close_based_on_last_post | <code>boolean</code> | if set `auto_close_hours` is relative to latest post |
 | created_by | <code>external.users.UserSummary</code> | User that created topic |
 | last_poster | <code>external.users.UserSummary</code> | User that created last post |
 | participants | <code>Array.&lt;Participant&gt;</code> | Topic Top Participants |
@@ -192,7 +192,7 @@ Available at `/t/slug/<topic id>/<post number>.json`
 | draft_key | <code>string</code> | Key to use when composing draft |
 | draft_sequence | <code>number</code> | Unsure, seems to be ordinal for number of drafts in topic |
 | posted | <code>boolean</code> | Unsure, seems to always be true |
-| unpinned | <code>\*</code> | Unknown, appears to always be null |
+| unpinned | <code>string</code> &#124; <code>null</code> | ISO formatted timestamp that the current user dismissed the pin on the topic |
 | pinned_globally | <code>boolean</code> | Has topic been pinned globally? |
 | pinned | <code>boolean</code> | Is topic pinned? |
 | pinned_at | <code>string</code> &#124; <code>null</code> | ISO formatted datetime topic was pinned |
