@@ -1,7 +1,7 @@
 'use strict';
 /**
  * Documentation for discourse JSON objects
- * @module external.discourse
+ * @module external.posts
  * @license MIT
  */
 
@@ -95,7 +95,7 @@ exports.Post = {};
 /**
  * Cleaned Discourse Post
  * 
- * @augments {external.module_discourse.Post}
+ * @augments {external.module_posts.Post}
  * @typedef {object}
  * @param {string} cleaned The value of `raw` after being processed to remove code and quotes
  */

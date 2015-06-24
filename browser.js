@@ -145,9 +145,9 @@ internals.stripCode = stripCode;
 /**
  * Clean post raw
  *
- * @param {external.module_discourse.Post} post Post to clean
+ * @param {external.module_posts.Post} post Post to clean
  * @param {string} post.raw Raw text of the post to clean
- * @returns {external.module_discourse.CleanedPost} input post with cleaned raw
+ * @returns {external.module_posts.CleanedPost} input post with cleaned raw
  */
 function cleanPost(post) {
     let text = post.raw || '';
