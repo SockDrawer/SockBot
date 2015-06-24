@@ -7,7 +7,6 @@ Documentation for discourse JSON objects
 * [posts](#external.module_posts)
   * [.PostType](#external.module_posts.PostType)
   * [.PostActionType](#external.module_posts.PostActionType)
-  * [.UserSummary](#external.module_posts.UserSummary) : <code>object</code>
   * [.ActionSummary](#external.module_posts.ActionSummary) : <code>object</code>
   * [.Post](#external.module_posts.Post) : <code>object</code>
   * [.CleanedPost](#external.module_posts.CleanedPost) : <code>object</code>
@@ -43,18 +42,6 @@ Discourse Post Action Type Enum
 | notify_user | <code>6</code> | Send the post owner a message |
 | notify_moderators | <code>7</code> | Flag for moderator attention with custom message |
 | spam | <code>8</code> | Flag post as Spam |
-
-<a name="external.module_posts.UserSummary"></a>
-### posts.UserSummary : <code>object</code>
-Discourse User Summary
-
-**Kind**: static typedef of <code>[posts](#external.module_posts)</code>  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| username | <code>string</code> | username of the summarized user |
-| avatar_template | <code>string</code> | URL template for summarized user's avatar |
-| uploaded_avatar_id | <code>number</code> | ID of the summarized user's avatar |
 
 <a name="external.module_posts.ActionSummary"></a>
 ### posts.ActionSummary : <code>object</code>
@@ -121,7 +108,7 @@ Can be retrieved directly at `/posts/<postid>.json`
 | edit_reason | <code>string</code> &#124; <code>null</code> | Reason for most recent post edit |
 | can_view_edit_history | <code>boolean</code> | Can the logged in user view post edit history of this post? |
 | wiki | <code>boolean</code> | Is this post a wiki post? |
-| reply_to_user | <code>UserSummary</code> &#124; <code>null</code> | User that the post is in reply to |
+| reply_to_user | <code>external.users.UserSummary</code> &#124; <code>null</code> | User that the post is in reply to |
 | actions_summary | <code>Array.&lt;ActionSummary&gt;</code> | Actions summaries for this post |
 
 <a name="external.module_posts.CleanedPost"></a>
