@@ -115,6 +115,8 @@ Can be retrieved directly at `/posts/<postid>.json`
 ### posts.CleanedPost : <code>object</code>
 Cleaned Discourse Post
 
+Created by SockBot from [external.module_posts.Post](external.module_posts.Post). **Not Produced by Discourse**
+
 **Kind**: static typedef of <code>[posts](#external.module_posts)</code>  
 **Extends:** <code>external.module_posts.Post</code>  
 

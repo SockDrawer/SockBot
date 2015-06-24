@@ -1,8 +1,13 @@
-<a name="UserSummary"></a>
-## UserSummary : <code>object</code>
+<a name="external.module_users"></a>
+## users
+Documentation for discourse JSON objects
+
+**License**: MIT  
+<a name="external.module_users.UserSummary"></a>
+### users.UserSummary : <code>object</code>
 Discourse User Summary
 
-**Kind**: global typedef  
+**Kind**: static typedef of <code>[users](#external.module_users)</code>  
 
 | Param | Type | Description |
 | --- | --- | --- |
