@@ -44,16 +44,6 @@ exports.PostActionType = {
 };
 
 /**
- * Discourse User Summary
- * 
- * @typedef {object}
- * @param {string} username username of the summarized user
- * @param {string} avatar_template URL template for summarized user's avatar
- * @param {number} uploaded_avatar_id ID of the summarized user's avatar
- */
-exports.UserSummary = {};
-
-/**
  * Discourse Post Action Summary
  * 
  * @typedef {object}
@@ -112,7 +102,7 @@ exports.ActionSummary = {};
  * @param {string|null} edit_reason Reason for most recent post edit
  * @param {boolean} can_view_edit_history Can the logged in user view post edit history of this post?
  * @param {boolean} wiki Is this post a wiki post?
- * @param {UserSummary|null} reply_to_user User that the post is in reply to
+ * @param {external.users.UserSummary|null} reply_to_user User that the post is in reply to
  * @param {ActionSummary[]} actions_summary Actions summaries for this post
  */
 exports.Post = {};
