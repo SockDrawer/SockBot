@@ -136,11 +136,8 @@ internals.stripQuotes = stripQuotes;
  * @returns {string} Input after stripping GFM code blocks tags
  */
 function stripCode(input) {
-    let result;
     input = input + '\n';
-    while ((result = input.replace(internals.rCode, '')) !== input) {
-        input = result;
-    }
+    const result = input.replace(internals.rCode, '');
     return result.replace(/\n$/m, '');
 }
 internals.stripCode = stripCode;
@@ -148,9 +145,9 @@ internals.stripCode = stripCode;
 /**
  * Clean post raw
  *
- * @param {discourse~Post} post Post to clean
+ * @param {external.module_discourse.Post} post Post to clean
  * @param {string} post.raw Raw text of the post to clean
- * @returns {discourse~CleanedPost} input post with cleaned raw
+ * @returns {external.module_discourse.CleanedPost} input post with cleaned raw
  */
 function cleanPost(post) {
     let text = post.raw || '';
