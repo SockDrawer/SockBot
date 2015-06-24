@@ -19,6 +19,31 @@ exports.PostType = {
 };
 
 /**
+ * Discourse Post Action Type Enum
+ * 
+ * @readonly
+ * @enum
+ */
+exports.PostActionType = {
+    /** Bookmark Action */
+    'bookmark': 1,
+    /** Like Action */
+    'like': 2,
+    /** Flag Post as Off Topic */
+    'off_topic': 3,
+    /** Flag Post as Inappropriate */
+    'inappropriate': 4,
+    /** Vote in a poll */
+    'vote': 5,
+    /** Send the post owner a message */
+    'notify_user': 6,
+    /** Flag for moderator attention with custom message */
+    'notify_moderators': 7,
+    /** Flag post as Spam */
+    'spam': 8
+};
+
+/**
  * Discourse User Summary
  * 
  * @typedef {object}
@@ -32,7 +57,7 @@ exports.UserSummary = {};
  * Discourse Post Action Summary
  * 
  * @typedef {object}
- * @param {number} id ActionSummary Id
+ * @param {PostActionType} id ActionSummary Id
  * @param {number} count Number of applied actions
  * @param {boolean} hidden Is this action type hidden?
  * @param {boolean} can_act Can currently logged in user perform this action?
@@ -99,4 +124,4 @@ exports.Post = {};
  * @typedef {object}
  * @param {string} cleaned The value of `raw` after being processed to remove code and quotes
  */
-exports.CleanedPost ={};
+exports.CleanedPost = {};
