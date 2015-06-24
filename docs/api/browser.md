@@ -9,7 +9,7 @@ Webbrowser abstraction for communicating with discourse
   * [~queueWorker(task, callback)](#module_browser..queueWorker)
   * [~stripQuotes(input)](#module_browser..stripQuotes) ⇒ <code>string</code>
   * [~stripCode(input)](#module_browser..stripCode) ⇒ <code>string</code>
-  * [~cleanPost(post)](#module_browser..cleanPost) ⇒ <code>external.module_discourse.CleanedPost</code>
+  * [~cleanPost(post)](#module_browser..cleanPost) ⇒ <code>external.module_posts.CleanedPost</code>
   * [~requestComplete([err], body)](#module_browser..requestComplete)
 
 <a name="module_browser..rQuote"></a>
@@ -90,15 +90,15 @@ Strip GFM fenced code blocks from input
 | input | <code>string</code> | Input string to strip |
 
 <a name="module_browser..cleanPost"></a>
-### browser~cleanPost(post) ⇒ <code>external.module_discourse.CleanedPost</code>
+### browser~cleanPost(post) ⇒ <code>external.module_posts.CleanedPost</code>
 Clean post raw
 
 **Kind**: inner method of <code>[browser](#module_browser)</code>  
-**Returns**: <code>external.module_discourse.CleanedPost</code> - input post with cleaned raw  
+**Returns**: <code>external.module_posts.CleanedPost</code> - input post with cleaned raw  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| post | <code>external.module_discourse.Post</code> | Post to clean |
+| post | <code>external.module_posts.Post</code> | Post to clean |
 | post.raw | <code>string</code> | Raw text of the post to clean |
 
 <a name="module_browser..requestComplete"></a>
