@@ -93,7 +93,7 @@ exports.PostStream = {};
  * @param {number} unread Number of posts that have not been read that were created before last visit to topic
  * @param {number} new_posts Number of posts created since last visit to topic
  * @param {boolean} pinned Is topic pinned?
- * @param {*} unpinned Unknown, appears to always be null
+ * @param {string|null} unpinned ISO formatted timestamp that the current user dismissed the pin on the topic
  * @param {boolean} visible Is topic visible?
  * @param {boolean} closed Is topic closed?
  * @param {boolean} archived Is topic archived?
@@ -124,7 +124,7 @@ exports.Participant = {};
  * @param {string} fancy_title HTML safe title
  * @param {boolean} internal Is link internal to this discourse instance?
  * @param {boolean} attachment Is this link an attachment?
- * @param {boolean} reflection Unsure, seems to be always false
+ * @param {boolean} reflection Is this an incoming, internal link?
  * @param {number} clicks Number of times link has been visited
  * @param {number} user_id Use Id of the posting user
  * @param {string} domain Domain of the link
@@ -136,8 +136,8 @@ exports.Link = {};
  *
  * @typedef {object}
  * @param {string|null} auto_close_at ISO formatted time that topic will autoclose at
- * @param {*} auto_close_hours Unsure, seems to always be null
- * @param {boolean} auto_close_based_on_last_post Unsure, seems to always be false
+ * @param {number|null} auto_close_hours number of hours before topic closes relative to topic creation
+ * @param {boolean} auto_close_based_on_last_post if set `auto_close_hours` is relative to latest post
  * @param {external.users.UserSummary} created_by User that created topic
  * @param {external.users.UserSummary} last_poster User that created last post
  * @param {Participant[]} participants Topic Top Participants
@@ -177,7 +177,7 @@ exports.TopicDetails = {};
  * @param {string} draft_key Key to use when composing draft
  * @param {number} draft_sequence Unsure, seems to be ordinal for number of drafts in topic
  * @param {boolean} posted Unsure, seems to always be true
- * @param {*} unpinned Unknown, appears to always be null
+ * @param {string|null} unpinned ISO formatted timestamp that the current user dismissed the pin on the topic
  * @param {boolean} pinned_globally Has topic been pinned globally?
  * @param {boolean} pinned Is topic pinned?
  * @param {string|null} pinned_at ISO formatted datetime topic was pinned
