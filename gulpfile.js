@@ -13,8 +13,8 @@ const gulp = require('gulp'),
 const exec = require('child_process').exec,
     fs = require('fs');
 
-const sockFiles = ['*.js', '!./gulpfile.js', '**/plugins/**/*.js','!node_modules/**'],
-    sockExterns =['**/external/**/*.js'],
+const sockFiles = ['*.js', '!./gulpfile.js', '**/plugins/**/*.js', '!node_modules/**'],
+    sockExterns = ['**/external/**/*.js'],
     sockDocs = ['README.md', 'docs/**/*.md'],
     sockTests = ['test/**/*.js'],
     sockReadme = ['docs/badges.md.tmpl', 'docs/index.md', 'docs/Special Thanks.md', 'docs/contributors.md'],
@@ -66,7 +66,7 @@ gulp.task('readme', ['contribs'], (done) => {
 /**
  * Generate API documentation for all js files, place markup in the correct folder for readthedocs.org
  */
-gulp.task('docs', ['gitBranch'], function (done) {
+gulp.task('docs', ['gitBranch', 'lintExterns'], function (done) {
     // Abort(successfully) early if running in CI and not job #1
     if (!runDocs) {
         return done();
@@ -86,6 +86,15 @@ gulp.task('docs', ['gitBranch'], function (done) {
  */
 gulp.task('lint', (done) => {
     return gulp.src(sockFiles)
+        .pipe(eslint())
+        .pipe(eslint.format())
+        .pipe(eslint.failAfterError());
+});
+/**
+ * Run all js files through eslint and report status.
+ */
+gulp.task('lintExterns', (done) => {
+    return gulp.src(sockExterns)
         .pipe(eslint())
         .pipe(eslint.format())
         .pipe(eslint.failAfterError());
@@ -171,25 +180,25 @@ gulp.task('pushDocs', ['gitConfig', 'commitDocs'], (done) => {
         return done();
     }
     git.addRemote('github', 'https://github.com/SockDrawer/SockBot.git', (e) => {
-            if (e) {
+        if (e) {
+            gutil.log = logger;
+            return done();
+        } else {
+            git.push('github', 'HEAD', {
+                args: ['-q']
+            }, () => {
+                //restore logging for the rest of the build
                 gutil.log = logger;
-                return done();
-            } else {
-                git.push('github', 'HEAD', {
-                    args: ['-q']
-                }, () => {
-                    //restore logging for the rest of the build
-                    gutil.log = logger;
-                    done();
-                });
-            }
-        });
+                done();
+            });
+        }
+    });
 });
 
 /**
  * Run code coverage instrumented tests
  */
-gulp.task('test', ['lint', 'lintTests'], (done) => {
+gulp.task('test', ['lint', 'lintTests', 'lintExterns'], (done) => {
     gulp.src(sockFiles)
         // Instrument code files with istanbulHarmony
         .pipe(istanbul({

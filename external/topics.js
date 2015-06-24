@@ -1,4 +1,5 @@
 'use strict';
+/*eslint-disable camelcase */
 /**
  * Documentation for discourse JSON objects
  * @module external.topics
@@ -7,7 +8,7 @@
 
 /**
  * Discourse Topic Notification Levels
- * 
+ *
  * @readonly
  * @enum
  */
@@ -24,7 +25,7 @@ exports.NotificationLevel = {
 
 /**
  * Discourse Topic Notification Reasons
- * 
+ *
  * @readonly
  * @enum
  */
@@ -51,7 +52,7 @@ exports.NotificationReason = {
 
 /**
  * Discourse Archetype
- * 
+ *
  * @readonly
  * @enum
  */
@@ -64,7 +65,7 @@ exports.Archetype = {
 
 /**
  * Stream of posts
- * 
+ *
  * @typedef {object}
  * @param {external.posts.Post[]} posts A single chunk of posts from thread
  * @param {number[]} stream Post Ids for all posts in thread
@@ -73,7 +74,7 @@ exports.PostStream = {};
 
 /**
  * Discourse Topic Summary
- * 
+ *
  * @typedef {object}
  * @param {number} id Topic Id.
  * @param {string} title Topic Title
@@ -100,7 +101,7 @@ exports.PostStream = {};
  * @param {boolean} liked Has topic been liked by current user?
  * @param {number} like_count Count of likes in the topic
  * @param {number} views Count of topic views
- * @param {number} category_id Id of the category the post belongs to 
+ * @param {number} category_id Id of the category the post belongs to
  * @param {NotificationLevel} notification_level Topic notification level
  * @param {Archetype} archetype Topic Archetype
  */
@@ -108,7 +109,7 @@ exports.TopicSummary = {};
 
 /**
  * Discourse Topic Participant
- * 
+ *
  * @augments {external.users.UserSummary}
  * @param {number} post_count Number of posts user has made in topic
  */
@@ -116,7 +117,7 @@ exports.Participant = {};
 
 /**
  * Discourse Topic Link
- * 
+ *
  * @typedef {object}
  * @param {string} url Url of the link
  * @param {string} title Title of the link (may be scraped from the linked page)
@@ -132,7 +133,7 @@ exports.Link = {};
 
 /**
  * Discourse Topic Details
- * 
+ *
  * @typedef {object}
  * @param {string|null} auto_close_at ISO formatted time that topic will autoclose at
  * @param {*} auto_close_hours Unsure, seems to always be null
@@ -154,9 +155,9 @@ exports.TopicDetails = {};
 
 /**
  * Discourse Topic
- * 
+ *
  * Available at `/t/slug/<topic id>/<post number>.json`
- * 
+ *
  * @typedef {object}
  * @param {PostStream} post_stream Stream of posts that were loaded for this request
  * @param {number} id Topic Id.

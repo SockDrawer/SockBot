@@ -1,4 +1,5 @@
 'use strict';
+/*eslint-disable camelcase */
 /**
  * Documentation for discourse JSON objects
  * @module external.posts
@@ -7,7 +8,7 @@
 
 /**
  * Discourse Post Type Enum
- * 
+ *
  * @readonly
  * @enum
  */
@@ -20,7 +21,7 @@ exports.PostType = {
 
 /**
  * Discourse Post Action Type Enum
- * 
+ *
  * @readonly
  * @enum
  */
@@ -45,7 +46,7 @@ exports.PostActionType = {
 
 /**
  * Discourse Post Action Summary
- * 
+ *
  * @typedef {object}
  * @param {PostActionType} id ActionSummary Id
  * @param {number} count Number of applied actions
@@ -57,11 +58,11 @@ exports.ActionSummary = {};
 
 /**
  * Discourse Post Object
- * 
+ *
  * Can be retrieved directly at `/posts/<postid>.json`
- * 
+ *
  * @typedef {object}
- * @param {number} id Post Id of the post. this number will not change 
+ * @param {number} id Post Id of the post. this number will not change
  * @param {string} name Long name of the post owner
  * @param {string} user_name Username of the post owner
  * @param {string} avatar_template URL template for post owner's avatar
@@ -109,7 +110,9 @@ exports.Post = {};
 
 /**
  * Cleaned Discourse Post
- * 
+ *
+ * Created by SockBot from {@link external.module_posts.Post}. **Not Produced by Discourse**
+ *
  * @augments {external.module_posts.Post}
  * @typedef {object}
  * @param {string} cleaned The value of `raw` after being processed to remove code and quotes

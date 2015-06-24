@@ -1,6 +1,14 @@
+'use strict';
+/*eslint-disable camelcase */
+/**
+ * Documentation for discourse JSON objects
+ * @module external.users
+ * @license MIT
+ */
+
 /**
  * Discourse User Summary
- * 
+ *
  * @typedef {object}
  * @param {number} [id] user id
  * @param {string} username username of the summarized user
