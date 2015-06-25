@@ -285,9 +285,9 @@ describe('browser', () => {
                 ['Empty GFM block', '```\n```', ''],
                 ['GFM with space for typehint', '``` \nfoo();\n```', ''],
                 ['Only a GFM code block', '```\ncode\n```', ''],
-                ['GFM with text before', 'before\n```\ncode\n```', 'before'],
+                ['GFM with text before', 'before\n```\ncode\n```', 'before\n'],
                 ['GFM with text before 2', 'before2\n```\ncode\n```\n', 'before2\n'],
-                ['GFM with text between', '```\ncode\n```\nbetween\n```\ncode\n```', 'between'],
+                ['GFM with text between', '```\ncode\n```\nbetween\n```\ncode\n```', 'between\n'],
                 ['GFM with text between 2', '```\ncode\n```\nbetween2\n```\ncode\n```\n', 'between2\n'],
                 ['GFM with text after', '```\ncode\n```\nafter', 'after'],
                 ['Only a type hinted GFM', '```type\ncode\n```', ''],
@@ -302,8 +302,8 @@ describe('browser', () => {
                 ['GFM with space before open', ' ```\ntest();\n```', ' ```\ntest();\n```'],
                 ['Inline code block', 'this `is` code', 'this `is` code'],
                 ['inline code block in quote', 'a[quote]`code`[/quote]b', 'ab'],
-                ['Inline code with quote inside', '`[quote]a[/quote]', '`[quote]a[/quote]`'],
-                ['Not an inline code with quote "inside"', '`\n[quote][/quote]\n`', '`\n`']
+                ['Inline code with quote inside', '`[quote]a[/quote]`', '`[quote]a[/quote]`'],
+                ['Not an inline code with quote "inside"', '`\n[quote][/quote]\n`', '`\n\n`']
             ].forEach((test) => {
                 const name = test[0],
                     input = test[1],
