@@ -25,7 +25,7 @@ exports.uuid = function () {
  */
 function addTimestamp(message) {
     const date = new Date().toISOString().replace(/\..+$/, '');
-    if (typeof message !== 'string'){
+    if (typeof message !== 'string') {
         message = JSON.stringify(message, null, '    ');
     }
     message = '[' + date.replace(/^.+T/, '') + '] ' + message;
@@ -66,7 +66,10 @@ exports.error = function (message) {
  * @param {*} original Data to clone
  * @returns {*} Cloned `original` data
  */
-exports.cloneData = function cloneData(original){
+exports.cloneData = function cloneData(original) {
+    if (original === undefined) {
+        return undefined;
+    }
     return JSON.parse(JSON.stringify(original));
 };
 
@@ -77,15 +80,20 @@ exports.cloneData = function cloneData(original){
  * @param {object} mixin Misin object to merge into `base`
  */
 function mergeInner(base, mixin) {
+    if (base == null || typeof base !== 'object' || Array.isArray(base)) {
+        throw new Error('base must be object');
+    }
+    if (mixin == null || typeof mixin !== 'object' || Array.isArray(mixin)) {
+        throw new Error('mixin must be object');
+    }
     let name;
     for (name in mixin) {
-        if (mixin.hasOwnProperty(name)) {
-            if (typeof mixin[name] === 'object' && !Array.isArray(mixin[name])) {
-                const newBase = base[name] || {};
-                base[name] = mergeInner(newBase, mixin[name]);
-            } else {
-                base[name] = mixin[name];
-            }
+        if (typeof mixin[name] === 'object' && !Array.isArray(mixin[name])) {
+            const newBase = base[name];
+            mergeInner(newBase, mixin[name]);
+            base[name] = newBase;
+        } else {
+            base[name] = mixin[name];
         }
     }
 }

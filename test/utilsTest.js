@@ -107,4 +107,155 @@ describe('utils', () => {
             /* eslint-enable no-console */
         });
     });
+    describe('cloneData()', () => {
+        const cloneData = utils.cloneData;
+        it('should throw on attempt to clone undefined', () => expect(cloneData(undefined)).to.equal(undefined));
+        describe('simple data structures tests', () => {
+            [null, false, true, 0, 1, -1, 1e100, Math.PI, Math.E, '', 'a', 'a longer string'].forEach((test) => {
+                it('should clone to self: ' + JSON.stringify(test), () => expect(cloneData(test)).to.equal(test));
+            });
+        });
+        it('should clone array', () => {
+            const orig = [null, false, true, 0, 1, -1, 1e100, Math.PI, Math.E, '', 'a', 'a longer string'],
+                result = cloneData(orig);
+            result.should.deep.equal(orig);
+            result.shift();
+            result.should.not.deep.equal(orig);
+        });
+        it('should clone object', () => {
+            const orig = {
+                    a: 1,
+                    b: 2
+                },
+                result = cloneData(orig);
+            result.should.deep.equal(orig);
+            result.c = 3;
+            result.should.not.deep.equal(orig);
+        });
+    });
+    describe('mergeInner()', () => {
+        const mergeInner = utils.mergeInner;
+        describe('should reject non object base', () => {
+            [undefined, null, false, 0, '', []].forEach((base) => {
+                it(': ' + JSON.stringify(base), () => expect(() => mergeInner(base)).to.throw('base must be object'));
+            });
+        });
+        describe('should reject non object mixin', () => {
+            [undefined, null, false, 0, '', []].forEach((mixin) => {
+                it(': ' + JSON.stringify(mixin), () => {
+                    expect(() => mergeInner({}, mixin)).to.throw('mixin must be object');
+                });
+            });
+        });
+        it('should merge objects with no overlap', () => {
+            const base = {
+                    a: 1
+                },
+                mixin = {
+                    b: 2
+                },
+                expected = {
+                    a: 1,
+                    b: 2
+                };
+            mergeInner(base, mixin);
+            base.should.deep.equal(expected);
+        });
+        it('should merge objects with overlap', () => {
+            const base = {
+                    a: 1,
+                    b: 3
+                },
+                mixin = {
+                    b: 2,
+                    c: 3
+                },
+                expected = {
+                    a: 1,
+                    b: 2,
+                    c: 3
+                };
+            mergeInner(base, mixin);
+            base.should.deep.equal(expected);
+        });
+        it('should replace array with mixin', () => {
+            const base = {
+                    a: [1]
+                },
+                mixin = {
+                    a: [2]
+                },
+                expected = {
+                    a: [2]
+                };
+            mergeInner(base, mixin);
+            base.should.deep.equal(expected);
+        });
+        it('should merge inner objects', () => {
+            const base = {
+                    a: {
+                        b: [1]
+                    }
+                },
+                mixin = {
+                    a: {
+                        c: false
+                    }
+                },
+                expected = {
+                    a: {
+                        b: [1],
+                        c: false
+                    }
+                };
+            mergeInner(base, mixin);
+            base.should.deep.equal(expected);
+        });
+        it('should not merge prototype', () => {
+            const base = {
+                    a: null
+                },
+                expected = {
+                    a: null
+                };
+            mergeInner(base, /object/);
+            base.should.deep.equal(expected);
+        });
+    });
+    describe('mergeObjects()', () => {
+        const mergeObjects = utils.mergeObjects;
+        it('should return empty on object when merging undefined', () => {
+            mergeObjects(undefined).should.deep.equal({});
+        });
+        it('should merge two objects', () => {
+            const base = {
+                    foo: 1
+                },
+                mixin = {
+                    bar: false
+                },
+                expected = {
+                    foo: 1,
+                    bar: false
+                };
+            mergeObjects(base, mixin).should.deep.equal(expected);
+        });
+        it('should merge three objects', () => {
+            const base = {
+                    foo: 1
+                },
+                mixin = {
+                    bar: false
+                },
+                mixin2 = {
+                    baz: 'quux'
+                },
+                expected = {
+                    foo: 1,
+                    bar: false,
+                    baz: 'quux'
+                };
+            mergeObjects(base, mixin, mixin2).should.deep.equal(expected);
+        });
+    });
 });
