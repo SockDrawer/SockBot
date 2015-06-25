@@ -3,6 +3,8 @@ node_js:
   - node
   - iojs
   - '0.12'
+  - 'iojs-v1.7'
+  - 'iojs-v1.8'
   - 'iojs-v2.0'
   - 'iojs-v2.1'
 before_script:
