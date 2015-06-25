@@ -60,8 +60,57 @@ exports.error = function (message) {
 };
 
 
+/**
+ * Clone object
+ *
+ * @param {*} original Data to clone
+ * @returns {*} Cloned `original` data
+ */
+exports.cloneData = function cloneData(original){
+    return JSON.parse(JSON.stringify(original));
+};
+
+/**
+ * Recursively merge objects
+ *
+ * @param {object} base Base object to merge `mixin` into
+ * @param {object} mixin Misin object to merge into `base`
+ */
+function mergeInner(base, mixin) {
+    let name;
+    for (name in mixin) {
+        if (mixin.hasOwnProperty(name)) {
+            if (typeof mixin[name] === 'object' && !Array.isArray(mixin[name])) {
+                const newBase = base[name] || {};
+                base[name] = mergeInner(newBase, mixin[name]);
+            } else {
+                base[name] = mixin[name];
+            }
+        }
+    }
+}
+
+/**
+ * Merge multiple objects into one object
+ *
+ * Later objects override earlier objects
+ *
+ * @param {...object} mixin Objects to merge
+ * @returns {object} object constructed by merging `mixin`s from left to right
+ */
+exports.mergeObjects = function mergeObjects(mixin) { //eslint-disable-line no-unused-vars
+    const args = Array.prototype.slice.apply(arguments),
+        res = {};
+    let obj;
+    while ((obj = args.shift())) {
+        mergeInner(res, exports.cloneData(obj));
+    }
+    return res;
+};
+
 /* istanbul ignore else */
 if (typeof GLOBAL.describe === 'function') {
     //test is running
     exports.addTimestamp = addTimestamp;
+    exports.mergeInner = mergeInner;
 }

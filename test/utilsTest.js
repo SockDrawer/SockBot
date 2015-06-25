@@ -12,7 +12,7 @@ const utils = require('../utils');
 
 describe('utils', () => {
     describe('exports', () => {
-        const fns = ['uuid', 'log', 'warn', 'error', 'addTimestamp'],
+        const fns = ['uuid', 'log', 'warn', 'error', 'addTimestamp', 'mergeObjects', 'mergeInner', 'cloneData'],
             objs = [],
             vals = [];
         describe('should export expected functions:', () => {
