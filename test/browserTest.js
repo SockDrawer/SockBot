@@ -35,7 +35,7 @@ describe('browser', () => {
         });
     });
     describe('internals', () => {
-        const fns = ['queueWorker', 'requestComplete', 'request', 'stripQuotes', 'stripCode', 'cleanPost'],
+        const fns = ['queueWorker', 'requestComplete', 'request', 'cleanPost'],
             objs = ['defaults', 'queue'],
             vals = [];
         describe('should include expected functions:', () => {
