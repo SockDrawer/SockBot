@@ -10,8 +10,11 @@ Core Utilities for Sockbot
     * [.log(message)](#module_utils.log)
     * [.warn(message)](#module_utils.warn)
     * [.error(message)](#module_utils.error)
+    * [.cloneData(original)](#module_utils.cloneData) ⇒ <code>\*</code>
+    * [.mergeObjects(...mixin)](#module_utils.mergeObjects) ⇒ <code>object</code>
   * _inner_
     * [~addTimestamp(message)](#module_utils..addTimestamp) ⇒ <code>string</code>
+    * [~mergeInner(base, mixin)](#module_utils..mergeInner)
 
 <a name="module_utils.uuid"></a>
 ### utils.uuid() ⇒ <code>string</code>
@@ -51,6 +54,30 @@ Log an error to the console
 | --- | --- | --- |
 | message | <code>\*</code> | Error to log |
 
+<a name="module_utils.cloneData"></a>
+### utils.cloneData(original) ⇒ <code>\*</code>
+Clone object
+
+**Kind**: static method of <code>[utils](#module_utils)</code>  
+**Returns**: <code>\*</code> - Cloned `original` data  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| original | <code>\*</code> | Data to clone |
+
+<a name="module_utils.mergeObjects"></a>
+### utils.mergeObjects(...mixin) ⇒ <code>object</code>
+Merge multiple objects into one object
+
+Later objects override earlier objects
+
+**Kind**: static method of <code>[utils](#module_utils)</code>  
+**Returns**: <code>object</code> - object constructed by merging `mixin`s from left to right  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| ...mixin | <code>object</code> | Objects to merge |
+
 <a name="module_utils..addTimestamp"></a>
 ### utils~addTimestamp(message) ⇒ <code>string</code>
 Add timestamp to message.
@@ -61,4 +88,15 @@ Add timestamp to message.
 | Param | Type | Description |
 | --- | --- | --- |
 | message | <code>\*</code> | Message to timestamp |
+
+<a name="module_utils..mergeInner"></a>
+### utils~mergeInner(base, mixin)
+Recursively merge objects
+
+**Kind**: inner method of <code>[utils](#module_utils)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| base | <code>object</code> | Base object to merge `mixin` into |
+| mixin | <code>object</code> | Misin object to merge into `base` |
 
