@@ -300,7 +300,7 @@ describe('browser', () => {
                 ['GFM without line breaks', '```foo```', '```foo```'],
                 ['GFM missing with close not on new line', '```\ntest();```', '```\ntest();```'],
                 ['GFM with space before open', ' ```\ntest();\n```', ' ```\ntest();\n```'],
-                ['Inline code block', 'this `is` code'],
+                ['Inline code block', 'this `is` code', 'this `is` code'],
                 ['inline code block in quote', 'a[quote]`code`[/quote]b', 'ab'],
                 ['Inline code with quote inside', '`[quote]a[/quote]', '`[quote]a[/quote]`'],
                 ['Not an inline code with quote "inside"', '`\n[quote][/quote]\n`', '`\n`']
