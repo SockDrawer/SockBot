@@ -22,7 +22,7 @@ const sockFiles = ['*.js', '!./gulpfile.js', '**/plugins/**/*.js', '!node_module
 
 const JobNumber = process.env.TRAVIS_JOB_NUMBER,
     runDocs = !JobNumber || /[.]1$/.test(JobNumber);
-    
+
 /**
  * Read git log to get a up to date list of contributors
  *
@@ -178,9 +178,17 @@ gulp.task('pushDocs', ['gitConfig', 'commitDocs'], (done) => {
     if (!runDocs) {
         return done();
     }
-    git.push('origin', 'HEAD', {
-        args: ['-q']
-    }, () => done());
+    git.addRemote('github', 'https://github.com/SockDrawer/SockBot.git', (e) => {
+        if (e) {
+            done();
+        } else {
+            git.push('github', 'HEAD', {
+                args: ['-q']
+            }, () => {
+                done();
+            });
+        }
+    });
 });
 
 /**
