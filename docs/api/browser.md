@@ -6,7 +6,7 @@ Webbrowser abstraction for communicating with discourse
 
 * [browser](#module_browser)
   * [~queueWorker(task, callback)](#module_browser..queueWorker)
-  * [~cleanPost(post)](#module_browser..cleanPost) ⇒ <code>external.module_posts.CleanedPost</code>
+  * [~cleanPostRaw(post)](#module_browser..cleanPostRaw) ⇒ <code>external.module_posts.CleanedPost</code>
   * [~requestComplete([err], body)](#module_browser..requestComplete)
 
 <a name="module_browser..queueWorker"></a>
@@ -25,9 +25,11 @@ Process browser tasks with rate limiting
 | [task.delay] | <code>Number</code> | <code>0</code> | Seconds to delay callback after request for additional rate limiting |
 | callback | <code>function</code> |  | Queue task complete callback |
 
-<a name="module_browser..cleanPost"></a>
-### browser~cleanPost(post) ⇒ <code>external.module_posts.CleanedPost</code>
+<a name="module_browser..cleanPostRaw"></a>
+### browser~cleanPostRaw(post) ⇒ <code>external.module_posts.CleanedPost</code>
 Clean post raw
+
+Provided and commented by flabdablet
 
 **Kind**: inner method of <code>[browser](#module_browser)</code>  
 **Returns**: <code>external.module_posts.CleanedPost</code> - input post with cleaned raw  
