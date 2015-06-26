@@ -35,7 +35,7 @@ describe('browser', () => {
         });
     });
     describe('internals', () => {
-        const fns = ['queueWorker', 'requestComplete', 'request', 'cleanPost'],
+        const fns = ['queueWorker', 'requestComplete', 'request', 'cleanPostRaw'],
             objs = ['defaults', 'queue'],
             vals = [];
         describe('should include expected functions:', () => {
@@ -215,16 +215,16 @@ describe('browser', () => {
         });
     });
     describe('internals.cleanPost()', () => {
-        const cleanPost = browser.internals.cleanPost;
+        const cleanPostRaw = browser.internals.cleanPostRaw;
         it('should add `cleaned` attribute to input', () => {
             const post = {
                 raw: 'hello!'
             };
             post.should.not.have.any.key('cleaned');
-            cleanPost(post);
+            cleanPostRaw(post);
             post.should.have.any.key('cleaned');
         });
-        it('should accept empty post', () => cleanPost({}).cleaned.should.equal(''));
+        it('should accept empty post', () => cleanPostRaw({}).cleaned.should.equal(''));
         describe('should pass match to sample tests', () => {
             [
                 ['Full quote empty', '[quote="accalia, post:108, topic:49440, full:true"][/quote]', ''],
@@ -296,46 +296,117 @@ describe('browser', () => {
                 ['Multiple GFM blocks', 'before\n```\n```\nmiddle\n```\nafter', 'before\nmiddle\n```\nafter'],
                 ['Multiple GFM blocks 2', 'before\n```\n1\n```\nmiddle\n```\n2\n```\nafter', 'before\nmiddle\nafter'],
                 ['GFM with trailing text', '```\n```test', '```\n```test'],
-                ['GFM wit trailing space on close', '```\n``` ', '```\n``` '],
+                ['GFM with trailing space on close', '```\n``` ', '```\n``` '],
                 ['GFM without line breaks', '```foo```', '```foo```'],
                 ['GFM missing with close not on new line', '```\ntest();```', '```\ntest();```'],
                 ['GFM with space before open', ' ```\ntest();\n```', ' ```\ntest();\n```'],
                 ['Inline code block', 'this `is` code', 'this `is` code'],
                 ['inline code block in quote', 'a[quote]`code`[/quote]b', 'ab'],
                 ['Inline code with quote inside', '`[quote]a[/quote]`', '`[quote]a[/quote]`'],
-                ['Not an inline code with quote "inside"', '`\n[quote][/quote]\n`', '`\n\n`']
+                ['Inline multiline code with quote inside', '`\n[quote][/quote]\n`', '`\n[quote][/quote]\n`'],
+                ['Newline Normalization - windows single', 'this is normal\r\n', 'this is normal\n'],
+                ['Newline Normalization - windows multiple', 'this is normal\r\n\r\n', 'this is normal\n\n'],
+                ['Newline Normalization - mac', 'this\ris normal\r', 'this\nis normal\n'],
+                ['Newline normalization - mixed', 'this\ris\nnormal\r\n', 'this\nis\nnormal\n'],
+                ['Newline Normalization - windows multiple 2', 'this\r\nis normal\r\n', 'this\nis normal\n'],
+                ['One backtick around code', 'One backtick around `code`', 'One backtick around `code`'],
+                ['Bare quote in inline code', '`[quote][/quote]`', '`[quote][/quote]`'],
+                ['Bare quote with backtick', '`[quote][/quote]', '`'],
+                ['"inline" code on multiline', 'a `code\ncode` b', 'a `code\ncode` b'],
+                ['multiline inline code', '`\ncode\n`', '`\ncode\n`'],
+                ['multiline with aftertext', '`name\ncode`\ntext', '`name\ncode`\ntext'],
+                ['double backtick inline code', '``inline code``', '``inline code``'],
+                ['double backtick with quote', '``[quote][/quote]``', '``[quote][/quote]``'],
+                ['inline code before quote', '``code``[quote][/quote]``', '``code````'],
+                ['double backtick with embedded singletick', ' ``code with ` embedded``', ' ``code with ` embedded``'],
+                ['double backtick with embedded singletick and quote', ' `` ` [quote][/quote] ``', ' `` ` [quote][/quote] ``'],
+                ['multiline double backtick', 'before ``code\ncode2`` after',
+                    'before ``code\ncode2`` after'
+                ],
+                ['multiline double backtick with quote',
+                    'before ``[quote]\n[/quote]`` after',
+                    'before ``[quote]\n[/quote]`` after'
+                ],
+                ['multiline double backtick 2', 'before ``\ncode\ncode2\n`` after', 'before ``\ncode\ncode2\n`` after'],
+                ['multiline double backtick with quote 2',
+                    'before ``\n[quote]\n[/quote]\n`` after',
+                    'before ``\n[quote]\n[/quote]\n`` after'
+                ],
+                ['multiline double backtick 3', 'before ``javascript\ncode\ncode2\n`` after',
+                    'before ``javascript\ncode\ncode2\n`` after'
+                ],
+                ['multiline double backtick with quote 3',
+                    'before ``javascript\n[quote]\n[/quote]\n`` after',
+                    'before ``javascript\n[quote]\n[/quote]\n`` after'
+                ],
+                ['inline triple backtick', '```code```', '```code```'],
+                ['inline triple backtick with quote',
+                    '```[quote][/quote]```',
+                    '```[quote][/quote]```'
+                ],
+                ['inline triple backtick with singletick', '```code with ` embedded```', '```code with ` embedded```'],
+                ['inline triple backtick with doubletick', '```code with `` embedded```',
+                    '```code with `` embedded```'
+                ],
+                ['inline triple backtick with linebreak', '```code with\nlinebreak```', '```code with\nlinebreak```'],
+                ['inline triple backtick with singletick and quote',
+                    '```code with ` [quote][/quote]embedded```',
+                    '```code with ` [quote][/quote]embedded```'
+                ],
+                ['inline triple backtick with doubletick and quote',
+                    '```code with `` [quote][/quote]embedded```',
+                    '```code with `` [quote][/quote]embedded```'
+                ],
+                ['inline triple backtick with linebreak and quote',
+                    '```code with\n[quote][/quote]linebreak```',
+                    '```code with\n[quote][/quote]linebreak```'
+                ],
+                ['tripletick with embedded tripletick', '```\ncode```\n```', ''],
+                ['language hinted tripletick with embedded tripletick', '```ruby\ncode```\n```', ''],
+                ['quadruple tick', '````code````', '````code````'],
+                ['quadruple tick with singletick', '````code ` code2````', '````code ` code2````'],
+                ['quadruple tick with doubletick', '````code `` code2````', '````code `` code2````'],
+                ['quadruple tick with tripletick', '````code ``` code2````', '````code ``` code2````'],
+                ['quadruple tick with newline', '````code\ncode2````', '````code\ncode2````'],
+                ['quadruple tick with quote', '````code````', '````code````'],
+                ['quadruple tick with singletick and quote',
+                    '````code ` [quote][/quote]code2````',
+                    '````code ` [quote][/quote]code2````'
+                ],
+                ['quadruple tick with doubletick and quote',
+                    '````code `` [quote][/quote]code2````',
+                    '````code `` [quote][/quote]code2````'
+                ],
+                ['quadruple tick with tripletick and quote',
+                    '````code ``` [quote][/quote]code2````',
+                    '````code ``` [quote][/quote]code2````'
+                ],
+                ['quadruple tick with newline and quote',
+                    '````code\n[quote][/quote]code2````',
+                    '````code\n[quote][/quote]code2````'
+                ],
+                ['Inline code before multiline quote',
+                    '``code``[quote]\n[/quote]``',
+                    '``code````'
+                ],
+                ['Bogus GFM fence creation hazard',
+                    '`\ncode\n`[quote=zippy]Yow!\n[/quote]``\ncode\n``\ntext\n' +
+                    '``\ncode\n``[quote=zippy]Are we having fun yet?\n[/quote]`\ncode\n`\ntext\n',
+                    '`\ncode\n` ``\ncode\n``\ntext\n' +
+                    '``\ncode\n`` `\ncode\n`\ntext\n'
+                ],
+                ['Greedy GFM fence',
+                    '````befunge\ncode\n```\nstill code\n```\nmore code\n```\ntext',
+                    'text'
+                ]
             ].forEach((test) => {
                 const name = test[0],
                     input = test[1],
                     expected = test[2];
-                it('should handle: ' + name, () => cleanPost({
+                it('should handle: ' + name, () => cleanPostRaw({
                     raw: input
                 }).cleaned.should.equal(expected));
             });
         });
-        describe('should normalize newlines', () => {
-            [
-                ['this is normal\r\n', 'this is normal\n'],
-                ['this is normal\r\n\r\n', 'this is normal\n\n'],
-                ['this\ris normal\r\n', 'this\nis normal\n'],
-                ['this is\nnormal\r\n', 'this is\nnormal\n'],
-                ['this\r\nis normal\r\n', 'this\nis normal\n']
-            ].forEach((test) => {
-                const input = test[0],
-                    output = test[1];
-                it('should correctly noprmalize: ' + JSON.stringify(input), () => {
-                    const result = cleanPost({
-                        raw: input
-                    }).cleaned;
-                    result.should.to.equal(output);
-                });
-            });
-        });
-        it('should strip GFM code blocks', () => cleanPost({
-            raw: '```\ncode\n```\n'
-        }).cleaned.should.to.equal(''));
-        it('should strip quotes blocks', () => cleanPost({
-            raw: '[quote]quoted[/quote]\n'
-        }).cleaned.should.to.equal('\n'));
     });
 });

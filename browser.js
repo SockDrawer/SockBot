@@ -8,8 +8,6 @@
 const request = require('request'),
     async = require('async');
 
-const utils = require('./utils');
-
 const defaults = {
         rejectUnauthorized: false,
         jar: request.jar(),
@@ -55,32 +53,34 @@ function queueWorker(task, callback) {
 /**
  * Clean post raw
  *
+ * Provided and commented by flabdablet
+ *
  * @param {external.module_posts.Post} post Post to clean
  * @param {string} post.raw Raw text of the post to clean
  * @returns {external.module_posts.CleanedPost} input post with cleaned raw
  */
-function cleanPost(post) {
+function cleanPostRaw(post) {
     let text = post.raw || '',
+        // Normalize newlines
         edited = text.
-
-    // Normalize newlines
     replace(/\r\n?/g, '\n').
 
     // Remove low-ASCII control chars except \t (\x09) and \n (\x0a)
     replace(/[\x00-\x08\x0b-\x1f]/g, '').
 
     // Remove GFM-fenced code blocks
+    replace(/^````.*\n(?:.*\n)*```(?:\n|$)/gm, '').
     replace(/^```.*\n(?:.*\n)*?```(?:\n|$)/gm, '').
 
     // Disable bbcode tags inside inline code blocks
-    replace(/`[^`\n]*`/g, code => code.replace(/\[/g, '[\x01')).
+    replace(/(`+)[^`][^]*?\1/, code => code.replace(/\[/g, '[\x10')). //DLE
 
     // Ease recognition of bbcode [quote] and
     // [quote=whatever] start tags
-    replace(/\[quote(?:=[^[\]]*)?]/ig, '\x02$&').
+    replace(/\[quote(?:=[^[\]]*)?]/ig, '\x02$&'). //STX
 
     // Ease recognition of bbcode [/quote] end tags
-    replace(/\[\/quote]/ig, '$&\x03');
+    replace(/\[\/quote]/ig, '$&\x03'); //ETX
 
     // Repeatedly strip non-nested quoted blocks until
     // no more remain; this removes nested blocks from
@@ -88,22 +88,25 @@ function cleanPost(post) {
     // where blocks were removed.
     do {
         text = edited;
-        edited = text.replace(/\x02[^\x02\x03]*\x03/g, '\x04');
+        edited = text.replace(/\x02[^\x02\x03]*\x03/g, '\x1a'); //SUB
     } while (edited !== text);
-
-    post.cleaned = text.
 
     // Remove any leftover unbalanced quoted text,
     // treating places where blocks were removed
     // as if they were the missing end tags
-    replace(/\x02[^\x04]*\x04/g, '').
+    post.cleaned = text.
+    replace(/\x02[^\x1a]*\x1a/g, '\x1a').
 
-    // Remove leftover recognition helpers
-    replace(/[\x01-\x04]/g, '');
+    // Ensure that quote stripping never coalesces
+    // adjacent backticks into bogus GFM fence markers
+    replace(/^(`+)\x1a`/gm, '$1 `').
+
+    // Remove leftover control characters
+    replace(/[\x00-\x08\x0b-\x1f]/g, '');
 
     return post;
 }
-internals.cleanPost = cleanPost;
+internals.cleanPostRaw = cleanPostRaw;
 
 /**
  * Browser Request Callback
