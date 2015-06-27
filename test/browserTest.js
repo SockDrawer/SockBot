@@ -319,10 +319,9 @@ describe('browser', () => {
                 ['double backtick with quote', '``[quote][/quote]``', '``[quote][/quote]``'],
                 ['inline code before quote', '``code``[quote][/quote]``', '``code````'],
                 ['double backtick with embedded singletick', ' ``code with ` embedded``', ' ``code with ` embedded``'],
+                //      ['double backtick with embedded singletick', ' `` ` [quote][/quote] ``', ' `` `  ``'], //may need newline
                 ['double backtick with embedded singletick and quote', ' `` ` [quote][/quote] ``', ' `` ` [quote][/quote] ``'],
-                ['multiline double backtick', 'before ``code\ncode2`` after',
-                    'before ``code\ncode2`` after'
-                ],
+                ['multiline double backtick', 'before ``code\ncode2`` after', 'before ``code\ncode2`` after'],
                 ['multiline double backtick with quote',
                     'before ``[quote]\n[/quote]`` after',
                     'before ``[quote]\n[/quote]`` after'
@@ -345,9 +344,7 @@ describe('browser', () => {
                     '```[quote][/quote]```'
                 ],
                 ['inline triple backtick with singletick', '```code with ` embedded```', '```code with ` embedded```'],
-                ['inline triple backtick with doubletick', '```code with `` embedded```',
-                    '```code with `` embedded```'
-                ],
+                ['inline triple backtick with doubletick', '```code with `` embedded```', '```code with `` embedded```'],
                 ['inline triple backtick with linebreak', '```code with\nlinebreak```', '```code with\nlinebreak```'],
                 ['inline triple backtick with singletick and quote',
                     '```code with ` [quote][/quote]embedded```',
@@ -398,12 +395,16 @@ describe('browser', () => {
                 ['Greedy GFM fence',
                     '````befunge\ncode\n```\nstill code\n```\nmore code\n```\ntext',
                     'text'
+                ],
+                ['GFM fence with leading and internal quotes',
+                    '[quote]Yow![/quote]```INTERCAL\nPLEASE DO [quote]FAIL[/quote]\n```',
+                    ''
                 ]
             ].forEach((test) => {
                 const name = test[0],
                     input = test[1],
                     expected = test[2];
-                it('should handle: ' + name, () => cleanPostRaw({
+                it(name, () => cleanPostRaw({
                     raw: input
                 }).cleaned.should.equal(expected));
             });

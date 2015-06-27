@@ -60,6 +60,10 @@ function queueWorker(task, callback) {
  * @returns {external.module_posts.CleanedPost} input post with cleaned raw
  */
 function cleanPostRaw(post) {
+
+    function hidetags(code) {
+        return code.replace(/\[(?!\x10)/g, '[\x10'); //DLE
+    }
     let text = post.raw || '',
         // Normalize newlines
         edited = text.
@@ -68,12 +72,10 @@ function cleanPostRaw(post) {
     // Remove low-ASCII control chars except \t (\x09) and \n (\x0a)
     replace(/[\x00-\x08\x0b-\x1f]/g, '').
 
-    // Remove GFM-fenced code blocks
-    replace(/^````.*\n(?:.*\n)*```(?:\n|$)/gm, '').
-    replace(/^```.*\n(?:.*\n)*?```(?:\n|$)/gm, '').
-
-    // Disable bbcode tags inside inline code blocks
-    replace(/(`+)[^`][^]*?\1/, code => code.replace(/\[/g, '[\x10')). //DLE
+    // Disable bbcode tags inside GFM-fenced and inline code blocks
+    replace(/^````.*\n(?:.*\n)*```(?:\n|$)/gm, hidetags).
+    replace(/^```(?:[^`\n].*)?\n(?:.*\n)*?```(?:\n|$)/gm, hidetags).
+    replace(/(`+)[^`][^]*?\1/, hidetags).
 
     // Ease recognition of bbcode [quote] and
     // [quote=whatever] start tags
@@ -98,12 +100,15 @@ function cleanPostRaw(post) {
     replace(/\x02[^\x1a]*\x1a/g, '\x1a').
 
     // Ensure that quote stripping never coalesces
-    // adjacent backticks into bogus GFM fence markers
+    // adjacent backticks into new GFM fence markers
     replace(/^(`+)\x1a`/gm, '$1 `').
 
     // Remove leftover control characters
-    replace(/[\x00-\x08\x0b-\x1f]/g, '');
+    replace(/[\x00-\x08\x0b-\x1f]/g, '').
 
+    // Remove GFM-fenced code blocks
+    replace(/^````.*\n(?:.*\n)*```(?:\n|$)/gm, '').
+    replace(/^```(?:[^`\n].*)?\n(?:.*\n)*?```(?:\n|$)/gm, '');
     return post;
 }
 internals.cleanPostRaw = cleanPostRaw;
