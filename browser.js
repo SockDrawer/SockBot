@@ -64,6 +64,13 @@ function cleanPostRaw(post) {
     function hidetags(code) {
         return code.replace(/\[(?!\x10)/g, '[\x10'); //DLE
     }
+
+    // Regexes to match various kinds of code block
+    const fencedgreedy = /^````.*\n(?:.*\n)*```(?:\n|$)/gm;
+    const fencedlazy = /^```(?:[^`\n].*)?\n(?:.*\n)*?```(?:\n|$)/gm;
+    const inline = /(`+)[^]*?\1/g;
+
+
     let text = post.raw || '',
         // Normalize newlines
         edited = text.
@@ -72,10 +79,10 @@ function cleanPostRaw(post) {
     // Remove low-ASCII control chars except \t (\x09) and \n (\x0a)
     replace(/[\x00-\x08\x0b-\x1f]/g, '').
 
-    // Disable bbcode tags inside GFM-fenced and inline code blocks
-    replace(/^````.*\n(?:.*\n)*```(?:\n|$)/gm, hidetags).
-    replace(/^```(?:[^`\n].*)?\n(?:.*\n)*?```(?:\n|$)/gm, hidetags).
-    replace(/(`+)[^`][^]*?\1/, hidetags).
+    // Disable bbcode tags inside all code blocks
+    replace(fencedgreedy, hidetags).
+    replace(fencedlazy, hidetags).
+    replace(inline, hidetags).
 
     // Ease recognition of bbcode [quote] and
     // [quote=whatever] start tags
@@ -107,8 +114,8 @@ function cleanPostRaw(post) {
     replace(/[\x00-\x08\x0b-\x1f]/g, '').
 
     // Remove GFM-fenced code blocks
-    replace(/^````.*\n(?:.*\n)*```(?:\n|$)/gm, '').
-    replace(/^```(?:[^`\n].*)?\n(?:.*\n)*?```(?:\n|$)/gm, '');
+    replace(fencedgreedy, '').
+    replace(fencedlazy, '');
     return post;
 }
 internals.cleanPostRaw = cleanPostRaw;
