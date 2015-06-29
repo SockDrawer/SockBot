@@ -1,0 +1,24 @@
+---
+core:
+  username: username
+  password: password
+  owner: accalia
+  ignoreUsers:
+    - blakeyrat
+    - PaulaBean
+  ignoreCategories:
+    - 8
+    - 23
+  cooldownPeriod: 3.6E7
+plugins: 
+  echo: true
+  anonymize: true
+  reader:
+    readWait: 8.64E7
+  summoner:
+    messages:
+    messages: 
+      - '@%__username__% has summoned me, and so I appear.'
+      - 'Yes master %__name__%, I shall appear as summoned.'
+      - 'Yes mistress %__name__%, I shall appear as summoned.'
+  './odd/path': true
