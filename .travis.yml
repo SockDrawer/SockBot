@@ -1,22 +1,25 @@
 language: node_js
 node_js:
-  - node
-  - iojs
-  - '0.11'
-  - '0.12'
-  - 'iojs-v1.7'
-  - 'iojs-v1.8'
-  - 'iojs-v2.0'
-  - 'iojs-v2.1'
+- node
+- iojs
+- '0.11'
+- '0.12'
+- iojs-v1.7
+- iojs-v1.8
+- iojs-v2.0
+- iojs-v2.1
 before_script:
-  - rm -rf ./coverage
-  - git config credential.helper "store --file=.git/credentials"
-  - echo "https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@github.com" > .git/credentials
-  - npm run gulp preBuild
+- rm -rf ./coverage
+- git config credential.helper "store --file=.git/credentials"
+- echo "https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@github.com" > .git/credentials
+- npm run gulp preBuild
 after_script:
-  - npm run gulp postBuild
-  - test -e ./coverage/lcov.info && < ./coverage/lcov.info ./node_modules/coveralls/bin/coveralls.js
+- npm run gulp postBuild
+- test -e ./coverage/lcov.info && < ./coverage/lcov.info ./node_modules/coveralls/bin/coveralls.js
 branches:
   only:
-    - master
-    - es6-dev
+  - master
+  - es6-dev
+notifications:
+  slack:
+    secure: Fycz8f/0HY/rgiMePSF4IhavbvSR0/B20gGX4sHHd83ql6WLOx8bf+Al348HhF8GobqD3uTUs1tQPmIGGHdPZ2l+0ZFythSSUNy766612WfyYOpCAqXeCALgcciKzrw7lkECtOLgBOm7vRWVSOfxHXle2NefZR3Q8eNPWpKlNP8=
