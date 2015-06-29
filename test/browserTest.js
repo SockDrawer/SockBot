@@ -319,8 +319,9 @@ describe('browser', () => {
                 ['double backtick with quote', '``[quote][/quote]``', '``[quote][/quote]``'],
                 ['inline code before quote', '``code``[quote][/quote]``', '``code````'],
                 ['double backtick with embedded singletick', ' ``code with ` embedded``', ' ``code with ` embedded``'],
-                //      ['double backtick with embedded singletick', ' `` ` [quote][/quote] ``', ' `` `  ``'], //may need newline
-                ['double backtick with embedded singletick and quote', ' `` ` [quote][/quote] ``', ' `` ` [quote][/quote] ``'],
+                ['double backtick with embedded singletick and quote', ' `` ` [quote][/quote] ``',
+                    ' `` ` [quote][/quote] ``'
+                ],
                 ['multiline double backtick', 'before ``code\ncode2`` after', 'before ``code\ncode2`` after'],
                 ['multiline double backtick with quote',
                     'before ``[quote]\n[/quote]`` after',
@@ -344,7 +345,9 @@ describe('browser', () => {
                     '```[quote][/quote]```'
                 ],
                 ['inline triple backtick with singletick', '```code with ` embedded```', '```code with ` embedded```'],
-                ['inline triple backtick with doubletick', '```code with `` embedded```', '```code with `` embedded```'],
+                ['inline triple backtick with doubletick', '```code with `` embedded```',
+                    '```code with `` embedded```'
+                ],
                 ['inline triple backtick with linebreak', '```code with\nlinebreak```', '```code with\nlinebreak```'],
                 ['inline triple backtick with singletick and quote',
                     '```code with ` [quote][/quote]embedded```',
