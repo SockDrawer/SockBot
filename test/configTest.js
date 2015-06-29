@@ -14,7 +14,7 @@ const config = require('../config'),
 describe('config', () => {
     describe('exports', () => {
         const fns = [],
-            objs = ['internals'],
+            objs = ['internals', 'stubs'],
             vals = [];
         describe('should export expected functions:', () => {
             fns.forEach((fn) => {
@@ -57,6 +57,12 @@ describe('config', () => {
         it('should include only expected keys', () => {
             config.internals.should.have.all.keys(fns.concat(objs, vals));
         });
+    });
+    describe('documentation stubs', () => {
+        const stubs = config.stubs;
+        Object.keys(stubs).forEach((stub) => it('should be a documentation stub: ' + stub, () => {
+            stubs[stub](); // just getting code coverage on docstubs
+        }));
     });
     describe('readFile()', () => {
         const readFile = config.internals.readFile;
