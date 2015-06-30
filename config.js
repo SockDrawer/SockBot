@@ -1,5 +1,7 @@
 'use strict';
 
+const utils = require('./utils');
+
 const fs = require('fs'),
     yaml = require('js-yaml');
 
@@ -87,8 +89,8 @@ const defaultConfig = {
 /**
  * Read and parse configuration File from disc
  *
- * @param {string} path File Path of file to read
- * @param {readComplete} callback Completion callback
+ * @param {string} path Path of file to read
+ * @param {configComplete} callback Completion callback
  */
 function readFile(path, callback) {
     if (!path || typeof path !== 'string') {
@@ -113,12 +115,33 @@ function readFile(path, callback) {
 }
 
 /**
- * Read File Callback
+ * Load configuration from disc
+ *
+ * @param {string} path Configuration file path
+ * @param {configComplete} callback Completion callback
+ */
+exports.loadConfiguration = function loadConfiguration(path, callback) {
+    readFile(path, (err, config) => {
+        if (err) {
+            callback(err);
+            return;
+        }
+        try {
+            exports.config = utils.mergeObjects(defaultConfig, config);
+            callback(null, exports.config);
+        } catch (e) {
+            callback(e);
+        }
+    });
+};
+
+/**
+ * Configuration Loaded Callback
  *
  * @param {Exception} [err=null] Error encountered processing request
- * @param {Object} config YAML parsed response body. If invalid YAML will be `undefined`
+ * @param {Object} config Loaded Configuration
  */
-function readComplete(err, config) {} //eslint-disable-line handle-callback-err, no-unused-vars
+function configComplete(err, config) {} //eslint-disable-line handle-callback-err, no-unused-vars
 
 /**
  * Current configuration
@@ -132,9 +155,10 @@ exports.config = JSON.parse(JSON.stringify(defaultConfig));
 /* istanbul ignore else */
 if (typeof GLOBAL.describe === 'function') {
     exports.internals = {
-        readFile: readFile
+        readFile: readFile,
+        defaultConfig: defaultConfig
     };
     exports.stubs = {
-        readComplete: readComplete
+        configComplete: configComplete
     };
 }

@@ -9,11 +9,12 @@ const expect = chai.expect;
 
 // The thing we're testing
 const config = require('../config'),
+    utils = require('../utils'),
     fs = require('fs');
 
 describe('config', () => {
     describe('exports', () => {
-        const fns = [],
+        const fns = ['loadConfiguration'],
             objs = ['internals', 'stubs', 'config'],
             vals = [];
         describe('should export expected functions:', () => {
@@ -37,7 +38,7 @@ describe('config', () => {
     });
     describe('internals', () => {
         const fns = ['readFile'],
-            objs = [],
+            objs = ['defaultConfig'],
             vals = [];
         describe('should include expected functions:', () => {
             fns.forEach((fn) => {
@@ -159,6 +160,46 @@ describe('config', () => {
             spy.lastCall.args.should.have.length(2);
             expect(spy.lastCall.args[0]).to.equal(null);
             spy.lastCall.args[1].should.deep.equal(result);
+        });
+        after(() => fs.readFile.restore());
+    });
+    describe('loadConfiguration()', () => {
+        const loadConfiguration = config.loadConfiguration;
+        before(() => sinon.stub(fs, 'readFile'));
+        it('should load valid config', () => {
+            const input = {
+                    core: {
+                        username: 'harold',
+                        password: 'crayon'
+                    }
+                },
+                expected = utils.mergeObjects(config.internals.defaultConfig, input);
+            fs.readFile.reset();
+            fs.readFile.yields(null, JSON.stringify(input));
+            const spy = sinon.spy();
+            loadConfiguration('config.js', spy);
+            spy.called.should.be.true;
+            spy.lastCall.args.should.have.length(2);
+            expect(spy.lastCall.args[0]).to.equal(null);
+            spy.lastCall.args[1].should.deep.equal(expected);
+        });
+        it('should pass on read error', () => {
+            fs.readFile.reset();
+            fs.readFile.yields(new Error('E_NO_ENT'));
+            const spy = sinon.spy();
+            loadConfiguration('config.js', spy);
+            spy.called.should.be.true;
+            spy.lastCall.args.should.have.length(1);
+            expect(spy.lastCall.args[0]).to.be.instanceOf(Error);
+        });
+                it('should pass on YAML error', () => {
+            fs.readFile.reset();
+            fs.readFile.yields(null, '1');
+            const spy = sinon.spy();
+            loadConfiguration('config.js', spy);
+            spy.called.should.be.true;
+            spy.lastCall.args.should.have.length(1);
+            expect(spy.lastCall.args[0]).to.be.instanceOf(Error);
         });
         after(() => fs.readFile.restore());
     });
