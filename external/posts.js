@@ -116,5 +116,7 @@ exports.Post = {};
  * @augments {external.module_posts.Post}
  * @typedef {object}
  * @param {string} cleaned The value of `raw` after being processed to remove code and quotes
+ * @param {string} url Direct URL link to this post
+ * @param {string} reply_to Direct URL link to the post this post is in reply to
  */
 exports.CleanedPost = {};
