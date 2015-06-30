@@ -2,9 +2,7 @@
 /*globals describe, it*/
 /*eslint no-unused-expressions:0 */
 
-const chai = require('chai'),
-    sinon = require('sinon');
-chai.should();
+const chai = require('chai');
 const expect = chai.expect;
 
 // The thing we're testing
