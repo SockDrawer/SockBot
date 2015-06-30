@@ -69,7 +69,7 @@ Can be retrieved directly at `/posts/<postid>.json`
 | --- | --- | --- |
 | id | <code>number</code> | Post Id of the post. this number will not change |
 | name | <code>string</code> | Long name of the post owner |
-| user_name | <code>string</code> | Username of the post owner |
+| username | <code>string</code> | Username of the post owner |
 | avatar_template | <code>string</code> | URL template for post owner's avatar |
 | uploaded_avatar_id | <code>number</code> | ID of the post owner's avatar |
 | created_at | <code>string</code> | ISO formatted post creation time |

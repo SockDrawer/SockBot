@@ -16,8 +16,11 @@
 <dt><a href="#readFile">readFile(path, callback)</a></dt>
 <dd><p>Read and parse configuration File from disc</p>
 </dd>
-<dt><a href="#readComplete">readComplete([err], config)</a></dt>
-<dd><p>Read File Callback</p>
+<dt><a href="#loadConfiguration">loadConfiguration(path, callback)</a></dt>
+<dd><p>Load configuration from disc</p>
+</dd>
+<dt><a href="#configComplete">configComplete([err], config)</a></dt>
+<dd><p>Configuration Loaded Callback</p>
 </dd>
 </dl>
 <a name="config"></a>
@@ -124,17 +127,28 @@ Read and parse configuration File from disc
 
 | Param | Type | Description |
 | --- | --- | --- |
-| path | <code>string</code> | File Path of file to read |
-| callback | <code>[readComplete](#readComplete)</code> | Completion callback |
+| path | <code>string</code> | Path of file to read |
+| callback | <code>[configComplete](#configComplete)</code> | Completion callback |
 
-<a name="readComplete"></a>
-## readComplete([err], config)
-Read File Callback
+<a name="loadConfiguration"></a>
+## loadConfiguration(path, callback)
+Load configuration from disc
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| path | <code>string</code> | Configuration file path |
+| callback | <code>[configComplete](#configComplete)</code> | Completion callback |
+
+<a name="configComplete"></a>
+## configComplete([err], config)
+Configuration Loaded Callback
 
 **Kind**: global function  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | [err] | <code>Exception</code> | <code></code> | Error encountered processing request |
-| config | <code>Object</code> |  | YAML parsed response body. If invalid YAML will be `undefined` |
+| config | <code>Object</code> |  | Loaded Configuration |
 
