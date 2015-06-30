@@ -64,7 +64,7 @@ exports.ActionSummary = {};
  * @typedef {object}
  * @param {number} id Post Id of the post. this number will not change
  * @param {string} name Long name of the post owner
- * @param {string} user_name Username of the post owner
+ * @param {string} username Username of the post owner
  * @param {string} avatar_template URL template for post owner's avatar
  * @param {number} uploaded_avatar_id ID of the post owner's avatar
  * @param {string} created_at ISO formatted post creation time
