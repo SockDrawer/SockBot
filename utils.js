@@ -89,7 +89,7 @@ function mergeInner(base, mixin) {
     let name;
     for (name in mixin) {
         if (typeof mixin[name] === 'object' && !Array.isArray(mixin[name])) {
-            const newBase = base[name];
+            const newBase = base[name] || {};
             mergeInner(newBase, mixin[name]);
             base[name] = newBase;
         } else {

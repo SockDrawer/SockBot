@@ -147,6 +147,32 @@ describe('utils', () => {
                 });
             });
         });
+        it('should accept empty base object', () => {
+            const mixin = {
+                    a: 1
+                },
+                base = {};
+            expect(() => mergeInner(base, mixin)).to.not.throw();
+            base.should.deep.equal(mixin);
+        });
+        it('should accept empty mixin object', () => {
+            const base = {
+                    a: 1
+                },
+                mixin = {};
+            expect(() => mergeInner(base, mixin)).to.not.throw();
+            base.should.deep.equal(base);
+        });
+        it('should accept merge missing base object', () => {
+            const mixin = {
+                    a: {
+                        b: 1
+                    }
+                },
+                base = {};
+            expect(() => mergeInner(base, mixin)).to.not.throw();
+            base.should.deep.equal(mixin);
+        });
         it('should merge objects with no overlap', () => {
             const base = {
                     a: 1
