@@ -416,22 +416,24 @@ describe('browser', () => {
     describe('internals.setTrustLevel()', () => {
         /*eslint-disable camelcase */
         const setTrustLevel = browser.internals.setTrustLevel;
+        const trust = browser.trustLevels,
+            normalLevels = [trust.tl0, trust.tl1, trust.tl2, trust.tl3, trust.tl4];
         describe('normal user trust levels', () => {
-            [0, 1, 2, 3, 4].forEach((trustLevel) => {
+            Object.keys(trust).forEach((trustLevel) => {
                 const post = {
                     username: 'trustLevel' + trustLevel,
-                    trust_level: trustLevel,
+                    trust_level: trust[trustLevel],
                     staff: false,
                     admin: false,
                     moderator: false
                 };
                 it('should maintain trust_level ' + trustLevel, () => {
-                    setTrustLevel(post).trust_level.should.equal(trustLevel);
+                    setTrustLevel(post).trust_level.should.equal(trust[trustLevel]);
                 });
             });
         });
         describe('ignored users', () => {
-            [0, 1, 2, 3, 4].forEach((trustLevel) => {
+            normalLevels.forEach((trustLevel) => {
                 const post = {
                     username: 'PaulaBean', // Paula is ignored by default
                     trust_level: trustLevel,
@@ -440,12 +442,12 @@ describe('browser', () => {
                     moderator: false
                 };
                 it('should set to ignored trust_level for tl' + trustLevel, () => {
-                    setTrustLevel(post).trust_level.should.equal(0);
+                    setTrustLevel(post).trust_level.should.equal(trust.ignored);
                 });
             });
         });
         describe('staff users', () => {
-            [0, 1, 2, 3, 4].forEach((trustLevel) => {
+            normalLevels.forEach((trustLevel) => {
                 const post = {
                     username: 'trustLevel' + trustLevel,
                     trust_level: trustLevel,
@@ -454,12 +456,12 @@ describe('browser', () => {
                     moderator: false
                 };
                 it('should set to staff trust_level for staff tl' + trustLevel, () => {
-                    setTrustLevel(post).trust_level.should.equal(6);
+                    setTrustLevel(post).trust_level.should.equal(trust.staff);
                 });
             });
         });
         describe('moderator users', () => {
-            [0, 1, 2, 3, 4].forEach((trustLevel) => {
+            normalLevels.forEach((trustLevel) => {
                 const post = {
                     username: 'trustLevel' + trustLevel,
                     trust_level: trustLevel,
@@ -468,12 +470,12 @@ describe('browser', () => {
                     moderator: true
                 };
                 it('should set to moderator trust_level for moderator tl' + trustLevel, () => {
-                    setTrustLevel(post).trust_level.should.equal(7);
+                    setTrustLevel(post).trust_level.should.equal(trust.moderator);
                 });
             });
         });
         describe('admin users', () => {
-            [0, 1, 2, 3, 4].forEach((trustLevel) => {
+            normalLevels.forEach((trustLevel) => {
                 const post = {
                     username: 'trustLevel' + trustLevel,
                     trust_level: trustLevel,
@@ -482,12 +484,12 @@ describe('browser', () => {
                     moderator: false
                 };
                 it('should set to admin trust_level for admin tl' + trustLevel, () => {
-                    setTrustLevel(post).trust_level.should.equal(8);
+                    setTrustLevel(post).trust_level.should.equal(trust.admin);
                 });
             });
         });
         describe('owner users', () => {
-            [0, 1, 2, 3, 4].forEach((trustLevel) => {
+            normalLevels.forEach((trustLevel) => {
                 const post = {
                     username: 'accalia', //accalia is default owner
                     trust_level: trustLevel,
@@ -496,99 +498,99 @@ describe('browser', () => {
                     moderator: false
                 };
                 it('should set to owner trust_level for owner tl' + trustLevel, () => {
-                    setTrustLevel(post).trust_level.should.equal(9);
+                    setTrustLevel(post).trust_level.should.equal(trust.owner);
                 });
             });
         });
         it('Owner status should trump Admin flag', () => {
             const post = {
                 username: 'accalia', //accalia is default owner
-                trust_level: 3,
+                trust_level: trust.tl3,
                 staff: false,
                 admin: true,
                 moderator: false
             };
-            setTrustLevel(post).trust_level.should.equal(9);
+            setTrustLevel(post).trust_level.should.equal(trust.owner);
         });
         it('Owner status should trump Moderator flag', () => {
             const post = {
                 username: 'accalia', //accalia is default owner
-                trust_level: 3,
+                trust_level: trust.tl3,
                 staff: false,
                 admin: false,
                 moderator: true
             };
-            setTrustLevel(post).trust_level.should.equal(9);
+            setTrustLevel(post).trust_level.should.equal(trust.owner);
         });
         it('Owner status should trump staff flag', () => {
             const post = {
                 username: 'accalia', //accalia is default owner
-                trust_level: 3,
+                trust_level: trust.tl3,
                 staff: true,
                 admin: false,
                 moderator: false
             };
-            setTrustLevel(post).trust_level.should.equal(9);
+            setTrustLevel(post).trust_level.should.equal(trust.owner);
         });
         it('Admin status should trump Moderator flag', () => {
             const post = {
                 username: 'admin',
-                trust_level: 3,
+                trust_level: trust.tl3,
                 staff: false,
                 admin: true,
                 moderator: true
             };
-            setTrustLevel(post).trust_level.should.equal(8);
+            setTrustLevel(post).trust_level.should.equal(trust.admin);
         });
         it('Admin status should trump Staff flag', () => {
             const post = {
                 username: 'admin',
-                trust_level: 3,
+                trust_level: trust.tl3,
                 staff: true,
                 admin: true,
                 moderator: false
             };
-            setTrustLevel(post).trust_level.should.equal(8);
+            setTrustLevel(post).trust_level.should.equal(trust.admin);
         });
         it('Moderator status should trump Staff flag', () => {
             const post = {
                 username: 'moderator',
-                trust_level: 3,
+                trust_level: trust.tl3,
                 staff: true,
                 admin: false,
                 moderator: true
             };
-            setTrustLevel(post).trust_level.should.equal(7);
+            setTrustLevel(post).trust_level.should.equal(trust.moderator);
         });
         it('Should not ignore Admin', () => {
             const post = {
                 username: 'PaulaBean',
-                trust_level: 3,
+                trust_level: trust.tl3,
                 staff: false,
                 admin: true,
                 moderator: false
             };
-            setTrustLevel(post).trust_level.should.equal(8);
+            setTrustLevel(post).trust_level.should.equal(trust.admin);
         });
         it('Should not ignore Moderator', () => {
             const post = {
                 username: 'PaulaBean',
-                trust_level: 3,
+                trust_level: trust.tl3,
                 staff: false,
                 admin: false,
                 moderator: true
             };
-            setTrustLevel(post).trust_level.should.equal(7);
+            setTrustLevel(post).trust_level.should.equal(trust.moderator);
         });
         it('Should not ignore Staff', () => {
             const post = {
                 username: 'PaulaBean',
-                trust_level: 3,
+                trust_level: trust.tl3,
                 staff: true,
                 admin: false,
                 moderator: false
             };
-            setTrustLevel(post).trust_level.should.equal(6);
+            setTrustLevel(post).trust_level.should.equal(trust.staff);
         });
         /*eslint-enable camelcase */
     });
