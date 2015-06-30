@@ -5,6 +5,8 @@
  * @license MIT
  */
 
+const config = require('./config');
+
 const request = require('request'),
     async = require('async');
 
@@ -20,8 +22,38 @@ const defaults = {
         request: request.defaults(defaults),
         queue: async.queue(queueWorker, 1),
         queueWorker: queueWorker,
-        defaults: defaults
+        defaults: defaults,
+        setTrustLevel: setTrustLevel
+    },
+    /**
+     * SockBot Virtual Trust Levels
+     *
+     * @readonly
+     * @enum
+     */
+    trustLevels = {
+        /** Bot Owner Trust Level */
+        owner: 9,
+        /** Forum Admin Trust Level */
+        admin: 8,
+        /** Forum Moderator Trust Level */
+        moderator: 7,
+        /** Forum Staff Trust Level */
+        staff: 6,
+        /** Discourst trust_level 4 Trust Level */
+        tl4: 4,
+        /** Discourst trust_level 3 Trust Level */
+        tl3: 3,
+        /** Discourst trust_level 2 Trust Level */
+        tl2: 2,
+        /** Discourst trust_level 1 Trust Level */
+        tl1: 1,
+        /** Discourst trust_level 0 Trust Level */
+        tl0: 0,
+        /** Ignored User Trust Level */
+        ignored: 0
     };
+exports.trustLevels = trustLevels;
 
 /**
  * Process browser tasks with rate limiting
@@ -50,6 +82,37 @@ function queueWorker(task, callback) {
     });
 }
 
+
+/**
+ * Normalize discourse trust level to SockBot Virtual Trust Level
+ *
+ * @param {external.module_posts.Post} post Post to normalize trust levels on
+ * @param {string} post.username Username of the post owner
+ * @param {Number} post.trust_level Trust level of the post owner
+ * @param {boolean} post.moderator Flags whether post owner has moderator powers
+ * @param {boolean} post.admin Flags whether post owner has admin powers
+ * @param {boolean} post.staff Flags whether post owner has staff powers
+ * @returns {external.module_posts.Post} input post with normalized trust_level
+ */
+function setTrustLevel(post) {
+    // Don't have a choice about using non-camelcase here...
+    /*eslint-disable camelcase*/
+    if (post.username === config.config.core.owner) {
+        post.trust_level = 9;
+    } else if (post.admin) {
+        post.trust_level = 8;
+    } else if (post.moderator) {
+        post.trust_level = 7;
+    } else if (post.staff) {
+        post.trust_level = 6;
+    } else if (config.config.core.ignoreUsers.indexOf(post.username) >= 0) {
+        post.trust_level = 0;
+    }
+    /*eslint-enable camelcase*/
+    return post;
+}
+
+
 /**
  * Clean post raw
  *
@@ -60,7 +123,6 @@ function queueWorker(task, callback) {
  * @returns {external.module_posts.CleanedPost} input post with cleaned raw
  */
 function cleanPostRaw(post) {
-
     function hidetags(code) {
         return code.replace(/\[(?!\x10)/g, '[\x10'); //DLE
     }
