@@ -23,7 +23,9 @@ const defaults = {
         queue: async.queue(queueWorker, 1),
         queueWorker: queueWorker,
         defaults: defaults,
-        setTrustLevel: setTrustLevel
+        setTrustLevel: setTrustLevel,
+        setPostUrl: setPostUrl,
+        cleanPostRaw: cleanPostRaw
     },
     /**
      * SockBot Virtual Trust Levels
@@ -80,6 +82,24 @@ function queueWorker(task, callback) {
         }
         setTimeout(callback, 5000);
     });
+}
+
+/**
+ * construct direct post link and direct in reply to link
+ *
+ * @param {external.module_posts.Post} post Post to generate links for
+ * @param {number} post.topic_id Topic Id that the input post belongs to
+ * @param {string} post.topic_slug URL slug of the topic
+ * @param {number} post.post_number Ordinal of the input post in topic.
+ * @param {number} post.reply_to_post_number The post_number the input post is a reply to
+ * @returns {external.module_posts.CleanedPost} input post with urls set
+ */
+function setPostUrl(post) {
+    post.url = config.core.forum + 't/' + post.topic_slug + '/' + post.topic_id + '/';
+    // not using camelcase for consistency with discourse
+    post.reply_to = post.url + (post.reply_to_post_number || ''); //eslint-disable-line camelcase
+    post.url += post.post_number;
+    return post;
 }
 
 
@@ -180,7 +200,6 @@ function cleanPostRaw(post) {
     replace(fencedlazy, '');
     return post;
 }
-internals.cleanPostRaw = cleanPostRaw;
 
 /**
  * Browser Request Callback
@@ -189,10 +208,12 @@ internals.cleanPostRaw = cleanPostRaw;
  * @param {Object} body JSON parsed response body. If invalid JSON will be `undefined`
  */
 function requestComplete(err, body) {} //eslint-disable-line handle-callback-err, no-unused-vars
-internals.requestComplete = requestComplete;
 
 /* istanbul ignore else */
 if (typeof GLOBAL.describe === 'function') {
     //test is running
     exports.internals = internals;
+    exports.stubs = {
+        requestComplete: requestComplete
+    };
 }
