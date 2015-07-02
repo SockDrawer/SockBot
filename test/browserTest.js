@@ -9,7 +9,8 @@ const expect = chai.expect;
 
 // The thing we're testing
 const browser = require('../browser'),
-    utils = require('../utils');
+    utils = require('../utils'),
+    config = require('../config');
 
 describe('browser', () => {
     describe('exports', () => {
@@ -187,7 +188,21 @@ describe('browser', () => {
             req.url.should.equal('http://example.com');
             done();
         });
-
+        it('should prefix default forum for relative URL', (done) => {
+            let req;
+            browser.internals.request = (opts, cb) => {
+                req = opts;
+                cb();
+            };
+            const queueSpy = sinon.spy();
+            queueWorker({
+                url: '/posts'
+            }, queueSpy);
+            clock.tick(5000);
+            queueSpy.called.should.be.true;
+            req.url.should.equal(config.config.core.forum + '/posts');
+            done();
+        });
         it('should select form from task', (done) => {
             const form = {
                 a: 1,
