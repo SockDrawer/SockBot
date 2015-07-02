@@ -74,9 +74,9 @@ For providing the lovely and amusing Error messages that sockbot will occasional
 | Javier Rotelli | 6 |
 | abarker-TDWTF | 4 |
 | Ben Lubar | 3 |
+| Travis-CI | 3 |
 | riking | 3 |
 | Steven Jennison | 2 |
-| Travis-CI | 2 |
 | VinDuv | 2 |
 | loopback0 | 2 |
 | Donal Fellows | 1 |
