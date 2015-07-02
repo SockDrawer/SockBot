@@ -25,7 +25,8 @@ const defaults = {
         defaults: defaults,
         setTrustLevel: setTrustLevel,
         setPostUrl: setPostUrl,
-        cleanPostRaw: cleanPostRaw
+        cleanPostRaw: cleanPostRaw,
+        cleanPost: cleanPost
     },
     /**
      * SockBot Virtual Trust Levels
@@ -95,7 +96,7 @@ function queueWorker(task, callback) {
  * @returns {external.module_posts.CleanedPost} input post with urls set
  */
 function setPostUrl(post) {
-    post.url = config.core.forum + 't/' + post.topic_slug + '/' + post.topic_id + '/';
+    post.url = config.config.core.forum + 't/' + post.topic_slug + '/' + post.topic_id + '/';
     // not using camelcase for consistency with discourse
     post.reply_to = post.url + (post.reply_to_post_number || ''); //eslint-disable-line camelcase
     post.url += post.post_number;
@@ -198,6 +199,19 @@ function cleanPostRaw(post) {
     // Remove GFM-fenced code blocks
     replace(fencedgreedy, '').
     replace(fencedlazy, '');
+    return post;
+}
+
+/**
+ * Clean discourse post for processing
+ *
+ * @param {external.posts.Post} post Input Post
+ * @returns {external.posts.CleanedPost} Cleaned Post
+ */
+function cleanPost(post){
+    cleanPostRaw(post);
+    setTrustLevel(post);
+    setPostUrl(post);
     return post;
 }
 
