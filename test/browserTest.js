@@ -664,4 +664,51 @@ describe('browser', () => {
             setPostUrl(post).reply_to.should.deep.equal(expected);
         });
     });
+    describe('internals.cleanPost()', () => {
+        const cleanPost = browser.internals.cleanPost;
+        it('should modify post in place', () => {
+            const post = {
+                'raw': 'this is passing'
+            };
+            post.should.not.have.any.key('cleaned');
+            cleanPost(post);
+            post.should.have.any.key('cleaned');
+        });
+        it('should return updated post', () => {
+            const post = {
+                'raw': 'this is passing'
+            };
+            cleanPost(post).should.equal(post);
+        });
+        it('should use cleanPostRaw()', () => {
+            const post = {
+                    'raw': 'this is [quote]not[/quote]passing'
+                },
+                expected = 'this is passing';
+            post.should.not.have.any.key('cleaned');
+            cleanPost(post);
+            post.should.have.any.key('cleaned');
+            post.cleaned.should.equal(expected);
+        });
+        it('should use setTrustLevel()', () => {
+            const post = {
+                admin: true,
+                'trust_level': browser.trustLevels.tl2
+            };
+            cleanPost(post);
+            post.trust_level.should.equal(browser.trustLevels.admin);
+        });
+        it('should use setPostUrl()', () => {
+            const post = {
+                    'topic_slug': 'topic',
+                    'topic_id': 1234,
+                    'post_number': 17
+                },
+                expected = 'https://what.thedailywtf.com/t/topic/1234/17';
+            post.should.not.have.any.key('url');
+            cleanPost(post);
+            post.should.have.any.key('url');
+            post.url.should.deep.equal(expected);
+        });
+    });
 });
