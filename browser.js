@@ -131,6 +131,9 @@ exports.createPost = function createPost(topicId, replyTo, content, callback) {
 /**
  * construct direct post link and direct in reply to link
  *
+ * @see {@link ../external/posts/#external.module_posts.Post|Post}
+ * @see {@link ../external/posts/#external.module_posts.CleanedPost|CleanedPost}
+ * 
  * @param {external.module_posts.Post} post Post to generate links for
  * @param {number} post.topic_id Topic Id that the input post belongs to
  * @param {string} post.topic_slug URL slug of the topic
@@ -150,13 +153,16 @@ function setPostUrl(post) {
 /**
  * Normalize discourse trust level to SockBot Virtual Trust Level
  *
+ * @see {@link ../external/posts/#external.module_posts.Post|Post}
+ * @see {@link ../external/posts/#external.module_posts.CleanedPost|CleanedPost}
+ * 
  * @param {external.module_posts.Post} post Post to normalize trust levels on
  * @param {string} post.username Username of the post owner
  * @param {Number} post.trust_level Trust level of the post owner
  * @param {boolean} post.moderator Flags whether post owner has moderator powers
  * @param {boolean} post.admin Flags whether post owner has admin powers
  * @param {boolean} post.staff Flags whether post owner has staff powers
- * @returns {external.module_posts.Post} input post with normalized trust_level
+ * @returns {external.module_posts.CleanedPost} input post with normalized trust_level
  */
 function setTrustLevel(post) {
     // Don't have a choice about using non-camelcase here...
@@ -182,6 +188,8 @@ function setTrustLevel(post) {
  *
  * Provided and commented by flabdablet
  *
+ * @see {@link ../external/posts/#external.module_posts.CleanedPost|CleanedPost}
+ * 
  * @param {external.module_posts.Post} post Post to clean
  * @param {string} post.raw Raw text of the post to clean
  * @returns {external.module_posts.CleanedPost} input post with cleaned raw
@@ -248,6 +256,9 @@ function cleanPostRaw(post) {
 /**
  * Clean discourse post for processing
  *
+ * @see {@link ../external/posts/#external.module_posts.Post|Post}
+ * @see {@link ../external/posts/#external.module_posts.CleanedPost|CleanedPost}
+ * 
  * @param {external.posts.Post} post Input Post
  * @returns {external.posts.CleanedPost} Cleaned Post
  */
@@ -267,7 +278,9 @@ function cleanPost(post) {
 function requestComplete(err, body) {} //eslint-disable-line handle-callback-err, no-unused-vars
 
 /**
- * post Request Callback
+ * Post Request Callback
+ * 
+ * @see {@link ../external/posts/#external.module_posts.CleanedPost|CleanedPost}
  *
  * @param {Exception} [err=null] Error encountered processing request
  * @param {external.posts.CleanedPost} post Cleaned post
