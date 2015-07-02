@@ -98,7 +98,7 @@ exports.drawCard = function(payload, callback) {
  * @type {Object}
  */
 exports.commands = {
-    new: {
+    'new': {
         handler: exports.createDeck,
         defaults: {
 			Type: "French52"
@@ -106,13 +106,13 @@ exports.commands = {
         params: ['Type'],
         description: 'Create new deck.'
     },
-	draw: {
-        handler: exports.createDeck,
+	'draw': {
+        handler: exports.drawCard,
         defaults: {
 			num: 1
 		},
         params: ['deck', 'num'],
-        description: 'Create new deck.'
+        description: 'Draw a card.'
     }
 };
 
