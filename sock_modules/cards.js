@@ -79,7 +79,8 @@ exports.drawCard = function(payload, callback) {
 		var msg = "";
 		for(var i = 0; i < payload.num; i++) {
 			var card = decks[payload.deck].draw();
-			msg +=  "Your card: " + card + "\n";
+			if (!card) msg += "No more cards!\n";
+			else msg +=  "Your card: " + card + "\n";
 		}
 		callback(null,msg);
 	} else {

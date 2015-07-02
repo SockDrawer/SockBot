@@ -138,6 +138,34 @@ describe("DeckModule", function() {
 		});
 	});
 	
+	it("should report nicely when a deck is out of cards", function(done) {
+		cardsModule.createDeck({Type: "French52"}, function(err, response) {
+			assert.isTrue(responseRegex.test(response));
+			var result = response.match(responseRegex);
+			var deckName = result[1];
+			
+			cardsModule.drawCard({deck: deckName, num: 52}, function(err, response) {
+				cardsModule.drawCard({deck: deckName, num: 3}, function(err, response) {
+					assert.include(response,"No more cards!");
+					done();
+				});
+			});
+		});
+	});
+	
+	it("should report nicely when a deck overdrafts", function(done) {
+		cardsModule.createDeck({Type: "French52"}, function(err, response) {
+			assert.isTrue(responseRegex.test(response));
+			var result = response.match(responseRegex);
+			var deckName = result[1];
+			
+			cardsModule.drawCard({deck: deckName, num: 55}, function(err, response) {
+				assert.include(response,"No more cards!");
+				done();
+			});
+		});
+	});
+	
 	it("should list one deck", function(done) {
 		cardsModule.createDeck({Type: "French52"}, function(err, response) {
 			assert.isTrue(responseRegex.test(response));
