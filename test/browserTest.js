@@ -13,7 +13,7 @@ const browser = require('../browser'),
 
 describe('browser', () => {
     describe('exports', () => {
-        const fns = [],
+        const fns = ['createPost'],
             objs = ['internals', 'trustLevels', 'stubs'],
             vals = [];
         describe('should export expected functions:', () => {
@@ -38,7 +38,7 @@ describe('browser', () => {
     describe('internals', () => {
         const fns = ['queueWorker', 'request', 'cleanPostRaw', 'setTrustLevel', 'setPostUrl', 'cleanPost'],
             objs = ['defaults', 'queue'],
-            vals = [];
+            vals = ['signature'];
         describe('should include expected functions:', () => {
             fns.forEach((fn) => {
                 it(fn + '()', () => expect(browser.internals[fn]).to.be.a('function'));
@@ -51,7 +51,7 @@ describe('browser', () => {
         });
         describe('should include expected values', () => {
             vals.forEach((val) => {
-                it(val, () => browser.internals.should.have.key(val));
+                it(val, () => browser.internals.should.have.any.key(val));
             });
         });
         it('should include only expected keys', () => {
@@ -715,5 +715,134 @@ describe('browser', () => {
             expect(() => cleanPost(post)).to.not.throw();
             post.should.have.any.key('cleaned');
         });
+    });
+    describe('createPost()', () => {
+        const queue = browser.internals.queue;
+        before(() => sinon.stub(queue, 'push'));
+        it('should accept four parameters version', () => {
+            queue.push.reset();
+            browser.createPost(1, 2, '', () => 0);
+            queue.push.called.should.be.true;
+        });
+        it('should accept three parameters version', () => {
+            queue.push.reset();
+            browser.createPost(1, '', () => 0);
+            queue.push.called.should.be.true;
+        });
+        it('should reject four parameters version with no callback', () => {
+            queue.push.reset();
+            expect(() => browser.createPost(1, 2, '', null)).to.throw('callback must be supplied');
+            queue.push.called.should.be.false;
+        });
+        it('should reject three parameters version with no callback', () => {
+            queue.push.reset();
+            expect(() => browser.createPost(1, 2, '')).to.throw('callback must be supplied');
+            queue.push.called.should.be.false;
+        });
+        it('should set http method to POST', () => {
+            queue.push.reset();
+            browser.createPost(100, '', () => 0);
+            const args = queue.push.lastCall.args;
+            args.should.have.length(1);
+            args[0].should.have.any.key('method');
+            args[0].method.should.equal('POST');
+        });
+        it('should set url', () => {
+            queue.push.reset();
+            browser.createPost(100, '', () => 0);
+            const args = queue.push.lastCall.args;
+            args.should.have.length(1);
+            args[0].should.have.any.key('url');
+            args[0].url.should.equal('/posts');
+        });
+        it('should set form', () => {
+            queue.push.reset();
+            browser.createPost(100, '', () => 0);
+            const args = queue.push.lastCall.args;
+            args.should.have.length(1);
+            args[0].should.have.any.key('form');
+            args[0].form.should.be.a('object');
+        });
+        it('should set callback', () => {
+            queue.push.reset();
+            browser.createPost(100, '', () => 0);
+            const args = queue.push.lastCall.args;
+            args.should.have.length(1);
+            args[0].should.have.any.key('callback');
+            args[0].callback.should.be.a('function');
+        });
+        describe('form', () => {
+            it('should set `raw`', () => {
+                queue.push.reset();
+                browser.internals.signature = '\nthis is my signature';
+                browser.createPost(100, 'i have content', () => 0);
+                const form = queue.push.lastCall.args[0].form;
+                form.should.have.any.key('raw');
+                form.raw.should.equal('i have content\nthis is my signature');
+            });
+            it('should set `topic_id`', () => {
+                queue.push.reset();
+                browser.createPost(100, '', () => 0);
+                const form = queue.push.lastCall.args[0].form;
+                form.should.have.any.key('topic_id');
+                form.topic_id.should.equal(100);
+            });
+            it('should set `is_warning`', () => {
+                queue.push.reset();
+                browser.createPost(100, '', () => 0);
+                const form = queue.push.lastCall.args[0].form;
+                form.should.have.any.key('is_warning');
+                form.is_warning.should.equal(false);
+            });
+            it('should set `reply_to_post_number`', () => {
+                queue.push.reset();
+                browser.createPost(100, 42, '', () => 0);
+                const form = queue.push.lastCall.args[0].form;
+                form.should.have.any.key('reply_to_post_number');
+                form.reply_to_post_number.should.equal(42);
+            });
+            it('should set `category`', () => {
+                queue.push.reset();
+                browser.createPost(100, '', () => 0);
+                const form = queue.push.lastCall.args[0].form;
+                form.should.have.any.key('category');
+                form.category.should.equal('');
+            });
+            it('should set `archetype`', () => {
+                queue.push.reset();
+                browser.createPost(100, '', () => 0);
+                const form = queue.push.lastCall.args[0].form;
+                form.should.have.any.key('archetype');
+                form.archetype.should.equal('regular');
+            });
+            it('should set `auto_close_time`', () => {
+                queue.push.reset();
+                browser.createPost(100, '', () => 0);
+                const form = queue.push.lastCall.args[0].form;
+                form.should.have.any.key('auto_close_time');
+                form.auto_close_time.should.equal('');
+            });
+        });
+        it('should pass err to external callback on completion', () => {
+            queue.push.reset();
+            queue.push.yieldsTo('callback', new Error('test error!'));
+            const spy = sinon.spy();
+            browser.createPost(100, '', spy);
+            spy.called.should.be.true;
+            spy.lastCall.args.should.have.length(1);
+            spy.lastCall.args[0].should.be.an.instanceOf(Error);
+        });
+        it('should pass post to external callback on completion', () => {
+            queue.push.reset();
+            queue.push.yieldsTo('callback', null, {});
+            const spy = sinon.spy();
+            browser.createPost(100, '', spy);
+            spy.called.should.be.true;
+            spy.lastCall.args.should.have.length(2);
+            expect(spy.lastCall.args[0]).to.equal(null);
+            // cleanPost should have been called, adding these keys
+            spy.lastCall.args[1].should.have.keys('cleaned', 'url', 'reply_to');
+        });
+        after(() => queue.push.restore());
     });
 });

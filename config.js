@@ -47,7 +47,7 @@ const defaultConfig = {
          * @default
          * @type {string}
          */
-        forum: 'https://what.thedailywtf.com/',
+        forum: 'https://what.thedailywtf.com',
         /**
          * Users to ignore.
          *

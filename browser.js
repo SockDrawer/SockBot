@@ -10,7 +10,8 @@ const config = require('./config');
 const request = require('request'),
     async = require('async');
 
-const defaults = {
+const signature = '\n\n<!-- Posted by a clever robot -->',
+    defaults = {
         rejectUnauthorized: false,
         jar: request.jar(),
         headers: {
@@ -26,7 +27,8 @@ const defaults = {
         setTrustLevel: setTrustLevel,
         setPostUrl: setPostUrl,
         cleanPostRaw: cleanPostRaw,
-        cleanPost: cleanPost
+        cleanPost: cleanPost,
+        signature: signature
     },
     /**
      * SockBot Virtual Trust Levels
@@ -70,6 +72,9 @@ exports.trustLevels = trustLevels;
  * @param {Function} callback Queue task complete callback
  */
 function queueWorker(task, callback) {
+    if (task.url && task.url[0] === '/') {
+        task.url = config.config.core.forum + task.url;
+    }
     internals.request({
         url: task.url,
         method: task.method || 'GET',
@@ -85,6 +90,36 @@ function queueWorker(task, callback) {
     });
 }
 
+exports.createPost = function createPost(topicId, replyTo, content, callback) {
+    if (callback === undefined) {
+        callback = content;
+        content = replyTo;
+        replyTo = undefined;
+    }
+    if (typeof callback !== 'function') {
+        throw new Error('callback must be supplied');
+    }
+    internals.queue.push({
+        method: 'POST',
+        url: '/posts',
+        form: {
+            raw: content + internals.signature,
+            'topic_id': topicId,
+            'is_warning': false,
+            'reply_to_post_number': replyTo,
+            category: '',
+            archetype: 'regular',
+            'auto_close_time': ''
+        },
+        callback: (err, body) => {
+            if (err) {
+                return callback(err);
+            }
+            callback(null, cleanPost(body));
+        }
+    });
+};
+
 /**
  * construct direct post link and direct in reply to link
  *
@@ -96,7 +131,7 @@ function queueWorker(task, callback) {
  * @returns {external.module_posts.CleanedPost} input post with urls set
  */
 function setPostUrl(post) {
-    post.url = config.config.core.forum + 't/' + post.topic_slug + '/' + post.topic_id + '/';
+    post.url = config.config.core.forum + '/t/' + post.topic_slug + '/' + post.topic_id + '/';
     // not using camelcase for consistency with discourse
     post.reply_to = post.url + (post.reply_to_post_number || ''); //eslint-disable-line camelcase
     post.url += post.post_number;
@@ -208,7 +243,7 @@ function cleanPostRaw(post) {
  * @param {external.posts.Post} post Input Post
  * @returns {external.posts.CleanedPost} Cleaned Post
  */
-function cleanPost(post){
+function cleanPost(post) {
     cleanPostRaw(post);
     setTrustLevel(post);
     setPostUrl(post);
