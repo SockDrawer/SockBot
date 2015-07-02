@@ -86,6 +86,14 @@ exports.drawCard = function(payload, callback) {
 	}
 }
 
+exports.listDecks = function(payload, callback) {
+	var msg = "##List of decks:\n";
+	for(deck in decks) {
+		msg += " - " + deck + "\n";
+	}
+	callback(null,msg);
+}
+
 /**
  *  Each command has the following properties:
  * - handler:        The encryption function.
@@ -113,6 +121,10 @@ exports.commands = {
 		},
         params: ['deck', 'num'],
         description: 'Draw a card.'
+    },
+	'list': {
+        handler: exports.listDecks,
+        description: 'List decks.'
     }
 };
 
