@@ -28,7 +28,8 @@ const signature = '\n\n<!-- Posted by a clever robot -->',
         setPostUrl: setPostUrl,
         cleanPostRaw: cleanPostRaw,
         cleanPost: cleanPost,
-        signature: signature
+        signature: signature,
+        getCSRF: getCSRF
     },
     /**
      * SockBot Virtual Trust Levels
@@ -194,6 +195,30 @@ exports.editPost = function editPost(postId, content, editReason, callback) {
 };
 
 /**
+ * get a CSRF token from discourse
+ *
+ * @param {completedCallback} callback Completion callback
+ */
+function getCSRF(callback) {
+    if (typeof callback !== 'function') {
+        throw new Error('callback must be supplied');
+    }
+    internals.queue.push({
+        method: 'GET',
+        url: '/session/csrf.json',
+        callback: (err, data) => {
+            if (err) {
+                return callback(err);
+            }
+            const csrf = (data || {}).csrf;
+            defaults.headers['X-CSRF-Token'] = csrf;
+            internals.request = internals.request.defaults(defaults);
+            callback(null);
+        }
+    });
+}
+
+/**
  * construct direct post link and direct in reply to link
  *
  * @see {@link ../external/posts/#external.module_posts.Post|Post}
@@ -352,12 +377,20 @@ function requestComplete(err, body) {} //eslint-disable-line handle-callback-err
  */
 function postedCallback(err, post) {} //eslint-disable-line handle-callback-err, no-unused-vars
 
+/**
+ * Completion Callback
+ *
+ * @param {Exception} [err=null] Error encountered processing request
+ */
+function completedCallback(err) {} //eslint-disable-line handle-callback-err, no-unused-vars
+
 /* istanbul ignore else */
 if (typeof GLOBAL.describe === 'function') {
     //test is running
     exports.internals = internals;
     exports.stubs = {
         requestComplete: requestComplete,
-        postedCallback: postedCallback
+        postedCallback: postedCallback,
+        completedCallback: completedCallback
     };
 }
