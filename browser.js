@@ -90,6 +90,14 @@ function queueWorker(task, callback) {
     });
 }
 
+/**
+ * Post content to an existing content
+ *
+ * @param {number} topicId Topic to post to
+ * @param {number} [replyTo] Post Number in topic that this post is in reply to
+ * @param {string} content Post Contents to post
+ * @param {postedCallback} callback Completion callback
+ */
 exports.createPost = function createPost(topicId, replyTo, content, callback) {
     if (callback === undefined) {
         callback = content;
@@ -258,11 +266,20 @@ function cleanPost(post) {
  */
 function requestComplete(err, body) {} //eslint-disable-line handle-callback-err, no-unused-vars
 
+/**
+ * post Request Callback
+ *
+ * @param {Exception} [err=null] Error encountered processing request
+ * @param {external.posts.CleanedPost} post Cleaned post
+ */
+function postedCallback(err, post) {} //eslint-disable-line handle-callback-err, no-unused-vars
+
 /* istanbul ignore else */
 if (typeof GLOBAL.describe === 'function') {
     //test is running
     exports.internals = internals;
     exports.stubs = {
-        requestComplete: requestComplete
+        requestComplete: requestComplete,
+        postedCallback: postedCallback
     };
 }
