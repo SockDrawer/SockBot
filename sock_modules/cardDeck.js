@@ -18,6 +18,7 @@ Array.prototype.remove = function(from, to) {
  function Deck(jsonDescription) {
 	this.allcards = jsonDescription.cards;
 	this.cards = this.allcards.slice(0);
+	this.type = jsonDescription.type;
  }
  
  Deck.prototype.draw = function() {
@@ -27,6 +28,14 @@ Array.prototype.remove = function(from, to) {
 	var card = this.cards[randomNum];
 	this.cards.remove(this.cards.indexOf(card));
 	return card;
+ }
+ 
+ Deck.prototype.size = function() {
+	 return this.allcards.length;
+ }
+ 
+ Deck.prototype.remaining = function() {
+	 return this.cards.length;
  }
  
  Deck.prototype.shuffle = function() {

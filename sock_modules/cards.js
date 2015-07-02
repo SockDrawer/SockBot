@@ -65,6 +65,7 @@ exports.createDeck = function(payload, callback) {
 		var data = {};
 		data.name = "deck" + nextnum;
 		data.cards = types[decktype];
+		data.type = decktype;
 		decks[data.name] = new Deck(data);
 		nextnum++;
 		callback(null, "Success! Your deck is " + data.name);
@@ -75,11 +76,32 @@ exports.createDeck = function(payload, callback) {
 
 exports.drawCard = function(payload, callback) {
 	if (payload.deck in decks) {
-		var card = decks[payload.deck].draw();
-		callback(null, "Your card: " + card);
+		var msg = "";
+		for(var i = 0; i < payload.num; i++) {
+			var card = decks[payload.deck].draw();
+			if (!card) msg += "No more cards!\n";
+			else msg +=  "Your card: " + card + "\n";
+		}
+		callback(null,msg);
 	} else {
 		callback(null, "Error: no such deck " + payload.deck);
 	}
+}
+
+exports.listDecks = function(payload, callback) {
+	var msg = "##List of decks:\n";
+	for(var deck in decks) {
+		msg += " - " + deck + " (" + decks[deck].type + ")"  + " [" + decks[deck].remaining() + "/" + decks[deck].size() + "]" + "\n";
+	}
+	callback(null,msg);
+}
+
+exports.listTypes = function(payload, callback) {
+	var msg = "##List of deck types:\n";
+	for(var decktype in types) {
+		msg += " - " + decktype + "\n";
+	}
+	callback(null,msg);
 }
 
 /**
@@ -94,7 +116,7 @@ exports.drawCard = function(payload, callback) {
  * @type {Object}
  */
 exports.commands = {
-    new: {
+    'new': {
         handler: exports.createDeck,
         defaults: {
 			Type: "French52"
@@ -102,13 +124,25 @@ exports.commands = {
         params: ['Type'],
         description: 'Create new deck.'
     },
-	draw: {
-        handler: exports.createDeck,
+	'draw': {
+        handler: exports.drawCard,
         defaults: {
 			num: 1
 		},
         params: ['deck', 'num'],
-        description: 'Create new deck.'
+        description: 'Draw a card.'
+    },
+	'list': {
+        handler: exports.listDecks,
+        defaults: {},
+        params: [],
+        description: 'List decks.'
+    },
+	'types': {
+        handler: exports.listTypes,
+        defaults: {},
+        params: [],
+        description: 'List deck types.'
     }
 };
 
