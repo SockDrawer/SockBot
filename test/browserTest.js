@@ -14,7 +14,7 @@ const browser = require('../browser'),
 
 describe('browser', () => {
     describe('exports', () => {
-        const fns = ['createPost'],
+        const fns = ['createPost', 'editPost'],
             objs = ['internals', 'trustLevels', 'stubs'],
             vals = [];
         describe('should export expected functions:', () => {
@@ -852,6 +852,105 @@ describe('browser', () => {
             queue.push.yieldsTo('callback', null, {});
             const spy = sinon.spy();
             browser.createPost(100, '', spy);
+            spy.called.should.be.true;
+            spy.lastCall.args.should.have.length(2);
+            expect(spy.lastCall.args[0]).to.equal(null);
+            // cleanPost should have been called, adding these keys
+            spy.lastCall.args[1].should.have.keys('cleaned', 'url', 'reply_to');
+        });
+        after(() => queue.push.restore());
+    });
+    describe('editPost()', () => {
+        const queue = browser.internals.queue;
+        before(() => sinon.stub(queue, 'push'));
+        it('should accept four parameters version', () => {
+            queue.push.reset();
+            browser.editPost(1, '', '', () => 0);
+            queue.push.called.should.be.true;
+        });
+        it('should accept three parameters version', () => {
+            queue.push.reset();
+            browser.editPost(1, '', () => 0);
+            queue.push.called.should.be.true;
+        });
+        it('should reject four parameters version with no callback', () => {
+            queue.push.reset();
+            expect(() => browser.editPost(1, 2, '', null)).to.throw('callback must be supplied');
+            queue.push.called.should.be.false;
+        });
+        it('should reject three parameters version with no callback', () => {
+            queue.push.reset();
+            expect(() => browser.editPost(1, 2, '')).to.throw('callback must be supplied');
+            queue.push.called.should.be.false;
+        });
+        it('should set http method to PUT', () => {
+            queue.push.reset();
+            browser.editPost(100, '', () => 0);
+            const args = queue.push.lastCall.args;
+            args.should.have.length(1);
+            args[0].should.have.any.key('method');
+            args[0].method.should.equal('PUT');
+        });
+        it('should set url', () => {
+            queue.push.reset();
+            browser.editPost(100, '', () => 0);
+            const args = queue.push.lastCall.args;
+            args.should.have.length(1);
+            args[0].should.have.any.key('url');
+            args[0].url.should.equal('/posts/100');
+        });
+        it('should set form', () => {
+            queue.push.reset();
+            browser.editPost(100, '', () => 0);
+            const args = queue.push.lastCall.args;
+            args.should.have.length(1);
+            args[0].should.have.any.key('form');
+            args[0].form.should.be.a('object');
+        });
+        it('should set callback', () => {
+            queue.push.reset();
+            browser.editPost(100, '', () => 0);
+            const args = queue.push.lastCall.args;
+            args.should.have.length(1);
+            args[0].should.have.any.key('callback');
+            args[0].callback.should.be.a('function');
+        });
+        it('should set `form.post` without edit reason', () => {
+            queue.push.reset();
+            browser.internals.signature = '\nthis is my signature';
+            browser.editPost(100, 'i have content', () => 0);
+            const form = queue.push.lastCall.args[0].form;
+            form.should.have.any.key('post');
+            form.post.should.deep.equal({
+                raw: 'i have content\nthis is my signature',
+                'edit_reason': ''
+            });
+        });
+        it('should set `form.post` with edit reason', () => {
+            queue.push.reset();
+            browser.internals.signature = '\nthis is my signature';
+            browser.editPost(100, 'i have content', 'i have my reasons', () => 0);
+            const form = queue.push.lastCall.args[0].form;
+            form.should.have.any.key('post');
+            form.post.should.deep.equal({
+                raw: 'i have content\nthis is my signature',
+                'edit_reason': 'i have my reasons'
+            });
+        });
+        it('should pass err to external callback on completion', () => {
+            queue.push.reset();
+            queue.push.yieldsTo('callback', new Error('test error!'));
+            const spy = sinon.spy();
+            browser.editPost(100, '', spy);
+            spy.called.should.be.true;
+            spy.lastCall.args.should.have.length(1);
+            spy.lastCall.args[0].should.be.an.instanceOf(Error);
+        });
+        it('should pass post to external callback on completion', () => {
+            queue.push.reset();
+            queue.push.yieldsTo('callback', null, {});
+            const spy = sinon.spy();
+            browser.editPost(100, '', spy);
             spy.called.should.be.true;
             spy.lastCall.args.should.have.length(2);
             expect(spy.lastCall.args[0]).to.equal(null);
