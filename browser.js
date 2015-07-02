@@ -129,6 +129,40 @@ exports.createPost = function createPost(topicId, replyTo, content, callback) {
 };
 
 /**
+ * Edit an existing post.
+ *
+ * @param {number} postId Id number of the post to edit
+ * @param {string} content New post content
+ * @param {string} [editReason] Optional Edit Reason that no one ever uses
+  * @param {postedCallback} callback Completion callback
+ */
+exports.editPost = function editPost(postId, content, editReason, callback) {
+    if (callback === undefined) {
+        callback = editReason;
+        editReason = '';
+    }
+    if (typeof callback !== 'function') {
+        throw new Error('callback must be supplied');
+    }
+    internals.queue.push({
+        method: 'PUT',
+        url: '/posts/' + postId,
+        form: {
+            post: {
+                raw: content + internals.signature,
+                'edit_reason': editReason
+            }
+        },
+        callback: (err, body) => {
+            if (err) {
+                return callback(err);
+            }
+            callback(null, cleanPost(body));
+        }
+    });
+};
+
+/**
  * construct direct post link and direct in reply to link
  *
  * @see {@link ../external/posts/#external.module_posts.Post|Post}
