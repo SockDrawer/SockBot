@@ -17,5 +17,6 @@
 | VinDuv | 2 |
 | loopback0 | 2 |
 | Donal Fellows | 1 |
+| Travis-CI | 1 |
 | jon | 1 |
 | root | 1 |
