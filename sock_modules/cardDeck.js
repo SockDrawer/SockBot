@@ -30,6 +30,14 @@ Array.prototype.remove = function(from, to) {
 	return card;
  }
  
+ Deck.prototype.size = function() {
+	 return this.allcards.length;
+ }
+ 
+ Deck.prototype.remaining = function() {
+	 return this.cards.length;
+ }
+ 
  Deck.prototype.shuffle = function() {
 	 this.cards = this.allcards.slice(0);
  }

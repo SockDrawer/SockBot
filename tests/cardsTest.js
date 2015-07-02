@@ -50,6 +50,42 @@ describe("Deck", function() {
 		var card4 = d.draw();
 		assert.isDefined(card4);
 	});
+	
+	it("should report cards remaining when full", function() {
+		var d = new Deck({type: "Magic", "cards": ["Ace", "Two"]});
+		assert.equal(2, d.remaining());
+	});
+	
+	it("should report cards remaining when drawing", function() {
+		var d = new Deck({type: "Magic", "cards": ["Ace", "Two"]});
+		d.draw();
+		assert.equal(1, d.remaining());
+	});
+	
+	it("should report cards remaining when empty", function() {
+		var d = new Deck({type: "Magic", "cards": ["Ace", "Two"]});
+		d.draw();
+		d.draw();
+		assert.equal(0, d.remaining());
+	});
+	
+	it("should report cards remaining after shuffle", function() {
+		var d = new Deck({type: "Magic", "cards": ["Ace", "Two"]});
+		d.draw();
+		d.draw();
+		d.shuffle();
+		assert.equal(2, d.remaining());
+	});
+	
+	it("should report size correctly", function() {
+		var d = new Deck({type: "Magic", "cards": ["Ace", "Two"]});
+		assert.equal(2, d.size());
+		d.draw();
+		d.draw();
+		assert.equal(2, d.size());
+		d.shuffle();
+		assert.equal(2, d.size());
+	});
 })
 
 describe("DeckModule", function() {
@@ -122,6 +158,7 @@ describe("DeckModule", function() {
 			var deckName1 = result[1];
 			
 			cardsModule.createDeck({Type: "French52"}, function(err, response) {
+				var result = response.match(responseRegex);
 				var deckName2 = result[1];
 				cardsModule.listDecks(null, function(err, response) {
 					assert.include(response,deckName1 + " (French52)");
@@ -129,6 +166,49 @@ describe("DeckModule", function() {
 					done();
 				});
 			});
+		});
+	});
+	
+	it("should list deck sizes", function(done) {
+		cardsModule.createDeck({Type: "French52"}, function(err, response) {
+			assert.isTrue(responseRegex.test(response));
+			var result = response.match(responseRegex);
+			var deckName1 = result[1];
+			
+			cardsModule.createDeck({Type: "French52"}, function(err, response) {
+				var result = response.match(responseRegex);
+				var deckName2 = result[1];
+				
+				cardsModule.drawCard({deck: deckName1, num: 3}, function(err, response) {
+					cardsModule.listDecks(null, function(err, response) {
+						assert.include(response,deckName1 + " (French52) [49/52]");
+						assert.include(response,deckName2 + " (French52) [52/52]");
+						done();
+					});
+				});
+				
+			});
+		});
+	});
+	
+	it("should list deck types", function(done) {
+		cardsModule.listTypes(null, function(err, response) {
+			assert.isNull(err);
+			done();
+		});
+	});
+	
+	it("should know French52", function(done) {
+		cardsModule.listTypes(null, function(err, response) {
+			assert.include(response,"French52");
+			done();
+		});
+	});
+	
+	it("should know French54", function(done) {
+		cardsModule.listTypes(null, function(err, response) {
+			assert.include(response,"French54");
+			done();
 		});
 	});
 	

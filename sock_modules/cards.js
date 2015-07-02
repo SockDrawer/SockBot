@@ -90,7 +90,15 @@ exports.drawCard = function(payload, callback) {
 exports.listDecks = function(payload, callback) {
 	var msg = "##List of decks:\n";
 	for(var deck in decks) {
-		msg += " - " + deck + " (" + decks[deck].type + ")"  + "\n";
+		msg += " - " + deck + " (" + decks[deck].type + ")"  + " [" + decks[deck].remaining() + "/" + decks[deck].size() + "]" + "\n";
+	}
+	callback(null,msg);
+}
+
+exports.listTypes = function(payload, callback) {
+	var msg = "##List of deck types:\n";
+	for(var decktype in types) {
+		msg += " - " + decktype + "\n";
 	}
 	callback(null,msg);
 }
@@ -128,6 +136,12 @@ exports.commands = {
         defaults: {},
         params: [],
         description: 'List decks.'
+    },
+	'types': {
+        handler: exports.listTypes,
+        defaults: {},
+        params: [],
+        description: 'List deck types.'
     }
 };
 
