@@ -119,15 +119,15 @@ function setTrustLevel(post) {
     // Don't have a choice about using non-camelcase here...
     /*eslint-disable camelcase*/
     if (post.username === config.config.core.owner) {
-        post.trust_level = 9;
+        post.trust_level = trustLevels.owner;
     } else if (post.admin) {
-        post.trust_level = 8;
+        post.trust_level = trustLevels.admin;
     } else if (post.moderator) {
-        post.trust_level = 7;
+        post.trust_level = trustLevels.moderator;
     } else if (post.staff) {
-        post.trust_level = 6;
+        post.trust_level = trustLevels.staff;
     } else if (config.config.core.ignoreUsers.indexOf(post.username) >= 0) {
-        post.trust_level = 0;
+        post.trust_level = trustLevels.ignored;
     }
     /*eslint-enable camelcase*/
     return post;
