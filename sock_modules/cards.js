@@ -75,8 +75,12 @@ exports.createDeck = function(payload, callback) {
 
 exports.drawCard = function(payload, callback) {
 	if (payload.deck in decks) {
-		var card = decks[payload.deck].draw();
-		callback(null, "Your card: " + card);
+		var msg = "";
+		for(var i = 0; i < payload.num; i++) {
+			var card = decks[payload.deck].draw();
+			msg +=  "Your card: " + card + "\n";
+		}
+		callback(null,msg);
 	} else {
 		callback(null, "Error: no such deck " + payload.deck);
 	}
