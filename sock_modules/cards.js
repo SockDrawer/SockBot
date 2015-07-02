@@ -65,6 +65,7 @@ exports.createDeck = function(payload, callback) {
 		var data = {};
 		data.name = "deck" + nextnum;
 		data.cards = types[decktype];
+		data.type = decktype;
 		decks[data.name] = new Deck(data);
 		nextnum++;
 		callback(null, "Success! Your deck is " + data.name);
@@ -89,7 +90,7 @@ exports.drawCard = function(payload, callback) {
 exports.listDecks = function(payload, callback) {
 	var msg = "##List of decks:\n";
 	for(var deck in decks) {
-		msg += " - " + deck + "\n";
+		msg += " - " + deck + " (" + decks[deck].type + ")"  + "\n";
 	}
 	callback(null,msg);
 }
