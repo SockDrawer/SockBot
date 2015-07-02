@@ -129,6 +129,37 @@ exports.createPost = function createPost(topicId, replyTo, content, callback) {
 };
 
 /**
+ * Create a new private message.
+ *
+ * @param {string|string[]} to Username or names to create PM to
+ * @param {string} title Title of the Private Message
+ * @param {string} content Private Message contents
+ * @param {postedCallback} callback Completion callback
+ */
+exports.createPrivateMessage = function createPrivateMessage(to, title, content, callback) {
+    if (typeof callback !== 'function') {
+        throw new Error('callback must be supplied');
+    }
+    internals.queue.push({
+        method: 'POST',
+        url: '/posts',
+        form: {
+            raw: content + internals.signature,
+            'is_warning': false,
+            'archetype': 'private_message',
+            'title': title,
+            'target_usernames': to
+        },
+        callback: (err, body) => {
+            if (err) {
+                return callback(err);
+            }
+            callback(null, cleanPost(body));
+        }
+    });
+};
+
+/**
  * Edit an existing post.
  *
  * @param {number} postId Id number of the post to edit
