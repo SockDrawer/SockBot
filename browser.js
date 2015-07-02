@@ -134,7 +134,7 @@ exports.createPost = function createPost(topicId, replyTo, content, callback) {
  * @param {number} postId Id number of the post to edit
  * @param {string} content New post content
  * @param {string} [editReason] Optional Edit Reason that no one ever uses
-  * @param {postedCallback} callback Completion callback
+ * @param {postedCallback} callback Completion callback
  */
 exports.editPost = function editPost(postId, content, editReason, callback) {
     if (callback === undefined) {
@@ -167,7 +167,7 @@ exports.editPost = function editPost(postId, content, editReason, callback) {
  *
  * @see {@link ../external/posts/#external.module_posts.Post|Post}
  * @see {@link ../external/posts/#external.module_posts.CleanedPost|CleanedPost}
- * 
+ *
  * @param {external.module_posts.Post} post Post to generate links for
  * @param {number} post.topic_id Topic Id that the input post belongs to
  * @param {string} post.topic_slug URL slug of the topic
@@ -189,7 +189,7 @@ function setPostUrl(post) {
  *
  * @see {@link ../external/posts/#external.module_posts.Post|Post}
  * @see {@link ../external/posts/#external.module_posts.CleanedPost|CleanedPost}
- * 
+ *
  * @param {external.module_posts.Post} post Post to normalize trust levels on
  * @param {string} post.username Username of the post owner
  * @param {Number} post.trust_level Trust level of the post owner
@@ -223,7 +223,7 @@ function setTrustLevel(post) {
  * Provided and commented by flabdablet
  *
  * @see {@link ../external/posts/#external.module_posts.CleanedPost|CleanedPost}
- * 
+ *
  * @param {external.module_posts.Post} post Post to clean
  * @param {string} post.raw Raw text of the post to clean
  * @returns {external.module_posts.CleanedPost} input post with cleaned raw
@@ -292,7 +292,7 @@ function cleanPostRaw(post) {
  *
  * @see {@link ../external/posts/#external.module_posts.Post|Post}
  * @see {@link ../external/posts/#external.module_posts.CleanedPost|CleanedPost}
- * 
+ *
  * @param {external.posts.Post} post Input Post
  * @returns {external.posts.CleanedPost} Cleaned Post
  */
@@ -313,7 +313,7 @@ function requestComplete(err, body) {} //eslint-disable-line handle-callback-err
 
 /**
  * Post Request Callback
- * 
+ *
  * @see {@link ../external/posts/#external.module_posts.CleanedPost|CleanedPost}
  *
  * @param {Exception} [err=null] Error encountered processing request
