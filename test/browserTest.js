@@ -37,7 +37,7 @@ describe('browser', () => {
         });
     });
     describe('internals', () => {
-        const fns = ['queueWorker', 'request', 'cleanPostRaw', 'setTrustLevel', 'setPostUrl', 'cleanPost'],
+        const fns = ['queueWorker', 'request', 'cleanPostRaw', 'setTrustLevel', 'setPostUrl', 'cleanPost', 'getCSRF'],
             objs = ['defaults', 'queue'],
             vals = ['signature'];
         describe('should include expected functions:', () => {
@@ -730,6 +730,94 @@ describe('browser', () => {
             expect(() => cleanPost(post)).to.not.throw();
             post.should.have.any.key('cleaned');
         });
+    });
+    describe('internals.getCSRF()', () => {
+
+        const queue = browser.internals.queue,
+            getCSRF = browser.internals.getCSRF;
+        before(() => sinon.stub(queue, 'push'));
+        it('should require a callback', () => expect(() => getCSRF()).to.throw('callback must be supplied'));
+        it('should require a callback 2', () => {
+            expect(() => getCSRF('not callback')).to.throw('callback must be supplied');
+        });
+        it('should set http method to GET', () => {
+            queue.push.reset();
+            getCSRF(() => 0);
+            const args = queue.push.lastCall.args;
+            args.should.have.length(1);
+            args[0].should.have.any.key('method');
+            args[0].method.should.equal('GET');
+        });
+        it('should set url', () => {
+            queue.push.reset();
+            getCSRF(() => 0);
+            const args = queue.push.lastCall.args;
+            args.should.have.length(1);
+            args[0].should.have.any.key('url');
+            args[0].url.should.equal('/session/csrf.json');
+        });
+        it('should not set form', () => {
+            queue.push.reset();
+            getCSRF(() => 0);
+            const args = queue.push.lastCall.args;
+            args.should.have.length(1);
+            args[0].should.not.have.any.key('form');
+        });
+        it('should set callback', () => {
+            queue.push.reset();
+            getCSRF(() => 0);
+            const args = queue.push.lastCall.args;
+            args.should.have.length(1);
+            args[0].should.have.any.key('callback');
+            args[0].callback.should.be.a('function');
+        });
+        it('should pass err to external callback on completion', () => {
+            queue.push.reset();
+            queue.push.yieldsTo('callback', new Error('test error!'));
+            const spy = sinon.spy();
+            getCSRF(spy);
+            spy.called.should.be.true;
+            spy.lastCall.args.should.have.length(1);
+            spy.lastCall.args[0].should.be.an.instanceOf(Error);
+        });
+        it('should pass post to external callback on completion', () => {
+            queue.push.reset();
+            queue.push.yieldsTo('callback', null, {});
+            const spy = sinon.spy();
+            getCSRF(spy);
+            spy.called.should.be.true;
+            spy.lastCall.args.should.have.length(1);
+            expect(spy.lastCall.args[0]).to.equal(null);
+        });
+        it('should set defaults CSRF token', () => {
+            queue.push.reset();
+            queue.push.yieldsTo('callback', null, {
+                csrf: 'madness? this is CSRF!'
+            });
+            const spy = sinon.spy();
+            getCSRF(spy);
+            browser.internals.defaults.headers.should.have.any.key('X-CSRF-Token');
+            browser.internals.defaults.headers['X-CSRF-Token'].should.equal('madness? this is CSRF!');
+        });
+        it('should set allow non json respose', () => {
+            queue.push.reset();
+            queue.push.yieldsTo('callback', null, 'CSRF!');
+            const spy = sinon.spy();
+            getCSRF(spy);
+            browser.internals.defaults.headers.should.have.any.key('X-CSRF-Token');
+            expect(browser.internals.defaults.headers['X-CSRF-Token']).to.equal(undefined);
+        });
+        it('should update request', () => {
+            queue.push.reset();
+            queue.push.yieldsTo('callback', null, {
+                csrf: 'other CSRF!'
+            });
+            const spy = sinon.spy(),
+                request = browser.internals.request;
+            getCSRF(spy);
+            browser.internals.request.should.not.equal(request);
+        });
+        after(() => queue.push.restore());
     });
     describe('createPost()', () => {
         const queue = browser.internals.queue;
