@@ -732,7 +732,6 @@ describe('browser', () => {
         });
     });
     describe('internals.getCSRF()', () => {
-
         const queue = browser.internals.queue,
             getCSRF = browser.internals.getCSRF;
         before(() => sinon.stub(queue, 'push'));
@@ -799,9 +798,17 @@ describe('browser', () => {
             browser.internals.defaults.headers.should.have.any.key('X-CSRF-Token');
             browser.internals.defaults.headers['X-CSRF-Token'].should.equal('madness? this is CSRF!');
         });
-        it('should set allow non json respose', () => {
+        it('should set allow non json response', () => {
             queue.push.reset();
             queue.push.yieldsTo('callback', null, 'CSRF!');
+            const spy = sinon.spy();
+            getCSRF(spy);
+            browser.internals.defaults.headers.should.have.any.key('X-CSRF-Token');
+            expect(browser.internals.defaults.headers['X-CSRF-Token']).to.equal(undefined);
+        });
+        it('should set allow non response', () => {
+            queue.push.reset();
+            queue.push.yieldsTo('callback', null, null);
             const spy = sinon.spy();
             getCSRF(spy);
             browser.internals.defaults.headers.should.have.any.key('X-CSRF-Token');
