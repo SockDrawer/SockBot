@@ -88,7 +88,7 @@ exports.drawCard = function(payload, callback) {
 
 exports.listDecks = function(payload, callback) {
 	var msg = "##List of decks:\n";
-	for(deck in decks) {
+	for(var deck in decks) {
 		msg += " - " + deck + "\n";
 	}
 	callback(null,msg);
@@ -124,6 +124,8 @@ exports.commands = {
     },
 	'list': {
         handler: exports.listDecks,
+        defaults: {},
+        params: [],
         description: 'List decks.'
     }
 };
