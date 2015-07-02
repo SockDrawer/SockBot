@@ -5,13 +5,30 @@ Webbrowser abstraction for communicating with discourse
 **License**: MIT  
 
 * [browser](#module_browser)
-  * [~trustLevels](#module_browser..trustLevels)
-  * [~queueWorker(task, callback)](#module_browser..queueWorker)
-  * [~setPostUrl(post)](#module_browser..setPostUrl) ⇒ <code>external.module_posts.CleanedPost</code>
-  * [~setTrustLevel(post)](#module_browser..setTrustLevel) ⇒ <code>external.module_posts.Post</code>
-  * [~cleanPostRaw(post)](#module_browser..cleanPostRaw) ⇒ <code>external.module_posts.CleanedPost</code>
-  * [~cleanPost(post)](#module_browser..cleanPost) ⇒ <code>external.posts.CleanedPost</code>
-  * [~requestComplete([err], body)](#module_browser..requestComplete)
+  * _static_
+    * [.createPost(topicId, [replyTo], content, callback)](#module_browser.createPost)
+  * _inner_
+    * [~trustLevels](#module_browser..trustLevels)
+    * [~queueWorker(task, callback)](#module_browser..queueWorker)
+    * [~setPostUrl(post)](#module_browser..setPostUrl) ⇒ <code>external.module_posts.CleanedPost</code>
+    * [~setTrustLevel(post)](#module_browser..setTrustLevel) ⇒ <code>external.module_posts.Post</code>
+    * [~cleanPostRaw(post)](#module_browser..cleanPostRaw) ⇒ <code>external.module_posts.CleanedPost</code>
+    * [~cleanPost(post)](#module_browser..cleanPost) ⇒ <code>external.posts.CleanedPost</code>
+    * [~requestComplete([err], body)](#module_browser..requestComplete)
+    * [~postedCallback([err], post)](#module_browser..postedCallback)
+
+<a name="module_browser.createPost"></a>
+### browser.createPost(topicId, [replyTo], content, callback)
+Post content to an existing content
+
+**Kind**: static method of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| topicId | <code>number</code> | Topic to post to |
+| [replyTo] | <code>number</code> | Post Number in topic that this post is in reply to |
+| content | <code>string</code> | Post Contents to post |
+| callback | <code>postedCallback</code> | Completion callback |
 
 <a name="module_browser..trustLevels"></a>
 ### browser~trustLevels
@@ -116,4 +133,15 @@ Browser Request Callback
 | --- | --- | --- | --- |
 | [err] | <code>Exception</code> | <code></code> | Error encountered processing request |
 | body | <code>Object</code> |  | JSON parsed response body. If invalid JSON will be `undefined` |
+
+<a name="module_browser..postedCallback"></a>
+### browser~postedCallback([err], post)
+post Request Callback
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [err] | <code>Exception</code> | <code></code> | Error encountered processing request |
+| post | <code>external.posts.CleanedPost</code> |  | Cleaned post |
 
