@@ -710,5 +710,10 @@ describe('browser', () => {
             post.should.have.any.key('url');
             post.url.should.deep.equal(expected);
         });
+        it('should handle empty post object', () => {
+            const post = {};
+            expect(() => cleanPost(post)).to.not.throw();
+            post.should.have.any.key('cleaned');
+        });
     });
 });
