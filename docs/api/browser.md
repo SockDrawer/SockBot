@@ -7,11 +7,12 @@ Webbrowser abstraction for communicating with discourse
 * [browser](#module_browser)
   * _static_
     * [.createPost(topicId, [replyTo], content, callback)](#module_browser.createPost)
+    * [.editPost(postId, content, [editReason], callback)](#module_browser.editPost)
   * _inner_
     * [~trustLevels](#module_browser..trustLevels)
     * [~queueWorker(task, callback)](#module_browser..queueWorker)
     * [~setPostUrl(post)](#module_browser..setPostUrl) ⇒ <code>external.module_posts.CleanedPost</code>
-    * [~setTrustLevel(post)](#module_browser..setTrustLevel) ⇒ <code>external.module_posts.Post</code>
+    * [~setTrustLevel(post)](#module_browser..setTrustLevel) ⇒ <code>external.module_posts.CleanedPost</code>
     * [~cleanPostRaw(post)](#module_browser..cleanPostRaw) ⇒ <code>external.module_posts.CleanedPost</code>
     * [~cleanPost(post)](#module_browser..cleanPost) ⇒ <code>external.posts.CleanedPost</code>
     * [~requestComplete([err], body)](#module_browser..requestComplete)
@@ -28,6 +29,19 @@ Post content to an existing content
 | topicId | <code>number</code> | Topic to post to |
 | [replyTo] | <code>number</code> | Post Number in topic that this post is in reply to |
 | content | <code>string</code> | Post Contents to post |
+| callback | <code>postedCallback</code> | Completion callback |
+
+<a name="module_browser.editPost"></a>
+### browser.editPost(postId, content, [editReason], callback)
+Edit an existing post.
+
+**Kind**: static method of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| postId | <code>number</code> | Id number of the post to edit |
+| content | <code>string</code> | New post content |
+| [editReason] | <code>string</code> | Optional Edit Reason that no one ever uses |
 | callback | <code>postedCallback</code> | Completion callback |
 
 <a name="module_browser..trustLevels"></a>
@@ -73,6 +87,11 @@ construct direct post link and direct in reply to link
 
 **Kind**: inner method of <code>[browser](#module_browser)</code>  
 **Returns**: <code>external.module_posts.CleanedPost</code> - input post with urls set  
+**See**
+
+- [Post](../external/posts/#external.module_posts.Post)
+- [CleanedPost](../external/posts/#external.module_posts.CleanedPost)
+
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -83,11 +102,16 @@ construct direct post link and direct in reply to link
 | post.reply_to_post_number | <code>number</code> | The post_number the input post is a reply to |
 
 <a name="module_browser..setTrustLevel"></a>
-### browser~setTrustLevel(post) ⇒ <code>external.module_posts.Post</code>
+### browser~setTrustLevel(post) ⇒ <code>external.module_posts.CleanedPost</code>
 Normalize discourse trust level to SockBot Virtual Trust Level
 
 **Kind**: inner method of <code>[browser](#module_browser)</code>  
-**Returns**: <code>external.module_posts.Post</code> - input post with normalized trust_level  
+**Returns**: <code>external.module_posts.CleanedPost</code> - input post with normalized trust_level  
+**See**
+
+- [Post](../external/posts/#external.module_posts.Post)
+- [CleanedPost](../external/posts/#external.module_posts.CleanedPost)
+
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -106,6 +130,7 @@ Provided and commented by flabdablet
 
 **Kind**: inner method of <code>[browser](#module_browser)</code>  
 **Returns**: <code>external.module_posts.CleanedPost</code> - input post with cleaned raw  
+**See**: [CleanedPost](../external/posts/#external.module_posts.CleanedPost)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -118,6 +143,11 @@ Clean discourse post for processing
 
 **Kind**: inner method of <code>[browser](#module_browser)</code>  
 **Returns**: <code>external.posts.CleanedPost</code> - Cleaned Post  
+**See**
+
+- [Post](../external/posts/#external.module_posts.Post)
+- [CleanedPost](../external/posts/#external.module_posts.CleanedPost)
+
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -136,9 +166,10 @@ Browser Request Callback
 
 <a name="module_browser..postedCallback"></a>
 ### browser~postedCallback([err], post)
-post Request Callback
+Post Request Callback
 
 **Kind**: inner method of <code>[browser](#module_browser)</code>  
+**See**: [CleanedPost](../external/posts/#external.module_posts.CleanedPost)  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
