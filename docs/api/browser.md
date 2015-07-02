@@ -7,16 +7,19 @@ Webbrowser abstraction for communicating with discourse
 * [browser](#module_browser)
   * _static_
     * [.createPost(topicId, [replyTo], content, callback)](#module_browser.createPost)
+    * [.createPrivateMessage(to, title, content, callback)](#module_browser.createPrivateMessage)
     * [.editPost(postId, content, [editReason], callback)](#module_browser.editPost)
   * _inner_
     * [~trustLevels](#module_browser..trustLevels)
     * [~queueWorker(task, callback)](#module_browser..queueWorker)
+    * [~getCSRF(callback)](#module_browser..getCSRF)
     * [~setPostUrl(post)](#module_browser..setPostUrl) ⇒ <code>external.module_posts.CleanedPost</code>
     * [~setTrustLevel(post)](#module_browser..setTrustLevel) ⇒ <code>external.module_posts.CleanedPost</code>
     * [~cleanPostRaw(post)](#module_browser..cleanPostRaw) ⇒ <code>external.module_posts.CleanedPost</code>
     * [~cleanPost(post)](#module_browser..cleanPost) ⇒ <code>external.posts.CleanedPost</code>
     * [~requestComplete([err], body)](#module_browser..requestComplete)
     * [~postedCallback([err], post)](#module_browser..postedCallback)
+    * [~completedCallback([err])](#module_browser..completedCallback)
 
 <a name="module_browser.createPost"></a>
 ### browser.createPost(topicId, [replyTo], content, callback)
@@ -29,6 +32,19 @@ Post content to an existing content
 | topicId | <code>number</code> | Topic to post to |
 | [replyTo] | <code>number</code> | Post Number in topic that this post is in reply to |
 | content | <code>string</code> | Post Contents to post |
+| callback | <code>postedCallback</code> | Completion callback |
+
+<a name="module_browser.createPrivateMessage"></a>
+### browser.createPrivateMessage(to, title, content, callback)
+Create a new private message.
+
+**Kind**: static method of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| to | <code>string</code> &#124; <code>Array.&lt;string&gt;</code> | Username or names to create PM to |
+| title | <code>string</code> | Title of the Private Message |
+| content | <code>string</code> | Private Message contents |
 | callback | <code>postedCallback</code> | Completion callback |
 
 <a name="module_browser.editPost"></a>
@@ -80,6 +96,16 @@ Process browser tasks with rate limiting
 | [task.callback] | <code>browser~requestComplete</code> |  | Callback toprovide request results to |
 | [task.delay] | <code>Number</code> | <code>0</code> | Seconds to delay callback after request for additional rate limiting |
 | callback | <code>function</code> |  | Queue task complete callback |
+
+<a name="module_browser..getCSRF"></a>
+### browser~getCSRF(callback)
+get a CSRF token from discourse
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| callback | <code>completedCallback</code> | Completion callback |
 
 <a name="module_browser..setPostUrl"></a>
 ### browser~setPostUrl(post) ⇒ <code>external.module_posts.CleanedPost</code>
@@ -175,4 +201,14 @@ Post Request Callback
 | --- | --- | --- | --- |
 | [err] | <code>Exception</code> | <code></code> | Error encountered processing request |
 | post | <code>external.posts.CleanedPost</code> |  | Cleaned post |
+
+<a name="module_browser..completedCallback"></a>
+### browser~completedCallback([err])
+Completion Callback
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [err] | <code>Exception</code> | <code></code> | Error encountered processing request |
 
