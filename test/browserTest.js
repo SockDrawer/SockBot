@@ -14,7 +14,7 @@ const browser = require('../browser'),
 
 describe('browser', () => {
     describe('exports', () => {
-        const fns = ['createPost', 'editPost'],
+        const fns = ['createPost', 'editPost', 'createPrivateMessage'],
             objs = ['internals', 'trustLevels', 'stubs'],
             vals = [];
         describe('should export expected functions:', () => {
@@ -852,6 +852,118 @@ describe('browser', () => {
             queue.push.yieldsTo('callback', null, {});
             const spy = sinon.spy();
             browser.createPost(100, '', spy);
+            spy.called.should.be.true;
+            spy.lastCall.args.should.have.length(2);
+            expect(spy.lastCall.args[0]).to.equal(null);
+            // cleanPost should have been called, adding these keys
+            spy.lastCall.args[1].should.have.keys('cleaned', 'url', 'reply_to');
+        });
+        after(() => queue.push.restore());
+    });
+    describe('createPrivateMessage()', () => {
+        const queue = browser.internals.queue;
+        before(() => sinon.stub(queue, 'push'));
+        it('should accept four parameters', () => {
+            queue.push.reset();
+            browser.createPrivateMessage('', '', '', () => 0);
+            queue.push.called.should.be.true;
+        });
+        it('should reject four parameters with no callback', () => {
+            queue.push.reset();
+            expect(() => browser.createPrivateMessage('', '', '', null)).to.throw('callback must be supplied');
+            queue.push.called.should.be.false;
+        });
+        it('should set http method to POST', () => {
+            queue.push.reset();
+            browser.createPrivateMessage('', '', '', () => 0);
+            const args = queue.push.lastCall.args;
+            args.should.have.length(1);
+            args[0].should.have.any.key('method');
+            args[0].method.should.equal('POST');
+        });
+        it('should set url', () => {
+            queue.push.reset();
+            browser.createPrivateMessage('', '', '', () => 0);
+            const args = queue.push.lastCall.args;
+            args.should.have.length(1);
+            args[0].should.have.any.key('url');
+            args[0].url.should.equal('/posts');
+        });
+        it('should set form', () => {
+            queue.push.reset();
+            browser.createPrivateMessage('', '', '', () => 0);
+            const args = queue.push.lastCall.args;
+            args.should.have.length(1);
+            args[0].should.have.any.key('form');
+            args[0].form.should.be.a('object');
+        });
+        it('should set callback', () => {
+            queue.push.reset();
+            browser.createPrivateMessage('', '', '', () => 0);
+            const args = queue.push.lastCall.args;
+            args.should.have.length(1);
+            args[0].should.have.any.key('callback');
+            args[0].callback.should.be.a('function');
+        });
+        describe('form', () => {
+            it('should set `raw`', () => {
+                queue.push.reset();
+                browser.internals.signature = '\nthis is my signature';
+                browser.createPrivateMessage('', '', 'i have content', () => 0);
+                const form = queue.push.lastCall.args[0].form;
+                form.should.have.any.key('raw');
+                form.raw.should.equal('i have content\nthis is my signature');
+            });
+            it('should set `title`', () => {
+                queue.push.reset();
+                browser.createPrivateMessage('', 'this is title', '', () => 0);
+                const form = queue.push.lastCall.args[0].form;
+                form.should.have.any.key('title');
+                form.title.should.equal('this is title');
+            });
+            it('should set `is_warning`', () => {
+                queue.push.reset();
+                browser.createPrivateMessage('', 100, '', () => 0);
+                const form = queue.push.lastCall.args[0].form;
+                form.should.have.any.key('is_warning');
+                form.is_warning.should.equal(false);
+            });
+            it('should set `target_usernames` with single target', () => {
+                queue.push.reset();
+                browser.createPrivateMessage('accalia', 42, '', () => 0);
+                const form = queue.push.lastCall.args[0].form;
+                form.should.have.any.key('target_usernames');
+                form.target_usernames.should.equal('accalia');
+            });
+            it('should set `target_usernames` with multiple targets', () => {
+                queue.push.reset();
+                browser.createPrivateMessage(['accalia', 'sockbot'], 100, '', () => 0);
+                const form = queue.push.lastCall.args[0].form;
+                form.should.have.any.key('target_usernames');
+                form.target_usernames.should.deep.equal(['accalia', 'sockbot']);
+            });
+            it('should set `archetype`', () => {
+                queue.push.reset();
+                browser.createPrivateMessage('', 100, '', () => 0);
+                const form = queue.push.lastCall.args[0].form;
+                form.should.have.any.key('archetype');
+                form.archetype.should.equal('private_message');
+            });
+        });
+        it('should pass err to external callback on completion', () => {
+            queue.push.reset();
+            queue.push.yieldsTo('callback', new Error('test error!'));
+            const spy = sinon.spy();
+            browser.createPrivateMessage('', 100, '', spy);
+            spy.called.should.be.true;
+            spy.lastCall.args.should.have.length(1);
+            spy.lastCall.args[0].should.be.an.instanceOf(Error);
+        });
+        it('should pass post to external callback on completion', () => {
+            queue.push.reset();
+            queue.push.yieldsTo('callback', null, {});
+            const spy = sinon.spy();
+            browser.createPrivateMessage('', 100, '', spy);
             spy.called.should.be.true;
             spy.lastCall.args.should.have.length(2);
             expect(spy.lastCall.args[0]).to.equal(null);
