@@ -7,8 +7,10 @@ Webbrowser abstraction for communicating with discourse
 * [browser](#module_browser)
   * [~trustLevels](#module_browser..trustLevels)
   * [~queueWorker(task, callback)](#module_browser..queueWorker)
+  * [~setPostUrl(post)](#module_browser..setPostUrl) ⇒ <code>external.module_posts.CleanedPost</code>
   * [~setTrustLevel(post)](#module_browser..setTrustLevel) ⇒ <code>external.module_posts.Post</code>
   * [~cleanPostRaw(post)](#module_browser..cleanPostRaw) ⇒ <code>external.module_posts.CleanedPost</code>
+  * [~cleanPost(post)](#module_browser..cleanPost) ⇒ <code>external.posts.CleanedPost</code>
   * [~requestComplete([err], body)](#module_browser..requestComplete)
 
 <a name="module_browser..trustLevels"></a>
@@ -48,6 +50,21 @@ Process browser tasks with rate limiting
 | [task.delay] | <code>Number</code> | <code>0</code> | Seconds to delay callback after request for additional rate limiting |
 | callback | <code>function</code> |  | Queue task complete callback |
 
+<a name="module_browser..setPostUrl"></a>
+### browser~setPostUrl(post) ⇒ <code>external.module_posts.CleanedPost</code>
+construct direct post link and direct in reply to link
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
+**Returns**: <code>external.module_posts.CleanedPost</code> - input post with urls set  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| post | <code>external.module_posts.Post</code> | Post to generate links for |
+| post.topic_id | <code>number</code> | Topic Id that the input post belongs to |
+| post.topic_slug | <code>string</code> | URL slug of the topic |
+| post.post_number | <code>number</code> | Ordinal of the input post in topic. |
+| post.reply_to_post_number | <code>number</code> | The post_number the input post is a reply to |
+
 <a name="module_browser..setTrustLevel"></a>
 ### browser~setTrustLevel(post) ⇒ <code>external.module_posts.Post</code>
 Normalize discourse trust level to SockBot Virtual Trust Level
@@ -77,6 +94,17 @@ Provided and commented by flabdablet
 | --- | --- | --- |
 | post | <code>external.module_posts.Post</code> | Post to clean |
 | post.raw | <code>string</code> | Raw text of the post to clean |
+
+<a name="module_browser..cleanPost"></a>
+### browser~cleanPost(post) ⇒ <code>external.posts.CleanedPost</code>
+Clean discourse post for processing
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
+**Returns**: <code>external.posts.CleanedPost</code> - Cleaned Post  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| post | <code>external.posts.Post</code> | Input Post |
 
 <a name="module_browser..requestComplete"></a>
 ### browser~requestComplete([err], body)

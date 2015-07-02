@@ -45,9 +45,9 @@ Contributors
 
 | Contributor | Commits |
 |---|---:|
-| Accalia de Elementia | 485 |
+| Accalia de Elementia | 495 |
 | RaceProUK | 185 |
-| Travis-CI | 36 |
+| Travis-CI | 37 |
 | Yamikuronue | 35 |
 | Andrew Cook | 15 |
 | PleegWat | 15 |

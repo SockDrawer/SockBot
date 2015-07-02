@@ -123,4 +123,6 @@ Created by SockBot from [#Post](#Post). **Not Produced by Discourse**
 | Param | Type | Description |
 | --- | --- | --- |
 | cleaned | <code>string</code> | The value of `raw` after being processed to remove code and quotes |
+| url | <code>string</code> | Direct URL link to this post |
+| reply_to | <code>string</code> | Direct URL link to the post this post is in reply to |
 
