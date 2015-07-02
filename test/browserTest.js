@@ -8,7 +8,8 @@ chai.should();
 const expect = chai.expect;
 
 // The thing we're testing
-const browser = require('../browser');
+const browser = require('../browser'),
+    utils = require('../utils');
 
 describe('browser', () => {
     describe('exports', () => {
@@ -35,7 +36,7 @@ describe('browser', () => {
         });
     });
     describe('internals', () => {
-        const fns = ['queueWorker', 'request', 'cleanPostRaw', 'setTrustLevel', 'setPostUrl'],
+        const fns = ['queueWorker', 'request', 'cleanPostRaw', 'setTrustLevel', 'setPostUrl', 'cleanPost'],
             objs = ['defaults', 'queue'],
             vals = [];
         describe('should include expected functions:', () => {
@@ -594,5 +595,73 @@ describe('browser', () => {
             });
         });
         /*eslint-enable camelcase */
+    });
+    describe('internals.setPostUrl()', () => {
+        const setPostUrl = browser.internals.setPostUrl;
+        describe('it adds expected keys to post', () => {
+            ['url', 'reply_to'].forEach((key) => {
+                it(': adds ' + key, () => {
+                    const post = {
+                        'topic_slug': 'topic',
+                        'topic_id': 1000,
+                        'post_number': 42
+                    };
+                    setPostUrl(post).should.have.any.key(key);
+                });
+            });
+        });
+        it('should return updated post', () => {
+            const post = {
+                    'topic_slug': 'topic',
+                    'topic_id': 1000,
+                    'post_number': 42
+                },
+                expected = utils.mergeObjects({
+                    url: 'https://what.thedailywtf.com/t/topic/1000/42',
+                    'reply_to': 'https://what.thedailywtf.com/t/topic/1000/'
+                }, post);
+            setPostUrl(post).should.deep.equal(expected);
+        });
+        it('should update post in place', () => {
+            const post = {
+                    'topic_slug': 'topic',
+                    'topic_id': 1000,
+                    'post_number': 42
+                },
+                expected = utils.mergeObjects({
+                    url: 'https://what.thedailywtf.com/t/topic/1000/42',
+                    'reply_to': 'https://what.thedailywtf.com/t/topic/1000/'
+                }, post);
+            setPostUrl(post);
+            post.should.deep.equal(expected);
+        });
+        it('should set URL for post', () => {
+            const post = {
+                    'topic_slug': 'cipot',
+                    'topic_id': 1234,
+                    'post_number': 4243
+                },
+                expected = 'https://what.thedailywtf.com/t/cipot/1234/4243';
+            setPostUrl(post).url.should.deep.equal(expected);
+        });
+        it('should set reply for non reply post', () => {
+            const post = {
+                    'topic_slug': 'cipot',
+                    'topic_id': 1234,
+                    'post_number': 4243
+                },
+                expected = 'https://what.thedailywtf.com/t/cipot/1234/';
+            setPostUrl(post).reply_to.should.deep.equal(expected);
+        });
+        it('should set reply for reply post', () => {
+            const post = {
+                    'topic_slug': 'cipot',
+                    'topic_id': 1234,
+                    'post_number': 4243,
+                    'reply_to_post_number': 17
+                },
+                expected = 'https://what.thedailywtf.com/t/cipot/1234/17';
+            setPostUrl(post).reply_to.should.deep.equal(expected);
+        });
     });
 });
