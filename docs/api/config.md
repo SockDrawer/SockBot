@@ -89,7 +89,7 @@ Owner promotes the user to virtual trust level 9 (above forum admins)
 Base URL for the discourse instance to log into
 
 **Kind**: static property of <code>[core](#defaultConfig.core)</code>  
-**Default**: <code>&quot;https://what.thedailywtf.com/&quot;</code>  
+**Default**: <code>&quot;https://what.thedailywtf.com&quot;</code>  
 <a name="defaultConfig.core.ignoreUsers"></a>
 #### core.ignoreUsers : <code>Array.&lt;string&gt;</code>
 Users to ignore.
