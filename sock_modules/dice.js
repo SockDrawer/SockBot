@@ -276,7 +276,7 @@ exports.rollXDice = function (match, callback) {
         return callback(result + 'Error Too many dice requested');
     }
     if (sides === 1) {
-        return callback(result + 'Sum : ' + num);
+        return callback(result + 'Sum: ' + num);
     }
     if (match.preroll) {
         result += 'Prerolling ' + exports.prerollDice(num, sides) + ' times: ';

@@ -342,6 +342,18 @@ describe("Fudge Dice", function() {
 			done();
 		});
 	});
+	
+	it("should accept bonuses", function(done) {		
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(6,[[6]]);
+		var match = {
+			num: 1,
+			bonus: 2
+		}
+		diceModule.rollFudgeDice(match, function(response) {
+			assert.include(response,'Total: 3');
+			done();
+		});
+	});
 });
 
 describe("XDice", function() {
@@ -472,6 +484,31 @@ describe("XDice", function() {
 		}
 		diceModule.rollXDice(match, function(response) {
 			assert.include(response,"Error Too many dice requested");
+			done();
+		});
+	});
+	
+	it("should default to one die", function(done) {
+		var match = {
+			sides: 20
+		}
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(1,[[1]]);
+		
+		diceModule.rollXDice(match, function(response) {
+			assert(mockRoll.getCall(0).calledWith(1,20, undefined),"Correct arguments should be passed; instead received " + mockRoll.getCall(0).args);
+			assert.include(response,'Rolling 1d20: 1');
+			done();
+		});
+	});
+	
+	it("should sum d1s", function(done) {
+		var match = {
+			num: 4,
+			sides: 1
+		}
+		
+		diceModule.rollXDice(match, function(response) {
+			assert.include(response,'Sum: 4');
 			done();
 		});
 	});
