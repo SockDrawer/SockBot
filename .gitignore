@@ -36,3 +36,7 @@ bin
 local
 include
 lib
+
+#test configuration files
+test.json
+test.yml
