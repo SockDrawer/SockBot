@@ -29,7 +29,8 @@ const signature = '\n\n<!-- Posted by a clever robot -->',
         cleanPostRaw: cleanPostRaw,
         cleanPost: cleanPost,
         signature: signature,
-        getCSRF: getCSRF
+        getCSRF: getCSRF,
+        doLogin: doLogin
     },
     /**
      * SockBot Virtual Trust Levels
@@ -219,6 +220,32 @@ function getCSRF(callback) {
 }
 
 /**
+ * Perform a login to discourse
+ *
+ * @param {loginCallback} callback Completion callback
+ */
+function doLogin(callback) {
+    if (typeof callback !== 'function') {
+        throw new Error('callback must be supplied');
+    }
+    internals.queue.push({
+        method: 'POST',
+        url: '/session',
+        form: {
+            login: config.core.username,
+            password: config.core.password
+        },
+        callback: (err, data) => {
+            if (err || !data) {
+                callback(err || new Error('No data received'));
+            } else {
+                callback(null, data.user || {});
+            }
+        }
+    });
+}
+
+/**
  * construct direct post link and direct in reply to link
  *
  * @see {@link ../external/posts/#external.module_posts.Post|Post}
@@ -383,6 +410,13 @@ function postedCallback(err, post) {} //eslint-disable-line handle-callback-err,
  * @param {Exception} [err=null] Error encountered processing request
  */
 function completedCallback(err) {} //eslint-disable-line handle-callback-err, no-unused-vars
+/**
+ * Login Completion Callback
+ *
+ * @param {Exception} [err=null] Error encountered processing request
+ * @param {extermal.users.User} user Logged in User information
+ */
+function loginCallback(err, user) {} //eslint-disable-line handle-callback-err, no-unused-vars
 
 /* istanbul ignore else */
 if (typeof GLOBAL.describe === 'function') {
@@ -391,6 +425,7 @@ if (typeof GLOBAL.describe === 'function') {
     exports.stubs = {
         requestComplete: requestComplete,
         postedCallback: postedCallback,
-        completedCallback: completedCallback
+        completedCallback: completedCallback,
+        loginCallback: loginCallback
     };
 }
