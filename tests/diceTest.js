@@ -141,31 +141,184 @@ describe("WhiteWolf Dice", function() {
 	
 	
 	it("should roll one die vs TN 7 and fail", function(done) {		
-		var mockRoll = sandbox.stub(diceModule, "roll").yields(2,[2]);
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(2,[[2]]);
 		var match = {
 			reroll: false,
 			num: 1,
 			target: 7
 		}
 		diceModule.rollWolfDice(match, function(response) {
-			assert.include(response,'Rolling 1d10 Target: 7: ');
-			assert.include(response,'2');
 			assert.include(response,'Successes: 0');
 			done();
 		});
 	});
 	
 	it("should roll one die vs TN 7 and succeed", function(done) {		
-		var mockRoll = sandbox.stub(diceModule, "roll").yields(8,[8]);
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(8,[[8]]);
 		var match = {
 			reroll: false,
 			num: 1,
 			target: 7
 		}
 		diceModule.rollWolfDice(match, function(response) {
-			assert.include(response,'Rolling 1d10 Target: 7: ');
-			assert.include(response,'8');
 			assert.include(response,'Successes: 1');
+			done();
+		});
+	});
+	
+	it("should default to TN 8", function(done) {		
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(11,[[9,2]]);
+		var match = {
+			reroll: false,
+			num: 2
+		}
+		diceModule.rollWolfDice(match, function(response) {
+			assert.include(response,'Successes: 1');
+			done();
+		});
+	});
+	
+	it("should default to ten dice", function(done) {		
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(10,[[1,1,1,1,1,1,1,1,1,1]]);
+		var match = {
+			reroll: false
+		}
+		diceModule.rollWolfDice(match, function(response) {
+			assert(mockRoll.getCall(0).calledWith(10,10, undefined),"Correct arguments should be passed; instead received " + mockRoll.getCall(0).args);
+			assert.include(response,'Successes: 0');
+			done();
+		});
+	});
+	
+	it("should not reroll non-tens", function(done) {		
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(11,[[9,2]]);
+		var match = {
+			reroll: true,
+			num: 2
+		}
+		diceModule.rollWolfDice(match, function(response) {
+			assert.include(response,'Successes: 1');
+			assert.notInclude(response,"Rerolling");
+			done();
+		});
+	});
+	
+	it("should reroll tens", function(done) {		
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(11,[[10,2],[2]]);
+		var match = {
+			reroll: true,
+			num: 2
+		}
+		diceModule.rollWolfDice(match, function(response) {
+			assert.include(response,'Successes: 1');
+			assert.include(response,"Rerolling 1d10");
+			done();
+		});
+	});
+	
+	it("should reroll multiple tens", function(done) {		
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(11,[[10,10],[2,2]]);
+		var match = {
+			reroll: true,
+			num: 2
+		}
+		diceModule.rollWolfDice(match, function(response) {
+			assert.include(response,'Successes: 2');
+			assert.include(response,"Rerolling 2d10");
+			done();
+		});
+	});
+	
+	it("should preroll", function(done) {		
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(11,[[10,10],[2,2]]);
+		var mockPreroll = sandbox.stub(diceModule, "prerollDice").returns(1);
+		var match = {
+			reroll: true,
+			preroll: true,
+			num: 2
+		}
+		diceModule.rollWolfDice(match, function(response) {
+			assert.include(response,'Successes: 2');
+			assert.include(response,"Prerolling 1 times");
+			assert(mockPreroll.called);
+			done();
+		});
+	});
+	
+	it("should accept bonuses", function(done) {		
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(2,[[2]]);
+		var match = {
+			reroll: false,
+			num: 1,
+			target: 7,
+			bonus: 2
+		}
+		diceModule.rollWolfDice(match, function(response) {
+			assert.include(response,'Successes: 2');
+			done();
+		});
+	});
+});
+
+describe("Fudge Dice", function() {
+	var sandbox;
+	
+	beforeEach(function(){
+	  sandbox = sinon.sandbox.create();
+	});
+	
+	afterEach(function() {
+		sandbox.restore();
+	})
+	
+	
+	it("should convert 5 and 6 to +", function(done) {		
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(11,[[5,6]]);
+		var match = {
+			num: 2
+		}
+		diceModule.rollFudgeDice(match, function(response) {
+			assert.include(response,'Total: 2');
+			assert.include(response,'++');
+			assert.notInclude(response, '5');
+			assert.notInclude(response, '6');
+			done();
+		});
+	});
+	
+	it("should convert 1 and 2 to -", function(done) {		
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(3,[[1,2]]);
+		var match = {
+			num: 2
+		}
+		diceModule.rollFudgeDice(match, function(response) {
+			assert.include(response,'Total: -2');
+			assert.include(response,'--');
+			assert.notInclude(response, '1');
+			done();
+		});
+	});
+	
+	it("should convert 3 and 4 to 0", function(done) {		
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(7,[[3,4]]);
+		var match = {
+			num: 2
+		}
+		diceModule.rollFudgeDice(match, function(response) {
+			assert.include(response,'Total: 0');
+			assert.include(response,'00');
+			assert.notInclude(response, '3');
+			assert.notInclude(response, '4');
+			done();
+		});
+	});
+	
+	it("should default to four dice", function(done) {		
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(4,[[1,1,1,1]]);
+		var match = {
+		}
+		diceModule.rollFudgeDice(match, function(response) {
+			assert(mockRoll.getCall(0).calledWith(4,6, undefined),"Correct arguments should be passed; instead received " + mockRoll.getCall(0).args);
 			done();
 		});
 	});

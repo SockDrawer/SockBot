@@ -52,7 +52,7 @@ exports.version = '1.5.0';
  * Roll the actual dice. Uses random.org as a source of random numbers.
  * Calls back with the following parameters:
  *  - sum: the total sum of dice rolled
- *  - results: the array of dice rolled
+ *  - results: the array of arrays of dice rolled (int[][])
  */
 exports.roll = function(num, sides, rerollGreater, callback) {
     var factor = sides < 0 ? -1 : 1,
@@ -197,6 +197,57 @@ exports.rollWolfDice = function(match, callback) {
             successes += match.bonus;
         }
         result += ' Successes: ' + successes;
+        callback(result);
+    });
+}
+
+/**
+ * Roll Fudge dice
+ * @param  {object} match Information about how to match
+ * @param  {number} match.num How many dice to roll. Defaults to four
+ * @param  {Function} callback The callback to call when complete
+ */
+exports.rollFudgeDice = function(match, callback) {
+    if (!match.num) {
+        match.num = 4;
+    }
+    var result = 'Rolling ' + match.num + ' dice of Fate: ';
+    if (isNaN(match.num) || match.num < 1) {
+        callback(result + getError());
+        return;
+    }
+    if (match.num > (exports.configuration.maxDice || 20)) {
+        callback(result + 'Error Too many dice requested');
+        return;
+    }
+    exports.roll(match.num, 6, undefined, function (sum, dice) {
+        var total = sum;
+        total = dice[0].reduce(function (i, v) {
+            if (v < 3) {
+                return i - 1;
+            }
+            if (v > 4) {
+                return i + 1;
+            }
+            return i;
+
+        }, 0);
+        dice = dice[0].map(function (v) {
+            if (v < 3) {
+                return '-';
+            }
+            if (v > 4) {
+                return '+';
+            }
+            return '0';
+
+        });
+        result += dice.join('');
+        if (match.bonus) {
+            total += match.bonus;
+            result += ' Bonus: ' + match.bonus;
+        }
+        result += 'Total: ' + total;
         callback(result);
     });
 }
