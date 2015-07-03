@@ -371,6 +371,7 @@ exports.parser = function parser(input, each, complete) {
  */
 exports.handleInput = function(payload, callback) {
     var results = [];
+	var err;
 	var input  = payload.dice;
     exports.parser(input,
         function (match, next) {
@@ -385,7 +386,7 @@ exports.handleInput = function(payload, callback) {
             }
         },
         function () {
-            callback(results);
+            callback(err, results);
         }
 	);
 }
