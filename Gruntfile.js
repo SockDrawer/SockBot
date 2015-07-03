@@ -38,15 +38,19 @@ module.exports = function(grunt) {
 		},
 		src: "**"
 	},
-	simplemocha: {
+	node_mocha: {
 		options: {
-			globals: ['expect'],
-			timeout: 3000,
-			ignoreLeaks: false,
-			ui: 'bdd',
-			reporter: 'spec'
+			mochaOptions: {
+				globals: ['expect'],
+				timeout: 3000,
+				ignoreLeaks: false,
+				ui: 'bdd',
+				reporter: 'spec'
+			},
+			reportFormats : ['html'],
+			runCoverage: true
 		},
-		all: { src: ['tests/*.js'] }
+		src: ['tests/*.js']
 	}
   });
 
@@ -55,12 +59,12 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-git');
   grunt.loadNpmTasks('grunt-jsdoc');
   grunt.loadNpmTasks('grunt-gh-pages');
-  grunt.loadNpmTasks('grunt-simple-mocha')
+  grunt.loadNpmTasks('grunt-node-mocha');
 
   // Default task(s).
   grunt.registerTask('generate-docs', ['mkdocs', 'jsdoc', 'gh-pages']);
   grunt.registerTask('local', ['mkdocs', 'jsdoc']);
   grunt.registerTask('default', ['mkdocs', 'jsdoc', 'gh-pages']);
-  grunt.registerTask('test', ['simplemocha']);
+  grunt.registerTask('test', ['node_mocha']);
 
 };
