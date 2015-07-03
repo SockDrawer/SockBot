@@ -253,6 +253,182 @@ exports.rollFudgeDice = function(match, callback) {
 }
 
 /**
+ * Roll arbitrary d20-style dice
+ * @param  {object} match Information about how to match
+ * @param  {number} match.sides What size dice to roll
+ * @param  {number} match.num How many dice to roll
+ * @param  {Function} callback The callback to call when complete
+ */
+exports.rollXDice = function (match, callback) {
+    var num = match.num,
+        sides = match.sides,
+        crit,
+        result;
+
+    if (num === undefined) {
+        num = 1;
+    }
+    result = 'Rolling ' + num + 'd' + sides + ': ';
+    if (isNaN(num) || isNaN(sides) || !num) {
+        return callback(result + getError());
+    }
+    if (num > (exports.configuration.maxDice || 20)) {
+        return callback(result + 'Error Too many dice requested');
+    }
+    if (sides === 1) {
+        return callback(result + 'Sum : ' + num);
+    }
+    if (match.preroll) {
+        result += 'Prerolling ' + exports.prerollDice(num, sides) + ' times: ';
+    }
+    if (match.reroll) {
+        crit = sides;
+    }
+    exports.roll(num, sides, crit, function (sum, dice) {
+        var d = dice.shift();
+
+        result += d.join(', ');
+        if (dice.length > 0) {
+            dice.forEach(function (d2) {
+                result += '\nRerolling ' + d2.length;
+                result += ' Crits:' + d2.join(', ');
+            });
+            result += '\n';
+        }
+        if (isNaN(sum)) {
+            result += ' ' + getError();
+        } else if (Math.abs(num) > 1) {
+            if (match.bonus) {
+                sum += match.bonus;
+                result += ' Bonus: ' + match.bonus;
+            }
+            result += ' Sum: ' + sum * (num < 0 ? -1 : 1);
+        }
+        callback(result);
+    });
+}
+
+exports.parser = function parser(input, each, complete) {
+	var pNum = '(?<num>-?\\d+)',
+		pSides = '(?<sides>-?\\d+)',
+		pMethod = '(?<method>W|Wolf|F|Fate|Fudge)',
+		pTarget = '(?:t(?<target>\\d+))',
+		pBonus = '(?:b(?<bonus>-?\\d+))',
+		pOptions = '(?<options>[pfrs]+)',
+		pMatcher = '\\b' + pNum + '?d(' + pSides + '|' + pMethod +
+		')(?<optional>' + pTarget + '|' + pBonus + '|' + pOptions +
+		')*\\b',
+		rTarget = xRegExp(pTarget, 'i'),
+		rBonus = xRegExp(pBonus, 'i'),
+		rOptions = xRegExp(pOptions, 'i'),
+		rMatcher = xRegExp(pMatcher, 'i');
+	
+	
+	var match = 1,
+		pos = 0;
+	async.until(
+		function () {
+			return !match;
+		},
+		function (next) {
+			match = rMatcher.xexec(input, pos);
+			if (match) {
+				var inner = match[0] || '',
+					target = rTarget.xexec(inner),
+					bonus = rBonus.xexec(inner),
+					options = rOptions.xexec(inner) || {},
+					matched = {
+						num: match.num ?
+							parseInt(match.num, 10) : undefined,
+						sides: match.sides ?
+							parseInt(match.sides, 10) : undefined,
+						method: match.method ?
+							match.method.toLowerCase() : undefined,
+						target: (target && target.target) ?
+							parseInt(target.target, 10) : undefined,
+						options: (options.options || '').toLowerCase(),
+						bonus: (bonus && bonus.bonus) ?
+							parseInt(bonus.bonus, 10) : undefined
+					};
+				matched.reroll = matched.options.indexOf('r') !== -1;
+				matched.preroll = matched.options.indexOf('p') !== -1;
+				matched.sort = matched.options.indexOf('s') !== -1;
+				matched.fails = matched.options.indexOf('f') !== -1;
+				pos = match.index + match[0].length - 1;
+				each(matched, next);
+			} else {
+				next(true);
+			}
+		},
+		complete
+	);
+};
+
+/**
+ * Roll as many dice as can be parsed. 
+ * @param  {string} input The input string to parse
+ * @param  {Function} callback The callback to call when complete
+ */
+exports.handleInput = function(payload, callback) {
+    var results = [];
+	var input  = payload.dice;
+    exports.parser(input,
+        function (match, next) {
+            if (results.length >= (exports.configuration.maxRolls || 6)) {
+                results.push('Reached maximum dice roll. stopping.');
+                next(true);
+            } else {
+                exports.rollDice(match, function (line) {
+                    results.push(line);
+                    next();
+                });
+            }
+        },
+        function () {
+            callback(results);
+        }
+	);
+}
+
+/**
+ * Determine what dice to roll and outsource the logic
+ * @param  {object} match Information about how to roll
+ * @param  {string} match.method What method to use to roll dice
+ * @param  {Function} callback The callback to call when complete.
+ */
+exports.rollDice = function(match, callback) {
+    if (!match.method) {
+        exports.rollXDice(match, callback);
+    } else if (match.method[0] === 'f') {
+        exports.rollFudgeDice(match, callback);
+    } else if (match.method[0] === 'w') {
+        exports.rollWolfDice(match, callback);
+    } else {
+        callback('Not implemented');
+    }
+}
+
+/**
+ *  Each command has the following properties:
+ * - handler:        The handler function.
+ * - defaults:       Default values of parameters
+ * - params:         Named parameters for this function
+ * - description:    A description of this function for the help
+ *
+ * @type {Object}
+ */
+exports.commands = {
+    'roll': {
+        handler: exports.handleInput,
+        defaults: {
+		},
+        params: ["dice", "message"],
+        description: 'Roll dice.'
+    }
+};
+
+
+/**
  * Bootstrap the module
  * @param  {string} browser - discourse.
  * @param  {object} config - The configuration to use

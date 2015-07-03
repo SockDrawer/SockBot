@@ -190,6 +190,16 @@ describe("WhiteWolf Dice", function() {
 		});
 	});
 	
+	it("should cap at 20 dice", function(done) {		
+		var match = {
+			num: 200
+		}
+		diceModule.rollWolfDice(match, function(response) {
+			assert.include(response,"Error Too many dice requested");
+			done();
+		});
+	});
+	
 	it("should not reroll non-tens", function(done) {		
 		var mockRoll = sandbox.stub(diceModule, "roll").yields(11,[[9,2]]);
 		var match = {
@@ -322,4 +332,235 @@ describe("Fudge Dice", function() {
 			done();
 		});
 	});
+	
+	it("should cap at 20 dice", function(done) {		
+		var match = {
+			num: 200
+		}
+		diceModule.rollFudgeDice(match, function(response) {
+			assert.include(response,"Error Too many dice requested");
+			done();
+		});
+	});
+});
+
+describe("XDice", function() {
+	var sandbox;
+	
+	beforeEach(function(){
+	  sandbox = sinon.sandbox.create();
+	});
+	
+	afterEach(function() {
+		sandbox.restore();
+	})
+	
+	it("should roll 1d20", function(done) {
+		var match = {
+			num: 1,
+			sides: 20
+		}
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(1,[[1]]);
+		
+		diceModule.rollXDice(match, function(response) {
+			assert(mockRoll.getCall(0).calledWith(1,20, undefined),"Correct arguments should be passed; instead received " + mockRoll.getCall(0).args);
+			assert.include(response,'Rolling 1d20: 1');
+			done();
+		});
+	});
+	
+	it("should roll 2d20", function(done) {
+		var match = {
+			num: 2,
+			sides: 20
+		}
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(2,[[1,1]]);
+		
+		diceModule.rollXDice(match, function(response) {
+			assert(mockRoll.getCall(0).calledWith(2,20, undefined),"Correct arguments should be passed; instead received " + mockRoll.getCall(0).args);
+			assert.include(response,'Rolling 2d20: 1, 1');
+			assert.include(response,'Sum: 2');
+			done();
+		});
+	});
+	
+	it("should roll 2d4", function(done) {
+		var match = {
+			num: 2,
+			sides: 4
+		}
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(2,[[1,1]]);
+		
+		diceModule.rollXDice(match, function(response) {
+			assert(mockRoll.getCall(0).calledWith(2,4, undefined),"Correct arguments should be passed; instead received " + mockRoll.getCall(0).args);
+			assert.include(response,'Rolling 2d4: 1, 1');
+			assert.include(response,'Sum: 2');
+			done();
+		});
+	});
+	
+	it("should not reroll non-crits", function(done) {		
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(11,[[9,2]]);
+		var match = {
+			reroll: true,
+			num: 2,
+			sides:10
+		}
+		diceModule.rollXDice(match, function(response) {
+			assert(mockRoll.getCall(0).calledWith(2,10,10),"Correct arguments should be passed; instead received " + mockRoll.getCall(0).args);
+			assert.include(response,'Rolling 2d10: 9, 2');
+			assert.notInclude(response,"Rerolling");
+			assert.include(response,'Sum: 11');
+			done();
+		});
+	});
+	
+	it("should reroll crits", function(done) {		
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(14,[[10,2],[2]]);
+		var match = {
+			reroll: true,
+			num: 2,
+			sides: 10
+		}
+		diceModule.rollXDice(match, function(response) {
+			assert(mockRoll.getCall(0).calledWith(2,10,10),"Correct arguments should be passed; instead received " + mockRoll.getCall(0).args);
+			assert.include(response,'Rolling 2d10: 10, 2');
+			assert.include(response,"Rerolling 1 Crits:2");
+			assert.include(response,'Sum: 14');
+			done();
+		});
+	});
+	
+	it("should reroll multiple crits", function(done) {
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(24,[[10,10],[2,2]]);
+		var match = {
+			reroll: true,
+			num: 2,
+			sides: 10
+		}
+		diceModule.rollXDice(match, function(response) {
+			assert(mockRoll.getCall(0).calledWith(2,10,10),"Correct arguments should be passed; instead received " + mockRoll.getCall(0).args);
+			assert.include(response,'Rolling 2d10: 10, 10');
+			assert.include(response,"Rerolling 2 Crits:2, 2");
+			assert.include(response,'Sum: 24');
+			done();
+		});
+	});
+	
+	it("should preroll", function(done) {		
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(11,[[10,10],[2,2]]);
+		var mockPreroll = sandbox.stub(diceModule, "prerollDice").returns(1);
+		var match = {
+			reroll: true,
+			preroll: true,
+			num: 2,
+			sides: 10
+		}
+		diceModule.rollXDice(match, function(response) {
+			assert.include(response,"Prerolling 1 times");
+			assert(mockPreroll.called);
+			done();
+		});
+	});
+	
+	it("should cap at 20 dice", function(done) {		
+		var match = {
+			reroll: true,
+			preroll: true,
+			num: 200,
+			sides: 10
+		}
+		diceModule.rollXDice(match, function(response) {
+			assert.include(response,"Error Too many dice requested");
+			done();
+		});
+	});
+});
+
+describe("handleInput", function() {
+	var sandbox;
+	
+	beforeEach(function(){
+	  sandbox = sinon.sandbox.create();
+	});
+	
+	afterEach(function() {
+		sandbox.restore();
+	});
+	
+	it("should delegate to Parser", function(done) {		
+		var mockParser = sandbox.stub(diceModule, "parser").callsArg(2);
+		var payload = {
+			dice: '1d20'
+		}
+		
+		diceModule.handleInput(payload, function(response) {
+			assert(mockParser.called);
+			assert(mockParser.getCall(0).calledWith('1d20'),"Correct arguments should be passed; instead received " + mockParser.getCall(0).args);
+			done();
+		});
+	});
+
+});
+
+describe("rollDice", function() {
+	var sandbox;
+	
+	beforeEach(function(){
+	  sandbox = sinon.sandbox.create();
+	});
+	
+	afterEach(function() {
+		sandbox.restore();
+	});
+	
+	it("should delegate fate dice", function(done) {		
+		var mockImpl = sandbox.stub(diceModule, "rollFudgeDice").yields();
+		var match = {
+			method: 'fate'
+		}
+		
+		diceModule.rollDice(match, function(response) {
+			assert(mockImpl.called);
+			assert(mockImpl.getCall(0).calledWith(match),"Correct arguments should be passed; instead received " + mockImpl.getCall(0).args);
+			done();
+		});
+	});
+	
+	it("should delegate white wolf dice", function(done) {		
+		var mockImpl = sandbox.stub(diceModule, "rollWolfDice").yields();
+		var match = {
+			method: 'wolf'
+		}
+		
+		diceModule.rollDice(match, function(response) {
+			assert(mockImpl.called);
+			assert(mockImpl.getCall(0).calledWith(match),"Correct arguments should be passed; instead received " + mockImpl.getCall(0).args);
+			done();
+		});
+	});
+	
+	it("should delegate normal dice by default", function(done) {		
+		var mockImpl = sandbox.stub(diceModule, "rollXDice").yields();
+		var match = {
+		}
+		
+		diceModule.rollDice(match, function(response) {
+			assert(mockImpl.called);
+			assert(mockImpl.getCall(0).calledWith(match),"Correct arguments should be passed; instead received " + mockImpl.getCall(0).args);
+			done();
+		});
+	});
+	
+	it("should reject other methods", function(done) {		
+		var match = {
+			method: 'banana'
+		}
+		
+		diceModule.rollDice(match, function(response) {
+			assert.equal(response, "Not implemented");
+			done();
+		});
+	});
+
 });
