@@ -343,6 +343,18 @@ describe("Fudge Dice", function() {
 		});
 	});
 	
+	it("should reject negative dice", function(done) {		
+		var match = {
+			num: -1
+		}
+		var mockRoll = sandbox.stub(diceModule, "getError").returns("This is an error string");
+		
+		diceModule.rollFudgeDice(match, function(response) {
+			assert.include(response,"This is an error string");
+			done();
+		});
+	});
+	
 	it("should accept bonuses", function(done) {		
 		var mockRoll = sandbox.stub(diceModule, "roll").yields(6,[[6]]);
 		var match = {
@@ -423,6 +435,34 @@ describe("XDice", function() {
 			assert.include(response,'Rolling 2d10: 9, 2');
 			assert.notInclude(response,"Rerolling");
 			assert.include(response,'Sum: 11');
+			done();
+		});
+	});
+	
+	it("should accept bonuses for one die", function(done) {		
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(6,[[6]]);
+		var match = {
+			num: 1,
+			sides:10,
+			bonus: 2
+		}
+		diceModule.rollXDice(match, function(response) {
+			assert.include(response,'Bonus: 2');
+			assert.include(response,'Sum: 8');
+			done();
+		});
+	});
+	
+	it("should accept bonuses for two die", function(done) {		
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(6,[[3,3]]);
+		var match = {
+			num: 2,
+			sides:10,
+			bonus: 2
+		}
+		diceModule.rollXDice(match, function(response) {
+			assert.include(response,'Bonus: 2');
+			assert.include(response,'Sum: 8');
 			done();
 		});
 	});
@@ -509,6 +549,32 @@ describe("XDice", function() {
 		
 		diceModule.rollXDice(match, function(response) {
 			assert.include(response,'Sum: 4');
+			done();
+		});
+	});
+	
+	it("should reject invalid dice", function(done) {		
+		var match = {
+			num: 'banana'
+		}
+		var mockRoll = sandbox.stub(diceModule, "getError").returns("This is an error string");
+		
+		diceModule.rollXDice(match, function(response) {
+			assert.include(response,"This is an error string");
+			done();
+		});
+	});
+	
+	it("should pass along errors", function(done) {		
+		var mockRoll = sandbox.stub(diceModule, "roll").yields('error',[[3,3]]);
+		var mockRoll = sandbox.stub(diceModule, "getError").returns("This is an error string");
+		var match = {
+			num: 2,
+			sides:10,
+			bonus: 2
+		}
+		diceModule.rollXDice(match, function(response) {
+			assert.include(response,'This is an error string');
 			done();
 		});
 	});

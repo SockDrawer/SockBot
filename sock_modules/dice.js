@@ -213,7 +213,7 @@ exports.rollFudgeDice = function(match, callback) {
     }
     var result = 'Rolling ' + match.num + ' dice of Fate: ';
     if (isNaN(match.num) || match.num < 1) {
-        callback(result + getError());
+        callback(result + exports.getError());
         return;
     }
     if (match.num > (exports.configuration.maxDice || 20)) {
@@ -270,7 +270,7 @@ exports.rollXDice = function (match, callback) {
     }
     result = 'Rolling ' + num + 'd' + sides + ': ';
     if (isNaN(num) || isNaN(sides) || !num) {
-        return callback(result + getError());
+        return callback(result + exports.getError());
     }
     if (num > (exports.configuration.maxDice || 20)) {
         return callback(result + 'Error Too many dice requested');
@@ -296,7 +296,7 @@ exports.rollXDice = function (match, callback) {
             result += '\n';
         }
         if (isNaN(sum)) {
-            result += ' ' + getError();
+            result += ' ' + exports.getError();
         } else if (Math.abs(num) > 1) {
             if (match.bonus) {
                 sum += match.bonus;
@@ -438,3 +438,11 @@ exports.begin = function begin(browser, config) {
     conf = config;
     discourse = browser;
 };
+
+/**
+ * Get a random error message. Adds quirkiness to the bot.
+ * @return {string} The error string.
+ */
+exports.getError = function() {
+    return conf.errors[Math.floor(Math.random() * conf.errors.length)];
+}
