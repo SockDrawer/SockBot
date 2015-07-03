@@ -37,7 +37,9 @@ describe('browser', () => {
         });
     });
     describe('internals', () => {
-        const fns = ['queueWorker', 'request', 'cleanPostRaw', 'setTrustLevel', 'setPostUrl', 'cleanPost', 'getCSRF'],
+        const fns = ['queueWorker', 'request', 'cleanPostRaw', 'setTrustLevel', 'setPostUrl', 'cleanPost', 'getCSRF',
+                'doLogin'
+            ],
             objs = ['defaults', 'queue'],
             vals = ['signature'];
         describe('should include expected functions:', () => {
@@ -823,6 +825,91 @@ describe('browser', () => {
                 request = browser.internals.request;
             getCSRF(spy);
             browser.internals.request.should.not.equal(request);
+        });
+        after(() => queue.push.restore());
+    });
+    describe('internals.doLogin()', () => {
+        const queue = browser.internals.queue,
+            doLogin = browser.internals.doLogin;
+        before(() => sinon.stub(queue, 'push'));
+        it('should require a callback', () => expect(() => doLogin()).to.throw('callback must be supplied'));
+        it('should require a callback 2', () => {
+            expect(() => doLogin('not callback')).to.throw('callback must be supplied');
+        });
+        it('should set http method to POST', () => {
+            queue.push.reset();
+            doLogin(() => 0);
+            const args = queue.push.lastCall.args;
+            args.should.have.length(1);
+            args[0].should.have.any.key('method');
+            args[0].method.should.equal('POST');
+        });
+        it('should set url', () => {
+            queue.push.reset();
+            doLogin(() => 0);
+            const args = queue.push.lastCall.args;
+            args.should.have.length(1);
+            args[0].should.have.any.key('url');
+            args[0].url.should.equal('/session');
+        });
+        it('should set form', () => {
+            queue.push.reset();
+            doLogin(() => 0);
+            const args = queue.push.lastCall.args;
+            args.should.have.length(1);
+            args[0].should.have.any.key('form');
+        });
+        it('should set form.login', () => {
+            queue.push.reset();
+            config.core.username = 'a_user_name';
+            doLogin(() => 0);
+            const form = queue.push.lastCall.args[0].form;
+            form.should.have.any.key('login');
+            form.login.should.equal('a_user_name');
+        });
+        it('should set form.password', () => {
+            queue.push.reset();
+            config.core.password = 'a_user_password';
+            doLogin(() => 0);
+            const form = queue.push.lastCall.args[0].form;
+            form.should.have.any.key('password');
+            form.password.should.equal('a_user_password');
+        });
+        it('should set callback', () => {
+            queue.push.reset();
+            doLogin(() => 0);
+            const args = queue.push.lastCall.args;
+            args.should.have.length(1);
+            args[0].should.have.any.key('callback');
+            args[0].callback.should.be.a('function');
+        });
+        it('should pass err to external callback on completion', () => {
+            queue.push.reset();
+            queue.push.yieldsTo('callback', new Error('test error!'));
+            const spy = sinon.spy();
+            doLogin(spy);
+            spy.called.should.be.true;
+            spy.lastCall.args.should.have.length(1);
+            spy.lastCall.args[0].should.be.an.instanceOf(Error);
+        });
+        it('should generate err on no response', () => {
+            queue.push.reset();
+            queue.push.yieldsTo('callback', null, null);
+            const spy = sinon.spy();
+            doLogin(spy);
+            spy.called.should.be.true;
+            spy.lastCall.args.should.have.length(1);
+            spy.lastCall.args[0].should.be.an.instanceOf(Error);
+        });
+        it('should pass post to external callback on completion', () => {
+            queue.push.reset();
+            queue.push.yieldsTo('callback', null, {});
+            const spy = sinon.spy();
+            doLogin(spy);
+            spy.called.should.be.true;
+            spy.lastCall.args.should.have.length(2);
+            expect(spy.lastCall.args[0]).to.equal(null);
+            spy.lastCall.args[1].should.deep.equal({});
         });
         after(() => queue.push.restore());
     });
