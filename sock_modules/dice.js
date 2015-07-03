@@ -386,7 +386,7 @@ exports.handleInput = function(payload, callback) {
             }
         },
         function () {
-            callback(err, results);
+            callback(err, results.join('\n'));
         }
 	);
 }
