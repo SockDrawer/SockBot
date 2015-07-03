@@ -200,7 +200,7 @@ describe('browser', () => {
             }, queueSpy);
             clock.tick(5000);
             queueSpy.called.should.be.true;
-            req.url.should.equal(config.config.core.forum + '/posts');
+            req.url.should.equal(config.core.forum + '/posts');
             done();
         });
         it('should select form from task', (done) => {

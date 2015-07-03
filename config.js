@@ -127,8 +127,10 @@ exports.loadConfiguration = function loadConfiguration(path, callback) {
             return;
         }
         try {
-            exports.config = utils.mergeObjects(defaultConfig, config);
-            callback(null, exports.config);
+            const cfg = utils.mergeObjects(defaultConfig, config);
+            exports.core = cfg.core;
+            exports.plugins = cfg.plugins;
+            callback(null, cfg);
         } catch (e) {
             callback(e);
         }
@@ -143,14 +145,26 @@ exports.loadConfiguration = function loadConfiguration(path, callback) {
  */
 function configComplete(err, config) {} //eslint-disable-line handle-callback-err, no-unused-vars
 
+
+const config = JSON.parse(JSON.stringify(defaultConfig));
+
 /**
- * Current configuration
+ * Current core configuration
  *
  * Set by ineternals. Do not edit
  *
  * @readonly
  */
-exports.config = JSON.parse(JSON.stringify(defaultConfig));
+exports.core = config.core;
+
+/**
+ * Current plugin configuration
+ *
+ * Set by ineternals. Do not edit
+ *
+ * @readonly
+ */
+exports.plugins = config.plugins;
 
 /* istanbul ignore else */
 if (typeof GLOBAL.describe === 'function') {

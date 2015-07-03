@@ -74,7 +74,7 @@ exports.trustLevels = trustLevels;
  */
 function queueWorker(task, callback) {
     if (task.url && task.url[0] === '/') {
-        task.url = config.config.core.forum + task.url;
+        task.url = config.core.forum + task.url;
     }
     internals.request({
         url: task.url,
@@ -232,7 +232,7 @@ function getCSRF(callback) {
  * @returns {external.module_posts.CleanedPost} input post with urls set
  */
 function setPostUrl(post) {
-    post.url = config.config.core.forum + '/t/' + post.topic_slug + '/' + post.topic_id + '/';
+    post.url = config.core.forum + '/t/' + post.topic_slug + '/' + post.topic_id + '/';
     // not using camelcase for consistency with discourse
     post.reply_to = post.url + (post.reply_to_post_number || ''); //eslint-disable-line camelcase
     post.url += post.post_number;
@@ -257,7 +257,7 @@ function setPostUrl(post) {
 function setTrustLevel(post) {
     // Don't have a choice about using non-camelcase here...
     /*eslint-disable camelcase*/
-    if (post.username === config.config.core.owner) {
+    if (post.username === config.core.owner) {
         post.trust_level = trustLevels.owner;
     } else if (post.admin) {
         post.trust_level = trustLevels.admin;
@@ -265,7 +265,7 @@ function setTrustLevel(post) {
         post.trust_level = trustLevels.moderator;
     } else if (post.staff) {
         post.trust_level = trustLevels.staff;
-    } else if (config.config.core.ignoreUsers.indexOf(post.username) >= 0) {
+    } else if (config.core.ignoreUsers.indexOf(post.username) >= 0) {
         post.trust_level = trustLevels.ignored;
     }
     /*eslint-enable camelcase*/
