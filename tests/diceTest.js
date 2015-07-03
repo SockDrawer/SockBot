@@ -603,6 +603,28 @@ describe("handleInput", function() {
 			done();
 		});
 	});
+	
+	it("should pass in the each method", function(done) {		
+		var mockRollDice = sandbox.stub(diceModule, "rollDice").yields("line of text");
+		var mockNext = sandbox.stub();
+		var mockParser = sandbox.stub(diceModule, "parser").yields(match, mockNext).callsArg(2);
+
+		var match = {
+		}
+		
+		var payload = {
+			dice: '1d20'
+		}
+		
+		diceModule.handleInput(payload, function(response) {
+			assert(mockParser.called);
+			assert(mockParser.getCall(0).calledWith('1d20'),"Correct arguments should be passed; instead received " + mockParser.getCall(0).args);
+			assert(mockRollDice.called);
+			assert(mockNext.called);
+			assert.include(response,"line of text\n");
+			done();
+		});
+	});
 
 });
 
