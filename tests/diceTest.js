@@ -21,8 +21,8 @@ describe("roll", function() {
 		
 		diceModule.roll(1,6,null, function(sum, results) {
 			assert.equal(sum,1,"Sum was not calculated correctly");
-			assert.lengthOf(results, 1,"One die should be rolled");			
-			assert.equal(results[0],1, "Individual dice not reported correctly");
+			assert.lengthOf(results[0], 1,"One die should be rolled");			
+			assert.equal(results[0][0],1, "Individual dice not reported correctly");
 			done();
 		});
 	});
@@ -32,9 +32,9 @@ describe("roll", function() {
 		
 		diceModule.roll(2,6,null, function(sum, results) {
 			assert.equal(sum,2,"Sum was not calculated correctly");
-			assert.lengthOf(results, 2,"Two die should be rolled");			
-			assert.equal(results[0],1, "Individual dice not reported correctly");
-			assert.equal(results[1],1, "Individual dice not reported correctly");
+			assert.lengthOf(results[0], 2,"Two die should be rolled");	
+			assert.equal(results[0][0],1, "Individual dice not reported correctly");
+			assert.equal(results[0][1],1, "Individual dice not reported correctly");
 			done();
 		});
 	});
@@ -44,8 +44,8 @@ describe("roll", function() {
 		
 		diceModule.roll(1,20,null, function(sum, results) {
 			assert.equal(sum,12,"Sum was not calculated correctly");
-			assert.lengthOf(results, 1,"One die should be rolled");			
-			assert.equal(results[0],12, "Individual dice not reported correctly");
+			assert.lengthOf(results[0], 1,"One die should be rolled");			
+			assert.equal(results[0][0],12, "Individual dice not reported correctly");
 			done();
 		});
 	});
@@ -55,8 +55,8 @@ describe("roll", function() {
 		
 		diceModule.roll(1,2,null, function(sum, results) {
 			assert.equal(sum,2,"Sum was not calculated correctly");
-			assert.lengthOf(results, 1,"One die should be rolled");			
-			assert.equal(results[0],2, "Individual dice not reported correctly");
+			assert.lengthOf(results[0], 1,"One die should be rolled");			
+			assert.equal(results[0][0],2, "Individual dice not reported correctly");
 			done();
 		});
 	});
@@ -66,9 +66,9 @@ describe("roll", function() {
 		
 		diceModule.roll(-2,6,null, function(sum, results) {
 			assert.equal(sum,4,"Sum was not calculated correctly");
-			assert.lengthOf(results, 2,"Two die should be rolled");			
-			assert.equal(results[0],2, "Individual dice not reported correctly");
-			assert.equal(results[1],2, "Individual dice not reported correctly");
+			assert.lengthOf(results[0], 2,"Two die should be rolled");			
+			assert.equal(results[0][0],2, "Individual dice not reported correctly");
+			assert.equal(results[0][1],2, "Individual dice not reported correctly");
 			done();
 		});
 	});
@@ -78,8 +78,8 @@ describe("roll", function() {
 		
 		diceModule.roll(1,-6,null, function(sum, results) {
 			assert.equal(sum,-2,"Sum was not calculated correctly");
-			assert.lengthOf(results, 1,"One die should be rolled");			
-			assert.equal(results[0],-2, "Individual dice not reported correctly");
+			assert.lengthOf(results[0], 1,"One die should be rolled");			
+			assert.equal(results[0][0],-2, "Individual dice not reported correctly");
 			done();
 		});
 	});
@@ -89,17 +89,29 @@ describe("roll", function() {
 		
 		diceModule.roll(5,6,6, function(sum, results) {
 			assert.equal(sum,15,"Sum was not calculated correctly");
-			assert.lengthOf(results, 5,"Five die should be rolled");			
+			assert.lengthOf(results[0], 5,"Five die should be rolled");			
 			done();
 		});
 	});
 	
 	it("should reroll above the threshold", function(done) {
-		var mockRequest = sandbox.stub(request, "get").yields(null,200,"6\n6\n6\n6\n1\n");
+		var mockRequest = sandbox.stub(request, "get").onCall(0).yields(null,200,"6\n6\n").onCall(1).yields(null,200,"1\n1\n");
 		
 		diceModule.roll(2,6,6, function(sum, results) {
-			assert.equal(sum,25,"Sum was not calculated correctly");
-			assert.lengthOf(results, 5,"Five die should be rolled");			
+			assert.equal(sum,14,"Sum was not calculated correctly");
+			assert.lengthOf(results[0], 2,"Two die should be rolled initially");
+			assert.lengthOf(results[1], 2,"Four die should be rolled for rerolls");
+			done();
+		});
+	});
+	
+	it("should continue exploding dice", function(done) {
+		var mockRequest = sandbox.stub(request, "get").onCall(0).yields(null,200,"6\n6\n").onCall(1).yields(null,200,"6\n6\n").onCall(2).yields(null,200,"1\n1\n");
+		
+		diceModule.roll(2,6,6, function(sum, results) {
+			assert.equal(sum,26,"Sum was not calculated correctly");
+			assert.lengthOf(results[0], 2,"Two die should be rolled initially");
+			assert.lengthOf(results[1], 4,"Four die should be rolled for rerolls");
 			done();
 		});
 	});
@@ -117,14 +129,22 @@ describe("prerollDice", function() {
 	})
 	
 	
-	it("should roll one die", function() {		
-		var numDice = diceModule.prerollDice(1,6);
-		assert.equal(numDice,1,"One die should be rolled");
+	it("should roll once per non-one returned", function() {
+		sandbox.stub(Math, "random").returns(2);
+		var numDice = diceModule.prerollDice(10,1);
+		assert.equal(numDice,1,"No dice should be rerolled");
 	});
 	
-	it("should roll ten die", function() {		
-		var numDice = diceModule.prerollDice(10,6);
-		assert.equal(numDice,10,"Ten die should be rolled");
+	it("should reroll once when it gets one 1 returned", function() {
+		sandbox.stub(Math, "random").onCall(0).returns(0).onCall(1).returns(2);
+		var numDice = diceModule.prerollDice(1,1);
+		assert.equal(numDice,2,"One die should be rerolled");
+	});
+	
+	it("should keep rerolling until it gets no ones", function() {
+		sandbox.stub(Math, "random").onCall(0).returns(0).onCall(1).returns(0).onCall(2).returns(2);
+		var numDice = diceModule.prerollDice(1,1);
+		assert.equal(numDice,3,"Three die should be rolled");
 	});
 });
 
@@ -604,7 +624,7 @@ describe("handleInput", function() {
 		});
 	});
 	
-	it("should pass in the each method", function(done) {		
+	/*it("should pass in the each method", function(done) {		
 		var mockRollDice = sandbox.stub(diceModule, "rollDice")//.yields("line of text");
 		var mockNext = sandbox.stub();
 		var mockParser = sandbox.stub(diceModule, "parser").callsArgWith(1,match, mockNext).callsArg(2);
@@ -624,7 +644,7 @@ describe("handleInput", function() {
 			assert.include(response,"line of text\n");
 			done();
 		});
-	});
+	});*/
 
 });
 
