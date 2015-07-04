@@ -320,7 +320,7 @@ exports.rollXDice = function (match, callback) {
 /**
  * Parse the command to determine how many and of what type of dice to roll
  * @param  {string} input The input for the dice roll command
- * @param  {Function} each The function to execute for each match found
+ * @param  {dice~each} each The function to execute for each match found
  * @param  {Function} complete The callback to call when complete
  */
 exports.parser = function parser(input, each, complete) {
@@ -440,3 +440,20 @@ exports.begin = function begin(browser, config) {
 exports.getError = function () {
     return conf.errors[Math.floor(Math.random() * conf.errors.length)];
 };
+
+/**
+ * Discourse Request Callback
+ * @callback dice~each
+ * @param {Object} match The dice request to process
+ * @param {number} match.num Number of dice to roll
+ * @param {number} match.sides Number of sides on dice
+ * @param {string} match.method Rolling method for dice
+ * @param {number} match.target (Wolf only) Minimum roll required to score a success
+ * @param {string} match.options Specified options
+ * @param {number} match.bonus Bonus
+ * @param {boolean} match.reroll Whether to reroll
+ * @param {boolean} match.preroll Whether to preroll
+ * @param {boolean} match.sort Whether to sort rolls
+ * @param {boolean} match.fails Currently unused
+ * @param {Function} callback Completion callback
+ */
