@@ -72,6 +72,7 @@ exports.roll = function(num, sides, rerollGreater, callback) {
         callback(0, [
             []
         ]);
+		return;
     }
     toRoll = num;
     async.whilst(
