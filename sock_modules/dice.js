@@ -325,7 +325,7 @@ exports.rollXDice = function (match, callback) {
  */
 exports.parser = function parser(input, each, complete) {
     var halt = false;
-    rMatcher.forEach(input, rMatcher,
+    rMatcher.forEach(input,
         function (match) {
             if (halt) {
                 return;
@@ -354,9 +354,9 @@ exports.parser = function parser(input, each, complete) {
             matched.fails = matched.options.indexOf('f') !== -1;
             each(matched, function (stop) {
                 halt = !!stop;
+                complete();
             });
         });
-    complete();
 };
 
 /**
