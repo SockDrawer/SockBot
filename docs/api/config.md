@@ -1,7 +1,11 @@
 ## Members
 <dl>
-<dt><a href="#config">config</a></dt>
-<dd><p>Current configuration</p>
+<dt><a href="#core">core</a></dt>
+<dd><p>Current core configuration</p>
+<p>Set by ineternals. Do not edit</p>
+</dd>
+<dt><a href="#plugins">plugins</a></dt>
+<dd><p>Current plugin configuration</p>
 <p>Set by ineternals. Do not edit</p>
 </dd>
 </dl>
@@ -23,9 +27,17 @@
 <dd><p>Configuration Loaded Callback</p>
 </dd>
 </dl>
-<a name="config"></a>
-## config
-Current configuration
+<a name="core"></a>
+## core
+Current core configuration
+
+Set by ineternals. Do not edit
+
+**Kind**: global variable  
+**Read only**: true  
+<a name="plugins"></a>
+## plugins
+Current plugin configuration
 
 Set by ineternals. Do not edit
 

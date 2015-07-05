@@ -9,10 +9,12 @@ Webbrowser abstraction for communicating with discourse
     * [.createPost(topicId, [replyTo], content, callback)](#module_browser.createPost)
     * [.createPrivateMessage(to, title, content, callback)](#module_browser.createPrivateMessage)
     * [.editPost(postId, content, [editReason], callback)](#module_browser.editPost)
+    * [.login(callback)](#module_browser.login)
   * _inner_
     * [~trustLevels](#module_browser..trustLevels)
     * [~queueWorker(task, callback)](#module_browser..queueWorker)
     * [~getCSRF(callback)](#module_browser..getCSRF)
+    * [~doLogin(callback)](#module_browser..doLogin)
     * [~setPostUrl(post)](#module_browser..setPostUrl) ⇒ <code>external.module_posts.CleanedPost</code>
     * [~setTrustLevel(post)](#module_browser..setTrustLevel) ⇒ <code>external.module_posts.CleanedPost</code>
     * [~cleanPostRaw(post)](#module_browser..cleanPostRaw) ⇒ <code>external.module_posts.CleanedPost</code>
@@ -20,6 +22,7 @@ Webbrowser abstraction for communicating with discourse
     * [~requestComplete([err], body)](#module_browser..requestComplete)
     * [~postedCallback([err], post)](#module_browser..postedCallback)
     * [~completedCallback([err])](#module_browser..completedCallback)
+    * [~loginCallback([err], user)](#module_browser..loginCallback)
 
 <a name="module_browser.createPost"></a>
 ### browser.createPost(topicId, [replyTo], content, callback)
@@ -59,6 +62,16 @@ Edit an existing post.
 | content | <code>string</code> | New post content |
 | [editReason] | <code>string</code> | Optional Edit Reason that no one ever uses |
 | callback | <code>postedCallback</code> | Completion callback |
+
+<a name="module_browser.login"></a>
+### browser.login(callback)
+Login to discourse
+
+**Kind**: static method of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| callback | <code>loginCallback</code> | Completion callback |
 
 <a name="module_browser..trustLevels"></a>
 ### browser~trustLevels
@@ -106,6 +119,16 @@ get a CSRF token from discourse
 | Param | Type | Description |
 | --- | --- | --- |
 | callback | <code>completedCallback</code> | Completion callback |
+
+<a name="module_browser..doLogin"></a>
+### browser~doLogin(callback)
+Perform a login to discourse
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| callback | <code>loginCallback</code> | Completion callback |
 
 <a name="module_browser..setPostUrl"></a>
 ### browser~setPostUrl(post) ⇒ <code>external.module_posts.CleanedPost</code>
@@ -211,4 +234,15 @@ Completion Callback
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | [err] | <code>Exception</code> | <code></code> | Error encountered processing request |
+
+<a name="module_browser..loginCallback"></a>
+### browser~loginCallback([err], user)
+Login Completion Callback
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [err] | <code>Exception</code> | <code></code> | Error encountered processing request |
+| user | <code>extermal.users.User</code> |  | Logged in User information |
 
