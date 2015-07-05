@@ -323,13 +323,11 @@ exports.rollXDice = function (match, callback) {
  * @param  {dice~each} each The function to execute for each match found
  * @param  {Function} complete The callback to call when complete
  */
-exports.parser = function parser(input, each, complete) {
-    var halt = false;
+exports.parser = function parser(input, complete) {
+    var matches = [],
+        results = [];
     rMatcher.forEach(input,
         function (match) {
-            if (halt) {
-                return;
-            }
             var inner = match[0] || '',
                 target = rTarget.xexec(inner),
                 bonus = rBonus.xexec(inner),
@@ -352,11 +350,19 @@ exports.parser = function parser(input, each, complete) {
             matched.preroll = matched.options.indexOf('p') !== -1;
             matched.sort = matched.options.indexOf('s') !== -1;
             matched.fails = matched.options.indexOf('f') !== -1;
-            each(matched, function (stop) {
-                halt = !!stop;
-                complete();
-            });
+            matches.push(matched);
         });
+    var cont = function (result) {
+        if (result) {
+            results.push(result);
+        }
+        if (results.length < 20 && matches.length > 0) {
+            exports.rollDice(matches.shift(), cont);
+        } else {
+            complete(results.join('\n'));
+        }
+    }
+    cont();
 };
 
 /**
@@ -365,23 +371,9 @@ exports.parser = function parser(input, each, complete) {
  * @param  {Function} callback The callback to call when complete
  */
 exports.handleInput = function (payload, callback) {
-    var results = [];
-    var err;
-    var input = payload.dice;
-    exports.parser(input,
-        function (match, next) {
-            if (results.length >= (exports.configuration.maxRolls || 6)) {
-                results.push('Reached maximum dice roll. stopping.');
-                next(true);
-            } else {
-                exports.rollDice(match, function (line) {
-                    results.push(line);
-                    next();
-                });
-            }
-        },
-        function () {
-            callback(err, results.join('\n'));
+    exports.parser(payload.dice,
+        function (result) {
+            callback(null, result);
         }
     );
 };
@@ -440,20 +432,3 @@ exports.begin = function begin(browser, config) {
 exports.getError = function () {
     return conf.errors[Math.floor(Math.random() * conf.errors.length)];
 };
-
-/**
- * Discourse Request Callback
- * @callback dice~each
- * @param {Object} match The dice request to process
- * @param {number} match.num Number of dice to roll
- * @param {number} match.sides Number of sides on dice
- * @param {string} match.method Rolling method for dice
- * @param {number} match.target (Wolf only) Minimum roll required to score a success
- * @param {string} match.options Specified options
- * @param {number} match.bonus Bonus
- * @param {boolean} match.reroll Whether to reroll
- * @param {boolean} match.preroll Whether to preroll
- * @param {boolean} match.sort Whether to sort rolls
- * @param {boolean} match.fails Currently unused
- * @param {Function} callback Completion callback
- */
