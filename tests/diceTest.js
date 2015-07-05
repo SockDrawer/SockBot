@@ -892,6 +892,31 @@ describe("parser", function() {
 		});
 	});
 	
+	it("should handle '20d10t7'", function(done) {		
+		var mockRollDice = sandbox.stub(diceModule, "rollDice").yields("this is a result");
+		var input = "20d10t7";
+		var expected = {
+			num: 20,
+			sides: 10,
+			method: undefined,
+			target: 7,
+			options: '',
+			bonus: undefined,
+			reroll: false,
+			preroll: false,
+			sort: false,
+			fails: false
+		}
+		
+		diceModule.parser(input, function(response) {
+			assert(mockRollDice.called);
+			var actual = mockRollDice.getCall(0).args[0];
+			
+			assert.deepEqual(actual,expected);
+			done();
+		});
+	});
+	
 	it("should handle multiple dice", function(done) {		
 		var mockRollDice = sandbox.stub(diceModule, "rollDice").yields("this is a result");
 		var input = "1d20 2d10";
@@ -928,6 +953,31 @@ describe("parser", function() {
 			
 			assert.deepEqual(actual1,expected1);
 			assert.deepEqual(actual2,expected2);
+			done();
+		});
+	});
+	
+	it("should handle 'd10'", function(done) {		
+		var mockRollDice = sandbox.stub(diceModule, "rollDice").yields("this is a result");
+		var input = "d10";
+		var expected = {
+			num: undefined,
+			sides: 10,
+			method: undefined,
+			target: undefined,
+			options: '',
+			bonus: undefined,
+			reroll: false,
+			preroll: false,
+			sort: false,
+			fails: false
+		}
+		
+		diceModule.parser(input, function(response) {
+			assert(mockRollDice.called);
+			var actual = mockRollDice.getCall(0).args[0];
+			
+			assert.deepEqual(actual,expected);
 			done();
 		});
 	});
