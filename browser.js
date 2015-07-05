@@ -201,9 +201,6 @@ exports.editPost = function editPost(postId, content, editReason, callback) {
  * @param {completedCallback} callback Completion callback
  */
 function getCSRF(callback) {
-    if (typeof callback !== 'function') {
-        throw new Error('callback must be supplied');
-    }
     internals.queue.push({
         method: 'GET',
         url: '/session/csrf.json',
@@ -225,9 +222,6 @@ function getCSRF(callback) {
  * @param {loginCallback} callback Completion callback
  */
 function doLogin(callback) {
-    if (typeof callback !== 'function') {
-        throw new Error('callback must be supplied');
-    }
     internals.queue.push({
         method: 'POST',
         url: '/session',
@@ -236,14 +230,32 @@ function doLogin(callback) {
             password: config.core.password
         },
         callback: (err, data) => {
-            if (err || !data) {
-                callback(err || new Error('No data received'));
+            if (err) {
+                callback(err);
             } else {
                 callback(null, data.user || {});
             }
         }
     });
 }
+
+/**
+ * Login to discourse
+ *
+ * @param {loginCallback} callback Completion callback
+ */
+exports.login = function login(callback) {
+    if (typeof callback !== 'function') {
+        throw new Error('callback must be supplied');
+    }
+    getCSRF((err) => {
+        if (err) {
+            callback(err);
+        } else {
+            doLogin(callback);
+        }
+    });
+};
 
 /**
  * construct direct post link and direct in reply to link
@@ -320,7 +332,6 @@ function cleanPostRaw(post) {
     const fencedgreedy = /^````.*\n(?:.*\n)*```(?:\n|$)/gm;
     const fencedlazy = /^```(?:[^`\n].*)?\n(?:.*\n)*?```(?:\n|$)/gm;
     const inline = /(`+)[^]*?\1/g;
-
 
     let text = post.raw || '',
         // Normalize newlines
@@ -410,6 +421,7 @@ function postedCallback(err, post) {} //eslint-disable-line handle-callback-err,
  * @param {Exception} [err=null] Error encountered processing request
  */
 function completedCallback(err) {} //eslint-disable-line handle-callback-err, no-unused-vars
+
 /**
  * Login Completion Callback
  *

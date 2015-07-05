@@ -14,7 +14,7 @@ const browser = require('../browser'),
 
 describe('browser', () => {
     describe('exports', () => {
-        const fns = ['createPost', 'editPost', 'createPrivateMessage'],
+        const fns = ['createPost', 'editPost', 'createPrivateMessage', 'login'],
             objs = ['internals', 'trustLevels', 'stubs'],
             vals = [];
         describe('should export expected functions:', () => {
@@ -737,10 +737,6 @@ describe('browser', () => {
         const queue = browser.internals.queue,
             getCSRF = browser.internals.getCSRF;
         before(() => sinon.stub(queue, 'push'));
-        it('should require a callback', () => expect(() => getCSRF()).to.throw('callback must be supplied'));
-        it('should require a callback 2', () => {
-            expect(() => getCSRF('not callback')).to.throw('callback must be supplied');
-        });
         it('should set http method to GET', () => {
             queue.push.reset();
             getCSRF(() => 0);
@@ -781,7 +777,7 @@ describe('browser', () => {
             spy.lastCall.args.should.have.length(1);
             spy.lastCall.args[0].should.be.an.instanceOf(Error);
         });
-        it('should pass post to external callback on completion', () => {
+        it('should pass null as err on successful completion', () => {
             queue.push.reset();
             queue.push.yieldsTo('callback', null, {});
             const spy = sinon.spy();
@@ -832,10 +828,6 @@ describe('browser', () => {
         const queue = browser.internals.queue,
             doLogin = browser.internals.doLogin;
         before(() => sinon.stub(queue, 'push'));
-        it('should require a callback', () => expect(() => doLogin()).to.throw('callback must be supplied'));
-        it('should require a callback 2', () => {
-            expect(() => doLogin('not callback')).to.throw('callback must be supplied');
-        });
         it('should set http method to POST', () => {
             queue.push.reset();
             doLogin(() => 0);
@@ -859,22 +851,6 @@ describe('browser', () => {
             args.should.have.length(1);
             args[0].should.have.any.key('form');
         });
-        it('should set form.login', () => {
-            queue.push.reset();
-            config.core.username = 'a_user_name';
-            doLogin(() => 0);
-            const form = queue.push.lastCall.args[0].form;
-            form.should.have.any.key('login');
-            form.login.should.equal('a_user_name');
-        });
-        it('should set form.password', () => {
-            queue.push.reset();
-            config.core.password = 'a_user_password';
-            doLogin(() => 0);
-            const form = queue.push.lastCall.args[0].form;
-            form.should.have.any.key('password');
-            form.password.should.equal('a_user_password');
-        });
         it('should set callback', () => {
             queue.push.reset();
             doLogin(() => 0);
@@ -892,15 +868,6 @@ describe('browser', () => {
             spy.lastCall.args.should.have.length(1);
             spy.lastCall.args[0].should.be.an.instanceOf(Error);
         });
-        it('should generate err on no response', () => {
-            queue.push.reset();
-            queue.push.yieldsTo('callback', null, null);
-            const spy = sinon.spy();
-            doLogin(spy);
-            spy.called.should.be.true;
-            spy.lastCall.args.should.have.length(1);
-            spy.lastCall.args[0].should.be.an.instanceOf(Error);
-        });
         it('should pass post to external callback on completion', () => {
             queue.push.reset();
             queue.push.yieldsTo('callback', null, {});
@@ -909,7 +876,41 @@ describe('browser', () => {
             spy.called.should.be.true;
             spy.lastCall.args.should.have.length(2);
             expect(spy.lastCall.args[0]).to.equal(null);
-            spy.lastCall.args[1].should.deep.equal({});
+        });
+        after(() => queue.push.restore());
+    });
+    describe('login', () => {
+        const login = browser.login,
+            queue = browser.internals.queue;
+        before(() => sinon.stub(queue, 'push'));
+        it('should require a callback', () => expect(() => login()).to.throw('callback must be supplied'));
+        it('should require a callback 2', () => {
+            expect(() => login('not callback')).to.throw('callback must be supplied');
+        });
+        it('should pass error on CSRF failure', () => {
+            const spy = sinon.spy(),
+                error = new Error('testErrot');
+            queue.push.reset();
+            queue.push
+                .throws(new Error('unexpected call'))
+                .onFirstCall().yieldsTo('callback', error);
+            login(spy);
+            spy.firstCall.args[0].should.equal(error);
+            queue.push.lastCall.args[0].url.should.equal('/session/csrf.json');
+        });
+        it('should call doLogin on csrf success', () => {
+            const spy = sinon.spy();
+            queue.push.reset();
+            queue.push
+                .throws(new Error('unexpected call'))
+                .onFirstCall().yieldsTo('callback', null, 'CSRF')
+                .onSecondCall().yieldsTo('callback', null, {
+                    user: 'user info'
+                });
+            login(spy);
+            expect(spy.firstCall.args[0]).to.equal(null);
+            spy.firstCall.args[1].should.equal('user info');
+            queue.push.lastCall.args[0].url.should.equal('/session');
         });
         after(() => queue.push.restore());
     });
