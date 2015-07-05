@@ -654,29 +654,193 @@ describe("handleInput", function() {
 			done();
 		});
 	});
-	
-	/*it("should pass in the each method", function(done) {		
-		var mockRollDice = sandbox.stub(diceModule, "rollDice")//.yields("line of text");
-		var mockNext = sandbox.stub();
-		var mockParser = sandbox.stub(diceModule, "parser").callsArgWith(1,match, mockNext).callsArg(2);
+});
 
-		var match = {
+describe("parser", function() {
+	var sandbox;
+	
+	beforeEach(function(){
+	  sandbox = sinon.sandbox.create();
+	});
+	
+	afterEach(function() {
+		sandbox.restore();
+	});
+	
+	it("should handle '1d20'", function(done) {		
+		var mockRollDice = sandbox.stub(diceModule, "rollDice").yields("this is a result");
+		var input = "1d20";
+		var expected = {
+			num: 1,
+			sides: 20,
+			method: undefined,
+			target: undefined,
+			options: '',
+			bonus: undefined,
+			reroll: false,
+			preroll: false,
+			sort: false,
+			fails: false
 		}
 		
-		var payload = {
-			dice: '1d20'
-		}
-		
-		diceModule.handleInput(payload, function(response) {
-			assert(mockParser.called);
-			assert(mockParser.getCall(0).calledWith('1d20'),"Correct arguments should be passed; instead received " + mockParser.getCall(0).args);
-			//assert(mockRollDice.called);
-			assert(mockNext.called);
-			assert.include(response,"line of text\n");
+		diceModule.parser(input, function(response) {
+			assert(mockRollDice.called);
+			var actual = mockRollDice.getCall(0).args[0];
+			
+			assert.deepEqual(actual,expected);
 			done();
 		});
-	});*/
-
+	});
+	
+	it("should handle '1d20+5'", function(done) {		
+		var mockRollDice = sandbox.stub(diceModule, "rollDice").yields("this is a result");
+		var input = "1d20+5";
+		var expected = {
+			num: 1,
+			sides: 20,
+			method: undefined,
+			target: undefined,
+			options: '',
+			bonus: 5,
+			reroll: false,
+			preroll: false,
+			sort: false,
+			fails: false
+		}
+		
+		diceModule.parser(input, function(response) {
+			assert(mockRollDice.called);
+			var actual = mockRollDice.getCall(0).args[0];
+			
+			assert.deepEqual(actual,expected);
+			done();
+		});
+	});
+	
+	it("should handle '2dW'", function(done) {		
+		var mockRollDice = sandbox.stub(diceModule, "rollDice").yields("this is a result");
+		var input = "2dW";
+		var expected = {
+			num: 2,
+			sides: undefined,
+			method: "w",
+			target: undefined,
+			options: '',
+			bonus: undefined,
+			reroll: false,
+			preroll: false,
+			sort: false,
+			fails: false
+		}
+		
+		diceModule.parser(input, function(response) {
+			assert(mockRollDice.called);
+			var actual = mockRollDice.getCall(0).args[0];
+			
+			assert.deepEqual(actual,expected);
+			done();
+		});
+	});
+	
+	it("should handle '2dWolf'", function(done) {		
+		var mockRollDice = sandbox.stub(diceModule, "rollDice").yields("this is a result");
+		var input = "2dWolf";
+		var expected = {
+			num: 2,
+			sides: undefined,
+			method: "wolf",
+			target: undefined,
+			options: '',
+			bonus: undefined,
+			reroll: false,
+			preroll: false,
+			sort: false,
+			fails: false
+		}
+		
+		diceModule.parser(input, function(response) {
+			assert(mockRollDice.called);
+			var actual = mockRollDice.getCall(0).args[0];
+			
+			assert.deepEqual(actual,expected);
+			done();
+		});
+	});
+	
+	it("should handle '4dF'", function(done) {		
+		var mockRollDice = sandbox.stub(diceModule, "rollDice").yields("this is a result");
+		var input = "4dF";
+		var expected = {
+			num: 4,
+			sides: undefined,
+			method: "f",
+			target: undefined,
+			options: '',
+			bonus: undefined,
+			reroll: false,
+			preroll: false,
+			sort: false,
+			fails: false
+		}
+		
+		diceModule.parser(input, function(response) {
+			assert(mockRollDice.called);
+			var actual = mockRollDice.getCall(0).args[0];
+			
+			assert.deepEqual(actual,expected);
+			done();
+		});
+	});
+	
+	it("should handle '4dFate'", function(done) {		
+		var mockRollDice = sandbox.stub(diceModule, "rollDice").yields("this is a result");
+		var input = "4dFate";
+		var expected = {
+			num: 4,
+			sides: undefined,
+			method: "fate",
+			target: undefined,
+			options: '',
+			bonus: undefined,
+			reroll: false,
+			preroll: false,
+			sort: false,
+			fails: false
+		}
+		
+		diceModule.parser(input, function(response) {
+			assert(mockRollDice.called);
+			var actual = mockRollDice.getCall(0).args[0];
+			
+			assert.deepEqual(actual,expected);
+			done();
+		});
+	});
+	
+	it("should handle '4dFudge'", function(done) {		
+		var mockRollDice = sandbox.stub(diceModule, "rollDice").yields("this is a result");
+		var input = "4dFudge";
+		var expected = {
+			num: 4,
+			sides: undefined,
+			method: "fudge",
+			target: undefined,
+			options: '',
+			bonus: undefined,
+			reroll: false,
+			preroll: false,
+			sort: false,
+			fails: false
+		}
+		
+		diceModule.parser(input, function(response) {
+			assert(mockRollDice.called);
+			var actual = mockRollDice.getCall(0).args[0];
+			
+			assert.deepEqual(actual,expected);
+			done();
+		});
+	});
 });
 
 describe("rollDice", function() {
