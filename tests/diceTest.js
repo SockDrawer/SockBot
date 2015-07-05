@@ -841,8 +841,97 @@ describe("parser", function() {
 			done();
 		});
 	});
+	
+	it("should handle '20d2p'", function(done) {		
+		var mockRollDice = sandbox.stub(diceModule, "rollDice").yields("this is a result");
+		var input = "20d2p";
+		var expected = {
+			num: 20,
+			sides: 2,
+			method: undefined,
+			target: undefined,
+			options: 'p',
+			bonus: undefined,
+			reroll: false,
+			preroll: true,
+			sort: false,
+			fails: false
+		}
+		
+		diceModule.parser(input, function(response) {
+			assert(mockRollDice.called);
+			var actual = mockRollDice.getCall(0).args[0];
+			
+			assert.deepEqual(actual,expected);
+			done();
+		});
+	});
+	
+	it("should handle '20d2pr'", function(done) {		
+		var mockRollDice = sandbox.stub(diceModule, "rollDice").yields("this is a result");
+		var input = "20d2pr";
+		var expected = {
+			num: 20,
+			sides: 2,
+			method: undefined,
+			target: undefined,
+			options: 'pr',
+			bonus: undefined,
+			reroll: true,
+			preroll: true,
+			sort: false,
+			fails: false
+		}
+		
+		diceModule.parser(input, function(response) {
+			assert(mockRollDice.called);
+			var actual = mockRollDice.getCall(0).args[0];
+			
+			assert.deepEqual(actual,expected);
+			done();
+		});
+	});
+	
+	it("should handle multiple dice", function(done) {		
+		var mockRollDice = sandbox.stub(diceModule, "rollDice").yields("this is a result");
+		var input = "1d20 2d10";
+		var expected1 = {
+			num: 1,
+			sides: 20,
+			method: undefined,
+			target: undefined,
+			options: '',
+			bonus: undefined,
+			reroll: false,
+			preroll: false,
+			sort: false,
+			fails: false
+		}
+		
+		var expected2 = {
+			num: 2,
+			sides: 10,
+			method: undefined,
+			target: undefined,
+			options: '',
+			bonus: undefined,
+			reroll: false,
+			preroll: false,
+			sort: false,
+			fails: false
+		}
+		
+		diceModule.parser(input, function(response) {
+			assert(mockRollDice.called);
+			var actual1 = mockRollDice.getCall(0).args[0];
+			var actual2 = mockRollDice.getCall(1).args[0];
+			
+			assert.deepEqual(actual1,expected1);
+			assert.deepEqual(actual2,expected2);
+			done();
+		});
+	});
 });
-
 describe("rollDice", function() {
 	var sandbox;
 	
