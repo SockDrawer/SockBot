@@ -19,10 +19,9 @@
   "devDependencies": {
     "chai": "^3.0.0",
     "coveralls": "^2.11.2",
-    "eslint": "^0.23.0",
     "gulp": "^3.9.0",
     "gulp-concat": "^2.5.2",
-    "gulp-eslint": "^0.14.0",
+    "gulp-eslint": "^0.15.0",
     "gulp-git": "^1.2.4",
     "gulp-istanbul": "^0.10.0",
     "gulp-jsdoc-to-markdown": "^1.1.1",
@@ -31,11 +30,10 @@
     "gulp-util": "^3.0.5",
     "istanbul-harmony": "^0.3.12",
     "jsdoc-to-markdown": "^1.1.1",
-    "mocha": "^2.2.5",
     "sinon": "^1.14.1"
   },
   "scripts": {
-    "start": "node --harmony SockBot.js",
+    "start": "node --harmony --harmony_arrow_functions SockBot.js",
     "lint": "node --harmony --harmony_arrow_functions node_modules/.bin/gulp lint lintTests",
     "test": "node --harmony --harmony_arrow_functions node_modules/.bin/gulp test",
     "gulp": "node --harmony --harmony_arrow_functions node_modules/.bin/gulp"
