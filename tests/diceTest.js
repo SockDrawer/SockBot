@@ -643,7 +643,7 @@ describe("handleInput", function() {
 	});
 	
 	it("should delegate to Parser", function(done) {		
-		var mockParser = sandbox.stub(diceModule, "parser").callsArg(2);
+		var mockParser = sandbox.stub(diceModule, "parser").yields("This is a result");
 		var payload = {
 			dice: '1d20'
 		}
