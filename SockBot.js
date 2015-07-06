@@ -13,6 +13,7 @@ exports.version = 'v2.0.0';
 
 const config = require('./config'),
     browser = require('./browser');
+
 /* istanbul ignore if */
 if (require.main === module) {
     config.loadConfiguration(process.argv[2], () => {
