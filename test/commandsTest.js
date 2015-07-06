@@ -148,6 +148,20 @@ describe('browser', () => {
                 parseMentionCommand('@foobar help arg1 arg2').mention.should.equal('@foobar');
             });
         });
+        describe('mention case insensitive', () => {
+            it('@foobar', () => {
+                expect(parseMentionCommand('@foobar help')).to.not.equal(null);
+            });
+            it('@FooBar', () => {
+                expect(parseMentionCommand('@foobar help')).to.not.equal(null);
+            });
+            it('@fOObAR', () => {
+                expect(parseMentionCommand('@foobar help')).to.not.equal(null);
+            });
+            it('@FOOBAR', () => {
+                expect(parseMentionCommand('@foobar help')).to.not.equal(null);
+            });
+        });
         describe('any space character should split args', () => {
             [' ', '\f', '\t', '\v', '\u00a0', '\u1680', '\u180e', '\u2000', '\u2001', '\u2002', '\u2003', '\u2004',
                 '\u2005', '\u2006', '\u2007', '\u2008', '\u2009', '\u200a', '\u2028', '\u2029', '\u202f', '\u205f',
@@ -178,6 +192,9 @@ describe('browser', () => {
         });
         it('should not match really short command', () => {
             expect(parseMentionCommand('@foobar c text stuff')).to.equal(null);
+        });
+        it('should not match wrong mention', () => {
+            expect(parseMentionCommand('@foobaz simple text stuff')).to.equal(null);
         });
         it('should match bare command', () => {
             parseMentionCommand('@foobar help').command.should.equal('help');
