@@ -1,10 +1,17 @@
+[![Build Status](https://travis-ci.org/SockDrawer/SockBot.svg)](https://travis-ci.org/SockDrawer/SockBot)
+[![Coverage Status](https://coveralls.io/repos/SockDrawer/SockBot/badge.svg)](https://coveralls.io/r/SockDrawer/SockBot)
+[![Docs Status](https://readthedocs.org/projects/sockbot/badge/)](http://sockbot.readthedocs.org
+
+[![Dependency Status](https://david-dm.org/SockDrawer/SockBot.svg)](https://david-dm.org/SockDrawer/SockBot)
+[![devDependency Status](https://david-dm.org/SockDrawer/SockBot/dev-status.svg)](https://david-dm.org/SockDrawer/SockBot#info=devDependencies)
+[![optionalDependency Status](https://david-dm.org/SockDrawer/SockBot/optional-status.svg)](https://david-dm.org/SockDrawer/SockBot#info=optionalDependencies)
+
+[![Stories in Ready](https://badge.waffle.io/sockdrawer/sockbot.png?label=ready&title=Ready)](https://waffle.io/sockdrawer/sockbot)
+[![Stories in Progress](https://badge.waffle.io/sockdrawer/sockbot.png?label=in%20progress&title=In%20Progress)](https://waffle.io/sockdrawer/sockbot)
+
 # Welcome to SockBot!
 
-[![Build Status](https://travis-ci.org/SockDrawer/SockBot.svg)](https://travis-ci.org/SockDrawer/SockBot)
-
 Sockbot - A sock puppet Robot worthy of TheDailyWTF that interfaces with what.thedailywtf.com. SO META!
-
-[API Docs](docs/index.html)
 
 
 NOTA BENE
@@ -58,19 +65,17 @@ For providing the lovely and amusing Error messages that sockbot will occasional
 [@mott555](http://what.thedailywtf.com/users/mott555)
 
 
-<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" property="dct:title">SockBot</span> by <span xmlns:cc="http://creativecommons.org/ns#" property="cc:attributionName">Accalia Elementia</span> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.<br />Based on a work at <a xmlns:dct="http://purl.org/dc/terms/" href="https://github.com/AccaliaDeElementia/SockBot" rel="dct:source">https://github.com/AccaliaDeElementia/SockBot</a>.
-
 | Contributor | Commits |
 |---|---:|
 | RaceProUK | 200 |
 | Accalia Elementia | 181 |
 | Accalia | 150 |
-| Accalia de Elementia | 67 |
+| Accalia de Elementia | 69 |
 | Yami | 34 |
 | Yamikuronue | 17 |
 | Andrew Cook | 15 |
 | PleegWat | 15 |
-| Travis-CI | 11 |
+| Travis-CI | 12 |
 | yamikuronue | 10 |
 | Javier Rotelli | 6 |
 | abarker-TDWTF | 4 |
