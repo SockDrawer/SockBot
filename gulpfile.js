@@ -3,6 +3,7 @@ var gulp = require('gulp'),
     gutil = require('gulp-util'),
     gulpJsdoc2md = require('gulp-jsdoc-to-markdown'),
     rename = require('gulp-rename'),
+    istanbul = require('gulp-istanbul'),
     mocha = require('gulp-mocha'),
     eslint = require('gulp-eslint'),
     git = require('gulp-git'),
@@ -11,7 +12,7 @@ var gulp = require('gulp'),
 var exec = require('child_process').exec,
     fs = require('fs');
 
-var sockFiles = ['*.js', '!./gulpfile.js', 'plugins/**/*.js'],
+var sockFiles = ['*.js', '!./gulpfile.js', 'sock_modules/**/*.js'],
     sockDocs = ['README.md', 'docs/**/*.md'],
     sockTests = ['tests/**/*.js'],
     sockReadme = ['docs/badges.md.tmpl', 'docs/index.md', 'docs/Special Thanks.md', 'docs/contributors.md'],
@@ -192,10 +193,20 @@ gulp.task('pushDocs', ['gitConfig', 'commitDocs'], function (done) {
 /**
  * Run code coverage instrumented tests
  */
-gulp.task('test', ['lint'], function () {
-    return gulp.src(sockTests)
-        .pipe(mocha());
-
+gulp.task('test', function(done) {
+    gulp.src(sockFiles)
+        // Instrument code files with istanbulHarmony
+        .pipe(istanbul())
+        // hook require function for complete code coverage
+        .pipe(istanbul.hookRequire())
+        .on('finish', function() {
+            // Run all tests
+            gulp.src(sockTests)
+                .pipe(mocha())
+                // Write code coverage reports
+                .pipe(istanbul.writeReports())
+                .on('end', done);
+        });
 });
 
 // Meta tasks
