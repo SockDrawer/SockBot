@@ -7,15 +7,17 @@ Command Parser for SockBot2.0
 
 * [commands](#module_commands)
   * _static_
-    * [.prepareParser(callback)](#module_commands.prepareParser)
+    * [.prepareParser(events, callback)](#module_commands.prepareParser)
+    * [.parseCommands(post, callback)](#module_commands.parseCommands)
   * _inner_
     * [~parseShortCommand(line)](#module_commands..parseShortCommand) ⇒ <code>command</code>
     * [~parseMentionCommand(line)](#module_commands..parseMentionCommand) ⇒ <code>command</code>
     * [~completedCallback([err])](#module_commands..completedCallback)
+    * [~parseCallback([err], commands)](#module_commands..parseCallback)
     * [~command](#module_commands..command) : <code>object</code>
 
 <a name="module_commands.prepareParser"></a>
-### commands.prepareParser(callback)
+### commands.prepareParser(events, callback)
 Perpare the command parser
 
 Needs to be called to set the internals of the parser after reading config file.
@@ -24,7 +26,19 @@ Needs to be called to set the internals of the parser after reading config file.
 
 | Param | Type | Description |
 | --- | --- | --- |
+| events | <code>EventEmitter</code> | EventEmitter that will be core comms for SockBot |
 | callback | <code>completedCallback</code> | Completion callback |
+
+<a name="module_commands.parseCommands"></a>
+### commands.parseCommands(post, callback)
+Parse commands from post and emit command events
+
+**Kind**: static method of <code>[commands](#module_commands)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| post | <code>external.posts.CleanedPost</code> | Post to parse commands from |
+| callback | <code>parseCallback</code> | CompletionCallback |
 
 <a name="module_commands..parseShortCommand"></a>
 ### commands~parseShortCommand(line) ⇒ <code>command</code>
@@ -57,6 +71,17 @@ Completion Callback
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | [err] | <code>Exception</code> | <code></code> | Error encountered processing request |
+
+<a name="module_commands..parseCallback"></a>
+### commands~parseCallback([err], commands)
+Parse Completion Callback
+
+**Kind**: inner method of <code>[commands](#module_commands)</code>  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [err] | <code>Exception</code> | <code></code> | Error encountered processing request |
+| commands | <code>Array.&lt;command&gt;</code> |  | Parsed Commands |
 
 <a name="module_commands..command"></a>
 ### commands~command : <code>object</code>
