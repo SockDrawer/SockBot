@@ -4,13 +4,15 @@ node_js:
 - '0.11'
 - '0.10'
 before_script:
-- git config --global user.email "yamikuronue@gmail.com"
-- git config --global user.name "Travis-CI via Yami"
-- npm install -g grunt-cli
-after_script:
 - git config credential.helper "store --file=.git/credentials"
-- echo "https://${GH_TOKEN}:@github.com" > .git/credentials
-- grunt generate-docs
-env:
-  global:
-    secure: A+I1DQE7zdzf5aQT4W2Fiv6eIHLEcyhna6W/4k/bbvaRJxaNc3AsRIS2QpSgscrxAbT1xALx2Of8EdmDBF9aq9xIROVb4WdPwKRYVqOG4j+mVydumTb++MOiljp5iF0DuWFyjlooS351vnFtR5JNWZGE25NYbmEowE5JoFHfYik=
+- echo "https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@github.com" > .git/credentials
+- npm run gulp preBuild
+after_script:
+- npm run gulp postBuild
+branches:
+  only:
+    - master
+    - es6-dev
+notifications:
+  slack:
+    secure: Fycz8f/0HY/rgiMePSF4IhavbvSR0/B20gGX4sHHd83ql6WLOx8bf+Al348HhF8GobqD3uTUs1tQPmIGGHdPZ2l+0ZFythSSUNy766612WfyYOpCAqXeCALgcciKzrw7lkECtOLgBOm7vRWVSOfxHXle2NefZR3Q8eNPWpKlNP8=

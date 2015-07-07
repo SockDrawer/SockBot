@@ -40,5 +40,11 @@
     "plotly": "^0.2.15",
     "request-debug": "^0.1.1",
     "tingodb": "^0.3.4"
+  },
+  "scripts": {
+    "start": "node --harmony SockBot.js",
+    "lint": "gulp lint lintTests",
+    "test": "gulp test",
+    "gulp": "gulp"
   }
 }
