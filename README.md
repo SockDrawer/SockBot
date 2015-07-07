@@ -75,7 +75,7 @@ For providing the lovely and amusing Error messages that sockbot will occasional
 | Yamikuronue | 17 |
 | Andrew Cook | 15 |
 | PleegWat | 15 |
-| Travis-CI | 14 |
+| Travis-CI | 15 |
 | yamikuronue | 10 |
 | Javier Rotelli | 6 |
 | abarker-TDWTF | 4 |
