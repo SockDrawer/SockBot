@@ -194,7 +194,7 @@ gulp.task('pushDocs', ['gitConfig', 'commitDocs'], (done) => {
 /**
  * Run code coverage instrumented tests
  */
-gulp.task('test', ['lint', 'lintTests', 'lintExterns'], (done) => {
+gulp.task('test', ['lint', 'lintTests'], (done) => {
     gulp.src(sockFiles)
         // Instrument code files with istanbulHarmony
         .pipe(istanbul({
@@ -219,4 +219,5 @@ gulp.task('test', ['lint', 'lintTests', 'lintExterns'], (done) => {
 gulp.task('buildDocs', ['readme', 'docs'], () => 0);
 gulp.task('preBuild', ['buildDocs'], () => 0);
 gulp.task('postBuild', ['pushDocs'], () => 0);
-gulp.task('default', ['lint', 'lintTests'], () => 0);
+gulp.task('default', ['lint'], () => 0);
+gulp.task('lintAll', ['lint', 'lintExterns'], () => 0);
