@@ -20,16 +20,16 @@
     "chai": "^3.0.0",
     "coveralls": "^2.11.2",
     "gulp": "^3.9.0",
-    "gulp-concat": "^2.5.2",
+    "gulp-concat": "^2.6.0",
     "gulp-eslint": "^0.15.0",
     "gulp-git": "^1.2.4",
     "gulp-istanbul": "^0.10.0",
     "gulp-jsdoc-to-markdown": "^1.1.1",
-    "gulp-mocha": "^2.1.1",
+    "gulp-mocha": "^2.1.2",
     "gulp-rename": "^1.2.2",
-    "gulp-util": "^3.0.5",
-    "istanbul-harmony": "^0.3.12",
-    "sinon": "^1.14.1"
+    "gulp-util": "^3.0.6",
+    "istanbul-harmony": "^0.3.16",
+    "sinon": "^1.15.1"
   },
   "scripts": {
     "start": "node --harmony --harmony_arrow_functions SockBot.js",
