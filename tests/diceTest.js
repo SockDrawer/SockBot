@@ -137,7 +137,7 @@ describe("roll", function() {
 	});
 	
 	it("should cap at 20 rerolls", function(done) {
-		var mockRequest = sandbox.stub(request, "get").yields(null,200,"6\n6\n");
+		var mockRequest = sandbox.stub(request, "get").yields(null,200,"6\n6\n")
 		
 		diceModule.roll(1,6,6, function(sum, results) {
 			assert.lengthOf(results[0], 2,"Two die should be rolled initially");
@@ -695,6 +695,31 @@ describe("parser", function() {
 	it("should handle '1d20+5'", function(done) {		
 		var mockRollDice = sandbox.stub(diceModule, "rollDice").yields("this is a result");
 		var input = "1d20+5";
+		var expected = {
+			num: 1,
+			sides: 20,
+			method: undefined,
+			target: undefined,
+			options: '',
+			bonus: 5,
+			reroll: false,
+			preroll: false,
+			sort: false,
+			fails: false
+		}
+		
+		diceModule.parser(input, function(response) {
+			assert(mockRollDice.called);
+			var actual = mockRollDice.getCall(0).args[0];
+			
+			assert.deepEqual(actual,expected);
+			done();
+		});
+	});
+
+	it("should handle '1d20b5'", function(done) {		
+		var mockRollDice = sandbox.stub(diceModule, "rollDice").yields("this is a result");
+		var input = "1d20b5";
 		var expected = {
 			num: 1,
 			sides: 20,
