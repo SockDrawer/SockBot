@@ -114,7 +114,7 @@
             s = s.replace(/%__(\w+)__%/g, function (m, key) {
                 if (post.hasOwnProperty(key)) {
                     return key === 'name' 
-                        ? post[key].replace(/@/g, '@&zwj;')
+                        ? post[key].replace(/\b@(\w+)\b/g, '<a class="mention">@&zwj;$1</a>')
                         : post[key];
                 }
                 return m;
