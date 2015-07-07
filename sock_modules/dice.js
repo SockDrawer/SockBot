@@ -74,12 +74,8 @@ exports.roll = function (num, sides, rerollGreater, callback) {
 
     rerollGreater = rerollGreater || Number.Infinity;
     rerollGreater = Math.abs(rerollGreater);
-    if (num < 0) {
-        num *= -1;
-    }
-    if (sides < 0) {
-        sides *= -1;
-    }
+    num = Math.abs(num);
+    sides = Math.abs(sides);
     if (!num || !sides) {
         callback(0, [
             []
