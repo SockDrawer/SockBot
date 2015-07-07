@@ -70,4 +70,5 @@ Parsed Command Data
 | command | <code>string</code> | Command name |
 | args | <code>Array.&lt;string&gt;</code> | Command arguments |
 | mention | <code>string</code> | Mention text that was included in command |
+| post | <code>external.posts.CleanedPost</code> | Post that triggered the command |
 
