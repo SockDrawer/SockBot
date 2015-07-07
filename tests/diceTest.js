@@ -461,6 +461,34 @@ describe("XDice", function() {
 		});
 	});
 	
+	it("should roll 1d-20", function(done) {
+		var match = {
+			num: 1,
+			sides: -20
+		}
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(1,[[1]]);
+		
+		diceModule.rollXDice(match, function(response) {
+			assert(mockRoll.getCall(0).calledWith(1,-20, undefined),"Correct arguments should be passed; instead received " + mockRoll.getCall(0).args);
+			assert.include(response,'Rolling 1d-20: 1');
+			done();
+		});
+	});
+	
+	it("should roll -1d-20", function(done) {
+		var match = {
+			num: -1,
+			sides: -20
+		}
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(1,[[1]]);
+		
+		diceModule.rollXDice(match, function(response) {
+			assert(mockRoll.getCall(0).calledWith(-1,-20, undefined),"Correct arguments should be passed; instead received " + mockRoll.getCall(0).args);
+			assert.include(response,'Rolling -1d-20: 1');
+			done();
+		});
+	});
+	
 	it("should roll 2d20", function(done) {
 		var match = {
 			num: 2,
@@ -486,6 +514,36 @@ describe("XDice", function() {
 		diceModule.rollXDice(match, function(response) {
 			assert(mockRoll.getCall(0).calledWith(-2,20, undefined),"Correct arguments should be passed; instead received " + mockRoll.getCall(0).args);
 			assert.include(response,'Rolling -2d20: 1, 1');
+			assert.include(response,'Sum: -2');
+			done();
+		});
+	});
+	
+	it("should roll 2d-20", function(done) {
+		var match = {
+			num: 2,
+			sides: -20
+		}
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(2,[[1,1]]);
+		
+		diceModule.rollXDice(match, function(response) {
+			assert(mockRoll.getCall(0).calledWith(2,-20, undefined),"Correct arguments should be passed; instead received " + mockRoll.getCall(0).args);
+			assert.include(response,'Rolling 2d-20: 1, 1');
+			assert.include(response,'Sum: 2');
+			done();
+		});
+	});
+	
+	it("should roll -2d-20", function(done) {
+		var match = {
+			num: -2,
+			sides: -20
+		}
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(2,[[1,1]]);
+		
+		diceModule.rollXDice(match, function(response) {
+			assert(mockRoll.getCall(0).calledWith(-2,-20, undefined),"Correct arguments should be passed; instead received " + mockRoll.getCall(0).args);
+			assert.include(response,'Rolling -2d-20: 1, 1');
 			assert.include(response,'Sum: -2');
 			done();
 		});
