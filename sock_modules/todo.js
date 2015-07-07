@@ -205,8 +205,8 @@ function makeSafe(fn) {
     };
 }
 
-exports.onNotify = function onNotify(_, __, topic, post, callback) {
-    if (!ready || !post) {
+exports.onNotify = function onNotify(type, _, topic, post, callback) {
+    if (!ready || !post || type === 'mentioned') {
         return callback();
     }
     var doc = createDocument(post, topic);
