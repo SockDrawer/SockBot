@@ -6,33 +6,14 @@ var gulp = require('gulp'),
     istanbul = require('gulp-istanbul'),
     mocha = require('gulp-mocha'),
     eslint = require('gulp-eslint'),
-    git = require('gulp-git'),
-    concat = require('gulp-concat');
-
-var exec = require('child_process').exec,
-    fs = require('fs');
+    git = require('gulp-git');
 
 var sockFiles = ['*.js', '!./gulpfile.js', 'sock_modules/**/*.js'],
     sockDocs = ['README.md', 'docs/**/*.md'],
-    sockTests = ['tests/**/*.js'],
-    sockReadme = ['docs/badges.md.tmpl', 'docs/index.md', 'docs/Special Thanks.md'],
-    sockContribs = ['docs/contributors.md.tmpl', 'docs/contributors.table.md.tmpl'];
-
+    sockTests = ['tests/**/*.js'];
+    
 var JobNumber = process.env.TRAVIS_JOB_NUMBER,
-    runDocs = !JobNumber || /[.]1$/.test(JobNumber),
-    logger = gutil.log;
-
-
-/**
- * Generate README.md.
- *
- * Generate document by concatenating badges.md.tmpl, index.md, and Special Thanks.md from docs/
- */
-gulp.task('readme',  function () {
-    return gulp.src(sockReadme)
-        .pipe(concat('README.md'))
-        .pipe(gulp.dest('.'));
-});
+    runDocs = !JobNumber || /[.]1$/.test(JobNumber);
 
 /**
  * Generate API documentation for all js files, place markup in the correct folder for readthedocs.org
@@ -144,7 +125,7 @@ gulp.task('test', function(done) {
 });
 
 // Meta tasks
-gulp.task('buildDocs', ['readme', 'docs'], function () {});
+gulp.task('buildDocs', ['docs'], function () {});
 gulp.task('preBuild', ['buildDocs'], function () {});
 gulp.task('postBuild', ['pushDocs'], function () {});
 gulp.task('default', ['lint', 'lintTests'], function () {});
