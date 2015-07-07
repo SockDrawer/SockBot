@@ -306,12 +306,14 @@ exports.rollXDice = function (match, callback) {
         }
         if (isNaN(sum)) {
             result += ' ' + exports.getError();
-        } else if (Math.abs(num) > 1) {
+        } else {
             if (match.bonus) {
                 sum += match.bonus;
                 result += ' Bonus: ' + match.bonus;
             }
-            result += ' Sum: ' + sum * (num < 0 ? -1 : 1);
+            if (Math.abs(num) > 1 || match.bonus) {
+                result += ' Sum: ' + sum * (num < 0 ? -1 : 1);
+            }
         }
         callback(result);
     });
