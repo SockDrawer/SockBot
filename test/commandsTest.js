@@ -36,7 +36,7 @@ describe('browser', () => {
     });
     describe('internals', () => {
         const fns = ['parseMentionCommand', 'parseShortCommand'],
-            objs = ['mention'],
+            objs = ['mention', 'events'],
             vals = [];
         describe('should include expected functions:', () => {
             fns.forEach((fn) => {
@@ -129,7 +129,7 @@ describe('browser', () => {
         const parseMentionCommand = commands.internals.parseMentionCommand;
         before((done) => {
             config.core.username = 'foobar';
-            commands.prepareParser(done);
+            commands.prepareParser({}, done);
         });
         describe('output object format', () => {
             it('should match bare command', () => {
@@ -218,12 +218,20 @@ describe('browser', () => {
         });
         it('should call callback on completion', () => {
             const spy = sinon.spy();
-            prepareParser(spy);
+            prepareParser({}, spy);
             spy.called.should.be.true;
             spy.lastCall.args.should.deep.equal([null]);
         });
+        it('should set events object', () => {
+            const spy = sinon.spy(),
+                events = {
+                    on: () => 0
+                };
+            prepareParser(events, spy);
+            commands.internals.events.should.equal(events);
+        });
         it('should produce expected mentionCommand regexp', () => {
-            prepareParser(() => 0);
+            prepareParser({}, () => 0);
             commands.internals.mention.toString().should.equal('/^@foo\\s\\S{3,}(\\s|$)/i');
         });
     });
@@ -242,25 +250,16 @@ describe('browser', () => {
             events = {
                 emit: sinon.stub()
             };
+            commands.internals.events = events;
             callbackSpy = sinon.spy();
         });
         it('should require callback', () => {
-            expect(() => commands.parseCommands({}, {}, null)).to.throw('callback must be supplied');
-            parseShortCommand.called.should.be.false;
-            parseMentionCommand.called.should.be.false;
-        });
-        it('should require events', () => {
-            expect(() => commands.parseCommands({}, null, () => 0)).to.throw('events must be supplied');
-            parseShortCommand.called.should.be.false;
-            parseMentionCommand.called.should.be.false;
-        });
-        it('should require events.emit', () => {
-            expect(() => commands.parseCommands({}, {}, () => 0)).to.throw('events must be supplied');
+            expect(() => commands.parseCommands({}, null)).to.throw('callback must be supplied');
             parseShortCommand.called.should.be.false;
             parseMentionCommand.called.should.be.false;
         });
         it('should accept empty post', () => {
-            commands.parseCommands(null, events, callbackSpy);
+            commands.parseCommands(null, callbackSpy);
             callbackSpy.called.should.be.true;
             callbackSpy.lastCall.args.should.deep.equal([null, []]);
             parseShortCommand.called.should.be.false;
@@ -269,7 +268,7 @@ describe('browser', () => {
         it('should accept blank post', () => {
             commands.parseCommands({
                 raw: ''
-            }, events, callbackSpy);
+            }, callbackSpy);
             callbackSpy.called.should.be.true;
             callbackSpy.lastCall.args.should.deep.equal([null, []]);
             parseShortCommand.called.should.be.false;
@@ -278,7 +277,7 @@ describe('browser', () => {
         it('should not emit on non command post', () => {
             commands.parseCommands({
                 raw: 'i am a little text short and stout'
-            }, events, callbackSpy);
+            }, callbackSpy);
             callbackSpy.called.should.be.true;
             callbackSpy.lastCall.args.should.deep.equal([null, []]);
             parseShortCommand.called.should.be.false;
@@ -288,7 +287,7 @@ describe('browser', () => {
         it('should not emit on non command post 2', () => {
             commands.parseCommands({
                 raw: '!i am a little text short and stout'
-            }, events, callbackSpy);
+            }, callbackSpy);
             callbackSpy.called.should.be.true;
             callbackSpy.lastCall.args.should.deep.equal([null, []]);
             parseShortCommand.called.should.be.true;
@@ -302,7 +301,7 @@ describe('browser', () => {
             events.emit.returns(true);
             commands.parseCommands({
                 raw: '!i am a little text short and stout'
-            }, events, callbackSpy);
+            }, callbackSpy);
             clocks.tick(0);
             events.emit.called.should.be.true;
             events.emit.lastCall.args.should.deep.equal(['command#foobar', {
@@ -320,7 +319,7 @@ describe('browser', () => {
             events.emit.returns(false);
             commands.parseCommands({
                 raw: '!i am a little text short and stout'
-            }, events, callbackSpy);
+            }, callbackSpy);
             clocks.tick(0);
             events.emit.calledWith('command#ERROR').should.be.false;
         });
@@ -332,7 +331,7 @@ describe('browser', () => {
                 .onSecondCall().returns(true);
             commands.parseCommands({
                 raw: '!i am a little text short and stout'
-            }, events, callbackSpy);
+            }, callbackSpy);
             clocks.tick(0);
             events.emit.callCount.should.equal(2);
             events.emit.calledWith('command#ERROR').should.be.true;
@@ -345,7 +344,7 @@ describe('browser', () => {
             events.emit.returns(false);
             commands.parseCommands({
                 raw: '!i am a little text short and stout'
-            }, events, callbackSpy);
+            }, callbackSpy);
             clocks.tick(0);
             events.emit.callCount.should.equal(3);
             events.emit.calledWith('command#ERROR').should.be.true;
@@ -355,6 +354,7 @@ describe('browser', () => {
             parseShortCommand.restore();
             parseMentionCommand.restore();
             clocks.restore();
+            commands.internals.events = null;
         });
     });
 });

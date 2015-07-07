@@ -11,7 +11,8 @@ const config = require('./config');
 const internals = {
     mention: null,
     parseShortCommand: parseShortCommand,
-    parseMentionCommand: parseMentionCommand
+    parseMentionCommand: parseMentionCommand,
+    events: null
 };
 /**
  * Parsed Command Data
@@ -30,10 +31,12 @@ const internals = {
  *
  * Needs to be called to set the internals of the parser after reading config file.
  *
+ * @param {EventEmitter} events EventEmitter that will be core comms for SockBot
  * @param {completedCallback} callback Completion callback
  */
-exports.prepareParser = function prepareParser(callback) {
+exports.prepareParser = function prepareParser(events, callback) {
     internals.mention = new RegExp('^@' + config.core.username + '\\s\\S{3,}(\\s|$)', 'i');
+    internals.events = events;
     callback(null);
 };
 
@@ -78,12 +81,9 @@ function parseMentionCommand(line) {
     };
 }
 
-exports.parseCommands = function parseCommands(post, events, callback) {
+exports.parseCommands = function parseCommands(post, callback) {
     if (typeof callback !== 'function') {
         throw new Error('callback must be supplied');
-    }
-    if (!events || typeof events.emit !== 'function') {
-        throw new Error('events must be supplied');
     }
     if (!post || !post.raw) {
         callback(null, []);
@@ -99,10 +99,10 @@ exports.parseCommands = function parseCommands(post, events, callback) {
     commands.forEach((command) => {
         setImmediate(() => {
             command.post = post;
-            const handled = events.emit('command#' + command.command, command);
+            const handled = internals.events.emit('command#' + command.command, command);
             if (!handled && !command.mention) {
-                if (!events.emit('command#ERROR', command)) {
-                    events.emit('error', new Error('command `' + command.command + '` was unhandled.'));
+                if (!internals.events.emit('command#ERROR', command)) {
+                    internals.events.emit('error', new Error('command `' + command.command + '` was unhandled.'));
                 }
             }
         });
