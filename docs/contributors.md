@@ -10,6 +10,7 @@
 | PleegWat | 15 |
 | Travis-CI | 15 |
 | yamikuronue | 10 |
+| Travis-CI | 7 |
 | Javier Rotelli | 6 |
 | abarker-TDWTF | 4 |
 | Ben Lubar | 3 |

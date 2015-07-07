@@ -77,6 +77,7 @@ For providing the lovely and amusing Error messages that sockbot will occasional
 | PleegWat | 15 |
 | Travis-CI | 15 |
 | yamikuronue | 10 |
+| Travis-CI | 7 |
 | Javier Rotelli | 6 |
 | abarker-TDWTF | 4 |
 | Ben Lubar | 3 |
