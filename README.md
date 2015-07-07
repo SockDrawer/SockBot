@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/SockDrawer/SockBot.svg)](https://travis-ci.org/SockDrawer/SockBot)
 [![Coverage Status](https://coveralls.io/repos/SockDrawer/SockBot/badge.svg)](https://coveralls.io/r/SockDrawer/SockBot)
-[![Docs Status](https://readthedocs.org/projects/sockbot/badge/)](http://sockbot.readthedocs.org
+[![Docs Status](https://readthedocs.org/projects/sockbot/badge)](http://sockbot.readthedocs.org)
 
 [![Dependency Status](https://david-dm.org/SockDrawer/SockBot.svg)](https://david-dm.org/SockDrawer/SockBot)
 [![devDependency Status](https://david-dm.org/SockDrawer/SockBot/dev-status.svg)](https://david-dm.org/SockDrawer/SockBot#info=devDependencies)
@@ -70,12 +70,12 @@ For providing the lovely and amusing Error messages that sockbot will occasional
 | RaceProUK | 200 |
 | Accalia Elementia | 181 |
 | Accalia | 150 |
-| Accalia de Elementia | 69 |
+| Accalia de Elementia | 71 |
 | Yami | 34 |
 | Yamikuronue | 17 |
 | Andrew Cook | 15 |
 | PleegWat | 15 |
-| Travis-CI | 13 |
+| Travis-CI | 14 |
 | yamikuronue | 10 |
 | Javier Rotelli | 6 |
 | abarker-TDWTF | 4 |
