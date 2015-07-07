@@ -1,71 +1,25 @@
 'use strict';
 const gulp = require('gulp'),
-    gutil = require('gulp-util'),
     gulpJsdoc2md = require('gulp-jsdoc-to-markdown'),
     rename = require('gulp-rename'),
     istanbul = require('gulp-istanbul'),
     istanbulHarmony = require('istanbul-harmony'),
     mocha = require('gulp-mocha'),
     eslint = require('gulp-eslint'),
-    git = require('gulp-git'),
-    concat = require('gulp-concat');
-
-const exec = require('child_process').exec,
-    fs = require('fs');
+    git = require('gulp-git');
 
 const sockFiles = ['*.js', '!./gulpfile.js', '**/plugins/**/*.js', '!node_modules/**'],
     sockExterns = ['**/external/**/*.js'],
     sockDocs = ['README.md', 'docs/**/*.md'],
-    sockTests = ['test/**/*.js'],
-    sockReadme = ['docs/badges.md.tmpl', 'docs/index.md', 'docs/Special Thanks.md', 'docs/contributors.md'],
-    sockContribs = ['docs/contributors.md.tmpl', 'docs/contributors.table.md.tmpl'];
+    sockTests = ['test/**/*.js'];
 
 const JobNumber = process.env.TRAVIS_JOB_NUMBER,
     runDocs = !JobNumber || /[.]1$/.test(JobNumber);
 
 /**
- * Read git log to get a up to date list of contributors
- *
- * Output to a template file that's used to generate contributors.md
- */
-gulp.task('buildContribs', ['gitBranch'], (done) => {
-    exec('git shortlog -ns < /dev/tty', (err, out) => {
-        if (err) {
-            return done(err);
-        }
-        let res = out.replace(/^\s+/gm, '').split('\n').filter((i) => !!i).map((i) => {
-            let j = i.split('\t');
-            return '| ' + j[1] + ' | ' + j[0] + ' |';
-        }).join('\n');
-        fs.writeFile('docs/contributors.table.md.tmpl',
-            '| Contributor | Commits |\n|---|---:|\n' + res, (err) => done(err));
-    });
-});
-
-/**
- * Generate docs/contributors.md
- */
-gulp.task('contribs', ['buildContribs'], () => {
-    return gulp.src(sockContribs)
-        .pipe(concat('contributors.md'))
-        .pipe(gulp.dest('docs/'));
-});
-
-/**
- * Generate README.md.
- *
- * Generate document by concatenating badges.md.tmpl, index.md, and Special Thanks.md from docs/
- */
-gulp.task('readme', ['contribs'], (done) => {
-    return gulp.src(sockReadme)
-        .pipe(concat('README.md'))
-        .pipe(gulp.dest('.'));
-});
-
-/**
  * Generate API documentation for all js files, place markup in the correct folder for readthedocs.org
  */
-gulp.task('docs', ['gitBranch', 'lintExterns'], function (done) {
+gulp.task('docs', ['lintExterns'], function (done) {
     // Abort(successfully) early if running in CI and not job #1
     if (!runDocs) {
         return done();
@@ -124,35 +78,6 @@ gulp.task('gitConfig', (done) => {
             args: 'config user.email "Travis-CI@servercooties.com"'
         }, () => {
             done();
-        });
-    });
-});
-
-/**
- * Pull git branch locally (solves detached head issue in CI)
- */
-gulp.task('gitBranch', (done) => {
-    // Abort(successfully) early if not running in CI
-    if (!JobNumber) {
-        return done();
-    }
-    let complete = false;
-    if (!runDocs) {
-        return done();
-    }
-    const branch = process.env.TRAVIS_BRANCH;
-    if (!branch) {
-        return done();
-    }
-    git.checkout(branch, () => {
-        // Make sure we have full log history.
-        git.pull('origin', branch, {
-            args: '--unshallow'
-        }, () => {
-            if (!complete) {
-                done();
-            }
-            complete = true;
         });
     });
 });
