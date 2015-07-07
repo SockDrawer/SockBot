@@ -240,5 +240,18 @@ describe("DeckModule", function() {
 		});
 	});
 	
+	it("should initialise", function(done) {
+		var conf = {
+			modules: {
+				CardBox: {
+					enabled: true
+				}
+			}
+		};
+		cardsModule.begin(null, conf);
+		assert.equal(cardsModule.configuration.enabled,true,"CardBox not initialised correctly");
+		done();
+	});
+	
 /*end module tests */
-})
+});

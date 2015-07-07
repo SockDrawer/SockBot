@@ -10,8 +10,7 @@
 
 var parser,
     discourse,
-    conf,
-    configuration;
+    conf;
 	
 	
 var decks = {};
@@ -54,7 +53,7 @@ exports.version = '1.0.0';
  * @param  {object} config - The configuration to use
  */
 exports.begin = function begin(browser, config) {
-    configuration = config.modules[exports.name];
+    exports.configuration = config.modules[exports.name];
     conf = config;
     discourse = browser;
 };
