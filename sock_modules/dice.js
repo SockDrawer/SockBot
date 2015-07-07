@@ -9,10 +9,22 @@
 var async = require('async'),
     xRegExp = require('xregexp').XRegExp,
     request = require('request');
-var parser,
-    discourse,
-    conf,
-    configuration;
+var conf;
+
+// Only need to construct these once
+var pNum = '(?<num>-?\\d+)',
+    pSides = '(?<sides>-?\\d+)',
+    pMethod = '(?<method>W|Wolf|F|Fate|Fudge)',
+    pTarget = '(?:t(?<target>\\d+))',
+    pBonus = '(?:b(?<bonus>-?\\d+))',
+    pOptions = '(?<options>[pfrs]+)',
+    pMatcher = '\\b' + pNum + '?d(' + pSides + '|' + pMethod +
+		')(?<optional>' + pTarget + '|' + pBonus + '|' + pOptions +
+		')*\\b',
+    rTarget = xRegExp(pTarget, 'i'),
+    rBonus = xRegExp(pBonus, 'i'),
+    rOptions = xRegExp(pOptions, 'i'),
+    rMatcher = xRegExp(pMatcher, 'i');
 
 /**
  * Brief description of this module for Help Docs
@@ -39,7 +51,7 @@ exports.name = 'DiceMaster';
  * the module with respect to other modules.
  *
  * sock_modules **should not** define modules with negative permissions.
- * Default value is 50 with lower numbers being higher priority. 
+ * Default value is 50 with lower numbers being higher priority.
  */
 exports.priority = undefined;
 
@@ -48,71 +60,20 @@ exports.priority = undefined;
  */
 exports.version = '1.5.0';
 
-//The parse is complicated. don't let it leak
-(function () {
-    var pNum = '(?<num>-?\\d+)',
-        pSides = '(?<sides>-?\\d+)',
-        pMethod = '(?<method>W|Wolf|F|Fate|Fudge)',
-        pTarget = '(?:t(?<target>\\d+))',
-        pBonus = '(?:b(?<bonus>-?\\d+))',
-        pOptions = '(?<options>[pfrs]+)',
-        pMatcher = '\\b' + pNum + '?d(' + pSides + '|' + pMethod +
-        ')(?<optional>' + pTarget + '|' + pBonus + '|' + pOptions +
-        ')*\\b',
-        rTarget = xRegExp(pTarget, 'i'),
-        rBonus = xRegExp(pBonus, 'i'),
-        rOptions = xRegExp(pOptions, 'i'),
-        rMatcher = xRegExp(pMatcher, 'i');
-    parser = function parser(input, each, complete) {
-        var match = 1,
-            pos = 0;
-        async.until(
-            function () {
-                return !match;
-            },
-            function (next) {
-                match = rMatcher.xexec(input, pos);
-                if (match) {
-                    var inner = match[0] || '',
-                        target = rTarget.xexec(inner),
-                        bonus = rBonus.xexec(inner),
-                        options = rOptions.xexec(inner) || {},
-                        matched = {
-                            num: match.num ?
-                                parseInt(match.num, 10) : undefined,
-                            sides: match.sides ?
-                                parseInt(match.sides, 10) : undefined,
-                            method: match.method ?
-                                match.method.toLowerCase() : undefined,
-                            target: (target && target.target) ?
-                                parseInt(target.target, 10) : undefined,
-                            options: (options.options || '').toLowerCase(),
-                            bonus: (bonus && bonus.bonus) ?
-                                parseInt(bonus.bonus, 10) : undefined
-                        };
-                    matched.reroll = matched.options.indexOf('r') !== -1;
-                    matched.preroll = matched.options.indexOf('p') !== -1;
-                    matched.sort = matched.options.indexOf('s') !== -1;
-                    matched.fails = matched.options.indexOf('f') !== -1;
-                    pos = match.index + match[0].length - 1;
-                    each(matched, next);
-                } else {
-                    next(true);
-                }
-            },
-            complete
-        );
-
-    };
-}());
-
-function getDiceFromServer(num, sides, rerollGreater, callback) {
+/**
+ * Roll the actual dice. Uses random.org as a source of random numbers.
+ * Calls back with the following parameters:
+ *  - sum: the total sum of dice rolled
+ *  - results: the array of arrays of dice rolled (int[][])
+ */
+exports.roll = function (num, sides, rerollGreater, callback) {
     var factor = sides < 0 ? -1 : 1,
         results = [],
         sum = 0,
         toRoll;
+
+    rerollGreater = rerollGreater || Number.Infinity;
     rerollGreater = Math.abs(rerollGreater);
-    rerollGreater = isNaN(rerollGreater) ? Number.Infinity : rerollGreater;
     if (num < 0) {
         num *= -1;
     }
@@ -123,6 +84,7 @@ function getDiceFromServer(num, sides, rerollGreater, callback) {
         callback(0, [
             []
         ]);
+        return;
     }
     toRoll = num;
     async.whilst(
@@ -130,7 +92,7 @@ function getDiceFromServer(num, sides, rerollGreater, callback) {
             return toRoll > 0;
         },
         function (next) {
-            if (results.length >= (configuration.maxReRolls || 20)) {
+            if (results.length >= (exports.configuration.maxReRolls || 20)) {
                 results.push(['Too many Rerolls. Stopping.']);
                 next(true);
                 return;
@@ -164,43 +126,29 @@ function getDiceFromServer(num, sides, rerollGreater, callback) {
             callback(sum, results);
         }
     );
-
-}
-
-/**
- * Get a random error message. Adds quirkiness to the bot.
- * @return {string} The error string.
- */
-function getError() {
-    return conf.errors[Math.floor(Math.random() * conf.errors.length)];
-}
+};
 
 /**
  * Pre-roll dice. To get bad streaks out early :)
  * @param  {number} num The number of dice to roll
  * @param  {number} sides The size of dice to roll
- * @return {number} How many dice were rolled
+ * @return {number} How many rolls were performed
  */
-function prerollDice(num, sides) {
+exports.prerollDice = function (num, sides) {
     var dice,
-        ct = 0,
         i,
-        ones = 1,
-        reducer = function reducer(a, o) {
-            return a + o === 1 ? 1 : 0;
-        };
+        ct = 0;
     num = Math.abs(num);
     sides = Math.abs(sides);
-    while (ones > 0) {
+    do {
         dice = [];
         for (i = 0; i < num; i += 1) {
             dice.push((Math.floor(Math.random() * sides)) + 1);
         }
-        ones = dice.reduce(reducer, 0);
         ct += 1;
-    }
+    } while (dice.indexOf(1) > -1);
     return ct;
-}
+};
 
 /**
  * Roll White Wolf-style dice
@@ -208,9 +156,13 @@ function prerollDice(num, sides) {
  * @param  {string} match.reroll Whether to reroll 10s (exploding dice)
  * @param  {number} match.num How many dice to roll. Defaults to ten.
  * @param  {number} match.target The target number for the roll
+ * @param  {string} match.preroll Whether to preroll
+ * @param  {number} match.bonus The bonus to add
  * @param  {Function} callback The callback to call when complete
+ * Will receive the following parameters:
+ * - Result: the string response to return
  */
-function rollWolfDice(match, callback) {
+exports.rollWolfDice = function (match, callback) {
     var criticals,
         result;
     if (match.reroll) {
@@ -223,11 +175,11 @@ function rollWolfDice(match, callback) {
         match.target = 8;
     }
     result = 'Rolling ' + match.num + 'd10 Target: ' + match.target + ': ';
-    if (match.num > (configuration.maxDice || 20)) {
+    if (match.num > (exports.configuration.maxDice || 20)) {
         callback(result + 'Error Too many dice requested');
         return;
     }
-    getDiceFromServer(match.num, 10, criticals, function (sum, dice) {
+    exports.roll(match.num, 10, criticals, function (sum, dice) {
         var successes = sum,
             mapper = function mapper(v) {
                 if (v >= match.target) {
@@ -238,7 +190,8 @@ function rollWolfDice(match, callback) {
             };
         successes = 0; // reset successes
         if (match.preroll) {
-            result += 'Prerolling ' + prerollDice(match.num, 10) + ' times: ';
+            result += 'Prerolling ' + exports.prerollDice(match.num, 10)
+                + ' times: ';
         }
         result += dice.shift().map(mapper).join(', ');
         if (dice.length > 0) {
@@ -255,7 +208,7 @@ function rollWolfDice(match, callback) {
         result += ' Successes: ' + successes;
         callback(result);
     });
-}
+};
 
 /**
  * Roll Fudge dice
@@ -263,20 +216,20 @@ function rollWolfDice(match, callback) {
  * @param  {number} match.num How many dice to roll. Defaults to four
  * @param  {Function} callback The callback to call when complete
  */
-function rollFudgeDice(match, callback) {
+exports.rollFudgeDice = function (match, callback) {
     if (!match.num) {
         match.num = 4;
     }
     var result = 'Rolling ' + match.num + ' dice of Fate: ';
     if (isNaN(match.num) || match.num < 1) {
-        callback(result + getError());
+        callback(result + exports.getError());
         return;
     }
-    if (match.num > (configuration.maxDice || 20)) {
+    if (match.num > (exports.configuration.maxDice || 20)) {
         callback(result + 'Error Too many dice requested');
         return;
     }
-    getDiceFromServer(match.num, 6, undefined, function (sum, dice) {
+    exports.roll(match.num, 6, undefined, function (sum, dice) {
         var total = sum;
         total = dice[0].reduce(function (i, v) {
             if (v < 3) {
@@ -306,7 +259,7 @@ function rollFudgeDice(match, callback) {
         result += 'Total: ' + total;
         callback(result);
     });
-}
+};
 
 /**
  * Roll arbitrary d20-style dice
@@ -315,7 +268,7 @@ function rollFudgeDice(match, callback) {
  * @param  {number} match.num How many dice to roll
  * @param  {Function} callback The callback to call when complete
  */
-function rollXDice(match, callback) {
+exports.rollXDice = function (match, callback) {
     var num = match.num,
         sides = match.sides,
         crit,
@@ -326,21 +279,21 @@ function rollXDice(match, callback) {
     }
     result = 'Rolling ' + num + 'd' + sides + ': ';
     if (isNaN(num) || isNaN(sides) || !num) {
-        return callback(result + getError());
+        return callback(result + exports.getError());
     }
-    if (num > (configuration.maxDice || 20)) {
+    if (num > (exports.configuration.maxDice || 20)) {
         return callback(result + 'Error Too many dice requested');
     }
     if (sides === 1) {
-        return callback(result + 'Sum : ' + num);
+        return callback(result + 'Sum: ' + num);
     }
     if (match.preroll) {
-        result += 'Prerolling ' + prerollDice(num, sides) + ' times: ';
+        result += 'Prerolling ' + exports.prerollDice(num, sides) + ' times: ';
     }
     if (match.reroll) {
         crit = sides;
     }
-    getDiceFromServer(num, sides, crit, function (sum, dice) {
+    exports.roll(num, sides, crit, function (sum, dice) {
         var d = dice.shift();
 
         result += d.join(', ');
@@ -352,7 +305,7 @@ function rollXDice(match, callback) {
             result += '\n';
         }
         if (isNaN(sum)) {
-            result += ' ' + getError();
+            result += ' ' + exports.getError();
         } else if (Math.abs(num) > 1) {
             if (match.bonus) {
                 sum += match.bonus;
@@ -362,7 +315,68 @@ function rollXDice(match, callback) {
         }
         callback(result);
     });
-}
+};
+
+/**
+ * Parse the command to determine how many and of what type of dice to roll
+ * @param  {string} input The input for the dice roll command
+ * @param  {dice~each} each The function to execute for each match found
+ * @param  {Function} complete The callback to call when complete
+ */
+exports.parser = function parser(input, complete) {
+    var matches = [],
+        results = [];
+    rMatcher.forEach(input,
+        function (match) {
+            var inner = match[0] || '',
+                target = rTarget.xexec(inner),
+                bonus = rBonus.xexec(inner),
+                options = rOptions.xexec(inner) || {},
+                matched = {
+                    num: match.num ? parseInt(match.num, 10) : undefined,
+                    sides: match.sides ? parseInt(match.sides, 10) : undefined,
+                    method: match.method
+                        ? match.method.toLowerCase()
+                        : undefined,
+                    target: (target && target.target)
+                        ? parseInt(target.target, 10)
+                        : undefined,
+                    options: (options.options || '').toLowerCase(),
+                    bonus: (bonus && bonus.bonus)
+                        ? parseInt(bonus.bonus, 10)
+                        : undefined
+                };
+            matched.reroll = matched.options.indexOf('r') !== -1;
+            matched.preroll = matched.options.indexOf('p') !== -1;
+            matched.sort = matched.options.indexOf('s') !== -1;
+            matched.fails = matched.options.indexOf('f') !== -1;
+            matches.push(matched);
+        });
+    var cont = function (result) {
+        if (result) {
+            results.push(result);
+        }
+        if (results.length < 20 && matches.length > 0) {
+            exports.rollDice(matches.shift(), cont);
+        } else {
+            complete(results.join('\n'));
+        }
+    }
+    cont();
+};
+
+/**
+ * Roll as many dice as can be parsed.
+ * @param  {string} input The input string to parse
+ * @param  {Function} callback The callback to call when complete
+ */
+exports.handleInput = function (payload, callback) {
+    exports.parser(payload.dice,
+        function (result) {
+            callback(null, result);
+        }
+    );
+};
 
 /**
  * Determine what dice to roll and outsource the logic
@@ -370,72 +384,37 @@ function rollXDice(match, callback) {
  * @param  {string} match.method What method to use to roll dice
  * @param  {Function} callback The callback to call when complete.
  */
-function rollDice(match, callback) {
+exports.rollDice = function (match, callback) {
     if (!match.method) {
-        rollXDice(match, callback);
+        exports.rollXDice(match, callback);
     } else if (match.method[0] === 'f') {
-        rollFudgeDice(match, callback);
+        exports.rollFudgeDice(match, callback);
     } else if (match.method[0] === 'w') {
-        rollWolfDice(match, callback);
+        exports.rollWolfDice(match, callback);
     } else {
         callback('Not implemented');
     }
-}
-
-/**
- * Roll as many dice as can be parsed. 
- * @param  {string} input The input string to parse
- * @param  {Function} callback The callback to call when complete
- */
-function rollAllDice(input, callback) {
-    var results = [];
-    parser(input,
-        function (match, next) {
-            if (results.length >= (configuration.maxRolls || 6)) {
-                results.push('Reached maximum dice roll. stopping.');
-                next(true);
-            } else {
-                rollDice(match, function (line) {
-                    results.push(line);
-                    next();
-                });
-            }
-        },
-        function () {
-            callback(results);
-        });
-}
-
-/**
- * Runs on notification. If the dice module is not enabled or is not triggered via PM, 
- * it early aborts. Otherwise, it tries to respond with the result of the dice roll.
- * @param {string} type - The type of event. Only responds if this is 'private_message'
- * @param {string} notification - The notification to respond to
- * @param {string} topic - Unused. PM-only.
- * @param {string} post - The post the notification was for
- * @param {function} callback - The callback to notify when processing is complete.
- */
-exports.onNotify = function (type, notification, topic, post, callback) {
-    if (!configuration.enabled || !post || !post.cleaned) {
-        return callback();
-    }
-    if (['private_message', 'replied'].indexOf(type) === -1) {
-        return callback();
-    }
-
-    rollAllDice(post.cleaned, function (dice) {
-        var result = dice.join('\n\n').trim();
-        if (result) {
-            discourse.createPost(notification.topic_id,
-                notification.post_number, result,
-                function () {
-                    callback(true);
-                });
-        } else {
-            callback();
-        }
-    });
 };
+
+/**
+ *  Each command has the following properties:
+ * - handler:        The handler function.
+ * - defaults:       Default values of parameters
+ * - params:         Named parameters for this function
+ * - description:    A description of this function for the help
+ *
+ * @type {Object}
+ */
+exports.commands = {
+    'roll': {
+        handler: exports.handleInput,
+        defaults: {
+		},
+        params: ['dice', 'message'],
+        description: 'Roll dice.'
+    }
+};
+
 
 /**
  * Bootstrap the module
@@ -443,7 +422,13 @@ exports.onNotify = function (type, notification, topic, post, callback) {
  * @param  {object} config - The configuration to use
  */
 exports.begin = function begin(browser, config) {
-    configuration = config.modules[exports.name];
     conf = config;
-    discourse = browser;
+};
+
+/**
+ * Get a random error message. Adds quirkiness to the bot.
+ * @return {string} The error string.
+ */
+exports.getError = function () {
+    return conf.errors[Math.floor(Math.random() * conf.errors.length)];
 };
