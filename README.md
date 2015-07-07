@@ -1,6 +1,6 @@
 # Welcome to SockBot!
 
-[![Build Status](https://travis-ci.org/SockDrawer/SockBot.svg)](https://travis-ci.org/SockDrawer/SockBot)
+[![Build Status](https://travis-ci.org/SockDrawer/SockBot.svg)](https://travis-ci.org/SockDrawer/SockBot) [![Coverage Status](https://coveralls.io/repos/SockDrawer/SockBot/badge.svg?branch=es6-dev&service=github)](https://coveralls.io/github/SockDrawer/SockBot?branch=es6-dev)
 
 Sockbot - A sock puppet Robot worthy of TheDailyWTF that interfaces with what.thedailywtf.com. SO META!
 
