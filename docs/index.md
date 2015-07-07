@@ -1,7 +1,5 @@
 # Welcome to SockBot!
 
-[![Build Status](https://travis-ci.org/SockDrawer/SockBot.svg)](https://travis-ci.org/SockDrawer/SockBot)
-
 Sockbot - A sock puppet Robot worthy of TheDailyWTF that interfaces with what.thedailywtf.com. SO META!
 
 [API Docs](docs/index.html)
