@@ -16,7 +16,7 @@ var pNum = '(?<num>-?\\d+)',
     pSides = '(?<sides>-?\\d+)',
     pMethod = '(?<method>W|Wolf|F|Fate|Fudge)',
     pTarget = '(?:t(?<target>\\d+))',
-    pBonus = '(?:b(?<bonus>-?\\d+))',
+    pBonus = '(?:(b|\\+)(?<bonus>-?\\d+))',
     pOptions = '(?<options>[pfrs]+)',
     pMatcher = '\\b' + pNum + '?d(' + pSides + '|' + pMethod +
 		')(?<optional>' + pTarget + '|' + pBonus + '|' + pOptions +
