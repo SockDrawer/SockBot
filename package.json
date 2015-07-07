@@ -29,12 +29,11 @@
     "gulp-rename": "^1.2.2",
     "gulp-util": "^3.0.5",
     "istanbul-harmony": "^0.3.12",
-    "jsdoc-to-markdown": "^1.1.1",
     "sinon": "^1.14.1"
   },
   "scripts": {
     "start": "node --harmony --harmony_arrow_functions SockBot.js",
-    "lint": "node --harmony --harmony_arrow_functions node_modules/.bin/gulp lint lintTests",
+    "lint": "node --harmony --harmony_arrow_functions node_modules/.bin/gulp lint",
     "test": "node --harmony --harmony_arrow_functions node_modules/.bin/gulp test",
     "gulp": "node --harmony --harmony_arrow_functions node_modules/.bin/gulp"
   }
