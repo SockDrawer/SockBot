@@ -15,52 +15,20 @@ var exec = require('child_process').exec,
 var sockFiles = ['*.js', '!./gulpfile.js', 'sock_modules/**/*.js'],
     sockDocs = ['README.md', 'docs/**/*.md'],
     sockTests = ['tests/**/*.js'],
-    sockReadme = ['docs/badges.md.tmpl', 'docs/index.md', 'docs/Special Thanks.md', 'docs/contributors.md'],
+    sockReadme = ['docs/badges.md.tmpl', 'docs/index.md', 'docs/Special Thanks.md'],
     sockContribs = ['docs/contributors.md.tmpl', 'docs/contributors.table.md.tmpl'];
 
 var JobNumber = process.env.TRAVIS_JOB_NUMBER,
     runDocs = !JobNumber || /[.]1$/.test(JobNumber),
     logger = gutil.log;
 
-/**
- * Read git log to get a up to date list of contributors
- *
- * Output to a template file that's used to generate contributors.md
- */
-gulp.task('buildContribs', ['gitBranch'], function (done) {
-    exec('git shortlog -ns < /dev/tty', function (err, out) {
-        if (err) {
-            return done(err);
-        }
-        var res = out.replace(/^\s+/gm, '').split('\n').filter(function (i) {
-            return !!i;
-        }).map(function (i) {
-            var j = i.split('\t');
-            return '| ' + j[1] + ' | ' + j[0] + ' |';
-        }).join('\n');
-        fs.writeFile('docs/contributors.table.md.tmpl',
-            '| Contributor | Commits |\n|---|---:|\n' + res,
-            function (err) {
-                done(err);
-            });
-    });
-});
-
-/**
- * Generate docs/contributors.md
- */
-gulp.task('contribs', ['buildContribs'], function () {
-    return gulp.src(sockContribs)
-        .pipe(concat('contributors.md'))
-        .pipe(gulp.dest('docs/'));
-});
 
 /**
  * Generate README.md.
  *
  * Generate document by concatenating badges.md.tmpl, index.md, and Special Thanks.md from docs/
  */
-gulp.task('readme', ['contribs'], function () {
+gulp.task('readme',  function () {
     return gulp.src(sockReadme)
         .pipe(concat('README.md'))
         .pipe(gulp.dest('.'));
@@ -69,7 +37,7 @@ gulp.task('readme', ['contribs'], function () {
 /**
  * Generate API documentation for all js files, place markup in the correct folder for readthedocs.org
  */
-gulp.task('docs', ['gitBranch'], function (done) {
+gulp.task('docs', function (done) {
     // Abort(successfully) early if running in CI and not job #1
     if (!runDocs) {
         return done();
@@ -124,31 +92,6 @@ gulp.task('gitConfig', function (done) {
 });
 
 /**
- * Pull git branch locally (solves detached head issue in CI)
- */
-gulp.task('gitBranch', function (done) {
-    // Abort(successfully) early if not running in CI
-    if (!JobNumber) {
-        return done();
-    }
-    if (!runDocs) {
-        return done();
-    }
-    var branch = process.env.TRAVIS_BRANCH;
-    if (!branch) {
-        return done();
-    }
-    git.checkout(branch, function () {
-        // Make sure we have full log history.
-        git.pull('origin', branch, {
-            args: '--unshallow'
-        }, function () {
-            done();
-        });
-    });
-});
-
-/**
  * Commit generated documentation to be picked up by readthedocs.org
  *
  * Add CI tag to commit to prevent CI jobs from being created by checking in docs
@@ -167,23 +110,14 @@ gulp.task('pushDocs', ['gitConfig', 'commitDocs'], function (done) {
     if (!runDocs) {
         return done();
     }
-    var username = process.env.GITHUB_USERNAME,
-        token = process.env.GITHUB_TOKEN;
-    // suppress output because sensitive things could get leaked
-    // this could suppress other logging from parallel tasks.
-    // that risk is deemed acceptable to prevent sensitive information leaking
-    //gutil.log = function () {};
     git.addRemote('github', 'https://github.com/SockDrawer/SockBot.git',
         function (e) {
             if (e) {
-                gutil.log = logger;
                 return done();
             } else {
                 git.push('github', 'HEAD', {
                     args: ['-q']
                 }, function () {
-                    //restore logging for the rest of the build
-                    gutil.log = logger;
                     done();
                 });
             }
