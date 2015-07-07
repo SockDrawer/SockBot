@@ -28,7 +28,7 @@
     "gulp-mocha": "^2.1.1",
     "gulp-rename": "^1.2.2",
     "gulp-util": "^3.0.5",
-    "jsdoc-to-markdown": "^1.1.1"
+    "jsdoc-to-markdown": "^1.1.1",
     "istanbul": "^0.3.17",
     "mocha": "^2.2.5",
     "sinon": "^1.15.4"
