@@ -1,6 +1,6 @@
 # Welcome to SockBot!
 
-[![Build Status](https://travis-ci.org/SockDrawer/SockBot.svg)](https://travis-ci.org/SockDrawer/SockBot) [![Coverage Status](https://coveralls.io/repos/SockDrawer/SockBot/badge.svg?branch=es6-dev&service=github)](https://coveralls.io/github/SockDrawer/SockBot?branch=es6-dev)
+[![Build Status](https://travis-ci.org/SockDrawer/SockBot.svg)](https://travis-ci.org/SockDrawer/SockBot)
 
 Sockbot - A sock puppet Robot worthy of TheDailyWTF that interfaces with what.thedailywtf.com. SO META!
 
@@ -66,13 +66,13 @@ For providing the lovely and amusing Error messages that sockbot will occasional
 | Accalia Elementia | 181 |
 | Accalia | 150 |
 | Accalia de Elementia | 64 |
-| Yami | 34 |
+| Yami | 35 |
 | Yamikuronue | 17 |
 | Andrew Cook | 15 |
 | PleegWat | 15 |
 | yamikuronue | 10 |
+| Travis-CI | 7 |
 | Javier Rotelli | 6 |
-| Travis-CI | 6 |
 | abarker-TDWTF | 4 |
 | Ben Lubar | 3 |
 | riking | 3 |

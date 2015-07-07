@@ -4,13 +4,13 @@
 | Accalia Elementia | 181 |
 | Accalia | 150 |
 | Accalia de Elementia | 64 |
-| Yami | 34 |
+| Yami | 35 |
 | Yamikuronue | 17 |
 | Andrew Cook | 15 |
 | PleegWat | 15 |
 | yamikuronue | 10 |
+| Travis-CI | 7 |
 | Javier Rotelli | 6 |
-| Travis-CI | 6 |
 | abarker-TDWTF | 4 |
 | Ben Lubar | 3 |
 | riking | 3 |
