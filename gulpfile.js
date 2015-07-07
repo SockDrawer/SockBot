@@ -141,7 +141,7 @@ gulp.task('test', ['lint', 'lintTests'], (done) => {
 });
 
 // Meta tasks
-gulp.task('buildDocs', ['readme', 'docs'], () => 0);
+gulp.task('buildDocs', ['docs'], () => 0);
 gulp.task('preBuild', ['buildDocs'], () => 0);
 gulp.task('postBuild', ['pushDocs'], () => 0);
 gulp.task('default', ['lint'], () => 0);
