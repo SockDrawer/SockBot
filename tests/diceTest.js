@@ -130,8 +130,10 @@ describe("roll", function() {
 		
 		diceModule.roll(2,6,6, function(sum, results) {
 			assert.equal(sum,26,"Sum was not calculated correctly");
+			assert.equal(results.length, 3, 'three sets of dice should be rolled');
 			assert.lengthOf(results[0], 2,"Two die should be rolled initially");
-			assert.lengthOf(results[1], 4,"Four die should be rolled for rerolls");
+			assert.lengthOf(results[1], 2,"Two die should be rolled for first rerolls");
+			assert.lengthOf(results[2], 2,"Two die should be rolled for second rerolls");
 			done();
 		});
 	});
@@ -140,9 +142,10 @@ describe("roll", function() {
 		var mockRequest = sandbox.stub(request, "get").yields(null,200,"6\n6\n")
 		
 		diceModule.roll(1,6,6, function(sum, results) {
+			assert.equal(results.length, 11, 'twenty sets of dice should be rolled');
 			assert.lengthOf(results[0], 2,"Two die should be rolled initially");
-			assert.lengthOf(results[1], 20,"Twenty die should be rolled for rerolls");
-			assert.include(results,['Too many Rerolls. Stopping.']);
+			assert.lengthOf(results[1], 2,"Twenty die should be rolled for rerolls");
+			assert.include(results[10],'Too many Rerolls. Stopping.');
 			done();
 		});
 	});
