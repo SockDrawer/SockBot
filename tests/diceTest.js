@@ -149,6 +149,16 @@ describe("roll", function() {
 			done();
 		});
 	});
+	
+	it("should cap at 20 rerolls without config set", function(done) {
+		var mockRequest = sandbox.stub(request, "get").yields(null,200,"6\n6\n")
+		diceModule.configuration.maxReRolls = undefined;
+		diceModule.roll(1,6,6, function(sum, results) {
+			assert.equal(results.length, 21, 'twenty sets of dice should be rolled');
+			assert.include(results[20],'Too many Rerolls. Stopping.');
+			done();
+		});
+	});
 });
 
 describe("prerollDice", function() {
@@ -248,6 +258,17 @@ describe("WhiteWolf Dice", function() {
 		var match = {
 			num: 200
 		}
+		diceModule.rollWolfDice(match, function(response) {
+			assert.include(response,"Error Too many dice requested");
+			done();
+		});
+	});
+	
+	it("should cap at 20 dice without config set", function(done) {		
+		var match = {
+			num: 200
+		}
+		diceModule.configuration.maxDice = undefined; 
 		diceModule.rollWolfDice(match, function(response) {
 			assert.include(response,"Error Too many dice requested");
 			done();
@@ -391,6 +412,17 @@ describe("Fudge Dice", function() {
 		var match = {
 			num: 200
 		}
+		diceModule.rollFudgeDice(match, function(response) {
+			assert.include(response,"Error Too many dice requested");
+			done();
+		});
+	});
+	
+	it("should cap at 20 dice without config set", function(done) {		
+		var match = {
+			num: 200
+		}
+		diceModule.configuration.maxDice = undefined; 
 		diceModule.rollFudgeDice(match, function(response) {
 			assert.include(response,"Error Too many dice requested");
 			done();
@@ -663,6 +695,20 @@ describe("XDice", function() {
 			num: 200,
 			sides: 10
 		}
+		diceModule.rollXDice(match, function(response) {
+			assert.include(response,"Error Too many dice requested");
+			done();
+		});
+	});
+	
+	it("should cap at 20 dice without config set", function(done) {		
+		var match = {
+			reroll: true,
+			preroll: true,
+			num: 200,
+			sides: 10
+		}
+		diceModule.configuration.maxDice = undefined;
 		diceModule.rollXDice(match, function(response) {
 			assert.include(response,"Error Too many dice requested");
 			done();
