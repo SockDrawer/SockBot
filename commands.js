@@ -22,6 +22,7 @@ const internals = {
  * @param {string} command Command name
  * @param {string[]} args Command arguments
  * @param {string} mention Mention text that was included in command
+ * @param {external.posts.CleanedPost} post Post that triggered the command
  */
 
 /**
@@ -47,7 +48,7 @@ function parseShortCommand(line) {
         return null;
     }
     const args = line.split(/\s+/),
-        command = args.shift().substring(1);
+        command = args.shift().substring(1).toLowerCase();
     return {
         input: line,
         command: command,
@@ -68,7 +69,7 @@ function parseMentionCommand(line) {
     }
     const args = line.split(/\s+/),
         mention = args.shift(),
-        command = args.shift();
+        command = args.shift().toLowerCase();
     return {
         input: ('!' + command + ' ' + args.join(' ')).replace(/\s+$/, ''),
         command: command,
@@ -76,6 +77,38 @@ function parseMentionCommand(line) {
         mention: mention
     };
 }
+
+exports.parseCommands = function parseCommands(post, events, callback) {
+    if (typeof callback !== 'function') {
+        throw new Error('callback must be supplied');
+    }
+    if (!events || typeof events.emit !== 'function') {
+        throw new Error('events must be supplied');
+    }
+    if (!post || !post.raw) {
+        callback(null, []);
+        return;
+    }
+    const commands = post.raw.split('\n').map((line) => line.replace(/\s+$/, '')).map((line) => {
+        if (line[0] === '!') {
+            return internals.parseShortCommand(line);
+        } else {
+            return internals.parseMentionCommand(line);
+        }
+    }).filter((command) => !!command);
+    commands.forEach((command) => {
+        setImmediate(() => {
+            command.post = post;
+            const handled = events.emit('command#' + command.command, command);
+            if (!handled && !command.mention) {
+                if (!events.emit('command#ERROR', command)) {
+                    events.emit('error', new Error('command `' + command.command + '` was unhandled.'));
+                }
+            }
+        });
+    });
+    callback(null, commands);
+};
 
 /**
  * Completion Callback

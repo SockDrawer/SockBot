@@ -1,5 +1,5 @@
 'use strict';
-/*globals describe, it, before*/
+/*globals describe, it, before, beforeEach, after*/
 /*eslint no-unused-expressions:0 */
 
 const chai = require('chai'),
@@ -12,7 +12,7 @@ const commands = require('../commands'),
     config = require('../config');
 describe('browser', () => {
     describe('exports', () => {
-        const fns = ['prepareParser'],
+        const fns = ['prepareParser', 'parseCommands'],
             objs = ['internals', 'stubs'],
             vals = [];
         describe('should export expected functions:', () => {
@@ -74,6 +74,9 @@ describe('browser', () => {
             });
             it('should set command in output object', () => {
                 parseShortCommand('!help arg1 arg2').command.should.equal('help');
+            });
+            it('should normalize command case in output object', () => {
+                parseShortCommand('!HELP arg1 arg2').command.should.equal('help');
             });
             it('should set args correctly', () => {
                 parseShortCommand('!help arg1 arg2').args.should.deep.equal(['arg1', 'arg2']);
@@ -141,6 +144,9 @@ describe('browser', () => {
             it('should set command in output object', () => {
                 parseMentionCommand('@foobar help arg1 arg2').command.should.equal('help');
             });
+            it('should normalize command case in output object', () => {
+                parseMentionCommand('@foobar HELP arg1 arg2').command.should.equal('help');
+            });
             it('should set args correctly', () => {
                 parseMentionCommand('@foobar help arg1 arg2').args.should.deep.equal(['arg1', 'arg2']);
             });
@@ -153,13 +159,13 @@ describe('browser', () => {
                 expect(parseMentionCommand('@foobar help')).to.not.equal(null);
             });
             it('@FooBar', () => {
-                expect(parseMentionCommand('@foobar help')).to.not.equal(null);
+                expect(parseMentionCommand('@FooBar help')).to.not.equal(null);
             });
             it('@fOObAR', () => {
-                expect(parseMentionCommand('@foobar help')).to.not.equal(null);
+                expect(parseMentionCommand('@fOObAR help')).to.not.equal(null);
             });
             it('@FOOBAR', () => {
-                expect(parseMentionCommand('@foobar help')).to.not.equal(null);
+                expect(parseMentionCommand('@FOOBAR help')).to.not.equal(null);
             });
         });
         describe('any space character should split args', () => {
@@ -219,6 +225,136 @@ describe('browser', () => {
         it('should produce expected mentionCommand regexp', () => {
             prepareParser(() => 0);
             commands.internals.mention.toString().should.equal('/^@foo\\s\\S{3,}(\\s|$)/i');
+        });
+    });
+    describe('parseCommands()', () => {
+        let parseShortCommand, parseMentionCommand, events, callbackSpy, clocks;
+        before(() => {
+            sinon.stub(commands.internals, 'parseShortCommand');
+            sinon.stub(commands.internals, 'parseMentionCommand');
+            parseShortCommand = commands.internals.parseShortCommand;
+            parseMentionCommand = commands.internals.parseMentionCommand;
+            clocks = sinon.useFakeTimers();
+        });
+        beforeEach(() => {
+            parseShortCommand.reset();
+            parseMentionCommand.reset();
+            events = {
+                emit: sinon.stub()
+            };
+            callbackSpy = sinon.spy();
+        });
+        it('should require callback', () => {
+            expect(() => commands.parseCommands({}, {}, null)).to.throw('callback must be supplied');
+            parseShortCommand.called.should.be.false;
+            parseMentionCommand.called.should.be.false;
+        });
+        it('should require events', () => {
+            expect(() => commands.parseCommands({}, null, () => 0)).to.throw('events must be supplied');
+            parseShortCommand.called.should.be.false;
+            parseMentionCommand.called.should.be.false;
+        });
+        it('should require events.emit', () => {
+            expect(() => commands.parseCommands({}, {}, () => 0)).to.throw('events must be supplied');
+            parseShortCommand.called.should.be.false;
+            parseMentionCommand.called.should.be.false;
+        });
+        it('should accept empty post', () => {
+            commands.parseCommands(null, events, callbackSpy);
+            callbackSpy.called.should.be.true;
+            callbackSpy.lastCall.args.should.deep.equal([null, []]);
+            parseShortCommand.called.should.be.false;
+            parseMentionCommand.called.should.be.false;
+        });
+        it('should accept blank post', () => {
+            commands.parseCommands({
+                raw: ''
+            }, events, callbackSpy);
+            callbackSpy.called.should.be.true;
+            callbackSpy.lastCall.args.should.deep.equal([null, []]);
+            parseShortCommand.called.should.be.false;
+            parseMentionCommand.called.should.be.false;
+        });
+        it('should not emit on non command post', () => {
+            commands.parseCommands({
+                raw: 'i am a little text short and stout'
+            }, events, callbackSpy);
+            callbackSpy.called.should.be.true;
+            callbackSpy.lastCall.args.should.deep.equal([null, []]);
+            parseShortCommand.called.should.be.false;
+            parseMentionCommand.called.should.be.true;
+            events.emit.called.should.be.false;
+        });
+        it('should not emit on non command post 2', () => {
+            commands.parseCommands({
+                raw: '!i am a little text short and stout'
+            }, events, callbackSpy);
+            callbackSpy.called.should.be.true;
+            callbackSpy.lastCall.args.should.deep.equal([null, []]);
+            parseShortCommand.called.should.be.true;
+            parseMentionCommand.called.should.be.false;
+            events.emit.called.should.be.false;
+        });
+        it('should emit on post containing command', () => {
+            parseShortCommand.returns({
+                command: 'foobar'
+            });
+            events.emit.returns(true);
+            commands.parseCommands({
+                raw: '!i am a little text short and stout'
+            }, events, callbackSpy);
+            clocks.tick(0);
+            events.emit.called.should.be.true;
+            events.emit.lastCall.args.should.deep.equal(['command#foobar', {
+                command: 'foobar',
+                post: {
+                    raw: '!i am a little text short and stout'
+                }
+            }]);
+        });
+        it('should not emit error on uhandled command from mention', () => {
+            parseShortCommand.returns({
+                command: 'foobar',
+                mention: true
+            });
+            events.emit.returns(false);
+            commands.parseCommands({
+                raw: '!i am a little text short and stout'
+            }, events, callbackSpy);
+            clocks.tick(0);
+            events.emit.calledWith('command#ERROR').should.be.false;
+        });
+        it('should emit error on uhandled command', () => {
+            parseShortCommand.returns({
+                command: 'foobar'
+            });
+            events.emit.onFirstCall().returns(false)
+                .onSecondCall().returns(true);
+            commands.parseCommands({
+                raw: '!i am a little text short and stout'
+            }, events, callbackSpy);
+            clocks.tick(0);
+            events.emit.callCount.should.equal(2);
+            events.emit.calledWith('command#ERROR').should.be.true;
+            events.emit.calledWith('error').should.be.false;
+        });
+        it('should emit global error on uhandled command error', () => {
+            parseShortCommand.returns({
+                command: 'foobar'
+            });
+            events.emit.returns(false);
+            commands.parseCommands({
+                raw: '!i am a little text short and stout'
+            }, events, callbackSpy);
+            clocks.tick(0);
+            events.emit.callCount.should.equal(3);
+            events.emit.calledWith('command#ERROR').should.be.true;
+            events.emit.calledWith('error').should.be.true;
+        });
+        after(() => {
+            parseShortCommand.restore();
+            parseMentionCommand.restore();
+            clocks.restore();
         });
     });
 });
