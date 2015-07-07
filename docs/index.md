@@ -2,8 +2,6 @@
 
 Sockbot - A sock puppet Robot worthy of TheDailyWTF that interfaces with what.thedailywtf.com. SO META!
 
-[API Docs](docs/index.html)
-
 
 NOTA BENE
 =========
@@ -55,5 +53,3 @@ For providing the lovely and amusing Error messages that sockbot will occasional
 [@Keith](http://what.thedailywtf.com/users/Keith)
 [@mott555](http://what.thedailywtf.com/users/mott555)
 
-
-<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br /><span xmlns:dct="http://purl.org/dc/terms/" property="dct:title">SockBot</span> by <span xmlns:cc="http://creativecommons.org/ns#" property="cc:attributionName">Accalia Elementia</span> is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.<br />Based on a work at <a xmlns:dct="http://purl.org/dc/terms/" href="https://github.com/AccaliaDeElementia/SockBot" rel="dct:source">https://github.com/AccaliaDeElementia/SockBot</a>.
