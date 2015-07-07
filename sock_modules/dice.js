@@ -329,7 +329,6 @@ exports.parser = function parser(input, complete) {
             var inner = match[0] || '',
                 target = rTarget.xexec(inner),
                 bonus = rBonus.xexec(inner),
-                options = rOptions.xexec(inner) || {},
                 matched = {
                     num: match.num ? parseInt(match.num, 10) : undefined,
                     sides: match.sides ? parseInt(match.sides, 10) : undefined,
@@ -339,7 +338,7 @@ exports.parser = function parser(input, complete) {
                     target: (target && target.target)
                         ? parseInt(target.target, 10)
                         : undefined,
-                    options: (options.options || '').toLowerCase(),
+                    options: (match.options || '').toLowerCase(),
                     bonus: (bonus && bonus.bonus)
                         ? parseInt(bonus.bonus, 10)
                         : undefined
