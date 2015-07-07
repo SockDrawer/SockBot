@@ -3,14 +3,14 @@
 | RaceProUK | 189 |
 | Accalia Elementia | 181 |
 | Accalia | 150 |
-| Accalia de Elementia | 58 |
+| Accalia de Elementia | 59 |
 | Yami | 34 |
 | Yamikuronue | 16 |
 | Andrew Cook | 15 |
 | PleegWat | 15 |
 | yamikuronue | 10 |
 | Javier Rotelli | 6 |
-| Travis-CI | 4 |
+| Travis-CI | 5 |
 | abarker-TDWTF | 4 |
 | Ben Lubar | 3 |
 | riking | 3 |
