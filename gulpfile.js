@@ -205,7 +205,9 @@ gulp.task('test', ['lint', 'lintTests', 'lintExterns'], (done) => {
         .on('finish', () => {
             // Run all tests
             gulp.src(sockTests)
-                .pipe(mocha())
+                .pipe(mocha({
+                    reporter: 'dot'
+                }))
                 .on('error', done)
                 // Write code coverage reports
                 .pipe(istanbul.writeReports())
