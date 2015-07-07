@@ -81,6 +81,12 @@ function parseMentionCommand(line) {
     };
 }
 
+/**
+ * Parse commands from post and emit command events
+ *
+ * @param {external.posts.CleanedPost} post Post to parse commands from
+ * @param {parseCallback} callback CompletionCallback
+ */
 exports.parseCommands = function parseCommands(post, callback) {
     if (typeof callback !== 'function') {
         throw new Error('callback must be supplied');
@@ -117,11 +123,20 @@ exports.parseCommands = function parseCommands(post, callback) {
  */
 function completedCallback(err) {} //eslint-disable-line handle-callback-err, no-unused-vars
 
+/**
+ * Parse Completion Callback
+ *
+ * @param {Exception} [err=null] Error encountered processing request
+ * @param {command[]} commands Parsed Commands
+ */
+function parseCallback(err, commands) {} //eslint-disable-line handle-callback-err, no-unused-vars
+
 /* istanbul ignore else */
 if (typeof GLOBAL.describe === 'function') {
     //test is running
     exports.internals = internals;
     exports.stubs = {
-        completedCallback: completedCallback
+        completedCallback: completedCallback,
+        parseCallback: parseCallback
     };
 }
