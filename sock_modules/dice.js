@@ -326,7 +326,7 @@ exports.parser = function parser(input, complete) {
         results = [];
     rMatcher.forEach(input,
         function (match) {
-            var inner = match[0] || '',
+            var inner = match[0],
                 target = rTarget.xexec(inner),
                 bonus = rBonus.xexec(inner),
                 matched = {
