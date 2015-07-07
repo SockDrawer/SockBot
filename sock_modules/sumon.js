@@ -113,7 +113,9 @@
                 ' summoned me to play in ' + notification.slug);
             s = s.replace(/%__(\w+)__%/g, function (m, key) {
                 if (post.hasOwnProperty(key)) {
-                    return post[key];
+                    return key === 'name' 
+                        ? post[key].replace(/@/g, '@&zwj;')
+                        : post[key];
                 }
                 return m;
             });
