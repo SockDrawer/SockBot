@@ -62,17 +62,17 @@ For providing the lovely and amusing Error messages that sockbot will occasional
 
 | Contributor | Commits |
 |---|---:|
-| RaceProUK | 189 |
+| RaceProUK | 198 |
 | Accalia Elementia | 181 |
 | Accalia | 150 |
-| Accalia de Elementia | 59 |
+| Accalia de Elementia | 63 |
 | Yami | 34 |
-| Yamikuronue | 16 |
+| Yamikuronue | 17 |
 | Andrew Cook | 15 |
 | PleegWat | 15 |
 | yamikuronue | 10 |
 | Javier Rotelli | 6 |
-| Travis-CI | 5 |
+| Travis-CI | 6 |
 | abarker-TDWTF | 4 |
 | Ben Lubar | 3 |
 | riking | 3 |
