@@ -311,6 +311,19 @@ describe('browser', () => {
                 }
             }]);
         });
+        it('should multi emit on post containing multiple commands', () => {
+            parseShortCommand.returns({
+                command: 'foobar'
+            });
+            events.emit.returns(true);
+            commands.parseCommands({
+                raw: '!i am a little\ntext short\n!and stout'
+            }, callbackSpy);
+            clocks.tick(0);
+            events.emit.called.should.be.true;
+            events.emit.callCount.should.equal(2);
+            events.emit.alwaysCalledWith('command#foobar');
+        });
         it('should not emit error on uhandled command from mention', () => {
             parseShortCommand.returns({
                 command: 'foobar',
