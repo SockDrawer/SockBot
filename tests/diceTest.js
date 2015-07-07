@@ -130,19 +130,32 @@ describe("roll", function() {
 		
 		diceModule.roll(2,6,6, function(sum, results) {
 			assert.equal(sum,26,"Sum was not calculated correctly");
+			assert.equal(results.length, 3, 'three sets of dice should be rolled');
 			assert.lengthOf(results[0], 2,"Two die should be rolled initially");
-			assert.lengthOf(results[1], 4,"Four die should be rolled for rerolls");
+			assert.lengthOf(results[1], 2,"Two die should be rolled for first rerolls");
+			assert.lengthOf(results[2], 2,"Two die should be rolled for second rerolls");
 			done();
 		});
 	});
 	
 	it("should cap at 20 rerolls", function(done) {
-		var mockRequest = sandbox.stub(request, "get").yields(null,200,"6\n6\n");
+		var mockRequest = sandbox.stub(request, "get").yields(null,200,"6\n6\n")
 		
 		diceModule.roll(1,6,6, function(sum, results) {
+			assert.equal(results.length, 11, 'twenty sets of dice should be rolled');
 			assert.lengthOf(results[0], 2,"Two die should be rolled initially");
-			assert.lengthOf(results[1], 20,"Twenty die should be rolled for rerolls");
-			assert.include(results,['Too many Rerolls. Stopping.']);
+			assert.lengthOf(results[1], 2,"Twenty die should be rolled for rerolls");
+			assert.include(results[10],'Too many Rerolls. Stopping.');
+			done();
+		});
+	});
+	
+	it("should cap at 20 rerolls without config set", function(done) {
+		var mockRequest = sandbox.stub(request, "get").yields(null,200,"6\n6\n")
+		diceModule.configuration.maxReRolls = undefined;
+		diceModule.roll(1,6,6, function(sum, results) {
+			assert.equal(results.length, 21, 'twenty sets of dice should be rolled');
+			assert.include(results[20],'Too many Rerolls. Stopping.');
 			done();
 		});
 	});
@@ -245,6 +258,17 @@ describe("WhiteWolf Dice", function() {
 		var match = {
 			num: 200
 		}
+		diceModule.rollWolfDice(match, function(response) {
+			assert.include(response,"Error Too many dice requested");
+			done();
+		});
+	});
+	
+	it("should cap at 20 dice without config set", function(done) {		
+		var match = {
+			num: 200
+		}
+		diceModule.configuration.maxDice = undefined; 
 		diceModule.rollWolfDice(match, function(response) {
 			assert.include(response,"Error Too many dice requested");
 			done();
@@ -394,6 +418,17 @@ describe("Fudge Dice", function() {
 		});
 	});
 	
+	it("should cap at 20 dice without config set", function(done) {		
+		var match = {
+			num: 200
+		}
+		diceModule.configuration.maxDice = undefined; 
+		diceModule.rollFudgeDice(match, function(response) {
+			assert.include(response,"Error Too many dice requested");
+			done();
+		});
+	});
+	
 	it("should reject negative dice", function(done) {		
 		var match = {
 			num: -1
@@ -444,6 +479,48 @@ describe("XDice", function() {
 		});
 	});
 	
+	it("should roll -1d20", function(done) {
+		var match = {
+			num: -1,
+			sides: 20
+		}
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(1,[[1]]);
+		
+		diceModule.rollXDice(match, function(response) {
+			assert(mockRoll.getCall(0).calledWith(-1,20, undefined),"Correct arguments should be passed; instead received " + mockRoll.getCall(0).args);
+			assert.include(response,'Rolling -1d20: 1');
+			done();
+		});
+	});
+	
+	it("should roll 1d-20", function(done) {
+		var match = {
+			num: 1,
+			sides: -20
+		}
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(1,[[1]]);
+		
+		diceModule.rollXDice(match, function(response) {
+			assert(mockRoll.getCall(0).calledWith(1,-20, undefined),"Correct arguments should be passed; instead received " + mockRoll.getCall(0).args);
+			assert.include(response,'Rolling 1d-20: 1');
+			done();
+		});
+	});
+	
+	it("should roll -1d-20", function(done) {
+		var match = {
+			num: -1,
+			sides: -20
+		}
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(1,[[1]]);
+		
+		diceModule.rollXDice(match, function(response) {
+			assert(mockRoll.getCall(0).calledWith(-1,-20, undefined),"Correct arguments should be passed; instead received " + mockRoll.getCall(0).args);
+			assert.include(response,'Rolling -1d-20: 1');
+			done();
+		});
+	});
+	
 	it("should roll 2d20", function(done) {
 		var match = {
 			num: 2,
@@ -455,6 +532,51 @@ describe("XDice", function() {
 			assert(mockRoll.getCall(0).calledWith(2,20, undefined),"Correct arguments should be passed; instead received " + mockRoll.getCall(0).args);
 			assert.include(response,'Rolling 2d20: 1, 1');
 			assert.include(response,'Sum: 2');
+			done();
+		});
+	});
+	
+	it("should roll -2d20", function(done) {
+		var match = {
+			num: -2,
+			sides: 20
+		}
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(2,[[1,1]]);
+		
+		diceModule.rollXDice(match, function(response) {
+			assert(mockRoll.getCall(0).calledWith(-2,20, undefined),"Correct arguments should be passed; instead received " + mockRoll.getCall(0).args);
+			assert.include(response,'Rolling -2d20: 1, 1');
+			assert.include(response,'Sum: -2');
+			done();
+		});
+	});
+	
+	it("should roll 2d-20", function(done) {
+		var match = {
+			num: 2,
+			sides: -20
+		}
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(2,[[1,1]]);
+		
+		diceModule.rollXDice(match, function(response) {
+			assert(mockRoll.getCall(0).calledWith(2,-20, undefined),"Correct arguments should be passed; instead received " + mockRoll.getCall(0).args);
+			assert.include(response,'Rolling 2d-20: 1, 1');
+			assert.include(response,'Sum: 2');
+			done();
+		});
+	});
+	
+	it("should roll -2d-20", function(done) {
+		var match = {
+			num: -2,
+			sides: -20
+		}
+		var mockRoll = sandbox.stub(diceModule, "roll").yields(2,[[1,1]]);
+		
+		diceModule.rollXDice(match, function(response) {
+			assert(mockRoll.getCall(0).calledWith(-2,-20, undefined),"Correct arguments should be passed; instead received " + mockRoll.getCall(0).args);
+			assert.include(response,'Rolling -2d-20: 1, 1');
+			assert.include(response,'Sum: -2');
 			done();
 		});
 	});
@@ -579,6 +701,20 @@ describe("XDice", function() {
 		});
 	});
 	
+	it("should cap at 20 dice without config set", function(done) {		
+		var match = {
+			reroll: true,
+			preroll: true,
+			num: 200,
+			sides: 10
+		}
+		diceModule.configuration.maxDice = undefined;
+		diceModule.rollXDice(match, function(response) {
+			assert.include(response,"Error Too many dice requested");
+			done();
+		});
+	});
+	
 	it("should default to one die", function(done) {
 		var match = {
 			sides: 20
@@ -695,6 +831,31 @@ describe("parser", function() {
 	it("should handle '1d20+5'", function(done) {		
 		var mockRollDice = sandbox.stub(diceModule, "rollDice").yields("this is a result");
 		var input = "1d20+5";
+		var expected = {
+			num: 1,
+			sides: 20,
+			method: undefined,
+			target: undefined,
+			options: '',
+			bonus: 5,
+			reroll: false,
+			preroll: false,
+			sort: false,
+			fails: false
+		}
+		
+		diceModule.parser(input, function(response) {
+			assert(mockRollDice.called);
+			var actual = mockRollDice.getCall(0).args[0];
+			
+			assert.deepEqual(actual,expected);
+			done();
+		});
+	});
+
+	it("should handle '1d20b5'", function(done) {		
+		var mockRollDice = sandbox.stub(diceModule, "rollDice").yields("this is a result");
+		var input = "1d20b5";
 		var expected = {
 			num: 1,
 			sides: 20,

@@ -16,7 +16,7 @@ var pNum = '(?<num>-?\\d+)',
     pSides = '(?<sides>-?\\d+)',
     pMethod = '(?<method>W|Wolf|F|Fate|Fudge)',
     pTarget = '(?:t(?<target>\\d+))',
-    pBonus = '(?:b(?<bonus>-?\\d+))',
+    pBonus = '(?:(b|\\+)(?<bonus>-?\\d+))',
     pOptions = '(?<options>[pfrs]+)',
     pMatcher = '\\b' + pNum + '?d(' + pSides + '|' + pMethod +
 		')(?<optional>' + pTarget + '|' + pBonus + '|' + pOptions +
@@ -74,12 +74,8 @@ exports.roll = function (num, sides, rerollGreater, callback) {
 
     rerollGreater = rerollGreater || Number.Infinity;
     rerollGreater = Math.abs(rerollGreater);
-    if (num < 0) {
-        num *= -1;
-    }
-    if (sides < 0) {
-        sides *= -1;
-    }
+    num = Math.abs(num);
+    sides = Math.abs(sides);
     if (!num || !sides) {
         callback(0, [
             []
@@ -306,12 +302,14 @@ exports.rollXDice = function (match, callback) {
         }
         if (isNaN(sum)) {
             result += ' ' + exports.getError();
-        } else if (Math.abs(num) > 1) {
+        } else {
             if (match.bonus) {
                 sum += match.bonus;
                 result += ' Bonus: ' + match.bonus;
             }
-            result += ' Sum: ' + sum * (num < 0 ? -1 : 1);
+            if (Math.abs(num) > 1 || match.bonus) {
+                result += ' Sum: ' + sum * (num < 0 ? -1 : 1);
+            }
         }
         callback(result);
     });
@@ -328,10 +326,9 @@ exports.parser = function parser(input, complete) {
         results = [];
     rMatcher.forEach(input,
         function (match) {
-            var inner = match[0] || '',
+            var inner = match[0],
                 target = rTarget.xexec(inner),
                 bonus = rBonus.xexec(inner),
-                options = rOptions.xexec(inner) || {},
                 matched = {
                     num: match.num ? parseInt(match.num, 10) : undefined,
                     sides: match.sides ? parseInt(match.sides, 10) : undefined,
@@ -341,7 +338,7 @@ exports.parser = function parser(input, complete) {
                     target: (target && target.target)
                         ? parseInt(target.target, 10)
                         : undefined,
-                    options: (options.options || '').toLowerCase(),
+                    options: (match.options || '').toLowerCase(),
                     bonus: (bonus && bonus.bonus)
                         ? parseInt(bonus.bonus, 10)
                         : undefined
