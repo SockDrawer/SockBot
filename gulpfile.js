@@ -9,6 +9,7 @@ var gulp = require('gulp'),
     git = require('gulp-git');
 
 var sockFiles = ['*.js', '!./gulpfile.js', 'sock_modules/**/*.js'],
+    sockCoverage = ['sock_modules/**/*.js'],
     sockDocs = ['README.md', 'docs/**/*.md'],
     sockTests = ['tests/**/*.js'];
     
@@ -109,7 +110,7 @@ gulp.task('pushDocs', ['gitConfig', 'commitDocs'], function (done) {
  * Run code coverage instrumented tests
  */
 gulp.task('test', function(done) {
-    gulp.src(sockFiles)
+    gulp.src(sockCoverage)
         // Instrument code files with istanbulHarmony
         .pipe(istanbul())
         // hook require function for complete code coverage
