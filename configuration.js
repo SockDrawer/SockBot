@@ -129,3 +129,11 @@ exports.loadConfiguration =
         exports.configuration = merge(def, userconf);
         return exports.configuration;
     };
+
+/*Default configuration*/
+exports.configuration = {
+    username: "Skynet",
+    admin: {
+        owner: "Nobody! Rogue bot on the loose!"
+    }
+};

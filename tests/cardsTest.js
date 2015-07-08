@@ -2,7 +2,7 @@ var Deck = require('../sock_modules/cardDeck.js');
 var cardsModule = require('../sock_modules/cards.js');
 var assert = require('chai').assert;
 
-describe("Deck", function() {
+describe("Deck object", function() {
 	it("should exist", function() {
 		var d = new Deck({type: "Magic", "cards": ["Ace"]});
 		assert.isObject(d);
@@ -88,7 +88,7 @@ describe("Deck", function() {
 	});
 })
 
-describe("DeckModule", function() {
+describe("Cards Module", function() {
 	var responseRegex = /^Success! Your deck is (\w+)$/;
 	
 	it("should be able to create a deck", function(done) {
