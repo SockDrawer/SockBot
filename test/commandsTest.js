@@ -36,7 +36,7 @@ describe('browser', () => {
         });
     });
     describe('internals', () => {
-        const fns = ['parseMentionCommand', 'parseShortCommand', 'registerCommand', 'commandPotect'],
+        const fns = ['parseMentionCommand', 'parseShortCommand', 'registerCommand', 'commandProtect'],
             objs = ['mention', 'events', 'commands'],
             vals = [];
         describe('should include expected functions:', () => {
@@ -329,6 +329,56 @@ describe('browser', () => {
             utils.log.restore();
         });
     });
+    describe('internals.commandProtect()', () => {
+        const commandProtect = commands.internals.commandProtect,
+            events = {};
+        let cmds;
+        before(() => {
+            sinon.stub(utils, 'warn');
+            events.removeListener = sinon.spy();
+            commands.internals.events = events;
+        });
+        beforeEach(() => {
+            events.removeListener.reset();
+            cmds = {};
+            commands.internals.commands = cmds;
+        });
+        it('should not trigger for incorrect prefix', () => {
+            commandProtect('postRecieved').should.be.false;
+        });
+        it('should not trigger for partial prefix', () => {
+            commandProtect('command#').should.be.false;
+        });
+        it('should trigger for proper command registration', () => {
+            const func = () => 0;
+            cmds.cmd = {
+                handler: func
+            };
+            commandProtect('command#cmd', func).should.be.true;
+            events.removeListener.calledWith('cmd', func).should.be.false;
+            utils.warn.called.should.be.false;
+        });
+        it('should reject command that is not already registered', () => {
+            const func = () => 0,
+                err = 'Invalid command (cmd) registered! must register commands with onCommand()';
+            commandProtect('command#cmd', func);
+            events.removeListener.calledWith('command#cmd', func).should.be.true;
+            utils.warn.lastCall.args[0].should.equal(err);
+        });
+        it('should reject command that is not properly registered', () => {
+            const func = () => 0,
+                err = 'Invalid command (cmd1) registered! must register commands with onCommand()';
+            cmds.cmd1 = {
+                handler: () => 0
+            };
+            commandProtect('command#cmd1', func);
+            events.removeListener.calledWith('command#cmd1', func).should.be.true;
+            utils.warn.calledWith(err).should.be.true;
+        });
+        after(() => {
+            utils.warn.restore();
+        });
+    });
     describe('prepareParser()', () => {
         const prepareCommands = commands.prepareCommands;
         before(() => {
@@ -361,7 +411,7 @@ describe('browser', () => {
             prepareCommands({
                 on: spy
             }, () => 0);
-            spy.calledWith('newListener', commands.internals.commandPotect).should.be.true;
+            spy.calledWith('newListener', commands.internals.commandProtect).should.be.true;
         });
     });
     describe('parseCommands()', () => {
