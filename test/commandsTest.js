@@ -9,10 +9,11 @@ const expect = chai.expect;
 
 // The thing we're testing
 const commands = require('../commands'),
-    config = require('../config');
+    config = require('../config'),
+    utils = require('../utils');
 describe('browser', () => {
     describe('exports', () => {
-        const fns = ['prepareParser', 'parseCommands'],
+        const fns = ['prepareCommands', 'parseCommands'],
             objs = ['internals', 'stubs'],
             vals = [];
         describe('should export expected functions:', () => {
@@ -35,8 +36,8 @@ describe('browser', () => {
         });
     });
     describe('internals', () => {
-        const fns = ['parseMentionCommand', 'parseShortCommand'],
-            objs = ['mention', 'events'],
+        const fns = ['parseMentionCommand', 'parseShortCommand', 'registerCommand', 'commandPotect'],
+            objs = ['mention', 'events', 'commands'],
             vals = [];
         describe('should include expected functions:', () => {
             fns.forEach((fn) => {
@@ -129,7 +130,9 @@ describe('browser', () => {
         const parseMentionCommand = commands.internals.parseMentionCommand;
         before((done) => {
             config.core.username = 'foobar';
-            commands.prepareParser({}, done);
+            commands.prepareCommands({
+                on: () => 0
+            }, done);
         });
         describe('output object format', () => {
             it('should match bare command', () => {
@@ -211,14 +214,131 @@ describe('browser', () => {
             cmd.args.should.deep.equal(['arg1', 'arg2']);
         });
     });
+    describe('internals.registerCommand()', () => {
+        const registerCommand = commands.internals.registerCommand,
+            events = {},
+            spy = sinon.spy();
+        before(() => {
+            events.on = sinon.spy();
+            commands.internals.events = events;
+            sinon.stub(utils, 'log');
+        });
+        beforeEach(() => {
+            //reset everything
+            commands.internals.commands = {};
+            spy.reset();
+            events.on.reset();
+            utils.log.reset();
+        });
+        describe('parameter validation', () => {
+            it('should require a callback', () => {
+                expect(() => registerCommand()).to.throw('callback must be provided');
+            });
+            it('should require callback to be a function', () => {
+                expect(() => {
+                    registerCommand(undefined, undefined, undefined, 'not function');
+                }).to.throw('callback must be provided');
+            });
+            it('should require `command`', () => {
+                registerCommand(undefined, undefined, undefined, spy);
+                spy.called.should.be.true;
+                spy.lastCall.args[0].should.be.instanceOf(Error);
+                spy.lastCall.args[0].message.should.equal('command must be provided');
+            });
+            it('should require `command` to be string', () => {
+                registerCommand(true, undefined, undefined, spy);
+                spy.called.should.be.true;
+                spy.lastCall.args[0].should.be.instanceOf(Error);
+                spy.lastCall.args[0].message.should.equal('command must be provided');
+            });
+            it('should require `helpstring`', () => {
+                registerCommand('command', undefined, undefined, spy);
+                spy.called.should.be.true;
+                spy.lastCall.args[0].should.be.instanceOf(Error);
+                spy.lastCall.args[0].message.should.equal('helpstring must be provided');
+            });
+            it('should require `helpstring` to be string', () => {
+                registerCommand('command', true, undefined, spy);
+                spy.called.should.be.true;
+                spy.lastCall.args[0].should.be.instanceOf(Error);
+                spy.lastCall.args[0].message.should.equal('helpstring must be provided');
+            });
+            it('should require `handler`', () => {
+                registerCommand('command', 'help', undefined, spy);
+                spy.called.should.be.true;
+                spy.lastCall.args[0].should.be.instanceOf(Error);
+                spy.lastCall.args[0].message.should.equal('handler must be provided');
+            });
+            it('should require `handler` to be string', () => {
+                registerCommand('command', 'help', true, spy);
+                spy.called.should.be.true;
+                spy.lastCall.args[0].should.be.instanceOf(Error);
+                spy.lastCall.args[0].message.should.equal('handler must be provided');
+            });
+            it('should call callback without error on command registration', () => {
+                registerCommand('command', 'help', () => 0, spy);
+                spy.called.should.be.true;
+                spy.lastCall.args.should.have.length(0);
+            });
+        });
+        it('should add command to command list on command registration', () => {
+            registerCommand('command', 'help', () => 0, spy);
+            commands.internals.commands.command.should.be.ok;
+        });
+        it('should add handler to command list on command registration', () => {
+            const func = () => 0;
+            registerCommand('command', 'help', func, spy);
+            commands.internals.commands.command.handler.should.equal(func);
+        });
+        it('should add handler to command list on command registration', () => {
+            const txt = 'help' + Math.random();
+            registerCommand('command', txt, () => 0, spy);
+            commands.internals.commands.command.help.should.equal(txt);
+        });
+        it('should add command to event listeners', () => {
+            const func = () => 0;
+            registerCommand('command', 'help', func, spy);
+            events.on.calledWith('command#command', func).should.be.true;
+        });
+        it('should log registration', () => {
+            registerCommand('command', 'help', () => 0, spy);
+            utils.log.callCount.should.equal(1);
+            utils.log.calledWith('Command Registered: command: help').should.be.true;
+        });
+        describe('command conflict resolution', () => {
+            it('should prefix conflicting command with underscore', () => {
+                const func = () => 0,
+                    name = '_command';
+                commands.internals.commands.command = true;
+                registerCommand('command', 'help', func, spy);
+                commands.internals.commands[name].handler.should.equal(func);
+                events.on.calledWith('command#_command', func).should.be.true;
+            });
+            it('should resolve multiply conflicting command with underscores', () => {
+                const func = () => 0,
+                    name = '___command';
+                commands.internals.commands[name.slice(3)] = true;
+                commands.internals.commands[name.slice(2)] = true;
+                commands.internals.commands[name.slice(1)] = true;
+                registerCommand('command', 'help', func, spy);
+                commands.internals.commands[name].handler.should.equal(func);
+                events.on.calledWith('command#___command', func).should.be.true;
+            });
+        });
+        after(() => {
+            utils.log.restore();
+        });
+    });
     describe('prepareParser()', () => {
-        const prepareParser = commands.prepareParser;
+        const prepareCommands = commands.prepareCommands;
         before(() => {
             config.core.username = 'foo';
         });
         it('should call callback on completion', () => {
             const spy = sinon.spy();
-            prepareParser({}, spy);
+            prepareCommands({
+                on: () => 0
+            }, spy);
             spy.called.should.be.true;
             spy.lastCall.args.should.deep.equal([null]);
         });
@@ -227,12 +347,21 @@ describe('browser', () => {
                 events = {
                     on: () => 0
                 };
-            prepareParser(events, spy);
+            prepareCommands(events, spy);
             commands.internals.events.should.equal(events);
         });
         it('should produce expected mentionCommand regexp', () => {
-            prepareParser({}, () => 0);
+            prepareCommands({
+                on: () => 0
+            }, () => 0);
             commands.internals.mention.toString().should.equal('/^@foo\\s\\S{3,}(\\s|$)/i');
+        });
+        it('should produce register commandPotect as newListener listener', () => {
+            const spy = sinon.spy();
+            prepareCommands({
+                on: spy
+            }, () => 0);
+            spy.calledWith('newListener', commands.internals.commandPotect).should.be.true;
         });
     });
     describe('parseCommands()', () => {
