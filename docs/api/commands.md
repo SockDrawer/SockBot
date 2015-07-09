@@ -7,17 +7,20 @@ Command Parser for SockBot2.0
 
 * [commands](#module_commands)
   * _static_
-    * [.prepareParser(events, callback)](#module_commands.prepareParser)
+    * [.prepareCommands(events, callback)](#module_commands.prepareCommands)
     * [.parseCommands(post, callback)](#module_commands.parseCommands)
   * _inner_
     * [~parseShortCommand(line)](#module_commands..parseShortCommand) ⇒ <code>command</code>
     * [~parseMentionCommand(line)](#module_commands..parseMentionCommand) ⇒ <code>command</code>
+    * [~registerCommand(command, helpstring, handler, callback)](#module_commands..registerCommand) ⇒ <code>undefined</code>
+    * [~commandProtect(event, handler)](#module_commands..commandProtect) ⇒ <code>boolean</code>
     * [~completedCallback([err])](#module_commands..completedCallback)
     * [~parseCallback([err], commands)](#module_commands..parseCallback)
+    * [~commandHandler(command)](#module_commands..commandHandler)
     * [~command](#module_commands..command) : <code>object</code>
 
-<a name="module_commands.prepareParser"></a>
-### commands.prepareParser(events, callback)
+<a name="module_commands.prepareCommands"></a>
+### commands.prepareCommands(events, callback)
 Perpare the command parser
 
 Needs to be called to set the internals of the parser after reading config file.
@@ -62,6 +65,34 @@ Parse a mention command from input line
 | --- | --- | --- |
 | line | <code>string</code> | Input line to parse |
 
+<a name="module_commands..registerCommand"></a>
+### commands~registerCommand(command, helpstring, handler, callback) ⇒ <code>undefined</code>
+Register a command
+
+will be added to core EventEmitter as .onCommand()
+
+**Kind**: inner method of <code>[commands](#module_commands)</code>  
+**Returns**: <code>undefined</code> - No return value  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| command | <code>string</code> | Command to handle |
+| helpstring | <code>string</code> | One line helpstring describing command |
+| handler | <code>commandHandler</code> | Function to handle the command |
+| callback | <code>completedCallback</code> | Completion callback |
+
+<a name="module_commands..commandProtect"></a>
+### commands~commandProtect(event, handler) ⇒ <code>boolean</code>
+Watch for unauthorized commands and reject them
+
+**Kind**: inner method of <code>[commands](#module_commands)</code>  
+**Returns**: <code>boolean</code> - Flag wether event was of intrest to function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| event | <code>string</code> | Event that is registered |
+| handler | <code>function</code> | Event Handler |
+
 <a name="module_commands..completedCallback"></a>
 ### commands~completedCallback([err])
 Completion Callback
@@ -82,6 +113,16 @@ Parse Completion Callback
 | --- | --- | --- | --- |
 | [err] | <code>Exception</code> | <code></code> | Error encountered processing request |
 | commands | <code>Array.&lt;command&gt;</code> |  | Parsed Commands |
+
+<a name="module_commands..commandHandler"></a>
+### commands~commandHandler(command)
+Command handler
+
+**Kind**: inner method of <code>[commands](#module_commands)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| command | <code>command</code> | Command to handle |
 
 <a name="module_commands..command"></a>
 ### commands~command : <code>object</code>
