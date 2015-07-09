@@ -6,13 +6,17 @@
  * @license MIT
  */
 
-const config = require('./config');
+const config = require('./config'),
+    utils = require('./utils');
 
 const internals = {
     mention: null,
     parseShortCommand: parseShortCommand,
     parseMentionCommand: parseMentionCommand,
-    events: null
+    registerCommand: registerCommand,
+    events: null,
+    commandPotect: commandPotect,
+    commands: {}
 };
 /**
  * Parsed Command Data
@@ -34,9 +38,11 @@ const internals = {
  * @param {EventEmitter} events EventEmitter that will be core comms for SockBot
  * @param {completedCallback} callback Completion callback
  */
-exports.prepareParser = function prepareParser(events, callback) {
+exports.prepareCommands = function prepareCommands(events, callback) {
     internals.mention = new RegExp('^@' + config.core.username + '\\s\\S{3,}(\\s|$)', 'i');
     internals.events = events;
+    events.onCommand = registerCommand;
+    events.on('newListener', commandPotect);
     callback(null);
 };
 
@@ -117,6 +123,60 @@ exports.parseCommands = function parseCommands(post, callback) {
 };
 
 /**
+ * Register a command
+ *
+ * will be added to core EventEmitter as .onCommand()
+ *
+ * @param {string} command Command to handle
+ * @param {string} helpstring One line helpstring describing command
+ * @param {commandHandler} handler Function to handle the command
+ * @param {completedCallback} callback Completion callback
+ * @returns {undefined} No return value
+ */
+function registerCommand(command, helpstring, handler, callback) {
+    if (!callback || typeof callback !== 'function') {
+        throw new Error('callback must be provided');
+    }
+    if (!command || typeof command !== 'string') {
+        return callback(new Error('command must be provided'));
+    }
+    if (!helpstring || typeof helpstring !== 'string') {
+        return callback(new Error('helpstring must be provided'));
+    }
+    if (!handler || typeof handler !== 'function') {
+        return callback(new Error('handler must be provided'));
+    }
+    command = command.toLowerCase();
+    while (internals.commands[command]) {
+        command = '_' + command;
+    }
+    internals.commands[command] = {
+        help: helpstring,
+        handler: handler
+    };
+    internals.events.on('command#' + command, handler);
+    utils.log('Command Registered: ' + command + ': ' + helpstring);
+    return callback();
+}
+
+/**
+ * Watch for unauthorized commands and reject them
+ *
+ * @param {string} event Event that is registered
+ * @param {function} handler Event Handler
+ */
+function commandPotect(event, handler) {
+    if (!/^command#/.test(event)) {
+        return;
+    }
+    const command = event.replace(/^command#/, '');
+    if (internals.commands[command] && internals.commands[command].handler !== handler) {
+        utils.warn('Invalid command registered! must register commands with onCommand()');
+        internals.events.removeListener(event, handler);
+    }
+}
+
+/**
  * Completion Callback
  *
  * @param {Exception} [err=null] Error encountered processing request
@@ -131,12 +191,20 @@ function completedCallback(err) {} //eslint-disable-line handle-callback-err, no
  */
 function parseCallback(err, commands) {} //eslint-disable-line handle-callback-err, no-unused-vars
 
+/**
+ * Command handler
+ *
+ * @param {command} command Command to handle
+ */
+function commandHandler(command) {} //eslint-disable-line no-unused-vars
+
 /* istanbul ignore else */
 if (typeof GLOBAL.describe === 'function') {
     //test is running
     exports.internals = internals;
     exports.stubs = {
         completedCallback: completedCallback,
-        parseCallback: parseCallback
+        parseCallback: parseCallback,
+        commandHandler: commandHandler
     };
 }
