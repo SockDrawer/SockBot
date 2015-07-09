@@ -15,7 +15,7 @@ const internals = {
     parseMentionCommand: parseMentionCommand,
     registerCommand: registerCommand,
     events: null,
-    commandPotect: commandPotect,
+    commandProtect: commandProtect,
     commands: {}
 };
 /**
@@ -42,7 +42,7 @@ exports.prepareCommands = function prepareCommands(events, callback) {
     internals.mention = new RegExp('^@' + config.core.username + '\\s\\S{3,}(\\s|$)', 'i');
     internals.events = events;
     events.onCommand = registerCommand;
-    events.on('newListener', commandPotect);
+    events.on('newListener', commandProtect);
     callback(null);
 };
 
@@ -164,16 +164,18 @@ function registerCommand(command, helpstring, handler, callback) {
  *
  * @param {string} event Event that is registered
  * @param {function} handler Event Handler
+ * @returns {boolean} Flag wether event was of intrest to function
  */
-function commandPotect(event, handler) {
-    if (!/^command#/.test(event)) {
-        return;
+function commandProtect(event, handler) {
+    if (!/^command#./.test(event)) {
+        return false;
     }
     const command = event.replace(/^command#/, '');
-    if (internals.commands[command] && internals.commands[command].handler !== handler) {
-        utils.warn('Invalid command registered! must register commands with onCommand()');
+    if (!internals.commands[command] || internals.commands[command].handler !== handler) {
+        utils.warn('Invalid command (' + command + ') registered! must register commands with onCommand()');
         internals.events.removeListener(event, handler);
     }
+    return true;
 }
 
 /**
