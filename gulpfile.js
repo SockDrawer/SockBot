@@ -16,10 +16,31 @@ const sockFiles = ['*.js', '!./gulpfile.js', '**/plugins/**/*.js', '!node_module
 const JobNumber = process.env.TRAVIS_JOB_NUMBER,
     runDocs = !JobNumber || /[.]1$/.test(JobNumber);
 
+
+/**
+ * Pull git branch locally (solves detached head issue in CI)
+ */
+gulp.task('gitBranch', (done) => {
+    let complete = false;
+    const branch = process.env.TRAVIS_BRANCH;
+    // Abort(successfully) early if not running in CI
+    if (!(JobNumber && runDocs && branch)) {
+        return done();
+    }
+    git.checkout(branch, () => {
+        // Make sure we have full log history.
+        git.pull('origin', branch, {}, () => {
+            if (!complete) {
+                done();
+            }
+            complete = true;
+        });
+    });
+});
 /**
  * Generate API documentation for all js files, place markup in the correct folder for readthedocs.org
  */
-gulp.task('docs', ['lintExterns'], function (done) {
+gulp.task('docs', ['gitBranch', 'lintExterns'], function (done) {
     // Abort(successfully) early if running in CI and not job #1
     if (!runDocs) {
         return done();
