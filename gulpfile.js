@@ -37,6 +37,7 @@ gulp.task('gitBranch', (done) => {
         });
     });
 });
+
 /**
  * Generate API documentation for all js files, place markup in the correct folder for readthedocs.org
  */
