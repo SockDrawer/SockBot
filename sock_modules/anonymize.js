@@ -8,7 +8,9 @@ var xRegExp = require('xregexp').XRegExp;
 var discourse,
     conf,
     rQuote = xRegExp('\\[quote.*post:(?<post_number>\\d+).*' +
-        'topic:(?<topic_id>\\d+)');
+        'topic:(?<topic_id>\\d+)'),
+    anon = 'Anonymizied Reply Sent. Thank you for using Anonymizer, ' +
+        'a SockIndustries application.';
 
 /** Description of the module */
 exports.description = 'Anonymize replies';
@@ -60,10 +62,14 @@ exports.onNotify = function (type, notification, topic, post, callback) {
         return callback();
     }
 
-    var anon = 'Anonymizied Reply Sent. Thank you for using Anonymizer, ' +
-        'a SockIndustries application.';
+    match.raw = post.raw;
+
+    exports.doAnonMsg(match, notification, callback);
+};
+
+exports.doAnonMsg = function(match, notification, callback) {
     discourse.log('Posting anonymously to ' + match.topic_id);
-    discourse.createPost(match.topic_id, match.post_number, post.raw,
+    discourse.createPost(match.topic_id, match.post_number, match.raw,
         function () {
             setTimeout(function () {
                 discourse.createPost(notification.topic_id,
@@ -73,4 +79,4 @@ exports.onNotify = function (type, notification, topic, post, callback) {
             }, 500);
             callback(true);
         });
-};
+}

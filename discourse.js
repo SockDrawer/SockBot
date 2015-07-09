@@ -30,7 +30,7 @@ var fs = require('fs');
 var request = require('request'),
     async = require('async'),
     xRegExp = require('xregexp').XRegExp,
-    conf = require('./configuration').configuration,
+    conf = require(__dirname + '/configuration').configuration,
     version = require('./version');
 var csrf,
     jar = request.jar(),
