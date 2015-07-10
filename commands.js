@@ -7,7 +7,8 @@
  */
 
 const config = require('./config'),
-    utils = require('./utils');
+    utils = require('./utils'),
+    browser = require('./browser');
 
 const internals = {
     mention: null,
@@ -16,6 +17,8 @@ const internals = {
     registerCommand: registerCommand,
     events: null,
     commandProtect: commandProtect,
+    getCommands: getCommands,
+    cmdError: cmdError,
     commands: {}
 };
 /**
@@ -41,6 +44,7 @@ const internals = {
 exports.prepareCommands = function prepareCommands(events, callback) {
     internals.mention = new RegExp('^@' + config.core.username + '\\s\\S{3,}(\\s|$)', 'i');
     internals.events = events;
+    events.on('command#ERROR', cmdError);
     events.onCommand = registerCommand;
     events.on('newListener', commandProtect);
     callback(null);
@@ -122,6 +126,22 @@ exports.parseCommands = function parseCommands(post, callback) {
     callback(null, commands);
 };
 
+function getCommands() {
+    const cmds = Object.keys(internals.commands),
+        result = ['Registered commands:'];
+    cmds.sort();
+    cmds.forEach((cmd) => result.push(cmd + ': ' + internals.commands[cmd].help));
+    return result.join('\n');
+}
+
+function cmdError(command) {
+    if (!command.post) {
+        return;
+    }
+    const err = 'Command `' + command.command + '` is not recognized\n\n' + internals.getCommands();
+    browser.createPost(command.post.topic_id, command.post.post_number, err, () => 0);
+}
+
 /**
  * Register a command
  *
@@ -181,32 +201,30 @@ function commandProtect(event, handler) {
 /**
  * Completion Callback
  *
+ * @callback
+ * @name completedCallback
  * @param {Exception} [err=null] Error encountered processing request
  */
-function completedCallback(err) {} //eslint-disable-line handle-callback-err, no-unused-vars
 
 /**
  * Parse Completion Callback
  *
+ * @callback
+ * @name parseCallback
  * @param {Exception} [err=null] Error encountered processing request
  * @param {command[]} commands Parsed Commands
  */
-function parseCallback(err, commands) {} //eslint-disable-line handle-callback-err, no-unused-vars
-
+ 
 /**
  * Command handler
  *
+ * @callback
+ * @name commandHandler
  * @param {command} command Command to handle
  */
-function commandHandler(command) {} //eslint-disable-line no-unused-vars
 
 /* istanbul ignore else */
 if (typeof GLOBAL.describe === 'function') {
     //test is running
     exports.internals = internals;
-    exports.stubs = {
-        completedCallback: completedCallback,
-        parseCallback: parseCallback,
-        commandHandler: commandHandler
-    };
 }
