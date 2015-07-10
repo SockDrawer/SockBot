@@ -21,17 +21,6 @@ const internals = {
     cmdError: cmdError,
     commands: {}
 };
-/**
- * Parsed Command Data
- *
- * @name command
- * @typedef {object}
- * @param {string} input Raw Command Input
- * @param {string} command Command name
- * @param {string[]} args Command arguments
- * @param {string} mention Mention text that was included in command
- * @param {external.posts.CleanedPost} post Post that triggered the command
- */
 
 /**
  * Perpare the command parser
@@ -47,7 +36,7 @@ exports.prepareCommands = function prepareCommands(events, callback) {
     events.on('command#ERROR', cmdError);
     events.onCommand = registerCommand;
     events.on('newListener', commandProtect);
-    callback(null);
+    events.onCommand('help', 'print command help listing', cmdHelp, callback);
 };
 
 /**
@@ -126,6 +115,11 @@ exports.parseCommands = function parseCommands(post, callback) {
     callback(null, commands);
 };
 
+/**
+ * Get a list of commands that are registered withg the bot
+ *
+ * @returns {string} command list for posting
+ */
 function getCommands() {
     const cmds = Object.keys(internals.commands),
         result = ['Registered commands:'];
@@ -134,12 +128,31 @@ function getCommands() {
     return result.join('\n');
 }
 
+/**
+ * Replies on unhandled command with helptext
+ *
+ * @param {command} command Unhandled command
+ */
 function cmdError(command) {
     if (!command.post) {
         return;
     }
     const err = 'Command `' + command.command + '` is not recognized\n\n' + internals.getCommands();
     browser.createPost(command.post.topic_id, command.post.post_number, err, () => 0);
+}
+
+/**
+ * Reply with help test top the command !help
+ *
+ * @param {command} command help command
+ */
+function cmdHelp(command) {
+    if (!command.post) {
+        return;
+    }
+    const help = internals.getCommands() + '\n\nMore details may be available by passing `help` as ' +
+        'the first parameter to a command';
+    browser.createPost(command.post.topic_id, command.post.post_number, help, () => 0);
 }
 
 /**
@@ -198,6 +211,19 @@ function commandProtect(event, handler) {
     return true;
 }
 
+
+/**
+ * Parsed Command Data
+ *
+ * @name command
+ * @typedef {object}
+ * @param {string} input Raw Command Input
+ * @param {string} command Command name
+ * @param {string[]} args Command arguments
+ * @param {string} mention Mention text that was included in command
+ * @param {external.posts.CleanedPost} post Post that triggered the command
+ */
+
 /**
  * Completion Callback
  *
@@ -214,7 +240,7 @@ function commandProtect(event, handler) {
  * @param {Exception} [err=null] Error encountered processing request
  * @param {command[]} commands Parsed Commands
  */
- 
+
 /**
  * Command handler
  *
