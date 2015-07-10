@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/SockDrawer/SockBot.svg)](https://travis-ci.org/SockDrawer/SockBot)
-[![Coverage Status](https://coveralls.io/repos/SockDrawer/SockBot/badge.svg)](https://coveralls.io/r/SockDrawer/SockBot)
+[![Coverage Status](https://coveralls.io/repos/SockDrawer/SockBot/badge.svg?branch=master&service=github)](https://coveralls.io/github/SockDrawer/SockBot?branch=master)
 [![Docs Status](https://readthedocs.org/projects/sockbot/badge)](http://sockbot.readthedocs.org)
 
 [![Dependency Status](https://david-dm.org/SockDrawer/SockBot.svg)](https://david-dm.org/SockDrawer/SockBot)
