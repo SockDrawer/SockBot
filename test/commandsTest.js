@@ -14,7 +14,7 @@ const commands = require('../commands'),
 describe('browser', () => {
     describe('exports', () => {
         const fns = ['prepareCommands', 'parseCommands'],
-            objs = ['internals', 'stubs'],
+            objs = ['internals'],
             vals = [];
         describe('should export expected functions:', () => {
             fns.forEach((fn) => {
@@ -36,7 +36,9 @@ describe('browser', () => {
         });
     });
     describe('internals', () => {
-        const fns = ['parseMentionCommand', 'parseShortCommand', 'registerCommand', 'commandProtect'],
+        const fns = ['parseMentionCommand', 'parseShortCommand', 'registerCommand',
+                'commandProtect', 'getCommands', 'cmdError'
+            ],
             objs = ['mention', 'events', 'commands'],
             vals = [];
         describe('should include expected functions:', () => {
@@ -56,12 +58,6 @@ describe('browser', () => {
         });
         it('should include only expected keys', () => {
             commands.internals.should.have.all.keys(fns.concat(objs, vals));
-        });
-    });
-    describe('documentation stubs', () => {
-        const stubs = commands.stubs;
-        Object.keys(stubs).forEach((stub) => {
-            it(stub + '() should be a stub function', () => stubs[stub]());
         });
     });
     describe('internals.parseShortCommand()', () => {
@@ -383,6 +379,7 @@ describe('browser', () => {
         const prepareCommands = commands.prepareCommands;
         before(() => {
             config.core.username = 'foo';
+            sinon.stub(utils, 'log');
         });
         it('should call callback on completion', () => {
             const spy = sinon.spy();
@@ -390,7 +387,7 @@ describe('browser', () => {
                 on: () => 0
             }, spy);
             spy.called.should.be.true;
-            spy.lastCall.args.should.deep.equal([null]);
+            spy.lastCall.args.should.deep.equal([]);
         });
         it('should set events object', () => {
             const spy = sinon.spy(),
@@ -413,6 +410,7 @@ describe('browser', () => {
             }, () => 0);
             spy.calledWith('newListener', commands.internals.commandProtect).should.be.true;
         });
+        after(() => utils.log.restore());
     });
     describe('parseCommands()', () => {
         let parseShortCommand, parseMentionCommand, events, callbackSpy, clocks;
