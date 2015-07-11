@@ -19,10 +19,10 @@ Webbrowser abstraction for communicating with discourse
     * [~setTrustLevel(post)](#module_browser..setTrustLevel) ⇒ <code>external.module_posts.CleanedPost</code>
     * [~cleanPostRaw(post)](#module_browser..cleanPostRaw) ⇒ <code>external.module_posts.CleanedPost</code>
     * [~cleanPost(post)](#module_browser..cleanPost) ⇒ <code>external.posts.CleanedPost</code>
-    * [~requestComplete([err], body)](#module_browser..requestComplete)
-    * [~postedCallback([err], post)](#module_browser..postedCallback)
-    * [~completedCallback([err])](#module_browser..completedCallback)
-    * [~loginCallback([err], user)](#module_browser..loginCallback)
+    * [~requestComplete](#module_browser..requestComplete)
+    * [~postedCallback](#module_browser..postedCallback)
+    * [~completedCallback](#module_browser..completedCallback)
+    * [~loginCallback](#module_browser..loginCallback)
 
 <a name="module_browser.createPost"></a>
 ### browser.createPost(topicId, [replyTo], content, callback)
@@ -108,6 +108,7 @@ Process browser tasks with rate limiting
 | [task.form] | <code>object</code> |  | HTTP form to use in HTTP request |
 | [task.callback] | <code>browser~requestComplete</code> |  | Callback toprovide request results to |
 | [task.delay] | <code>Number</code> | <code>0</code> | Seconds to delay callback after request for additional rate limiting |
+| [task.bypassRateLimit] | <code>boolean</code> | <code>false</code> | If true bypass request rate limiting |
 | callback | <code>function</code> |  | Queue task complete callback |
 
 <a name="module_browser..getCSRF"></a>
@@ -203,10 +204,10 @@ Clean discourse post for processing
 | post | <code>external.posts.Post</code> | Input Post |
 
 <a name="module_browser..requestComplete"></a>
-### browser~requestComplete([err], body)
+### browser~requestComplete
 Browser Request Callback
 
-**Kind**: inner method of <code>[browser](#module_browser)</code>  
+**Kind**: inner typedef of <code>[browser](#module_browser)</code>  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -214,10 +215,10 @@ Browser Request Callback
 | body | <code>Object</code> |  | JSON parsed response body. If invalid JSON will be `undefined` |
 
 <a name="module_browser..postedCallback"></a>
-### browser~postedCallback([err], post)
+### browser~postedCallback
 Post Request Callback
 
-**Kind**: inner method of <code>[browser](#module_browser)</code>  
+**Kind**: inner typedef of <code>[browser](#module_browser)</code>  
 **See**: [CleanedPost](../external/posts/#external.module_posts.CleanedPost)  
 
 | Param | Type | Default | Description |
@@ -226,20 +227,20 @@ Post Request Callback
 | post | <code>external.posts.CleanedPost</code> |  | Cleaned post |
 
 <a name="module_browser..completedCallback"></a>
-### browser~completedCallback([err])
+### browser~completedCallback
 Completion Callback
 
-**Kind**: inner method of <code>[browser](#module_browser)</code>  
+**Kind**: inner typedef of <code>[browser](#module_browser)</code>  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | [err] | <code>Exception</code> | <code></code> | Error encountered processing request |
 
 <a name="module_browser..loginCallback"></a>
-### browser~loginCallback([err], user)
+### browser~loginCallback
 Login Completion Callback
 
-**Kind**: inner method of <code>[browser](#module_browser)</code>  
+**Kind**: inner typedef of <code>[browser](#module_browser)</code>  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
