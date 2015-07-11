@@ -12,12 +12,15 @@ Command Parser for SockBot2.0
   * _inner_
     * [~parseShortCommand(line)](#module_commands..parseShortCommand) ⇒ <code>command</code>
     * [~parseMentionCommand(line)](#module_commands..parseMentionCommand) ⇒ <code>command</code>
+    * [~getCommandHelps()](#module_commands..getCommandHelps) ⇒ <code>string</code>
+    * [~cmdError(command)](#module_commands..cmdError)
+    * [~cmdHelp(command)](#module_commands..cmdHelp)
     * [~registerCommand(command, helpstring, handler, callback)](#module_commands..registerCommand) ⇒ <code>undefined</code>
     * [~commandProtect(event, handler)](#module_commands..commandProtect) ⇒ <code>boolean</code>
-    * [~completedCallback([err])](#module_commands..completedCallback)
-    * [~parseCallback([err], commands)](#module_commands..parseCallback)
-    * [~commandHandler(command)](#module_commands..commandHandler)
     * [~command](#module_commands..command) : <code>object</code>
+    * [~completedCallback](#module_commands..completedCallback)
+    * [~parseCallback](#module_commands..parseCallback)
+    * [~commandHandler](#module_commands..commandHandler)
 
 <a name="module_commands.prepareCommands"></a>
 ### commands.prepareCommands(events, callback)
@@ -65,6 +68,32 @@ Parse a mention command from input line
 | --- | --- | --- |
 | line | <code>string</code> | Input line to parse |
 
+<a name="module_commands..getCommandHelps"></a>
+### commands~getCommandHelps() ⇒ <code>string</code>
+Get a list of commands that are registered withg the bot
+
+**Kind**: inner method of <code>[commands](#module_commands)</code>  
+**Returns**: <code>string</code> - command list for posting  
+<a name="module_commands..cmdError"></a>
+### commands~cmdError(command)
+Replies on unhandled command with helptext
+
+**Kind**: inner method of <code>[commands](#module_commands)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| command | <code>command</code> | Unhandled command |
+
+<a name="module_commands..cmdHelp"></a>
+### commands~cmdHelp(command)
+Reply with help test top the command !help
+
+**Kind**: inner method of <code>[commands](#module_commands)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| command | <code>command</code> | help command |
+
 <a name="module_commands..registerCommand"></a>
 ### commands~registerCommand(command, helpstring, handler, callback) ⇒ <code>undefined</code>
 Register a command
@@ -93,37 +122,6 @@ Watch for unauthorized commands and reject them
 | event | <code>string</code> | Event that is registered |
 | handler | <code>function</code> | Event Handler |
 
-<a name="module_commands..completedCallback"></a>
-### commands~completedCallback([err])
-Completion Callback
-
-**Kind**: inner method of <code>[commands](#module_commands)</code>  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [err] | <code>Exception</code> | <code></code> | Error encountered processing request |
-
-<a name="module_commands..parseCallback"></a>
-### commands~parseCallback([err], commands)
-Parse Completion Callback
-
-**Kind**: inner method of <code>[commands](#module_commands)</code>  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [err] | <code>Exception</code> | <code></code> | Error encountered processing request |
-| commands | <code>Array.&lt;command&gt;</code> |  | Parsed Commands |
-
-<a name="module_commands..commandHandler"></a>
-### commands~commandHandler(command)
-Command handler
-
-**Kind**: inner method of <code>[commands](#module_commands)</code>  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| command | <code>command</code> | Command to handle |
-
 <a name="module_commands..command"></a>
 ### commands~command : <code>object</code>
 Parsed Command Data
@@ -137,4 +135,35 @@ Parsed Command Data
 | args | <code>Array.&lt;string&gt;</code> | Command arguments |
 | mention | <code>string</code> | Mention text that was included in command |
 | post | <code>external.posts.CleanedPost</code> | Post that triggered the command |
+
+<a name="module_commands..completedCallback"></a>
+### commands~completedCallback
+Completion Callback
+
+**Kind**: inner typedef of <code>[commands](#module_commands)</code>  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [err] | <code>Exception</code> | <code></code> | Error encountered processing request |
+
+<a name="module_commands..parseCallback"></a>
+### commands~parseCallback
+Parse Completion Callback
+
+**Kind**: inner typedef of <code>[commands](#module_commands)</code>  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [err] | <code>Exception</code> | <code></code> | Error encountered processing request |
+| commands | <code>Array.&lt;command&gt;</code> |  | Parsed Commands |
+
+<a name="module_commands..commandHandler"></a>
+### commands~commandHandler
+Command handler
+
+**Kind**: inner typedef of <code>[commands](#module_commands)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| command | <code>command</code> | Command to handle |
 
