@@ -10,7 +10,8 @@ const expect = chai.expect;
 // The thing we're testing
 const commands = require('../commands'),
     config = require('../config'),
-    utils = require('../utils');
+    utils = require('../utils'),
+    browser = require('../browser');
 describe('browser', () => {
     describe('exports', () => {
         const fns = ['prepareCommands', 'parseCommands'],
@@ -37,7 +38,7 @@ describe('browser', () => {
     });
     describe('internals', () => {
         const fns = ['parseMentionCommand', 'parseShortCommand', 'registerCommand',
-                'commandProtect', 'getCommands', 'cmdError'
+                'commandProtect', 'getCommandHelps', 'cmdError', 'cmdHelp'
             ],
             objs = ['mention', 'events', 'commands'],
             vals = [];
@@ -58,6 +59,143 @@ describe('browser', () => {
         });
         it('should include only expected keys', () => {
             commands.internals.should.have.all.keys(fns.concat(objs, vals));
+        });
+    });
+    describe('internals.getCommandHelps()', () => {
+        let cmds;
+        const getCommandHelps = commands.internals.getCommandHelps;
+        beforeEach(() => {
+            commands.internals.commands = {};
+            cmds = commands.internals.commands;
+        });
+        it('should return default text', () => {
+            const expected = 'Registered commands:',
+                result = getCommandHelps();
+            result.should.equal(expected);
+        });
+        it('should return help for one command', () => {
+            cmds.help = {
+                help: 'foobar'
+            };
+            const expected = 'Registered commands:\nhelp: foobar',
+                result = getCommandHelps();
+            result.should.equal(expected);
+        });
+        it('should return sort commands', () => {
+            cmds.help = {
+                help: 'foobar'
+            };
+            cmds.aaa = {
+                help: 'bbb'
+            };
+            const expected = 'Registered commands:\naaa: bbb\nhelp: foobar',
+                result = getCommandHelps();
+            result.should.equal(expected);
+        });
+        after(() => commands.internals.commands = {});
+    });
+    describe('internals.cmdError', () => {
+        const cmdError = commands.internals.cmdError;
+        before(() => {
+            commands.internals.commands = {};
+            sinon.stub(browser, 'createPost');
+        });
+        beforeEach(() => browser.createPost.reset());
+        it('should be registered as `command#ERROR` event', (done) => {
+            const spy = sinon.spy();
+            sinon.stub(utils, 'log');
+            commands.prepareCommands({
+                on: spy
+            }, () => {
+                utils.log.restore();
+                spy.calledWith('command#ERROR', cmdError).should.be.true;
+                done();
+            });
+        });
+        it('should not post on missing command post', () => {
+            cmdError({});
+            browser.createPost.called.should.be.false;
+        });
+        it('should post expected text', () => {
+            const expected = 'Command `foobar` is not recognized\n\nRegistered commands:\n' +
+                'help: print command help listing';
+            cmdError({
+                command: 'foobar',
+                post: {
+                    'topic_id': 1,
+                    'post_number': 5
+                }
+            });
+            browser.createPost.callCount.should.equal(1);
+            browser.createPost.calledWith(1, 5).should.be.true;
+            browser.createPost.lastCall.args[2].should.equal(expected);
+        });
+        it('should pass callback to createPost', () => {
+            cmdError({
+                command: 'foobar',
+                post: {
+                    'topic_id': 1,
+                    'post_number': 5
+                }
+            });
+            browser.createPost.lastCall.args[3].should.be.a('function');
+            browser.createPost.lastCall.args[3]().should.equal(0);
+        });
+        after(() => browser.createPost.restore());
+    });
+    describe('internals.cmdHelp', () => {
+        const cmdHelp = commands.internals.cmdHelp;
+        let clock;
+        before(() => {
+            commands.internals.commands = {};
+            sinon.stub(browser, 'createPost');
+            clock = sinon.useFakeTimers();
+        });
+        beforeEach(() => browser.createPost.reset());
+        it('should be registered as `command#help` event', (done) => {
+            const spy = sinon.spy();
+            sinon.stub(utils, 'log');
+            commands.prepareCommands({
+                on: spy
+            }, () => {
+                utils.log.restore();
+                clock.tick(0);
+                spy.calledWith('command#help', cmdHelp).should.be.true;
+                done();
+            });
+        });
+        it('should not post on missing command post', () => {
+            cmdHelp({});
+            browser.createPost.called.should.be.false;
+        });
+        it('should post expected text', () => {
+            const expected = 'Registered commands:\nhelp: print command help listing\n\n' +
+                'More details may be available by passing `help` as the first parameter to a command';
+            cmdHelp({
+                command: 'foobar',
+                post: {
+                    'topic_id': 15,
+                    'post_number': 75
+                }
+            });
+            browser.createPost.callCount.should.equal(1);
+            browser.createPost.calledWith(15, 75).should.be.true;
+            browser.createPost.lastCall.args[2].should.equal(expected);
+        });
+        it('should pass callback to createPost', () => {
+            cmdHelp({
+                command: 'foobar',
+                post: {
+                    'topic_id': 1,
+                    'post_number': 5
+                }
+            });
+            browser.createPost.lastCall.args[3].should.be.a('function');
+            browser.createPost.lastCall.args[3]().should.equal(0);
+        });
+        after(() => {
+            browser.createPost.restore();
+            clock.restore();
         });
     });
     describe('internals.parseShortCommand()', () => {
@@ -122,13 +260,67 @@ describe('browser', () => {
             cmd.args.should.deep.equal(['arg1', 'arg2']);
         });
     });
+    describe('internals.commandProtect()', () => {
+        const commandProtect = commands.internals.commandProtect,
+            events = {};
+        let cmds;
+        before(() => {
+            sinon.stub(utils, 'warn');
+            events.removeListener = sinon.spy();
+            commands.internals.events = events;
+        });
+        beforeEach(() => {
+            events.removeListener.reset();
+            cmds = {};
+            commands.internals.commands = cmds;
+        });
+        it('should not trigger for incorrect prefix', () => {
+            commandProtect('postRecieved').should.be.false;
+        });
+        it('should not trigger for partial prefix', () => {
+            commandProtect('command#').should.be.false;
+        });
+        it('should trigger for proper command registration', () => {
+            const func = () => 0;
+            cmds.cmd = {
+                handler: func
+            };
+            commandProtect('command#cmd', func).should.be.true;
+            events.removeListener.calledWith('cmd', func).should.be.false;
+            utils.warn.called.should.be.false;
+        });
+        it('should reject command that is not already registered', () => {
+            const func = () => 0,
+                err = 'Invalid command (cmd) registered! must register commands with onCommand()';
+            commandProtect('command#cmd', func);
+            events.removeListener.calledWith('command#cmd', func).should.be.true;
+            utils.warn.lastCall.args[0].should.equal(err);
+        });
+        it('should reject command that is not properly registered', () => {
+            const func = () => 0,
+                err = 'Invalid command (cmd1) registered! must register commands with onCommand()';
+            cmds.cmd1 = {
+                handler: () => 0
+            };
+            commandProtect('command#cmd1', func);
+            events.removeListener.calledWith('command#cmd1', func).should.be.true;
+            utils.warn.calledWith(err).should.be.true;
+        });
+        after(() => {
+            utils.warn.restore();
+        });
+    });
     describe('internals.parseMentionCommand()', () => {
         const parseMentionCommand = commands.internals.parseMentionCommand;
         before((done) => {
             config.core.username = 'foobar';
+            sinon.stub(utils, 'log');
             commands.prepareCommands({
                 on: () => 0
-            }, done);
+            }, () => {
+                utils.log.restore();
+                done();
+            });
         });
         describe('output object format', () => {
             it('should match bare command', () => {
@@ -323,56 +515,6 @@ describe('browser', () => {
         });
         after(() => {
             utils.log.restore();
-        });
-    });
-    describe('internals.commandProtect()', () => {
-        const commandProtect = commands.internals.commandProtect,
-            events = {};
-        let cmds;
-        before(() => {
-            sinon.stub(utils, 'warn');
-            events.removeListener = sinon.spy();
-            commands.internals.events = events;
-        });
-        beforeEach(() => {
-            events.removeListener.reset();
-            cmds = {};
-            commands.internals.commands = cmds;
-        });
-        it('should not trigger for incorrect prefix', () => {
-            commandProtect('postRecieved').should.be.false;
-        });
-        it('should not trigger for partial prefix', () => {
-            commandProtect('command#').should.be.false;
-        });
-        it('should trigger for proper command registration', () => {
-            const func = () => 0;
-            cmds.cmd = {
-                handler: func
-            };
-            commandProtect('command#cmd', func).should.be.true;
-            events.removeListener.calledWith('cmd', func).should.be.false;
-            utils.warn.called.should.be.false;
-        });
-        it('should reject command that is not already registered', () => {
-            const func = () => 0,
-                err = 'Invalid command (cmd) registered! must register commands with onCommand()';
-            commandProtect('command#cmd', func);
-            events.removeListener.calledWith('command#cmd', func).should.be.true;
-            utils.warn.lastCall.args[0].should.equal(err);
-        });
-        it('should reject command that is not properly registered', () => {
-            const func = () => 0,
-                err = 'Invalid command (cmd1) registered! must register commands with onCommand()';
-            cmds.cmd1 = {
-                handler: () => 0
-            };
-            commandProtect('command#cmd1', func);
-            events.removeListener.calledWith('command#cmd1', func).should.be.true;
-            utils.warn.calledWith(err).should.be.true;
-        });
-        after(() => {
-            utils.warn.restore();
         });
     });
     describe('prepareParser()', () => {
