@@ -140,10 +140,11 @@ exports.loadConfiguration = function loadConfiguration(path, callback) {
 /**
  * Configuration Loaded Callback
  *
+ * @callback
+ * @name configComplete
  * @param {Exception} [err=null] Error encountered processing request
  * @param {Object} config Loaded Configuration
  */
-function configComplete(err, config) {} //eslint-disable-line handle-callback-err, no-unused-vars
 
 
 const config = JSON.parse(JSON.stringify(defaultConfig));
@@ -171,8 +172,5 @@ if (typeof GLOBAL.describe === 'function') {
     exports.internals = {
         readFile: readFile,
         defaultConfig: defaultConfig
-    };
-    exports.stubs = {
-        configComplete: configComplete
     };
 }
