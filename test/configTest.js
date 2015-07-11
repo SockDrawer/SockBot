@@ -15,7 +15,7 @@ const config = require('../config'),
 describe('config', () => {
     describe('exports', () => {
         const fns = ['loadConfiguration'],
-            objs = ['internals', 'stubs', 'core', 'plugins'],
+            objs = ['internals', 'core', 'plugins'],
             vals = [];
         describe('should export expected functions:', () => {
             fns.forEach((fn) => {
@@ -58,12 +58,6 @@ describe('config', () => {
         it('should include only expected keys', () => {
             config.internals.should.have.all.keys(fns.concat(objs, vals));
         });
-    });
-    describe('documentation stubs', () => {
-        const stubs = config.stubs;
-        Object.keys(stubs).forEach((stub) => it('should be a documentation stub: ' + stub, () => {
-            stubs[stub](); // just getting code coverage on docstubs
-        }));
     });
     describe('readFile()', () => {
         const readFile = config.internals.readFile;
@@ -192,7 +186,7 @@ describe('config', () => {
             spy.lastCall.args.should.have.length(1);
             expect(spy.lastCall.args[0]).to.be.instanceOf(Error);
         });
-                it('should pass on YAML error', () => {
+        it('should pass on YAML error', () => {
             fs.readFile.reset();
             fs.readFile.yields(null, '1');
             const spy = sinon.spy();
