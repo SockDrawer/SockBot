@@ -71,6 +71,7 @@ exports.trustLevels = trustLevels;
  * @param {object} [task.form] HTTP form to use in HTTP request
  * @param {browser~requestComplete} [task.callback] Callback toprovide request results to
  * @param {Number} [task.delay=0] Seconds to delay callback after request for additional rate limiting
+ * @param {boolean} [task.bypassRateLimit=false] If true bypass request rate limiting
  * @param {Function} callback Queue task complete callback
  */
 function queueWorker(task, callback) {
@@ -88,7 +89,7 @@ function queueWorker(task, callback) {
         if (task.callback && typeof task.callback === 'function') {
             setTimeout(() => task.callback(e, body), task.delay || 0);
         }
-        setTimeout(callback, 5000);
+        setTimeout(callback, task.bypassRateLimit ? 0 : 5000);
     });
 }
 
@@ -204,6 +205,7 @@ function getCSRF(callback) {
     internals.queue.push({
         method: 'GET',
         url: '/session/csrf.json',
+        bypassRateLimit: true,
         callback: (err, data) => {
             if (err) {
                 return callback(err);
@@ -400,44 +402,42 @@ function cleanPost(post) {
 /**
  * Browser Request Callback
  *
+ * @callback
+ * @name requestComplete
  * @param {Exception} [err=null] Error encountered processing request
  * @param {Object} body JSON parsed response body. If invalid JSON will be `undefined`
  */
-function requestComplete(err, body) {} //eslint-disable-line handle-callback-err, no-unused-vars
 
 /**
  * Post Request Callback
  *
  * @see {@link ../external/posts/#external.module_posts.CleanedPost|CleanedPost}
  *
+ * @callback
+ * @name postedCallback
  * @param {Exception} [err=null] Error encountered processing request
  * @param {external.posts.CleanedPost} post Cleaned post
  */
-function postedCallback(err, post) {} //eslint-disable-line handle-callback-err, no-unused-vars
 
 /**
  * Completion Callback
  *
+ * @callback
+ * @name completedCallback
  * @param {Exception} [err=null] Error encountered processing request
  */
-function completedCallback(err) {} //eslint-disable-line handle-callback-err, no-unused-vars
 
 /**
  * Login Completion Callback
  *
+ * @callback
+ * @name loginCallback
  * @param {Exception} [err=null] Error encountered processing request
  * @param {extermal.users.User} user Logged in User information
  */
-function loginCallback(err, user) {} //eslint-disable-line handle-callback-err, no-unused-vars
 
 /* istanbul ignore else */
 if (typeof GLOBAL.describe === 'function') {
     //test is running
     exports.internals = internals;
-    exports.stubs = {
-        requestComplete: requestComplete,
-        postedCallback: postedCallback,
-        completedCallback: completedCallback,
-        loginCallback: loginCallback
-    };
 }
