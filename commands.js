@@ -17,8 +17,9 @@ const internals = {
     registerCommand: registerCommand,
     events: null,
     commandProtect: commandProtect,
-    getCommands: getCommands,
+    getCommandHelps: getCommandHelps,
     cmdError: cmdError,
+    cmdHelp: cmdHelp,
     commands: {}
 };
 
@@ -120,7 +121,7 @@ exports.parseCommands = function parseCommands(post, callback) {
  *
  * @returns {string} command list for posting
  */
-function getCommands() {
+function getCommandHelps() {
     const cmds = Object.keys(internals.commands),
         result = ['Registered commands:'];
     cmds.sort();
@@ -137,7 +138,7 @@ function cmdError(command) {
     if (!command.post) {
         return;
     }
-    const err = 'Command `' + command.command + '` is not recognized\n\n' + internals.getCommands();
+    const err = 'Command `' + command.command + '` is not recognized\n\n' + internals.getCommandHelps();
     browser.createPost(command.post.topic_id, command.post.post_number, err, () => 0);
 }
 
@@ -150,7 +151,7 @@ function cmdHelp(command) {
     if (!command.post) {
         return;
     }
-    const help = internals.getCommands() + '\n\nMore details may be available by passing `help` as ' +
+    const help = internals.getCommandHelps() + '\n\nMore details may be available by passing `help` as ' +
         'the first parameter to a command';
     browser.createPost(command.post.topic_id, command.post.post_number, help, () => 0);
 }
