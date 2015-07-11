@@ -15,7 +15,7 @@ const browser = require('../browser'),
 describe('browser', () => {
     describe('exports', () => {
         const fns = ['createPost', 'editPost', 'createPrivateMessage', 'login'],
-            objs = ['internals', 'trustLevels', 'stubs'],
+            objs = ['internals', 'trustLevels'],
             vals = [];
         describe('should export expected functions:', () => {
             fns.forEach((fn) => {
@@ -61,12 +61,6 @@ describe('browser', () => {
             browser.internals.should.have.all.keys(fns.concat(objs, vals));
         });
     });
-    describe('documentation stubs', () => {
-        const stubs = browser.stubs;
-        Object.keys(stubs).forEach((stub) => {
-            it(stub + '() should be a stub function', () => stubs[stub]());
-        });
-    });
     describe('internals.queueWorker()', () => {
         const queueWorker = browser.internals.queueWorker,
             request = browser.internals.request;
@@ -78,8 +72,20 @@ describe('browser', () => {
             browser.internals.request = (_, cb) => cb(null, null, '"foobar"');
             const spy = sinon.spy();
             queueWorker({}, spy);
+            clock.tick(4999);
             spy.called.should.be.false;
             clock.tick(5000);
+            spy.called.should.be.true;
+            done();
+        });
+        it('should accept bypassRateLimit parameter and not delay delay completion', (done) => {
+            browser.internals.request = (_, cb) => cb(null, null, '"foobar"');
+            const spy = sinon.spy();
+            queueWorker({
+                bypassRateLimit: true
+            }, spy);
+            spy.called.should.be.false;
+            clock.tick(0);
             spy.called.should.be.true;
             done();
         });
@@ -767,6 +773,14 @@ describe('browser', () => {
             args.should.have.length(1);
             args[0].should.have.any.key('callback');
             args[0].callback.should.be.a('function');
+        });
+        it('should set bypassRateLimit', () => {
+            queue.push.reset();
+            getCSRF(() => 0);
+            const args = queue.push.lastCall.args;
+            args.should.have.length(1);
+            args[0].should.have.any.key('bypassRateLimit');
+            args[0].bypassRateLimit.should.equal(true);
         });
         it('should pass err to external callback on completion', () => {
             queue.push.reset();
