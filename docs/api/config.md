@@ -23,7 +23,10 @@
 <dt><a href="#loadConfiguration">loadConfiguration(path, callback)</a></dt>
 <dd><p>Load configuration from disc</p>
 </dd>
-<dt><a href="#configComplete">configComplete([err], config)</a></dt>
+</dl>
+## Typedefs
+<dl>
+<dt><a href="#configComplete">configComplete</a></dt>
 <dd><p>Configuration Loaded Callback</p>
 </dd>
 </dl>
@@ -154,10 +157,10 @@ Load configuration from disc
 | callback | <code>[configComplete](#configComplete)</code> | Completion callback |
 
 <a name="configComplete"></a>
-## configComplete([err], config)
+## configComplete
 Configuration Loaded Callback
 
-**Kind**: global function  
+**Kind**: global typedef  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
