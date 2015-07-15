@@ -8,7 +8,7 @@
 
 /**
  * Message-bus message
- * 
+ *
  * @typedef {object}
  * @name message
  * @param {number} global_id Global Message Id
@@ -19,7 +19,7 @@
 
 /**
  * Message relating to a post
- * 
+ *
  * @typedef {object}
  * @name postMessage
  * @param (number) id Post id of post message relates to
@@ -30,17 +30,17 @@
 
 /**
  * Message relating to a topic
- * 
+ *
  * @typedef {object}
  * @name topicMessage
  * @param {number} topic_id Id of topic
  * @param {string} message_type Message Type
  * @param {topicTrackingState} payload Topic Information
  */
- 
+
  /**
   * Topic Tracking State
-  * 
+  *
   * @typedef {object}
   * @name topicTrackingState
   * @param {number} topic_id Topic Id
@@ -50,4 +50,3 @@
   * @param {number} category_id Category ID of the topic
   * @param {external.topics.NotificationLevel} notification_level Notification level of the topic
   */
-  
