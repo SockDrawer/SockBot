@@ -59,7 +59,7 @@ gulp.task('docs', ['gitBranch', 'lintExterns'], function (done) {
 /**
  * Run all js files through eslint and report status.
  */
-gulp.task('lint', (done) => {
+gulp.task('lintCore', (done) => {
     return gulp.src(sockFiles)
         .pipe(eslint())
         .pipe(eslint.format())
@@ -141,7 +141,7 @@ gulp.task('pushDocs', ['gitConfig', 'commitDocs'], (done) => {
 /**
  * Run code coverage instrumented tests
  */
-gulp.task('test', ['lint', 'lintTests'], (done) => {
+gulp.task('test', ['lintCore', 'lintTests'], (done) => {
     gulp.src(sockFiles)
         // Instrument code files with istanbulHarmony
         .pipe(istanbul({
@@ -167,4 +167,4 @@ gulp.task('buildDocs', ['docs'], () => 0);
 gulp.task('preBuild', ['buildDocs'], () => 0);
 gulp.task('postBuild', ['pushDocs'], () => 0);
 gulp.task('default', ['lint'], () => 0);
-gulp.task('lintAll', ['lint', 'lintExterns'], () => 0);
+gulp.task('lint', ['lintCore', 'lintTests', 'lintExterns'], () => 0);
