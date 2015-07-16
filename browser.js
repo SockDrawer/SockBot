@@ -260,6 +260,22 @@ exports.login = function login(callback) {
 };
 
 /**
+ * poll message-bus for messages
+ *
+ * @param {Object.<string, number>} channels Channels of interest
+ * @param {string} clientId Id of the client for message-bus
+ * @param {messageBusCallback} callback Completion callback
+ */
+exports.messageBus = function messageBus(channels, clientId, callback) {
+    internals.queue.push({
+        method: 'POST',
+        url: '/message-bus/' + clientId + '/poll',
+        form: channels,
+        callback: callback
+    });
+};
+
+/**
  * construct direct post link and direct in reply to link
  *
  * @see {@link ../external/posts/#external.module_posts.Post|Post}
@@ -434,6 +450,15 @@ function cleanPost(post) {
  * @name loginCallback
  * @param {Exception} [err=null] Error encountered processing request
  * @param {extermal.users.User} user Logged in User information
+ */
+
+/**
+ * MessageBus Completion Callback
+ *
+ * @callback
+ * @name messageBusCallback
+ * @param {Excption} [err=null] Error encountered processing request
+ * @param {external.messageBus.message[]} messages Messages found.
  */
 
 /* istanbul ignore else */

@@ -1,5 +1,5 @@
 'use strict';
-/*globals describe, it, before, after*/
+/*globals describe, it, before, beforeEach, after*/
 /*eslint no-unused-expressions:0 */
 
 const chai = require('chai'),
@@ -14,7 +14,7 @@ const browser = require('../browser'),
 
 describe('browser', () => {
     describe('exports', () => {
-        const fns = ['createPost', 'editPost', 'createPrivateMessage', 'login'],
+        const fns = ['createPost', 'editPost', 'createPrivateMessage', 'login', 'messageBus'],
             objs = ['internals', 'trustLevels'],
             vals = [];
         describe('should export expected functions:', () => {
@@ -887,6 +887,61 @@ describe('browser', () => {
             queue.push.yieldsTo('callback', null, {});
             const spy = sinon.spy();
             doLogin(spy);
+            spy.called.should.be.true;
+            spy.lastCall.args.should.have.length(2);
+            expect(spy.lastCall.args[0]).to.equal(null);
+        });
+        after(() => queue.push.restore());
+    });
+    describe('messageBus()', () => {
+        const queue = browser.internals.queue,
+            messageBus = browser.messageBus;
+        before(() => sinon.stub(queue, 'push'));
+        beforeEach(() => queue.push.reset());
+        it('should set http method to POST', () => {
+            messageBus({}, '', () => 0);
+            const args = queue.push.lastCall.args;
+            args.should.have.length(1);
+            args[0].should.have.any.key('method');
+            args[0].method.should.equal('POST');
+        });
+        it('should set url', () => {
+            messageBus({}, 'foobarbaz', () => 0);
+            const args = queue.push.lastCall.args;
+            args.should.have.length(1);
+            args[0].should.have.any.key('url');
+            args[0].url.should.equal('/message-bus/foobarbaz/poll');
+        });
+        it('should set form', () => {
+            const form = {};
+            messageBus(form, '', () => 0);
+            const args = queue.push.lastCall.args;
+            args.should.have.length(1);
+            args[0].should.have.any.key('form');
+            args[0].form.should.equal(form);
+        });
+        it('should set callback', () => {
+            const fn = () => 0;
+            messageBus({}, '', fn);
+            const args = queue.push.lastCall.args;
+            args.should.have.length(1);
+            args[0].should.have.any.key('callback');
+            args[0].callback.should.equal(fn);
+        });
+        it('should pass err to external callback on completion', () => {
+            queue.push.reset();
+            queue.push.yieldsTo('callback', new Error('test error!'));
+            const spy = sinon.spy();
+            messageBus({}, '', spy);
+            spy.called.should.be.true;
+            spy.lastCall.args.should.have.length(1);
+            spy.lastCall.args[0].should.be.an.instanceOf(Error);
+        });
+        it('should pass post to external callback on completion', () => {
+            queue.push.reset();
+            queue.push.yieldsTo('callback', null, {});
+            const spy = sinon.spy();
+            messageBus({}, '', spy);
             spy.called.should.be.true;
             spy.lastCall.args.should.have.length(2);
             expect(spy.lastCall.args[0]).to.equal(null);
