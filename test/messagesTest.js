@@ -13,7 +13,7 @@ const messages = require('../messages');
 describe('browser', () => {
     describe('exports', () => {
         const fns = ['prepare'],
-            objs = ['internals'],
+            objs = ['internals', 'privateFns'],
             vals = [];
         describe('should export expected functions:', () => {
             fns.forEach((fn) => {
@@ -35,7 +35,7 @@ describe('browser', () => {
         });
     });
     describe('internals', () => {
-        const fns = ['onMessageAdd', 'onMessageRemove', 'addChannel', 'removeChannel'],
+        const fns = [],
             objs = ['clientId', 'events', 'channels', 'channelCounts'],
             vals = [];
         describe('should include expected functions:', () => {
@@ -56,6 +56,18 @@ describe('browser', () => {
         it('should include only expected keys', () => {
             messages.internals.should.have.all.keys(fns.concat(objs, vals));
         });
+    });
+    describe('privateFns', () => {
+        const fns = ['onMessageAdd', 'onMessageRemove', 'addChannel', 'removeChannel', 'updateChannels'];
+        describe('should include expected functions:', () => {
+            fns.forEach((fn) => {
+                it(fn + '()', () => expect(messages.privateFns[fn]).to.be.a('function'));
+            });
+            it('should include only expected keys', () => {
+                messages.privateFns.should.have.all.keys(fns);
+            });
+        });
+
     });
     describe('prepare()', () => {
         let events;
@@ -84,23 +96,27 @@ describe('browser', () => {
         });
         it('should add `addChannel()` to events', () => {
             messages.prepare(events, '', () => 0);
-            messages.internals.addChannel.should.equal(events.addChannel);
+            messages.privateFns.addChannel.should.equal(events.addChannel);
         });
         it('should add `removeChannel()` to events', () => {
             messages.prepare(events, '', () => 0);
-            messages.internals.removeChannel.should.equal(events.removeChannel);
+            messages.privateFns.removeChannel.should.equal(events.removeChannel);
         });
         it('should register `newListener` event', () => {
             messages.prepare(events, '', () => 0);
-            events.on.calledWith('newListener', messages.internals.onMessageAdd).should.be.true;
+            events.on.calledWith('newListener', messages.privateFns.onMessageAdd).should.be.true;
         });
         it('should register `removeListener` event', () => {
             messages.prepare(events, '', () => 0);
-            events.on.calledWith('removeListener', messages.internals.onMessageRemove).should.be.true;
+            events.on.calledWith('removeListener', messages.privateFns.onMessageRemove).should.be.true;
+        });
+        it('should register listener for `/__status`', () => {
+            messages.prepare(events, '', () => 0);
+            events.on.calledWith('message-bus#/__status', messages.privateFns.updateChannels).should.be.true;
         });
     });
-    describe('internals.onMessageAdd()', () => {
-        const onMessageAdd = messages.internals.onMessageAdd;
+    describe('privateFns.onMessageAdd()', () => {
+        const onMessageAdd = messages.privateFns.onMessageAdd;
         beforeEach(() => {
             messages.internals.channels = {};
             messages.internals.channelCounts = {};
@@ -140,8 +156,8 @@ describe('browser', () => {
             messages.internals.channelCounts['/some/channel'].should.equal(43);
         });
     });
-    describe('internals.onMessageRemove()', () => {
-        const onMessageRemove = messages.internals.onMessageRemove;
+    describe('privateFns.onMessageRemove()', () => {
+        const onMessageRemove = messages.privateFns.onMessageRemove;
         beforeEach(() => {
             messages.internals.channels = {};
             messages.internals.channelCounts = {};
@@ -187,7 +203,7 @@ describe('browser', () => {
             messages.internals.channels.should.not.have.any.key('foo');
         });
     });
-    describe('internals.addChannel()', () => {
+    describe('privateFns.addChannel()', () => {
         let events;
         beforeEach((done) => {
             events = {
@@ -207,7 +223,7 @@ describe('browser', () => {
             events.on.calledWith('message-bus#foobar', fn).should.be.true;
         });
     });
-    describe('internals.removeChannel()', () => {
+    describe('privateFns.removeChannel()', () => {
         let events;
         beforeEach((done) => {
             events = {
@@ -223,6 +239,20 @@ describe('browser', () => {
             const fn = () => 0;
             events.removeChannel('foobar', fn);
             events.removeListener.calledWith('message-bus#foobar', fn).should.be.true;
+        });
+    });
+    describe('privateFns.updateChannels()', () => {
+        const updateChannels = messages.privateFns.updateChannels;
+        beforeEach(() => {
+            messages.internals.channels = {};
+        });
+        it('should set channels', () => {
+            const chans = {
+                '/u/234': 45,
+                'foobar': 32
+            };
+            updateChannels(chans);
+            messages.internals.channels.should.deep.equal(chans);
         });
     });
 });

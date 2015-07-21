@@ -9,11 +9,7 @@ const internals = {
     clientId: null,
     events: null,
     channels: null,
-    channelCounts: null,
-    addChannel: addChannel,
-    removeChannel: removeChannel,
-    onMessageAdd: onMessageAdd,
-    onMessageRemove: onMessageRemove
+    channelCounts: null
 };
 
 exports.prepare = function prepare(events, clientId, callback) {
@@ -25,8 +21,15 @@ exports.prepare = function prepare(events, clientId, callback) {
     events.removeChannel = removeChannel;
     events.on('newListener', onMessageAdd);
     events.on('removeListener', onMessageRemove);
+    addChannel('/__status', updateChannels);
     callback();
 };
+
+function updateChannels(message) {
+    Object.keys(message).forEach((channel) => {
+        internals.channels[channel] = message[channel];
+    });
+}
 
 /**
  * Add message-bus channel listener
@@ -101,4 +104,11 @@ function onMessageRemove(event) {
 if (typeof GLOBAL.describe === 'function') {
     //test is running
     exports.internals = internals;
+    exports.privateFns = {
+        addChannel: addChannel,
+        removeChannel: removeChannel,
+        onMessageAdd: onMessageAdd,
+        onMessageRemove: onMessageRemove,
+        updateChannels: updateChannels
+    };
 }
