@@ -58,16 +58,17 @@ describe('browser', () => {
         });
     });
     describe('privateFns', () => {
-        const fns = ['onMessageAdd', 'onMessageRemove', 'addChannel', 'removeChannel', 'updateChannels'];
+        const fns = ['onMessageAdd', 'onMessageRemove', 'onChannel', 'onTopic', 'removeChannel', 'removeTopic',
+            'statusChannelHandler'
+        ];
         describe('should include expected functions:', () => {
             fns.forEach((fn) => {
                 it(fn + '()', () => expect(messages.privateFns[fn]).to.be.a('function'));
             });
-            it('should include only expected keys', () => {
-                messages.privateFns.should.have.all.keys(fns);
-            });
         });
-
+        it('should include only expected keys', () => {
+            messages.privateFns.should.have.all.keys(fns);
+        });
     });
     describe('prepare()', () => {
         let events;
@@ -94,13 +95,21 @@ describe('browser', () => {
             messages.prepare(events, id, () => 0);
             id.should.equal(messages.internals.clientId);
         });
-        it('should add `addChannel()` to events', () => {
+        it('should add `onChannel()` to events', () => {
             messages.prepare(events, '', () => 0);
-            messages.privateFns.addChannel.should.equal(events.addChannel);
+            messages.privateFns.onChannel.should.equal(events.onChannel);
+        });
+        it('should add `onTopic()` to events', () => {
+            messages.prepare(events, '', () => 0);
+            messages.privateFns.onTopic.should.equal(events.onTopic);
         });
         it('should add `removeChannel()` to events', () => {
             messages.prepare(events, '', () => 0);
             messages.privateFns.removeChannel.should.equal(events.removeChannel);
+        });
+        it('should add `removeTopic()` to events', () => {
+            messages.prepare(events, '', () => 0);
+            messages.privateFns.removeTopic.should.equal(events.removeTopic);
         });
         it('should register `newListener` event', () => {
             messages.prepare(events, '', () => 0);
@@ -112,7 +121,7 @@ describe('browser', () => {
         });
         it('should register listener for `/__status`', () => {
             messages.prepare(events, '', () => 0);
-            events.on.calledWith('message-bus#/__status', messages.privateFns.updateChannels).should.be.true;
+            events.on.calledWith('message#/__status', messages.privateFns.statusChannelHandler).should.be.true;
         });
     });
     describe('privateFns.onMessageAdd()', () => {
@@ -126,34 +135,63 @@ describe('browser', () => {
             messages.internals.channels.should.deep.equal({});
             messages.internals.channelCounts.should.deep.equal({});
         });
-        it('should not register partial prefix (`message#`)', () => {
-            onMessageAdd('message#' + Math.random()).should.be.false;
+        it('should not register partial prefix (`msg#`)', () => {
+            onMessageAdd('msg#' + Math.random()).should.be.false;
             messages.internals.channels.should.deep.equal({});
             messages.internals.channelCounts.should.deep.equal({});
         });
-        it('should not register partial prefix (`message-bus`)', () => {
-            onMessageAdd('message-bus' + Math.random()).should.be.false;
+        it('should not register partial prefix (`top#`)', () => {
+            onMessageAdd('top#' + Math.random()).should.be.false;
             messages.internals.channels.should.deep.equal({});
             messages.internals.channelCounts.should.deep.equal({});
         });
-        it('should register with correct prefix', () => {
-            onMessageAdd('message-bus#/some/channel').should.be.true;
+        it('should not register partial prefix (`message`)', () => {
+            onMessageAdd('message' + Math.random()).should.be.false;
+            messages.internals.channels.should.deep.equal({});
+            messages.internals.channelCounts.should.deep.equal({});
+        });
+        it('should not register partial prefix (`topic`)', () => {
+            onMessageAdd('topic' + Math.random()).should.be.false;
+            messages.internals.channels.should.deep.equal({});
+            messages.internals.channelCounts.should.deep.equal({});
+        });
+        it('should register with correct prefix (`message#`)', () => {
+            onMessageAdd('message#/some/channel').should.be.true;
             messages.internals.channels.should.have.any.key('/some/channel');
         });
+        it('should register with correct prefix (`topic#`)', () => {
+            onMessageAdd('topic#channel').should.be.true;
+            messages.internals.channels.should.have.any.key('/topic/channel');
+        });
         it('should register new channel at position -1', () => {
-            onMessageAdd('message-bus#/some/channel');
+            onMessageAdd('message#/some/channel');
             messages.internals.channels['/some/channel'].should.equal(-1);
+        });
+        it('should register new topic at position -1', () => {
+            onMessageAdd('topic#channel');
+            messages.internals.channels['/topic/channel'].should.equal(-1);
         });
         it('should not override existing channel position', () => {
             messages.internals.channelCounts['/some/channel'] = 42;
             messages.internals.channels['/some/channel'] = 42;
-            onMessageAdd('message-bus#/some/channel');
+            onMessageAdd('message#/some/channel');
             messages.internals.channels['/some/channel'].should.equal(42);
+        });
+        it('should not override existing topic position', () => {
+            messages.internals.channelCounts['/topic/channel'] = 42;
+            messages.internals.channels['/topic/channel'] = 42;
+            onMessageAdd('topic#channel');
+            messages.internals.channels['/topic/channel'].should.equal(42);
         });
         it('should increment listener count for channel', () => {
             messages.internals.channelCounts['/some/channel'] = 42;
-            onMessageAdd('message-bus#/some/channel');
+            onMessageAdd('message#/some/channel');
             messages.internals.channelCounts['/some/channel'].should.equal(43);
+        });
+        it('should increment listener count for topic', () => {
+            messages.internals.channelCounts['/topic/channel'] = 42;
+            onMessageAdd('topic#channel');
+            messages.internals.channelCounts['/topic/channel'].should.equal(43);
         });
     });
     describe('privateFns.onMessageRemove()', () => {
@@ -167,43 +205,68 @@ describe('browser', () => {
             messages.internals.channels.should.deep.equal({});
             messages.internals.channelCounts.should.deep.equal({});
         });
-        it('should not remove partial prefix (`message#`)', () => {
-            onMessageRemove('message#' + Math.random()).should.be.false;
+        it('should not remove partial prefix (`msg#`)', () => {
+            onMessageRemove('msg#' + Math.random()).should.be.false;
             messages.internals.channels.should.deep.equal({});
             messages.internals.channelCounts.should.deep.equal({});
         });
-        it('should not remove partial prefix (`message-bus`)', () => {
-            onMessageRemove('message-bus' + Math.random()).should.be.false;
+        it('should not remove partial prefix (`top#`)', () => {
+            onMessageRemove('top#' + Math.random()).should.be.false;
             messages.internals.channels.should.deep.equal({});
             messages.internals.channelCounts.should.deep.equal({});
         });
-        it('should remove corect prefix', () => {
-            onMessageRemove('message-bus#' + Math.random()).should.be.true;
+        it('should not remove partial prefix (`message`)', () => {
+            onMessageRemove('message' + Math.random()).should.be.false;
+            messages.internals.channels.should.deep.equal({});
+            messages.internals.channelCounts.should.deep.equal({});
+        });
+        it('should not remove partial prefix (`topic`)', () => {
+            onMessageRemove('topic' + Math.random()).should.be.false;
+            messages.internals.channels.should.deep.equal({});
+            messages.internals.channelCounts.should.deep.equal({});
+        });
+        it('should remove corect prefix (`message#`)', () => {
+            onMessageRemove('message#' + Math.random()).should.be.true;
+            messages.internals.channels.should.deep.equal({});
+        });
+        it('should remove corect prefix(`topic#`)', () => {
+            onMessageRemove('topic#' + Math.random()).should.be.true;
             messages.internals.channels.should.deep.equal({});
         });
         it('should decrement listener with correct prefix', () => {
             messages.internals.channelCounts.foo = 3;
-            onMessageRemove('message-bus#foo');
+            onMessageRemove('message#foo');
             messages.internals.channelCounts.foo.should.equal(2);
         });
         it('should decrement listener with correct prefix', () => {
-            messages.internals.channelCounts.foo = 3;
-            onMessageRemove('message-bus#foo');
-            messages.internals.channelCounts.foo.should.equal(2);
+            messages.internals.channelCounts['/topic/foo'] = 3;
+            onMessageRemove('topic#foo');
+            messages.internals.channelCounts['/topic/foo'].should.equal(2);
+        });
+        it('should remove topic listener with count of zero', () => {
+            messages.internals.channelCounts['/topic/foo'] = 1;
+            messages.internals.channels['/topic/foo'] = true;
+            onMessageRemove('topic#foo');
+            messages.internals.channels.should.not.have.any.key('/topic/foo');
         });
         it('should remove listener with count of zero', () => {
             messages.internals.channelCounts.foo = 1;
             messages.internals.channels.foo = true;
-            onMessageRemove('message-bus#foo');
+            onMessageRemove('message#foo');
             messages.internals.channels.should.not.have.any.key('foo');
+        });
+        it('should remove unregistered topic listener', () => {
+            messages.internals.channels['/topic/foo'] = true;
+            onMessageRemove('topic#foo');
+            messages.internals.channels.should.not.have.any.key('/topic/foo');
         });
         it('should remove unregistered listener', () => {
             messages.internals.channels.foo = true;
-            onMessageRemove('message-bus#foo');
+            onMessageRemove('message#foo');
             messages.internals.channels.should.not.have.any.key('foo');
         });
     });
-    describe('privateFns.addChannel()', () => {
+    describe('privateFns.onChannel()', () => {
         let events;
         beforeEach((done) => {
             events = {
@@ -215,12 +278,32 @@ describe('browser', () => {
             });
         });
         it('should return event object for chaining', () => {
-            events.addChannel('', () => 0).should.equal(events);
+            events.onChannel('', () => 0).should.equal(events);
         });
         it('should register renamed event', () => {
             const fn = () => 0;
-            events.addChannel('foobar', fn);
-            events.on.calledWith('message-bus#foobar', fn).should.be.true;
+            events.onChannel('foobar', fn);
+            events.on.calledWith('message#foobar', fn).should.be.true;
+        });
+    });
+    describe('privateFns.onTopic()', () => {
+        let events;
+        beforeEach((done) => {
+            events = {
+                on: sinon.spy()
+            };
+            messages.prepare(events, '', () => {
+                events.on.reset();
+                done();
+            });
+        });
+        it('should return event object for chaining', () => {
+            events.onTopic('', () => 0).should.equal(events);
+        });
+        it('should register renamed event', () => {
+            const fn = () => 0;
+            events.onTopic('foobar', fn);
+            events.on.calledWith('topic#foobar', fn).should.be.true;
         });
     });
     describe('privateFns.removeChannel()', () => {
@@ -235,14 +318,32 @@ describe('browser', () => {
         it('should return event object for chaining', () => {
             events.removeChannel('', () => 0).should.equal(events);
         });
-        it('should register renamed event', () => {
+        it('should remove renamed event', () => {
             const fn = () => 0;
             events.removeChannel('foobar', fn);
-            events.removeListener.calledWith('message-bus#foobar', fn).should.be.true;
+            events.removeListener.calledWith('message#foobar', fn).should.be.true;
         });
     });
-    describe('privateFns.updateChannels()', () => {
-        const updateChannels = messages.privateFns.updateChannels;
+    describe('privateFns.removeTopic()', () => {
+        let events;
+        beforeEach((done) => {
+            events = {
+                on: sinon.spy(),
+                removeListener: sinon.spy()
+            };
+            messages.prepare(events, '', done);
+        });
+        it('should return event object for chaining', () => {
+            events.removeTopic('', () => 0).should.equal(events);
+        });
+        it('should remove renamed event', () => {
+            const fn = () => 0;
+            events.removeTopic('foobar', fn);
+            events.removeListener.calledWith('topic#foobar', fn).should.be.true;
+        });
+    });
+    describe('privateFns.statusChannelHandler()', () => {
+        const statusChannelHandler = messages.privateFns.statusChannelHandler;
         beforeEach(() => {
             messages.internals.channels = {};
         });
@@ -251,8 +352,34 @@ describe('browser', () => {
                 '/u/234': 45,
                 'foobar': 32
             };
-            updateChannels(chans);
+            statusChannelHandler(chans);
             messages.internals.channels.should.deep.equal(chans);
+        });
+        it('should override existing channels', () => {
+            const chans = {
+                '/u/234': 45,
+                'foobar': 32
+            };
+            messages.internals.channels = {
+                '/u/234': 4,
+                'foobar': 3
+            };
+            statusChannelHandler(chans);
+            messages.internals.channels.should.deep.equal(chans);
+        });
+        it('should not remove unrelated existing channels', () => {
+            messages.internals.channels.barbaz = 2;
+            const chans = {
+                    '/u/234': 45,
+                    'foobar': 32
+                },
+                expected = {
+                    '/u/234': 45,
+                    'foobar': 32,
+                    barbaz: 2
+                };
+            statusChannelHandler(chans);
+            messages.internals.channels.should.deep.equal(expected);
         });
     });
 });

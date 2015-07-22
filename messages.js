@@ -5,53 +5,123 @@
  * @author Accalia
  * @license MIT
  */
+const async = require('async');
+
+const browser = require('./browser'),
+    utils = require('./utils');
+
 const internals = {
-    clientId: null,
-    events: null,
-    channels: null,
-    channelCounts: null
-};
+        clientId: null,
+        events: null,
+        channels: null,
+        channelCounts: null
+    },
+    messagePrefix = 'message#',
+    messagePrefixTest = /^message#/,
+    topicPrefix = 'topic#',
+    topicPrefixTest = /^topic#/;
 
 exports.prepare = function prepare(events, clientId, callback) {
     internals.events = events;
     internals.clientId = clientId;
     internals.channels = {};
     internals.channelCounts = {};
-    events.addChannel = addChannel;
+    events.onChannel = onChannel;
     events.removeChannel = removeChannel;
+    events.onTopic = onTopic;
+    events.removeTopic = removeTopic;
     events.on('newListener', onMessageAdd);
     events.on('removeListener', onMessageRemove);
-    addChannel('/__status', updateChannels);
+    onChannel('/__status', statusChannelHandler);
     callback();
 };
 
-function updateChannels(message) {
+function pollMessages(callback) {
+    browser.messageBus(internals.channels, internals.clientId, (err, messages) => {
+        if (err) {
+            //Reset channel position on error
+            resetChannelPositions();
+            utils.warn('Error in messageBus: ' + JSON.stringify(err));
+            return;
+        }
+        updateChannelPositions();
+        async.each(messages, (message) => {
+            setTimeout(() => {
+
+            }, 0);
+        });
+    });
+}
+
+function updateChannelPositions(messages) {
+    const channels = internals.channels;
+    messages.forEach((message) => {
+        const channel = message.channel;
+        channels[channel] = Math.max(channels[channel], message.message_id);
+    });
+}
+
+function resetChannelPositions() {
+    Object.keys(internals.channels).forEach((channel) => {
+        internals.channels[channel] = -1;
+    });
+}
+
+/**
+ * Message handler for the `/__status` message channel
+ *
+ * @param {Object<string,number>} message New channel positions
+ */
+function statusChannelHandler(message) {
     Object.keys(message).forEach((channel) => {
         internals.channels[channel] = message[channel];
     });
 }
 
 /**
- * Add message-bus channel listener
+ * Add message-bus non-topic channel listener
  *
  * @param {string} channel Channel to listen to
  * @param {messageHandler} handler Message handler to add
  * @returns {EventEmitter} Returns emitter, so calls can be chained.
  */
-function addChannel(channel, handler) {
-    internals.events.on('message-bus#' + channel, handler);
+function onChannel(channel, handler) {
+    internals.events.on(messagePrefix + channel, handler);
+    return internals.events;
+}
+/**
+ * Add message-bus topic channel listener
+ *
+ * @param {string} topicId Topic to listen to
+ * @param {messageHandler} handler Message handler to add
+ * @returns {EventEmitter} Returns emitter, so calls can be chained.
+ */
+function onTopic(topicId, handler) {
+    internals.events.on(topicPrefix + topicId, handler);
     return internals.events;
 }
 
 /**
- * Remove message-bus channel listener
+ * Remove message-bus non-topic channel listener
  *
  * @param {string} channel Channel to remove listener from
  * @param {messageHandler} handler Message handler to remove
  * @returns {EventEmitter} Returns emitter, so calls can be chained.
  */
 function removeChannel(channel, handler) {
-    internals.events.removeListener('message-bus#' + channel, handler);
+    internals.events.removeListener(messagePrefix + channel, handler);
+    return internals.events;
+}
+
+/**
+ * Remove message-bus topic channel listener
+ *
+ * @param {string} topicId Topic to remove listener from
+ * @param {messageHandler} handler Message handler to remove
+ * @returns {EventEmitter} Returns emitter, so calls can be chained.
+ */
+function removeTopic(topicId, handler) {
+    internals.events.removeListener(topicPrefix + topicId, handler);
     return internals.events;
 }
 
@@ -62,16 +132,25 @@ function removeChannel(channel, handler) {
  * @returns {boolean} True if event was a message-bus channel, false otherwise
  */
 function onMessageAdd(event) {
-    if (!/^message-bus#/.test(event)) {
+    if (messagePrefixTest.test(event)) {
+        const channel = event.replace(messagePrefixTest, '');
+        const count = internals.channelCounts[channel] || 0;
+        internals.channelCounts[channel] = count + 1;
+        if (count === 0) {
+            internals.channels[channel] = -1;
+        }
+        return true;
+    } else if (topicPrefixTest.test(event)) {
+        const channel = '/topic/' + event.replace(topicPrefixTest, '');
+        const count = internals.channelCounts[channel] || 0;
+        internals.channelCounts[channel] = count + 1;
+        if (count === 0) {
+            internals.channels[channel] = -1;
+        }
+        return true;
+    } else {
         return false;
     }
-    const channel = event.replace(/^message-bus#/, '');
-    const count = internals.channelCounts[channel] || 0;
-    internals.channelCounts[channel] = count + 1;
-    if (count === 0) {
-        internals.channels[channel] = -1;
-    }
-    return true;
 }
 
 /**
@@ -81,16 +160,25 @@ function onMessageAdd(event) {
  * @returns {boolean} True if event was a message-bus channel, false otherwise
  */
 function onMessageRemove(event) {
-    if (!/^message-bus#/.test(event)) {
+    if (messagePrefixTest.test(event)) {
+        const channel = event.replace(messagePrefixTest, '');
+        const count = internals.channelCounts[channel] || 1;
+        internals.channelCounts[channel] = count - 1;
+        if (count <= 1) {
+            delete internals.channels[channel];
+        }
+        return true;
+    } else if (topicPrefixTest.test(event)) {
+        const channel = '/topic/' + event.replace(topicPrefixTest, '');
+        const count = internals.channelCounts[channel] || 1;
+        internals.channelCounts[channel] = count - 1;
+        if (count <= 1) {
+            delete internals.channels[channel];
+        }
+        return true;
+    } else {
         return false;
     }
-    const channel = event.replace(/^message-bus#/, '');
-    const count = internals.channelCounts[channel] || 1;
-    internals.channelCounts[channel] = count - 1;
-    if (count <= 1) {
-        delete internals.channels[channel];
-    }
-    return true;
 }
 
 /**
@@ -105,10 +193,12 @@ if (typeof GLOBAL.describe === 'function') {
     //test is running
     exports.internals = internals;
     exports.privateFns = {
-        addChannel: addChannel,
+        onChannel: onChannel,
+        onTopic: onTopic,
         removeChannel: removeChannel,
+        removeTopic: removeTopic,
         onMessageAdd: onMessageAdd,
         onMessageRemove: onMessageRemove,
-        updateChannels: updateChannels
+        statusChannelHandler: statusChannelHandler
     };
 }
