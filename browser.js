@@ -19,19 +19,6 @@ const signature = '\n\n<!-- Posted by a clever robot -->',
             'User-Agent': 'SockBot 2.0.x Angelic Ariel'
         }
     },
-    internals = {
-        request: request.defaults(defaults),
-        queue: async.queue(queueWorker, 1),
-        queueWorker: queueWorker,
-        defaults: defaults,
-        setTrustLevel: setTrustLevel,
-        setPostUrl: setPostUrl,
-        cleanPostRaw: cleanPostRaw,
-        cleanPost: cleanPost,
-        signature: signature,
-        getCSRF: getCSRF,
-        doLogin: doLogin
-    },
     /**
      * SockBot Virtual Trust Levels
      *
@@ -59,8 +46,70 @@ const signature = '\n\n<!-- Posted by a clever robot -->',
         tl0: 0,
         /** Ignored User Trust Level */
         ignored: 0
+    },
+    coreQueue = {
+        queue: async.queue(queueWorker, 1),
+        delay: 0
+    },
+    pluginQueue = {
+        queue: async.queue(queueWorker, 1),
+        delay: 5000
+    },
+    privateFns = {
+        queueWorker: queueWorker,
+        setTrustLevel: setTrustLevel,
+        setPostUrl: setPostUrl,
+        cleanPostRaw: cleanPostRaw,
+        cleanPost: cleanPost,
+        getCSRF: getCSRF,
+        doLogin: doLogin
+    },
+    internals = {
+        request: request.defaults(defaults),
+        core: {
+            setCore: setCore,
+            setPlugins: setPlugins
+        },
+        plugins: {},
+        defaults: defaults,
+        signature: signature,
+        coreQueue: coreQueue,
+        pluginQueue: pluginQueue
+    },
+    externals = {
+        trustLevels: trustLevels,
+        createPost: createPost,
+        createPrivateMessage: createPrivateMessage,
+        editPost: editPost,
+        login: login,
+        messageBus: messageBus
     };
-exports.trustLevels = trustLevels;
+
+internals.current = internals.core;
+
+Object.keys(externals).forEach((key) => {
+    if (typeof externals[key] === 'function') {
+        internals.core[key] = () => externals[key].apply(coreQueue, arguments);
+        internals.plugins[key] = () => externals[key].apply(pluginQueue, arguments);
+    } else {
+        internals.core[key] = externals[key];
+        internals.plugins[key] = externals[key];
+    }
+});
+
+exports = module.exports = function get() {
+    return internals.current;
+};
+
+function setCore() {
+    internals.current = internals.core;
+    return internals.current;
+}
+
+function setPlugins() {
+    internals.current = internals.plugins;
+    return internals.current;
+}
 
 /**
  * Process browser tasks with rate limiting
@@ -71,7 +120,6 @@ exports.trustLevels = trustLevels;
  * @param {object} [task.form] HTTP form to use in HTTP request
  * @param {browser~requestComplete} [task.callback] Callback toprovide request results to
  * @param {Number} [task.delay=0] Seconds to delay callback after request for additional rate limiting
- * @param {boolean} [task.bypassRateLimit=false] If true bypass request rate limiting
  * @param {Function} callback Queue task complete callback
  */
 function queueWorker(task, callback) {
@@ -87,9 +135,9 @@ function queueWorker(task, callback) {
             body = JSON.parse(body);
         } catch (ignore) {} //eslint-disable-line no-empty
         if (task.callback && typeof task.callback === 'function') {
-            setTimeout(() => task.callback(e, body), task.delay || 0);
+            setTimeout(() => task.callback(e, body), 0);
         }
-        setTimeout(callback, task.bypassRateLimit ? 0 : 5000);
+        setTimeout(callback, task.delay);
     });
 }
 
@@ -101,7 +149,7 @@ function queueWorker(task, callback) {
  * @param {string} content Post Contents to post
  * @param {postedCallback} callback Completion callback
  */
-exports.createPost = function createPost(topicId, replyTo, content, callback) {
+function createPost(topicId, replyTo, content, callback) {
     if (callback === undefined) {
         callback = content;
         content = replyTo;
@@ -110,7 +158,7 @@ exports.createPost = function createPost(topicId, replyTo, content, callback) {
     if (typeof callback !== 'function') {
         throw new Error('callback must be supplied');
     }
-    internals.queue.push({
+    this.queue.push({
         method: 'POST',
         url: '/posts',
         form: {
@@ -127,9 +175,10 @@ exports.createPost = function createPost(topicId, replyTo, content, callback) {
                 return callback(err);
             }
             callback(null, cleanPost(body));
-        }
+        },
+        delay: this.delay
     });
-};
+}
 
 /**
  * Create a new private message.
@@ -139,11 +188,11 @@ exports.createPost = function createPost(topicId, replyTo, content, callback) {
  * @param {string} content Private Message contents
  * @param {postedCallback} callback Completion callback
  */
-exports.createPrivateMessage = function createPrivateMessage(to, title, content, callback) {
+function createPrivateMessage(to, title, content, callback) {
     if (typeof callback !== 'function') {
         throw new Error('callback must be supplied');
     }
-    internals.queue.push({
+    this.queue.push({
         method: 'POST',
         url: '/posts',
         form: {
@@ -158,9 +207,10 @@ exports.createPrivateMessage = function createPrivateMessage(to, title, content,
                 return callback(err);
             }
             callback(null, cleanPost(body));
-        }
+        },
+        delay: this.delay
     });
-};
+}
 
 /**
  * Edit an existing post.
@@ -170,7 +220,7 @@ exports.createPrivateMessage = function createPrivateMessage(to, title, content,
  * @param {string} [editReason] Optional Edit Reason that no one ever uses
  * @param {postedCallback} callback Completion callback
  */
-exports.editPost = function editPost(postId, content, editReason, callback) {
+function editPost(postId, content, editReason, callback) {
     if (callback === undefined) {
         callback = editReason;
         editReason = '';
@@ -178,7 +228,7 @@ exports.editPost = function editPost(postId, content, editReason, callback) {
     if (typeof callback !== 'function') {
         throw new Error('callback must be supplied');
     }
-    internals.queue.push({
+    this.queue.push({
         method: 'PUT',
         url: '/posts/' + postId,
         form: {
@@ -192,17 +242,20 @@ exports.editPost = function editPost(postId, content, editReason, callback) {
                 return callback(err);
             }
             callback(null, cleanPost(body));
-        }
+        },
+        delay: this.delay
     });
-};
+}
 
 /**
  * get a CSRF token from discourse
  *
+ * @param {number} delay Delay completion by this many ms
+ * @param {async.queue} queue Task Queue
  * @param {completedCallback} callback Completion callback
  */
-function getCSRF(callback) {
-    internals.queue.push({
+function getCSRF(delay, queue, callback) {
+    queue.push({
         method: 'GET',
         url: '/session/csrf.json',
         bypassRateLimit: true,
@@ -214,17 +267,20 @@ function getCSRF(callback) {
             defaults.headers['X-CSRF-Token'] = csrf;
             internals.request = internals.request.defaults(defaults);
             callback(null);
-        }
+        },
+        delay: delay
     });
 }
 
 /**
  * Perform a login to discourse
  *
+ * @param {number} delay Delay completion by this many ms
+ * @param {async.queue} queue Task Queue
  * @param {loginCallback} callback Completion callback
  */
-function doLogin(callback) {
-    internals.queue.push({
+function doLogin(delay, queue, callback) {
+    queue.push({
         method: 'POST',
         url: '/session',
         form: {
@@ -237,7 +293,8 @@ function doLogin(callback) {
             } else {
                 callback(null, data.user || {});
             }
-        }
+        },
+        delay: delay
     });
 }
 
@@ -246,18 +303,19 @@ function doLogin(callback) {
  *
  * @param {loginCallback} callback Completion callback
  */
-exports.login = function login(callback) {
+function login(callback) {
     if (typeof callback !== 'function') {
         throw new Error('callback must be supplied');
     }
-    getCSRF((err) => {
+    const ctx = this;
+    getCSRF(ctx.delay, ctx.queue, (err) => {
         if (err) {
             callback(err);
         } else {
-            doLogin(callback);
+            doLogin(ctx.delay, ctx.queue, callback);
         }
     });
-};
+}
 
 /**
  * poll message-bus for messages
@@ -266,14 +324,15 @@ exports.login = function login(callback) {
  * @param {string} clientId Id of the client for message-bus
  * @param {messageBusCallback} callback Completion callback
  */
-exports.messageBus = function messageBus(channels, clientId, callback) {
-    internals.queue.push({
+function messageBus(channels, clientId, callback) {
+    this.queue.push({
         method: 'POST',
         url: '/message-bus/' + clientId + '/poll',
         form: channels,
-        callback: callback
+        callback: callback,
+        delay: this.delay
     });
-};
+}
 
 /**
  * construct direct post link and direct in reply to link
@@ -328,7 +387,6 @@ function setTrustLevel(post) {
     /*eslint-enable camelcase*/
     return post;
 }
-
 
 /**
  * Clean post raw
@@ -465,4 +523,6 @@ function cleanPost(post) {
 if (typeof GLOBAL.describe === 'function') {
     //test is running
     exports.internals = internals;
+    exports.privateFns = privateFns;
+    exports.externals = externals;
 }

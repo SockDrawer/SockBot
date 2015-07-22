@@ -10,9 +10,9 @@ const expect = chai.expect;
 // The thing we're testing
 const commands = require('../commands'),
     config = require('../config'),
-    utils = require('../utils'),
-    browser = require('../browser');
-describe('browser', () => {
+    utils = require('../utils');
+const browser = require('../browser')();
+describe('commands', () => {
     describe('exports', () => {
         const fns = ['prepareCommands', 'parseCommands'],
             objs = ['internals'],

@@ -7,8 +7,8 @@
  */
 
 const config = require('./config'),
-    utils = require('./utils'),
-    browser = require('./browser');
+    utils = require('./utils');
+const browser = require('./browser')();
 
 const internals = {
     mention: null,
