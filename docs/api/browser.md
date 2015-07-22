@@ -5,73 +5,24 @@ Webbrowser abstraction for communicating with discourse
 **License**: MIT  
 
 * [browser](#module_browser)
-  * _static_
-    * [.createPost(topicId, [replyTo], content, callback)](#module_browser.createPost)
-    * [.createPrivateMessage(to, title, content, callback)](#module_browser.createPrivateMessage)
-    * [.editPost(postId, content, [editReason], callback)](#module_browser.editPost)
-    * [.login(callback)](#module_browser.login)
-  * _inner_
-    * [~trustLevels](#module_browser..trustLevels)
-    * [~queueWorker(task, callback)](#module_browser..queueWorker)
-    * [~getCSRF(callback)](#module_browser..getCSRF)
-    * [~doLogin(callback)](#module_browser..doLogin)
-    * [~setPostUrl(post)](#module_browser..setPostUrl) ⇒ <code>external.module_posts.CleanedPost</code>
-    * [~setTrustLevel(post)](#module_browser..setTrustLevel) ⇒ <code>external.module_posts.CleanedPost</code>
-    * [~cleanPostRaw(post)](#module_browser..cleanPostRaw) ⇒ <code>external.module_posts.CleanedPost</code>
-    * [~cleanPost(post)](#module_browser..cleanPost) ⇒ <code>external.posts.CleanedPost</code>
-    * [~requestComplete](#module_browser..requestComplete)
-    * [~postedCallback](#module_browser..postedCallback)
-    * [~completedCallback](#module_browser..completedCallback)
-    * [~loginCallback](#module_browser..loginCallback)
-
-<a name="module_browser.createPost"></a>
-### browser.createPost(topicId, [replyTo], content, callback)
-Post content to an existing content
-
-**Kind**: static method of <code>[browser](#module_browser)</code>  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| topicId | <code>number</code> | Topic to post to |
-| [replyTo] | <code>number</code> | Post Number in topic that this post is in reply to |
-| content | <code>string</code> | Post Contents to post |
-| callback | <code>postedCallback</code> | Completion callback |
-
-<a name="module_browser.createPrivateMessage"></a>
-### browser.createPrivateMessage(to, title, content, callback)
-Create a new private message.
-
-**Kind**: static method of <code>[browser](#module_browser)</code>  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| to | <code>string</code> &#124; <code>Array.&lt;string&gt;</code> | Username or names to create PM to |
-| title | <code>string</code> | Title of the Private Message |
-| content | <code>string</code> | Private Message contents |
-| callback | <code>postedCallback</code> | Completion callback |
-
-<a name="module_browser.editPost"></a>
-### browser.editPost(postId, content, [editReason], callback)
-Edit an existing post.
-
-**Kind**: static method of <code>[browser](#module_browser)</code>  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| postId | <code>number</code> | Id number of the post to edit |
-| content | <code>string</code> | New post content |
-| [editReason] | <code>string</code> | Optional Edit Reason that no one ever uses |
-| callback | <code>postedCallback</code> | Completion callback |
-
-<a name="module_browser.login"></a>
-### browser.login(callback)
-Login to discourse
-
-**Kind**: static method of <code>[browser](#module_browser)</code>  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| callback | <code>loginCallback</code> | Completion callback |
+  * [~trustLevels](#module_browser..trustLevels)
+  * [~queueWorker(task, callback)](#module_browser..queueWorker)
+  * [~createPost(topicId, [replyTo], content, callback)](#module_browser..createPost)
+  * [~createPrivateMessage(to, title, content, callback)](#module_browser..createPrivateMessage)
+  * [~editPost(postId, content, [editReason], callback)](#module_browser..editPost)
+  * [~getCSRF(delay, queue, callback)](#module_browser..getCSRF)
+  * [~doLogin(delay, queue, callback)](#module_browser..doLogin)
+  * [~login(callback)](#module_browser..login)
+  * [~messageBus(channels, clientId, callback)](#module_browser..messageBus)
+  * [~setPostUrl(post)](#module_browser..setPostUrl) ⇒ <code>external.module_posts.CleanedPost</code>
+  * [~setTrustLevel(post)](#module_browser..setTrustLevel) ⇒ <code>external.module_posts.CleanedPost</code>
+  * [~cleanPostRaw(post)](#module_browser..cleanPostRaw) ⇒ <code>external.module_posts.CleanedPost</code>
+  * [~cleanPost(post)](#module_browser..cleanPost) ⇒ <code>external.posts.CleanedPost</code>
+  * [~requestComplete](#module_browser..requestComplete)
+  * [~postedCallback](#module_browser..postedCallback)
+  * [~completedCallback](#module_browser..completedCallback)
+  * [~loginCallback](#module_browser..loginCallback)
+  * [~messageBusCallback](#module_browser..messageBusCallback)
 
 <a name="module_browser..trustLevels"></a>
 ### browser~trustLevels
@@ -108,28 +59,92 @@ Process browser tasks with rate limiting
 | [task.form] | <code>object</code> |  | HTTP form to use in HTTP request |
 | [task.callback] | <code>browser~requestComplete</code> |  | Callback toprovide request results to |
 | [task.delay] | <code>Number</code> | <code>0</code> | Seconds to delay callback after request for additional rate limiting |
-| [task.bypassRateLimit] | <code>boolean</code> | <code>false</code> | If true bypass request rate limiting |
 | callback | <code>function</code> |  | Queue task complete callback |
 
+<a name="module_browser..createPost"></a>
+### browser~createPost(topicId, [replyTo], content, callback)
+Post content to an existing content
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| topicId | <code>number</code> | Topic to post to |
+| [replyTo] | <code>number</code> | Post Number in topic that this post is in reply to |
+| content | <code>string</code> | Post Contents to post |
+| callback | <code>postedCallback</code> | Completion callback |
+
+<a name="module_browser..createPrivateMessage"></a>
+### browser~createPrivateMessage(to, title, content, callback)
+Create a new private message.
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| to | <code>string</code> &#124; <code>Array.&lt;string&gt;</code> | Username or names to create PM to |
+| title | <code>string</code> | Title of the Private Message |
+| content | <code>string</code> | Private Message contents |
+| callback | <code>postedCallback</code> | Completion callback |
+
+<a name="module_browser..editPost"></a>
+### browser~editPost(postId, content, [editReason], callback)
+Edit an existing post.
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| postId | <code>number</code> | Id number of the post to edit |
+| content | <code>string</code> | New post content |
+| [editReason] | <code>string</code> | Optional Edit Reason that no one ever uses |
+| callback | <code>postedCallback</code> | Completion callback |
+
 <a name="module_browser..getCSRF"></a>
-### browser~getCSRF(callback)
+### browser~getCSRF(delay, queue, callback)
 get a CSRF token from discourse
 
 **Kind**: inner method of <code>[browser](#module_browser)</code>  
 
 | Param | Type | Description |
 | --- | --- | --- |
+| delay | <code>number</code> | Delay completion by this many ms |
+| queue | <code>async.queue</code> | Task Queue |
 | callback | <code>completedCallback</code> | Completion callback |
 
 <a name="module_browser..doLogin"></a>
-### browser~doLogin(callback)
+### browser~doLogin(delay, queue, callback)
 Perform a login to discourse
 
 **Kind**: inner method of <code>[browser](#module_browser)</code>  
 
 | Param | Type | Description |
 | --- | --- | --- |
+| delay | <code>number</code> | Delay completion by this many ms |
+| queue | <code>async.queue</code> | Task Queue |
 | callback | <code>loginCallback</code> | Completion callback |
+
+<a name="module_browser..login"></a>
+### browser~login(callback)
+Login to discourse
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| callback | <code>loginCallback</code> | Completion callback |
+
+<a name="module_browser..messageBus"></a>
+### browser~messageBus(channels, clientId, callback)
+poll message-bus for messages
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| channels | <code>Object.&lt;string, number&gt;</code> | Channels of interest |
+| clientId | <code>string</code> | Id of the client for message-bus |
+| callback | <code>messageBusCallback</code> | Completion callback |
 
 <a name="module_browser..setPostUrl"></a>
 ### browser~setPostUrl(post) ⇒ <code>external.module_posts.CleanedPost</code>
@@ -246,4 +261,15 @@ Login Completion Callback
 | --- | --- | --- | --- |
 | [err] | <code>Exception</code> | <code></code> | Error encountered processing request |
 | user | <code>extermal.users.User</code> |  | Logged in User information |
+
+<a name="module_browser..messageBusCallback"></a>
+### browser~messageBusCallback
+MessageBus Completion Callback
+
+**Kind**: inner typedef of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [err] | <code>Excption</code> | <code></code> | Error encountered processing request |
+| messages | <code>Array.&lt;external.messageBus.message&gt;</code> |  | Messages found. |
 
