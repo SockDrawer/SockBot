@@ -11,7 +11,7 @@
     "Yamikuronue <yamikuronue> (https://github.com/yamikuronue)"
   ],
   "dependencies": {
-    "async": "^1.2.1",
+    "async": "^1.4.0",
     "js-yaml": "^3.3.1",
     "request": "^2.58.0"
   },
