@@ -6,8 +6,8 @@ message-bus handler for SockBot2.0
 **License**: MIT  
 
 * [commands](#module_commands)
-  * [~filterIgnoredOnPost(post, topic, callback)](#module_commands..filterIgnoredOnPost)
-  * [~filterIgnoredOnTopic(post, topic, callback)](#module_commands..filterIgnoredOnTopic)
+  * [~filterIgnoredOnPost(post, topic, callback)](#module_commands..filterIgnoredOnPost) ⇒ <code>null</code>
+  * [~filterIgnoredOnTopic(post, topic, callback)](#module_commands..filterIgnoredOnTopic) ⇒ <code>null</code>
   * [~filterIgnored(post, topic, callback)](#module_commands..filterIgnored)
   * [~statusChannelHandler(message)](#module_commands..statusChannelHandler)
   * [~onChannel(channel, handler)](#module_commands..onChannel) ⇒ <code>EventEmitter</code>
@@ -22,10 +22,11 @@ message-bus handler for SockBot2.0
   * [~topicMessageHandler](#module_commands..topicMessageHandler)
 
 <a name="module_commands..filterIgnoredOnPost"></a>
-### commands~filterIgnoredOnPost(post, topic, callback)
+### commands~filterIgnoredOnPost(post, topic, callback) ⇒ <code>null</code>
 Proccess post for ignore contitions
 
 **Kind**: inner method of <code>[commands](#module_commands)</code>  
+**Returns**: <code>null</code> - No return value  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -34,10 +35,11 @@ Proccess post for ignore contitions
 | callback | <code>filterCallback</code> | Completion Callback |
 
 <a name="module_commands..filterIgnoredOnTopic"></a>
-### commands~filterIgnoredOnTopic(post, topic, callback)
+### commands~filterIgnoredOnTopic(post, topic, callback) ⇒ <code>null</code>
 Proccess topic for ignore contitions
 
 **Kind**: inner method of <code>[commands](#module_commands)</code>  
+**Returns**: <code>null</code> - No return value  
 
 | Param | Type | Description |
 | --- | --- | --- |
