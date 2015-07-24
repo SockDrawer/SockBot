@@ -6,6 +6,9 @@ message-bus handler for SockBot2.0
 **License**: MIT  
 
 * [commands](#module_commands)
+  * [~filterIgnoredOnPost(post, topic, callback)](#module_commands..filterIgnoredOnPost)
+  * [~filterIgnoredOnTopic(post, topic, callback)](#module_commands..filterIgnoredOnTopic)
+  * [~filterIgnored(post, topic, callback)](#module_commands..filterIgnored)
   * [~statusChannelHandler(message)](#module_commands..statusChannelHandler)
   * [~onChannel(channel, handler)](#module_commands..onChannel) ⇒ <code>EventEmitter</code>
   * [~onTopic(topicId, handler)](#module_commands..onTopic) ⇒ <code>EventEmitter</code>
@@ -13,8 +16,46 @@ message-bus handler for SockBot2.0
   * [~removeTopic(topicId, handler)](#module_commands..removeTopic) ⇒ <code>EventEmitter</code>
   * [~onMessageAdd(event)](#module_commands..onMessageAdd) ⇒ <code>boolean</code>
   * [~onMessageRemove(event,)](#module_commands..onMessageRemove) ⇒ <code>boolean</code>
+  * [~completionCallback](#module_commands..completionCallback)
+  * [~filterCallback](#module_commands..filterCallback)
   * [~messageHandler](#module_commands..messageHandler)
   * [~topicMessageHandler](#module_commands..topicMessageHandler)
+
+<a name="module_commands..filterIgnoredOnPost"></a>
+### commands~filterIgnoredOnPost(post, topic, callback)
+Proccess post for ignore contitions
+
+**Kind**: inner method of <code>[commands](#module_commands)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| post | <code>externals.posts.CleanedPost</code> | Post to filter |
+| topic | <code>externals.topics.Topic</code> | Topic `post` belongs to |
+| callback | <code>filterCallback</code> | Completion Callback |
+
+<a name="module_commands..filterIgnoredOnTopic"></a>
+### commands~filterIgnoredOnTopic(post, topic, callback)
+Proccess topic for ignore contitions
+
+**Kind**: inner method of <code>[commands](#module_commands)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| post | <code>externals.posts.CleanedPost</code> | Triggering post |
+| topic | <code>externals.topics.Topic</code> | Topic to filter |
+| callback | <code>filterCallback</code> | Completion Callback |
+
+<a name="module_commands..filterIgnored"></a>
+### commands~filterIgnored(post, topic, callback)
+Filter post/topic for ignore conditions
+
+**Kind**: inner method of <code>[commands](#module_commands)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| post | <code>externals.posts.CleanedPost</code> | Post to filter |
+| topic | <code>externals.topics.Topic</code> | Topic to filter |
+| callback | <code>completionCallback</code> | Completion Callback |
 
 <a name="module_commands..statusChannelHandler"></a>
 ### commands~statusChannelHandler(message)
@@ -95,6 +136,27 @@ Listen for parting message-bus channels
 | Param | Type | Description |
 | --- | --- | --- |
 | event, | <code>string</code> | event that has unregistered a handler |
+
+<a name="module_commands..completionCallback"></a>
+### commands~completionCallback
+Completion Callback
+
+**Kind**: inner typedef of <code>[commands](#module_commands)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| err | <code>string</code> &#124; <code>Error</code> | Filter Error state |
+
+<a name="module_commands..filterCallback"></a>
+### commands~filterCallback
+Filter Callback
+
+**Kind**: inner typedef of <code>[commands](#module_commands)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| err | <code>string</code> &#124; <code>Error</code> | Filter Error state |
+| reason | <code>string</code> | Filter Reason |
 
 <a name="module_commands..messageHandler"></a>
 ### commands~messageHandler
