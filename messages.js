@@ -55,6 +55,13 @@ function pollMessages(callback) {
     });
 }
 
+/**
+ * Proccess post for ignore contitions
+ * 
+ * @param {externals.posts.CleanedPost} post Post to filter
+ * @param {externals.topics.Topic} topic Topic `post` belongs to
+ * @param {filterCallback} callback Completion Callback
+ */
 function filterIgnoredOnPost(post, topic, callback) {
     const flow = (err, msg) => setTimeout(() => callback(err, msg), 0),
         ignoredUsers = config.core.ignoreUsers,
@@ -80,6 +87,13 @@ function filterIgnoredOnPost(post, topic, callback) {
     flow(null, 'POST OK');
 }
 
+/**
+ * Proccess topic for ignore contitions
+ * 
+ * @param {externals.posts.CleanedPost} post Triggering post
+ * @param {externals.topics.Topic} topic Topic to filter
+ * @param {filterCallback} callback Completion Callback
+ */
 function filterIgnoredOnTopic(post, topic, callback) {
     const flow = (err, msg) => setTimeout(() => callback(err, msg), 0),
         ignoredUsers = config.core.ignoreUsers,
@@ -102,6 +116,13 @@ function filterIgnoredOnTopic(post, topic, callback) {
     flow(null, 'TOPIC OK');
 }
 
+/**
+ * Filter post/topic for ignore conditions
+ * 
+ * @param {externals.posts.CleanedPost} post Post to filter
+ * @param {externals.topics.Topic} topic Topic to filter
+ * @param {completionCallback} callback Completion Callback
+ */
 function filterIgnored(post, topic, callback) {
     async.parallel([
         (cb) => filterIgnoredOnPost(post, topic, cb), (cb) => filterIgnoredOnTopic(post, topic, cb)
@@ -136,7 +157,7 @@ function updateChannelPositions(messages) {
     const channels = internals.channels;
     messages.forEach((message) => {
         const channel = message.channel;
-        channels[channel] = Math.max(channels[channel], message.message_id);
+        channels[channel] = Math.max(channels[channel] || -1, message.message_id);
     });
 }
 
@@ -260,6 +281,22 @@ function onMessageRemove(event) {
         return false;
     }
 }
+
+/**
+ * Completion Callback
+ * 
+ * @callback
+ * @name completionCallback
+ * @param {string|Error} err Filter Error state
+ */
+ /**
+ * Filter Callback
+ * 
+ * @callback
+ * @name filterCallback
+ * @param {string|Error} err Filter Error state
+ * @param {string} reason Filter Reason
+ */
 
 /**
  * Message-bus Message Handler
