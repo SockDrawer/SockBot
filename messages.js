@@ -57,10 +57,11 @@ function pollMessages(callback) {
 
 /**
  * Proccess post for ignore contitions
- * 
+ *
  * @param {externals.posts.CleanedPost} post Post to filter
  * @param {externals.topics.Topic} topic Topic `post` belongs to
  * @param {filterCallback} callback Completion Callback
+ * @returns {null} No return value
  */
 function filterIgnoredOnPost(post, topic, callback) {
     const flow = (err, msg) => setTimeout(() => callback(err, msg), 0),
@@ -84,15 +85,16 @@ function filterIgnoredOnPost(post, topic, callback) {
     if (post.primary_group_name === 'bots') {
         return flow('ignore', 'Poster is a Bot');
     }
-    flow(null, 'POST OK');
+    return flow(null, 'POST OK');
 }
 
 /**
  * Proccess topic for ignore contitions
- * 
+ *
  * @param {externals.posts.CleanedPost} post Triggering post
  * @param {externals.topics.Topic} topic Topic to filter
  * @param {filterCallback} callback Completion Callback
+ * @returns {null} No return value
  */
 function filterIgnoredOnTopic(post, topic, callback) {
     const flow = (err, msg) => setTimeout(() => callback(err, msg), 0),
@@ -118,7 +120,7 @@ function filterIgnoredOnTopic(post, topic, callback) {
 
 /**
  * Filter post/topic for ignore conditions
- * 
+ *
  * @param {externals.posts.CleanedPost} post Post to filter
  * @param {externals.topics.Topic} topic Topic to filter
  * @param {completionCallback} callback Completion Callback
@@ -284,14 +286,14 @@ function onMessageRemove(event) {
 
 /**
  * Completion Callback
- * 
+ *
  * @callback
  * @name completionCallback
  * @param {string|Error} err Filter Error state
  */
  /**
  * Filter Callback
- * 
+ *
  * @callback
  * @name filterCallback
  * @param {string|Error} err Filter Error state
