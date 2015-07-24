@@ -7,14 +7,16 @@
  */
 const async = require('async');
 
-const browser = require('./browser'),
-    utils = require('./utils');
+const utils = require('./utils'),
+    config = require('./config');
+const browser = require('./browser')();
 
 const internals = {
         clientId: null,
         events: null,
         channels: null,
-        channelCounts: null
+        channelCounts: null,
+        cooldownTimers: {}
     },
     messagePrefix = 'message#',
     messagePrefixTest = /^message#/,
@@ -49,6 +51,83 @@ function pollMessages(callback) {
             setTimeout(() => {
 
             }, 0);
+        });
+    });
+}
+
+function filterIgnoredOnPost(post, topic, callback) {
+    const flow = (err, msg) => setTimeout(() => callback(err, msg), 0),
+        ignoredUsers = config.core.ignoreUsers,
+        now = Date.now();
+    if (post.trust_level >= 4) {
+        return flow(null, 'Poster is TL4+');
+    }
+    if (ignoredUsers.indexOf(post.username) >= 0) {
+        return flow('ignore', 'Post Creator Ignored');
+    }
+    if (post.trust_level < 1) {
+        return flow('ignore', 'Poster is TL0');
+    }
+    if (post.trust_level === 1) {
+        if (internals.cooldownTimers[post.username] && now < internals.cooldownTimers[post.username]) {
+            return flow('ignore', 'Poster is TL1 on Cooldown');
+        }
+        internals.cooldownTimers[post.username] = now + config.core.cooldownPeriod;
+    }
+    if (post.primary_group_name === 'bots') {
+        return flow('ignore', 'Poster is a Bot');
+    }
+    flow(null, 'POST OK');
+}
+
+function filterIgnoredOnTopic(post, topic, callback) {
+    const flow = (err, msg) => setTimeout(() => callback(err, msg), 0),
+        ignoredUsers = config.core.ignoreUsers,
+        ignoredCategory = config.core.ignoreCategories;
+    if (post.trust_level >= 5) {
+        return flow(null, 'Poster is Staff');
+    }
+    if (topic.details) {
+        const user = topic.details.created_by.username;
+        if (topic.details.notification_level < 1) {
+            return flow('ignore', 'Topic Was Muted');
+        }
+        if (ignoredUsers.indexOf(user) >= 0) {
+            return flow('ignore', 'Topic Creator Ignored');
+        }
+    }
+    if (ignoredCategory.indexOf(topic.category_id) >= 0) {
+        return flow('ignore', 'Topic Category Ignored');
+    }
+    flow(null, 'TOPIC OK');
+}
+
+function filterIgnored(post, topic, callback) {
+    async.parallel([
+        (cb) => filterIgnoredOnPost(post, topic, cb), (cb) => filterIgnoredOnTopic(post, topic, cb)
+    ], (err, reason) => {
+        if (err) {
+            utils.warn('Post #' + post.id + ' Ignored: ' + reason.join(', '));
+        }
+        callback(err);
+    });
+}
+
+//{"global_id":24139840,"message_id":841790,"channel":"/topic/1000",
+//"data":{"id":487321,"post_number":58230,"updated_at":"2015-07-22 17:32:24 +0000","type":"created"}}
+function processTopicMessage(message) {
+    const topic = message.channel.replace('/topic/', '');
+    async.parallel({
+        topic: (cb) => browser.getTopic(topic, cb),
+        post: (cb) => browser.getPost(message.data.id, cb)
+    }, (err, result) => {
+        if (err) {
+            return;
+        }
+        filterIgnored(result.topic, result.post, (ignored) => {
+            if (!ignored) {
+                internals.events.emit('topic#' + topic, result.topic, result.post);
+            }
         });
     });
 }
@@ -89,6 +168,7 @@ function onChannel(channel, handler) {
     internals.events.on(messagePrefix + channel, handler);
     return internals.events;
 }
+
 /**
  * Add message-bus topic channel listener
  *
@@ -188,6 +268,13 @@ function onMessageRemove(event) {
  * @name messageHandler
  */
 
+/**
+ * Message-bus Topic Message Handler
+ *
+ * @callback
+ * @name topicMessageHandler
+ */
+
 /* istanbul ignore else */
 if (typeof GLOBAL.describe === 'function') {
     //test is running
@@ -199,6 +286,11 @@ if (typeof GLOBAL.describe === 'function') {
         removeTopic: removeTopic,
         onMessageAdd: onMessageAdd,
         onMessageRemove: onMessageRemove,
-        statusChannelHandler: statusChannelHandler
+        statusChannelHandler: statusChannelHandler,
+        filterIgnoredOnPost: filterIgnoredOnPost,
+        filterIgnoredOnTopic: filterIgnoredOnTopic,
+        filterIgnored: filterIgnored,
+        updateChannelPositions: updateChannelPositions,
+        resetChannelPositions: resetChannelPositions
     };
 }
