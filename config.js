@@ -74,7 +74,7 @@ const defaultConfig = {
          * @default
          * @type {Number}
          */
-        cooldownPeriod: 3.6E7
+        cooldownPeriod: 3.6E6
     },
     /**
      * Plugin configuration.
