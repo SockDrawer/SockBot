@@ -731,7 +731,75 @@ describe('browser', () => {
             });
             after(() => timers.restore());
         });
-        describe('ResetChannelPositions()', () => {});
-        describe('updateChannelpositions', () => {});
+        describe('resetChannelPositions()', () => {
+            const resetChannelPositions = messages.privateFns.resetChannelPositions;
+            it('should set all channels to position `-1`', () => {
+                const input = {},
+                    expected = {};
+                for (let i = 0; i < 50; i += 1) {
+                    const key = '/channel/' + Math.ceil(Math.random() * 5000);
+                    input[key] = Math.floor(Math.random() * 1e5);
+                    expected[key] = -1;
+                }
+                messages.internals.channels = input;
+                resetChannelPositions();
+                messages.internals.channels.should.deep.equal(expected);
+            });
+            after(() => messages.internals.channels = {});
+        });
+        describe('updateChannelpositions', () => {
+            const updateChannelPositions = messages.privateFns.updateChannelPositions;
+            beforeEach(() => messages.internals.channels = {});
+            it('should add new channel to channel watch list', () => {
+                //Not that this should be a thing normally, but just in case.
+                const message = {
+                    channel: 'foobar',
+                    'message_id': 50
+                };
+                updateChannelPositions([message]);
+                messages.internals.channels.should.have.any.key('foobar');
+                messages.internals.channels.foobar.should.equal(50);
+            });
+            it('should not update channel when update would reduce the channel position', () => {
+                //Not that this should be a thing normally, but just in case.
+                const message = {
+                    channel: 'foobar',
+                    'message_id': 30
+                };
+                messages.internals.channels.foobar = 50;
+                updateChannelPositions([message]);
+                messages.internals.channels.foobar.should.equal(50);
+            });
+            it('should update channel when update would increase the channel position', () => {
+                const message = {
+                    channel: 'foobar',
+                    'message_id': 50
+                };
+                messages.internals.channels.foobar = 30;
+                updateChannelPositions([message]);
+                messages.internals.channels.foobar.should.equal(50);
+            });
+            it('should update multiple channels', () => {
+                const message1 = {
+                        channel: 'foobar',
+                        'message_id': 50
+                    },
+                    message2 = {
+                        channel: 'barbaz',
+                        'message_id': 45
+                    },
+                    message3 = {
+                        channel: 'quux',
+                        'message_id': 30
+                    },
+                    expected = {
+                        foobar: 50,
+                        barbaz: 45,
+                        quux: 30
+                    };
+                updateChannelPositions([message1, message2, message3]);
+                messages.internals.channels.should.deep.equal(expected);
+            });
+        });
     });
 });
