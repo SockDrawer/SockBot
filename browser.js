@@ -81,6 +81,8 @@ const signature = '\n\n<!-- Posted by a clever robot -->',
         createPost: createPost,
         createPrivateMessage: createPrivateMessage,
         editPost: editPost,
+        getPost: getPost,
+        getTopic: getTopic,
         login: login,
         messageBus: messageBus
     };
@@ -248,6 +250,53 @@ function editPost(postId, content, editReason, callback) {
 }
 
 /**
+ * Get post details
+ *
+ * @param {number} postId Id of post to retrieve
+ * @param {postedCallback} callback Completion callback
+ */
+function getPost(postId, callback) {
+    this.queue.push({
+        method: 'GET',
+        url: '/posts/' + postId + '.json',
+        callback: (err, post) => {
+            if (err) {
+                return callback(err);
+            }
+            callback(null, cleanPost(post));
+        },
+        delay: this.delay
+    });
+}
+
+/**
+ * Get topic details
+ *
+ * @param {number} topicId Id of topic to retrieve
+ * @param {topicCallback} callback Completion callback
+ */
+function getTopic(topicId, callback) {
+    this.queue.push({
+        method: 'GET',
+        url: '/t/' + topicId + '.json?include_raw=1&track_visit=true',
+        callback: (err, topic) => {
+            if (err) {
+                return callback(err);
+            }
+            delete topic.post_stream;
+            if (topic.details) {
+                delete topic.details.links;
+                delete topic.details.participants;
+                delete topic.details.suggested_topics;
+            }
+            topic.url = '/t/' + topic.slug + '/' + topic.id;
+            callback(null, topic);
+        },
+        delay: this.delay
+    });
+}
+
+/**
  * get a CSRF token from discourse
  *
  * @param {number} delay Delay completion by this many ms
@@ -354,7 +403,6 @@ function setPostUrl(post) {
     post.url += post.post_number;
     return post;
 }
-
 
 /**
  * Normalize discourse trust level to SockBot Virtual Trust Level
@@ -491,6 +539,17 @@ function cleanPost(post) {
  * @name postedCallback
  * @param {Exception} [err=null] Error encountered processing request
  * @param {external.posts.CleanedPost} post Cleaned post
+ */
+
+/**
+ * Topic Request Callback
+ *
+ * @see {@link ../external/topics/#external.module_topic.Topic|Topic}
+ *
+ * @callback
+ * @name topicCallback
+ * @param {Exception} [err=null] Error encountered processing request
+ * @param {external.topics.Topic} topic RetrievedTopic
  */
 
 /**
