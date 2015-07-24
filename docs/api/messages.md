@@ -14,6 +14,7 @@ message-bus handler for SockBot2.0
   * [~onMessageAdd(event)](#module_commands..onMessageAdd) ⇒ <code>boolean</code>
   * [~onMessageRemove(event,)](#module_commands..onMessageRemove) ⇒ <code>boolean</code>
   * [~messageHandler](#module_commands..messageHandler)
+  * [~topicMessageHandler](#module_commands..topicMessageHandler)
 
 <a name="module_commands..statusChannelHandler"></a>
 ### commands~statusChannelHandler(message)
@@ -98,5 +99,10 @@ Listen for parting message-bus channels
 <a name="module_commands..messageHandler"></a>
 ### commands~messageHandler
 Message-bus Message Handler
+
+**Kind**: inner typedef of <code>[commands](#module_commands)</code>  
+<a name="module_commands..topicMessageHandler"></a>
+### commands~topicMessageHandler
+Message-bus Topic Message Handler
 
 **Kind**: inner typedef of <code>[commands](#module_commands)</code>  

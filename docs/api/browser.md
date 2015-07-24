@@ -10,6 +10,8 @@ Webbrowser abstraction for communicating with discourse
   * [~createPost(topicId, [replyTo], content, callback)](#module_browser..createPost)
   * [~createPrivateMessage(to, title, content, callback)](#module_browser..createPrivateMessage)
   * [~editPost(postId, content, [editReason], callback)](#module_browser..editPost)
+  * [~getPost(postId, callback)](#module_browser..getPost)
+  * [~getTopic(topicId, callback)](#module_browser..getTopic)
   * [~getCSRF(delay, queue, callback)](#module_browser..getCSRF)
   * [~doLogin(delay, queue, callback)](#module_browser..doLogin)
   * [~login(callback)](#module_browser..login)
@@ -20,6 +22,7 @@ Webbrowser abstraction for communicating with discourse
   * [~cleanPost(post)](#module_browser..cleanPost) ⇒ <code>external.posts.CleanedPost</code>
   * [~requestComplete](#module_browser..requestComplete)
   * [~postedCallback](#module_browser..postedCallback)
+  * [~topicCallback](#module_browser..topicCallback)
   * [~completedCallback](#module_browser..completedCallback)
   * [~loginCallback](#module_browser..loginCallback)
   * [~messageBusCallback](#module_browser..messageBusCallback)
@@ -99,6 +102,28 @@ Edit an existing post.
 | content | <code>string</code> | New post content |
 | [editReason] | <code>string</code> | Optional Edit Reason that no one ever uses |
 | callback | <code>postedCallback</code> | Completion callback |
+
+<a name="module_browser..getPost"></a>
+### browser~getPost(postId, callback)
+Get post details
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| postId | <code>number</code> | Id of post to retrieve |
+| callback | <code>postedCallback</code> | Completion callback |
+
+<a name="module_browser..getTopic"></a>
+### browser~getTopic(topicId, callback)
+Get topic details
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| topicId | <code>number</code> | Id of topic to retrieve |
+| callback | <code>topicCallback</code> | Completion callback |
 
 <a name="module_browser..getCSRF"></a>
 ### browser~getCSRF(delay, queue, callback)
@@ -240,6 +265,18 @@ Post Request Callback
 | --- | --- | --- | --- |
 | [err] | <code>Exception</code> | <code></code> | Error encountered processing request |
 | post | <code>external.posts.CleanedPost</code> |  | Cleaned post |
+
+<a name="module_browser..topicCallback"></a>
+### browser~topicCallback
+Topic Request Callback
+
+**Kind**: inner typedef of <code>[browser](#module_browser)</code>  
+**See**: [Topic](../external/topics/#external.module_topic.Topic)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [err] | <code>Exception</code> | <code></code> | Error encountered processing request |
+| topic | <code>external.topics.Topic</code> |  | RetrievedTopic |
 
 <a name="module_browser..completedCallback"></a>
 ### browser~completedCallback

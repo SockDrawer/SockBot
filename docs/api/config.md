@@ -126,7 +126,7 @@ Posts from ignored categories will not trigger bot.
 Cooldown timer for users that map to virtual trust level 1 or lower
 
 **Kind**: static property of <code>[core](#defaultConfig.core)</code>  
-**Default**: <code>36000000</code>  
+**Default**: <code>3600000</code>  
 <a name="defaultConfig.plugins"></a>
 ### defaultConfig.plugins : <code>object</code>
 Plugin configuration.
