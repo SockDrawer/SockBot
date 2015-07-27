@@ -174,6 +174,11 @@ function processTopicMessage(message) {
     });
 }
 
+/**
+ * Update channel position for polled messages.
+ *
+ * @param {externals.messageBus.message[]} messages Messages that were polled
+ */
 function updateChannelPositions(messages) {
     const channels = internals.channels;
     messages.forEach((message) => {
@@ -182,6 +187,11 @@ function updateChannelPositions(messages) {
     });
 }
 
+/**
+ * Reset all channels to position -1.
+ *
+ * This is to reset message-bus after poll failure or after software version update
+ */
 function resetChannelPositions() {
     Object.keys(internals.channels).forEach((channel) => {
         internals.channels[channel] = -1;
