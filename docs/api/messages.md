@@ -121,7 +121,7 @@ Add message-bus topic channel listener
 | Param | Type | Description |
 | --- | --- | --- |
 | topicId | <code>string</code> | Topic to listen to |
-| handler | <code>messageHandler</code> | Message handler to add |
+| handler | <code>topicMessageHandler</code> | Message handler to add |
 
 <a name="module_commands..removeChannel"></a>
 ### commands~removeChannel(channel, handler) ⇒ <code>EventEmitter</code>
@@ -145,7 +145,7 @@ Remove message-bus topic channel listener
 | Param | Type | Description |
 | --- | --- | --- |
 | topicId | <code>string</code> | Topic to remove listener from |
-| handler | <code>messageHandler</code> | Message handler to remove |
+| handler | <code>topicMessageHandler</code> | Message handler to remove |
 
 <a name="module_commands..onMessageAdd"></a>
 ### commands~onMessageAdd(event) ⇒ <code>boolean</code>
@@ -195,6 +195,11 @@ Filter Callback
 Message-bus Message Handler
 
 **Kind**: inner typedef of <code>[commands](#module_commands)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| message | <code>externals.messageBus.message</code> | Message Recieved |
+
 <a name="module_commands..topicMessageHandler"></a>
 ### commands~topicMessageHandler
 Message-bus Topic Message Handler
