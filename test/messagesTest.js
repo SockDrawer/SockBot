@@ -122,7 +122,7 @@ describe('browser', () => {
             sinon.stub(messages.privateFns, 'updateChannelPositions');
             sinon.stub(messages.privateFns, 'processTopicMessage');
             messages.internals.events = {
-                emit: sinon.spy()
+                emit: sinon.stub()
             };
         });
         beforeEach(() => {
@@ -164,6 +164,74 @@ describe('browser', () => {
             browser.messageBus.yields('fake error');
             messages.pollMessages(spy);
             spy.calledWith('fake error').should.be.true;
+        });
+        it('should call updateChannelPositions() on poll success', () => {
+            const spy = sinon.spy(),
+                msgs = [];
+            browser.messageBus.yields(null, msgs);
+            messages.pollMessages(spy);
+            messages.privateFns.updateChannelPositions.calledWith(msgs).should.be.true;
+        });
+        it('should accept poll returning zero messages', () => {
+            const spy = sinon.spy(),
+                msgs = [];
+            browser.messageBus.yields(null, msgs);
+            messages.pollMessages(spy);
+            spy.called.should.be.true;
+            spy.lastCall.args.should.deep.equal([null]);
+        });
+        it('should pass `/topic/*` messages to processTopicMessage()', () => {
+            const spy = sinon.spy(),
+                msg = {
+                    channel: '/topic/1234'
+                },
+                msgs = [msg];
+            browser.messageBus.yields(null, msgs);
+            messages.pollMessages(spy);
+            messages.privateFns.processTopicMessage.calledWith(msg).should.be.true;
+        });
+        it('should emit message directly for non `/topic/*` messages', () => {
+            const spy = sinon.spy(),
+                msg = {
+                    channel: '/__status/1234',
+                    data: {
+                        foobar: Math.random()
+                    }
+                },
+                msgs = [msg];
+            browser.messageBus.yields(null, msgs);
+            messages.pollMessages(spy);
+            messages.internals.events.emit.calledWith(msg.channel, msg.data).should.be.true;
+        });
+        it('should print warning when no listeners registered for event', () => {
+            const spy = sinon.spy(),
+                msg = {
+                    channel: '/__status/1234',
+                    'message_id': 5432,
+                    data: {
+                        foobar: Math.random()
+                    }
+                },
+                msgs = [msg];
+            browser.messageBus.yields(null, msgs);
+            messages.internals.events.emit.returns(false);
+            messages.pollMessages(spy);
+            utils.warn.calledWith('Message 5432 for channel /__status/1234 was not handled!').should.be.true;
+        });
+        it('should not print warning when listeners registered for event', () => {
+            const spy = sinon.spy(),
+                msg = {
+                    channel: '/__status/1234',
+                    'message_id': 5432,
+                    data: {
+                        foobar: Math.random()
+                    }
+                },
+                msgs = [msg];
+            browser.messageBus.yields(null, msgs);
+            messages.internals.events.emit.returns(true);
+            messages.pollMessages(spy);
+            utils.warn.called.should.be.false;
         });
         after(() => {
             browser.messageBus.restore();
@@ -873,14 +941,16 @@ describe('browser', () => {
         describe('processTopicMessage()', () => {
             const processTopicMessage = messages.privateFns.processTopicMessage;
             before(() => {
+                sinon.stub(utils, 'warn');
                 sinon.stub(browser, 'getTopic');
                 sinon.stub(browser, 'getPost');
                 sinon.stub(messages.privateFns, 'filterIgnored');
                 messages.internals.events = {
-                    emit: sinon.spy()
+                    emit: sinon.stub()
                 };
             });
             beforeEach(() => {
+                utils.warn.reset();
                 browser.getTopic.reset();
                 browser.getPost.reset();
                 messages.privateFns.filterIgnored.reset();
@@ -981,7 +1051,32 @@ describe('browser', () => {
                 });
                 messages.internals.events.emit.calledWith('topic#1234', data, topic, post).should.be.true;
             });
+            it('should print warning when no listeners registered for event', () => {
+                browser.getTopic.yields(null, {});
+                browser.getPost.yields(null, {});
+                messages.internals.events.emit.returns(false);
+                messages.privateFns.filterIgnored.yields(null);
+                processTopicMessage({
+                    channel: '/topic/1234',
+                    'message_id': 5432,
+                    data: {}
+                });
+                utils.warn.calledWith('Message 5432 for channel /topic/1234 was not handled!').should.be.true;
+            });
+            it('should not print warning when listeners registered for event', () => {
+                browser.getTopic.yields(null, {});
+                browser.getPost.yields(null, {});
+                messages.internals.events.emit.returns(true);
+                messages.privateFns.filterIgnored.yields(null);
+                processTopicMessage({
+                    channel: '/topic/1234',
+                    'message_id': 5432,
+                    data: {}
+                });
+                utils.warn.called.should.be.false;
+            });
             after(() => {
+                utils.warn.restore();
                 browser.getTopic.restore();
                 browser.getPost.restore();
                 messages.privateFns.filterIgnored.restore();

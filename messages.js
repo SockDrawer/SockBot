@@ -66,7 +66,11 @@ exports.pollMessages = function pollMessages(callback) {
             if (/\/topic\//.test(message.channel)) {
                 privateFns.processTopicMessage(message);
             } else {
-                internals.events.emit(message.channel, message.data);
+                const handled = internals.events.emit(message.channel, message.data);
+                if (!handled) {
+                    utils.warn('Message ' + message.message_id + ' for channel ' +
+                        message.channel + ' was not handled!');
+                }
             }
             next();
         }, callback);
@@ -174,7 +178,11 @@ function processTopicMessage(message) {
         }
         privateFns.filterIgnored(result.topic, result.post, (ignored) => {
             if (!ignored) {
-                internals.events.emit('topic#' + topic, message.data, result.topic, result.post);
+                const handled = internals.events.emit('topic#' + topic, message.data, result.topic, result.post);
+                if (!handled) {
+                    utils.warn('Message ' + message.message_id + ' for channel ' +
+                        message.channel + ' was not handled!');
+                }
             }
         });
     });
@@ -231,7 +239,7 @@ function onChannel(channel, handler) {
  * Add message-bus topic channel listener
  *
  * @param {string} topicId Topic to listen to
- * @param {messageHandler} handler Message handler to add
+ * @param {topicMessageHandler} handler Message handler to add
  * @returns {EventEmitter} Returns emitter, so calls can be chained.
  */
 function onTopic(topicId, handler) {
@@ -255,7 +263,7 @@ function removeChannel(channel, handler) {
  * Remove message-bus topic channel listener
  *
  * @param {string} topicId Topic to remove listener from
- * @param {messageHandler} handler Message handler to remove
+ * @param {topicMessageHandler} handler Message handler to remove
  * @returns {EventEmitter} Returns emitter, so calls can be chained.
  */
 function removeTopic(topicId, handler) {
@@ -341,6 +349,7 @@ function onMessageRemove(event) {
  *
  * @callback
  * @name messageHandler
+ * @param {externals.messageBus.message} message Message Recieved
  */
 
 /**
