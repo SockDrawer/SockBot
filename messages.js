@@ -18,6 +18,21 @@ const internals = {
         channelCounts: null,
         cooldownTimers: {}
     },
+    privateFns = {
+        onChannel: onChannel,
+        onTopic: onTopic,
+        removeChannel: removeChannel,
+        removeTopic: removeTopic,
+        onMessageAdd: onMessageAdd,
+        onMessageRemove: onMessageRemove,
+        statusChannelHandler: statusChannelHandler,
+        filterIgnoredOnPost: filterIgnoredOnPost,
+        filterIgnoredOnTopic: filterIgnoredOnTopic,
+        filterIgnored: filterIgnored,
+        updateChannelPositions: updateChannelPositions,
+        resetChannelPositions: resetChannelPositions,
+        processTopicMessage: processTopicMessage
+    },
     messagePrefix = 'message#',
     messagePrefixTest = /^message#/,
     topicPrefix = 'topic#',
@@ -46,7 +61,7 @@ function pollMessages(callback) {
             utils.warn('Error in messageBus: ' + JSON.stringify(err));
             return;
         }
-        updateChannelPositions();
+        privateFns.updateChannelPositions();
         async.each(messages, (message) => {
             setTimeout(() => {
 
@@ -127,7 +142,11 @@ function filterIgnoredOnTopic(post, topic, callback) {
  */
 function filterIgnored(post, topic, callback) {
     async.parallel([
-        (cb) => filterIgnoredOnPost(post, topic, cb), (cb) => filterIgnoredOnTopic(post, topic, cb)
+        (cb) => {
+            privateFns.filterIgnoredOnPost(post, topic, cb);
+        }, (cb) => {
+            privateFns.filterIgnoredOnTopic(post, topic, cb);
+        }
     ], (err, reason) => {
         if (err) {
             utils.warn('Post #' + post.id + ' Ignored: ' + reason.join(', '));
@@ -291,7 +310,7 @@ function onMessageRemove(event) {
  * @name completionCallback
  * @param {string|Error} err Filter Error state
  */
- /**
+/**
  * Filter Callback
  *
  * @callback
@@ -318,18 +337,5 @@ function onMessageRemove(event) {
 if (typeof GLOBAL.describe === 'function') {
     //test is running
     exports.internals = internals;
-    exports.privateFns = {
-        onChannel: onChannel,
-        onTopic: onTopic,
-        removeChannel: removeChannel,
-        removeTopic: removeTopic,
-        onMessageAdd: onMessageAdd,
-        onMessageRemove: onMessageRemove,
-        statusChannelHandler: statusChannelHandler,
-        filterIgnoredOnPost: filterIgnoredOnPost,
-        filterIgnoredOnTopic: filterIgnoredOnTopic,
-        filterIgnored: filterIgnored,
-        updateChannelPositions: updateChannelPositions,
-        resetChannelPositions: resetChannelPositions
-    };
+    exports.privateFns = privateFns;
 }
