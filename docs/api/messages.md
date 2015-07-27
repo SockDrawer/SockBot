@@ -9,6 +9,9 @@ message-bus handler for SockBot2.0
   * [~filterIgnoredOnPost(post, topic, callback)](#module_commands..filterIgnoredOnPost) ⇒ <code>null</code>
   * [~filterIgnoredOnTopic(post, topic, callback)](#module_commands..filterIgnoredOnTopic) ⇒ <code>null</code>
   * [~filterIgnored(post, topic, callback)](#module_commands..filterIgnored)
+  * [~processTopicMessage(message)](#module_commands..processTopicMessage)
+  * [~updateChannelPositions(messages)](#module_commands..updateChannelPositions)
+  * [~resetChannelPositions()](#module_commands..resetChannelPositions)
   * [~statusChannelHandler(message)](#module_commands..statusChannelHandler)
   * [~onChannel(channel, handler)](#module_commands..onChannel) ⇒ <code>EventEmitter</code>
   * [~onTopic(topicId, handler)](#module_commands..onTopic) ⇒ <code>EventEmitter</code>
@@ -59,6 +62,33 @@ Filter post/topic for ignore conditions
 | topic | <code>externals.topics.Topic</code> | Topic to filter |
 | callback | <code>completionCallback</code> | Completion Callback |
 
+<a name="module_commands..processTopicMessage"></a>
+### commands~processTopicMessage(message)
+Process a message that is from a `/topic/*` channel
+
+**Kind**: inner method of <code>[commands](#module_commands)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| message | <code>externals.messageBus.message</code> | Message to process |
+
+<a name="module_commands..updateChannelPositions"></a>
+### commands~updateChannelPositions(messages)
+Update channel position for polled messages.
+
+**Kind**: inner method of <code>[commands](#module_commands)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| messages | <code>Array.&lt;externals.messageBus.message&gt;</code> | Messages that were polled |
+
+<a name="module_commands..resetChannelPositions"></a>
+### commands~resetChannelPositions()
+Reset all channels to position -1.
+
+This is to reset message-bus after poll failure or after software version update
+
+**Kind**: inner method of <code>[commands](#module_commands)</code>  
 <a name="module_commands..statusChannelHandler"></a>
 ### commands~statusChannelHandler(message)
 Message handler for the `/__status` message channel
@@ -170,3 +200,10 @@ Message-bus Message Handler
 Message-bus Topic Message Handler
 
 **Kind**: inner typedef of <code>[commands](#module_commands)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| message | <code>externals.messageBus.postMessage</code> | Payload of message |
+| topic | <code>externals.topics.Topic</code> | Topic containing post |
+| post | <code>externals.posts.CleanedPost</code> | Post that triggered the message |
+
