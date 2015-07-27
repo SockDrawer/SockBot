@@ -155,8 +155,11 @@ function filterIgnored(post, topic, callback) {
     });
 }
 
-//{"global_id":24139840,"message_id":841790,"channel":"/topic/1000",
-//"data":{"id":487321,"post_number":58230,"updated_at":"2015-07-22 17:32:24 +0000","type":"created"}}
+/**
+ * Process a message that is from a `/topic/*` channel
+ *
+ * @param {externals.messageBus.message} message Message to process
+ */
 function processTopicMessage(message) {
     const topic = message.channel.replace('/topic/', '');
     async.parallel({
@@ -166,9 +169,9 @@ function processTopicMessage(message) {
         if (err) {
             return;
         }
-        filterIgnored(result.topic, result.post, (ignored) => {
+        privateFns.filterIgnored(result.topic, result.post, (ignored) => {
             if (!ignored) {
-                internals.events.emit('topic#' + topic, result.topic, result.post);
+                internals.events.emit('topic#' + topic, message.data, result.topic, result.post);
             }
         });
     });
@@ -320,6 +323,7 @@ function onMessageRemove(event) {
  * @name completionCallback
  * @param {string|Error} err Filter Error state
  */
+
 /**
  * Filter Callback
  *
@@ -341,6 +345,9 @@ function onMessageRemove(event) {
  *
  * @callback
  * @name topicMessageHandler
+ * @param {externals.messageBus.postMessage} message Payload of message
+ * @param {externals.topics.Topic} topic Topic containing post
+ * @param {externals.posts.CleanedPost} post Post that triggered the message
  */
 
 /* istanbul ignore else */
