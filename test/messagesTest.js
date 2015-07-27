@@ -11,6 +11,7 @@ const expect = chai.expect;
 const messages = require('../messages'),
     config = require('../config'),
     utils = require('../utils');
+const browser = require('../browser')();
 
 describe('browser', () => {
     describe('exports', () => {
@@ -807,6 +808,123 @@ describe('browser', () => {
                 messages.internals.channels.should.deep.equal(expected);
             });
         });
-        describe('processTopicMessage()', () => {});
+        describe('processTopicMessage()', () => {
+            const processTopicMessage = messages.privateFns.processTopicMessage;
+            before(() => {
+                sinon.stub(browser, 'getTopic');
+                sinon.stub(browser, 'getPost');
+                sinon.stub(messages.privateFns, 'filterIgnored');
+                messages.internals.events = {
+                    emit: sinon.spy()
+                };
+            });
+            beforeEach(() => {
+                browser.getTopic.reset();
+                browser.getPost.reset();
+                messages.privateFns.filterIgnored.reset();
+                messages.internals.events.emit.reset();
+            });
+            it('should call browser.getPost()', () => {
+                browser.getPost.yields('stubbed');
+                processTopicMessage({
+                    channel: '/topic/1234',
+                    data: {
+                        id: 5678
+                    }
+                });
+                browser.getPost.calledWith(5678).should.be.true;
+            });
+            it('should call browser.getTopic()', () => {
+                browser.getTopic.yields('stubbed');
+                processTopicMessage({
+                    channel: '/topic/1234',
+                    data: {
+                        id: 5678
+                    }
+                });
+                browser.getTopic.calledWith('1234').should.be.true;
+            });
+            it('should abort if getPost() yields error', () => {
+                browser.getPost.yields('stubbed');
+                processTopicMessage({
+                    channel: '/topic/1234',
+                    data: {
+                        id: 5678
+                    }
+                });
+                messages.privateFns.filterIgnored.called.should.be.false;
+            });
+            it('should abort if getTopic() yields error', () => {
+                browser.getTopic.yields('stubbed');
+                processTopicMessage({
+                    channel: '/topic/1234',
+                    data: {
+                        id: 5678
+                    }
+                });
+                messages.privateFns.filterIgnored.called.should.be.false;
+            });
+            it('should filter topic/post through filterIgnored()', () => {
+                const topic = {
+                        id: 1234
+                    },
+                    post = {
+                        id: 5678
+                    };
+                browser.getTopic.yields(null, topic);
+                browser.getPost.yields(null, post);
+                messages.privateFns.filterIgnored.yields('ignored');
+                processTopicMessage({
+                    channel: '/topic/1234',
+                    data: {
+                        id: 5678
+                    }
+                });
+                messages.privateFns.filterIgnored.calledWith(topic, post).should.be.true;
+            });
+            it('should filtered message should not emit message', () => {
+                const topic = {
+                        id: 1234
+                    },
+                    post = {
+                        id: 5678
+                    };
+                browser.getTopic.yields(null, topic);
+                browser.getPost.yields(null, post);
+                messages.privateFns.filterIgnored.yields('ignored');
+                processTopicMessage({
+                    channel: '/topic/1234',
+                    data: {
+                        id: 5678
+                    }
+                });
+                messages.internals.events.emit.called.should.be.false;
+            });
+            it('should emit event on success', () => {
+                const topic = {
+                        id: 1234
+                    },
+                    post = {
+                        id: 5678
+                    },
+                    data = {
+                        id: 5678
+                    };
+                browser.getTopic.yields(null, topic);
+                browser.getPost.yields(null, post);
+                messages.privateFns.filterIgnored.yields(null);
+                processTopicMessage({
+                    channel: '/topic/1234',
+                    data: data
+                });
+                messages.internals.events.emit.calledWith('topic#1234', data, topic, post).should.be.true;
+            });
+            after(() => {
+                browser.getTopic.restore();
+                browser.getPost.restore();
+                messages.privateFns.filterIgnored.restore();
+                messages.internals.events = null;
+            });
+        });
     });
 });
