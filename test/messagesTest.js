@@ -15,7 +15,7 @@ const browser = require('../browser')();
 
 describe('browser', () => {
     describe('exports', () => {
-        const fns = ['prepare'],
+        const fns = ['prepare', 'pollMessages'],
             objs = ['internals', 'privateFns'],
             vals = [];
         describe('should export expected functions:', () => {
@@ -112,6 +112,69 @@ describe('browser', () => {
         it('should register listener for `/__status`', () => {
             messages.prepare(events, '', () => 0);
             events.on.calledWith('message#/__status', messages.privateFns.statusChannelHandler).should.be.true;
+        });
+    });
+    describe('pollMessages()', () => {
+        before(() => {
+            sinon.stub(browser, 'messageBus');
+            sinon.stub(utils, 'warn');
+            sinon.stub(messages.privateFns, 'resetChannelPositions');
+            sinon.stub(messages.privateFns, 'updateChannelPositions');
+            sinon.stub(messages.privateFns, 'processTopicMessage');
+            messages.internals.events = {
+                emit: sinon.spy()
+            };
+        });
+        beforeEach(() => {
+            browser.messageBus.reset();
+            utils.warn.reset();
+            messages.privateFns.resetChannelPositions.reset();
+            messages.privateFns.updateChannelPositions.reset();
+            messages.privateFns.processTopicMessage.reset();
+            messages.internals.events.emit.reset();
+            //randomize data
+            messages.internals.clientId = Math.random();
+            messages.internals.channels = {};
+            messages.internals.channels['foo' + Math.random()] = Math.random();
+        });
+        it('should call browser.messageBus()', () => {
+            const spy = sinon.spy();
+            messages.pollMessages(spy);
+            browser.messageBus.called.should.be.true;
+            const args = browser.messageBus.lastCall.args;
+            args.should.have.length(3);
+            args[0].should.deep.equal(messages.internals.channels);
+            args[1].should.deep.equal(messages.internals.clientId);
+            args[2].should.be.a('function');
+        });
+        it('should log message on poll failure', () => {
+            const spy = sinon.spy();
+            browser.messageBus.yields('fake error');
+            messages.pollMessages(spy);
+            utils.warn.calledWith('Error in messageBus: "fake error"').should.be.true;
+        });
+        it('should reset positions on poll failure', () => {
+            const spy = sinon.spy();
+            browser.messageBus.yields('fake error');
+            messages.pollMessages(spy);
+            messages.privateFns.resetChannelPositions.called.should.be.true;
+        });
+        it('should pass error onto callback on poll failure', () => {
+            const spy = sinon.spy();
+            browser.messageBus.yields('fake error');
+            messages.pollMessages(spy);
+            spy.calledWith('fake error').should.be.true;
+        });
+        it('')
+        after(() => {
+            browser.messageBus.restore();
+            utils.warn.restore();
+            messages.privateFns.resetChannelPositions.restore();
+            messages.privateFns.updateChannelPositions.restore();
+            messages.privateFns.processTopicMessage.restore();
+            messages.internals.events = null;
+            messages.internals.channels = null;
+            messages.internals.clientId = null;
         });
     });
     describe('privateFns', () => {

@@ -53,22 +53,25 @@ exports.prepare = function prepare(events, clientId, callback) {
     callback();
 };
 
-function pollMessages(callback) {
+exports.pollMessages = function pollMessages(callback) {
     browser.messageBus(internals.channels, internals.clientId, (err, messages) => {
         if (err) {
             //Reset channel position on error
-            resetChannelPositions();
+            privateFns.resetChannelPositions();
             utils.warn('Error in messageBus: ' + JSON.stringify(err));
-            return;
+            return callback(err);
         }
-        privateFns.updateChannelPositions();
-        async.each(messages, (message) => {
-            setTimeout(() => {
-
-            }, 0);
-        });
+        privateFns.updateChannelPositions(messages);
+        async.each(messages, (message, next) => {
+            if (/\/topic\//.test(message.channel)) {
+                privateFns.processTopicMessage(message);
+            } else {
+                internals.events.emit(message.channel, message.data);
+            }
+            next();
+        }, callback);
     });
-}
+};
 
 /**
  * Proccess post for ignore contitions
