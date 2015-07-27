@@ -165,7 +165,6 @@ describe('browser', () => {
             messages.pollMessages(spy);
             spy.calledWith('fake error').should.be.true;
         });
-        it('')
         after(() => {
             browser.messageBus.restore();
             utils.warn.restore();
