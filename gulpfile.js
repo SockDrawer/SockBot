@@ -49,13 +49,13 @@ gulp.task('docList', ['gitBranch'], function (done) {
         }, (err, stdout) => {
             if (err) {
                 console.log('Error fetching files in commit range\n' + err);
-                return;
+            } else {
+                stdout.split(/\r?\n/).foreach((file) => {
+                    if (file && file.length > 3 && file.endsWith('.js')){
+                        docgenFiles.push('./' + file);
+                    }
+                });
             }
-            stdout.split(/\r?\n/).foreach((file) => {
-                if (file && file.length > 3 && file.endsWith('.js')){
-                    docgenFiles.push('./' + file);
-                }
-            });
             if (docgenFiles.length === 0) {
                 docgenFiles.push('**');
             }
