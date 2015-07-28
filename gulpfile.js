@@ -42,7 +42,7 @@ gulp.task('gitBranch', (done) => {
 /**
  * Construct the array of file globs for gulpJsdoc2md
  */
- gulp.task('docList', ['gitBranch'], function (done) {
+gulp.task('docList', ['gitBranch'], function (done) {
     if (CommitRange) {
         git.exec({
             args: 'show --pretty="format:" --name-only ' + CommitRange
@@ -61,6 +61,9 @@ gulp.task('gitBranch', (done) => {
             }
             done();
         });
+    } else {
+        docgenFiles.push('*.*');
+        done();
     }
 });
 
