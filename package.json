@@ -21,6 +21,7 @@
     "coveralls": "^2.11.2",
     "gulp": "^3.9.0",
     "gulp-eslint": "^0.15.0",
+    "gulp-filter": "^3.0.0",
     "gulp-git": "^1.2.4",
     "gulp-istanbul": "^0.10.0",
     "gulp-jsdoc-to-markdown": "^1.1.1",
