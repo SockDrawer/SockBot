@@ -57,12 +57,12 @@ gulp.task('docList', ['gitBranch'], function (done) {
                 }
             });
             if (docgenFiles.length === 0) {
-                docgenFiles.push('*.*');
+                docgenFiles.push('**');
             }
             done();
         });
     } else {
-        docgenFiles.push('*.*');
+        docgenFiles.push('**');
         done();
     }
 });
