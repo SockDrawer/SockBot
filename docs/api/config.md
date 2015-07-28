@@ -8,6 +8,10 @@
 <dd><p>Current plugin configuration</p>
 <p>Set by ineternals. Do not edit</p>
 </dd>
+<dt><a href="#user">user</a></dt>
+<dd><p>Current logged in user</p>
+<p>Set by internals. Do not edit</p>
+</dd>
 </dl>
 ## Constants
 <dl>
@@ -43,6 +47,14 @@ Set by ineternals. Do not edit
 Current plugin configuration
 
 Set by ineternals. Do not edit
+
+**Kind**: global variable  
+**Read only**: true  
+<a name="user"></a>
+## user
+Current logged in user
+
+Set by internals. Do not edit
 
 **Kind**: global variable  
 **Read only**: true  
