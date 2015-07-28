@@ -50,7 +50,7 @@ gulp.task('docList', ['gitBranch'], (done) => {
             if (err) {
                 console.log('Error fetching files in commit range\n' + err);
             } else {
-                stdout.split(/\r?\n/).foreach((file) => {
+                stdout.split(/\r?\n/).forEach((file) => {
                     if (file && file.length > 3 && file.endsWith('.js')){
                         docgenFiles.push('./' + file);
                     }
