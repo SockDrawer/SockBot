@@ -5,6 +5,16 @@
  * @license MIT
  */
 
+const async = require('async');
+const config = require('./config');
+
+const internals = {
+        cooldownTimers: {}
+    },
+    privateFns = {
+        filterIgnoredOnPost: filterIgnoredOnPost,
+        filterIgnoredOnTopic: filterIgnoredOnTopic
+    };
 
 /**
  * Generate a "good enough" Type 4 UUID.
@@ -116,9 +126,97 @@ exports.mergeObjects = function mergeObjects(mixin) { //eslint-disable-line no-u
     return res;
 };
 
+/**
+ * Proccess post for ignore contitions
+ *
+ * @param {externals.posts.CleanedPost} post Post to filter
+ * @param {externals.topics.Topic} topic Topic `post` belongs to
+ * @param {filterCallback} callback Completion Callback
+ * @returns {null} No return value
+ */
+function filterIgnoredOnPost(post, topic, callback) {
+    const flow = (err, msg) => setTimeout(() => callback(err, msg), 0),
+        ignoredUsers = config.core.ignoreUsers,
+        now = Date.now();
+    if (post.trust_level >= 4) {
+        return flow(null, 'Poster is TL4+');
+    }
+    if (ignoredUsers.indexOf(post.username) >= 0) {
+        return flow('ignore', 'Post Creator Ignored');
+    }
+    if (post.trust_level < 1) {
+        return flow('ignore', 'Poster is TL0');
+    }
+    if (post.trust_level === 1) {
+        if (internals.cooldownTimers[post.username] && now < internals.cooldownTimers[post.username]) {
+            return flow('ignore', 'Poster is TL1 on Cooldown');
+        }
+        internals.cooldownTimers[post.username] = now + config.core.cooldownPeriod;
+    }
+    if (post.primary_group_name === 'bots') {
+        return flow('ignore', 'Poster is a Bot');
+    }
+    return flow(null, 'POST OK');
+}
+
+/**
+ * Proccess topic for ignore contitions
+ *
+ * @param {externals.posts.CleanedPost} post Triggering post
+ * @param {externals.topics.Topic} topic Topic to filter
+ * @param {filterCallback} callback Completion Callback
+ * @returns {null} No return value
+ */
+function filterIgnoredOnTopic(post, topic, callback) {
+    const flow = (err, msg) => setTimeout(() => callback(err, msg), 0),
+        ignoredUsers = config.core.ignoreUsers,
+        ignoredCategory = config.core.ignoreCategories;
+    if (post.trust_level >= 5) {
+        return flow(null, 'Poster is Staff');
+    }
+    if (topic.details) {
+        const user = topic.details.created_by.username;
+        if (topic.details.notification_level < 1) {
+            return flow('ignore', 'Topic Was Muted');
+        }
+        if (ignoredUsers.indexOf(user) >= 0) {
+            return flow('ignore', 'Topic Creator Ignored');
+        }
+    }
+    if (ignoredCategory.indexOf(topic.category_id) >= 0) {
+        return flow('ignore', 'Topic Category Ignored');
+    }
+    flow(null, 'TOPIC OK');
+}
+
+/**
+ * Filter post/topic for ignore conditions
+ *
+ * @param {externals.posts.CleanedPost} post Post to filter
+ * @param {externals.topics.Topic} topic Topic to filter
+ * @param {completionCallback} callback Completion Callback
+ */
+exports.filterIgnored = function filterIgnored(post, topic, callback) {
+    async.parallel([
+        (cb) => {
+            privateFns.filterIgnoredOnPost(post, topic, cb);
+        }, (cb) => {
+            privateFns.filterIgnoredOnTopic(post, topic, cb);
+        }
+    ], (err, reason) => {
+        if (err) {
+            exports.warn('Post #' + post.id + ' Ignored: ' + reason.join(', '));
+        }
+        callback(err);
+    });
+};
+
+
 /* istanbul ignore else */
 if (typeof GLOBAL.describe === 'function') {
     //test is running
     exports.addTimestamp = addTimestamp;
     exports.mergeInner = mergeInner;
+    exports.internals = internals;
+    exports.privateFns = privateFns;
 }
