@@ -167,6 +167,15 @@ exports.core = config.core;
  */
 exports.plugins = config.plugins;
 
+/**
+ * Current logged in user
+ *
+ * Set by internals. Do not edit
+ *
+ * @readonly
+ */
+exports.user = {};
+
 /* istanbul ignore else */
 if (typeof GLOBAL.describe === 'function') {
     exports.internals = {
