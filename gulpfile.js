@@ -70,7 +70,7 @@ gulp.task('docList', ['gitBranch'], (done) => {
 /**
  * Generate API documentation for all js files, place markup in the correct folder for readthedocs.org
  */
-gulp.task('docs', ['gitBranch', 'lintExterns', 'docList'], function (done) {
+gulp.task('docs', ['gitBranch', 'lintExterns', 'docList'], (done) => {
     // Abort(successfully) early if running in CI and not job #1
     if (!runDocs) {
         return done();
