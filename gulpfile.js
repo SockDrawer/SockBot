@@ -12,34 +12,11 @@ const sockFiles = ['*.js', '!./gulpfile.js', '**/plugins/**/*.js', '!node_module
     sockExterns = ['**/external/**/*.js'],
     sockDocs = ['README.md', 'docs/**/*.md'],
     sockTests = ['test/**/*.js'];
+let docgenFiles = [];
 
 const JobNumber = process.env.TRAVIS_JOB_NUMBER,
     CommitRange = process.env.TRAVIS_COMMIT_RANGE,
     runDocs = !JobNumber || /[.]1$/.test(JobNumber);
-
-/**
- * Construct the array of file globs for gulpJsdoc2md
- */
-function getFilesForDocGen() {
-    let files = [];
-    if (CommitRange) {
-        git.exec({
-            args: 'show --pretty="format:" --name-only ' + CommitRange
-        }, (err, stdout) => {
-            if (err) {
-                console.log('Error fetching files in commit range\n' + err);
-                return;
-            }
-            stdout.split(/\r?\n/).foreach((file) => {
-                if (file && file.length > 3 && file.endsWith('.js')){
-                    files.push('./' + file);
-                }
-                console.log(file);
-            });
-        });
-    }
-    return files.length > 0 ? files : sockFiles.concat(sockExterns);
-}
 
 /**
  * Pull git branch locally (solves detached head issue in CI)
@@ -63,14 +40,40 @@ gulp.task('gitBranch', (done) => {
 });
 
 /**
+ * Construct the array of file globs for gulpJsdoc2md
+ */
+ gulp.task('docList', ['gitBranch'], function (done) {
+    if (CommitRange) {
+        git.exec({
+            args: 'show --pretty="format:" --name-only ' + CommitRange
+        }, (err, stdout) => {
+            if (err) {
+                console.log('Error fetching files in commit range\n' + err);
+                return;
+            }
+            stdout.split(/\r?\n/).foreach((file) => {
+                if (file && file.length > 3 && file.endsWith('.js')){
+                    docgenFiles.push('./' + file);
+                }
+            });
+            if (docgenFiles.length === 0) {
+                docgenFiles.push('*.*');
+            }
+            done();
+        });
+    }
+});
+
+/**
  * Generate API documentation for all js files, place markup in the correct folder for readthedocs.org
  */
-gulp.task('docs', ['gitBranch', 'lintExterns'], function (done) {
+gulp.task('docs', ['gitBranch', 'lintExterns', 'docList'], function (done) {
     // Abort(successfully) early if running in CI and not job #1
     if (!runDocs) {
         return done();
     }
-    gulp.src(getFilesForDocGen())
+    gulp.src(sockFiles.concat(sockExterns))
+        .filter(docgenFiles)
         .pipe(gulpJsdoc2md({}))
         .on('error', done)
         .pipe(rename((path) => {
