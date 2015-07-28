@@ -1,7 +1,7 @@
 'use strict';
 /**
  * message-bus handler for SockBot2.0
- * @module commands
+ * @module messages
  * @author Accalia
  * @license MIT
  */
