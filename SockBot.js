@@ -9,10 +9,20 @@
 /*eslint-disable no-console */
 exports.version = 'v2.0.0';
 
-
-
 const config = require('./config');
 const browser = require('./browser')();
+
+exports.start = function (cfg) {
+    config.loadConfiguration(cfg, () => {
+        browser.login((err, user) => {
+            config.user = user;
+            console.log(err, config.user);
+        });
+    });
+};
+
+exports.stop = function() {
+};
 
 /* istanbul ignore if */
 if (require.main === module) {

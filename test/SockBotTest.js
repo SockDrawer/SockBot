@@ -1,16 +1,20 @@
 'use strict';
-/*globals describe, it*/
+/*globals describe, it, beforeEach, afterEach*/
 /*eslint no-unused-expressions:0 */
 
-const chai = require('chai');
+const chai = require('chai'),
+    sinon = require('sinon');
+chai.should();
 const expect = chai.expect;
 
 // The thing we're testing
-const SockBot = require('../SockBot');
+const SockBot = require('../SockBot'),
+    browser = require('../browser'),
+    config = require('../config');
 
 describe('SockBot', () => {
     describe('exports', () => {
-        const fns = [],
+        const fns = ['start', 'stop'],
             objs = [],
             vals = ['version'];
         describe('should export expected functions:', () => {
@@ -25,11 +29,39 @@ describe('SockBot', () => {
         });
         describe('should export expected values', () => {
             vals.forEach((val) => {
-                it(val, () => SockBot.should.have.key(val));
+                it(val, () => expect(SockBot[val]).to.not.be.undefined);
             });
         });
         it('should export only expected keys', () => {
             SockBot.should.have.all.keys(fns.concat(objs, vals));
         });
     });
+    describe('start', () => {
+		let sandbox;
+		beforeEach(function() {
+			sandbox = sinon.sandbox.create();
+		});
+		afterEach(function() {
+			sandbox.restore();
+		});
+		it('should load the config', () => {
+			sandbox.stub(config, 'loadConfiguration').yields();
+			sandbox.stub(browser.externals, 'login').yields(null, {});
+			SockBot.start('example.config.yml');
+			browser.externals.login.called.should.be.true;
+			config.loadConfiguration.calledWith('example.config.yml').should.be.true;
+		});
+	});
+    describe('stop', () => {
+		let sandbox;
+		beforeEach(function() {
+			sandbox = sinon.sandbox.create();
+		});
+		afterEach(function() {
+			sandbox.restore();
+		});
+		it('should do nothing', () => {
+			SockBot.stop();
+		});
+	});
 });
