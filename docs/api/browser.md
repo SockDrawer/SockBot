@@ -16,6 +16,7 @@ Webbrowser abstraction for communicating with discourse
   * [~doLogin(delay, queue, callback)](#module_browser..doLogin)
   * [~login(callback)](#module_browser..login)
   * [~messageBus(channels, clientId, callback)](#module_browser..messageBus)
+  * [~getNotifications(callback)](#module_browser..getNotifications)
   * [~setPostUrl(post)](#module_browser..setPostUrl) ⇒ <code>external.module_posts.CleanedPost</code>
   * [~setTrustLevel(post)](#module_browser..setTrustLevel) ⇒ <code>external.module_posts.CleanedPost</code>
   * [~cleanPostRaw(post)](#module_browser..cleanPostRaw) ⇒ <code>external.module_posts.CleanedPost</code>
@@ -26,6 +27,7 @@ Webbrowser abstraction for communicating with discourse
   * [~completedCallback](#module_browser..completedCallback)
   * [~loginCallback](#module_browser..loginCallback)
   * [~messageBusCallback](#module_browser..messageBusCallback)
+  * [~notificationsCallback](#module_browser..notificationsCallback)
 
 <a name="module_browser..trustLevels"></a>
 ### browser~trustLevels
@@ -171,6 +173,16 @@ poll message-bus for messages
 | clientId | <code>string</code> | Id of the client for message-bus |
 | callback | <code>messageBusCallback</code> | Completion callback |
 
+<a name="module_browser..getNotifications"></a>
+### browser~getNotifications(callback)
+Poll for notifications
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| callback | <code>notificationsCallback</code> | Completion callback |
+
 <a name="module_browser..setPostUrl"></a>
 ### browser~setPostUrl(post) ⇒ <code>external.module_posts.CleanedPost</code>
 construct direct post link and direct in reply to link
@@ -309,4 +321,15 @@ MessageBus Completion Callback
 | --- | --- | --- | --- |
 | [err] | <code>Excption</code> | <code></code> | Error encountered processing request |
 | messages | <code>Array.&lt;external.messageBus.message&gt;</code> |  | Messages found. |
+
+<a name="module_browser..notificationsCallback"></a>
+### browser~notificationsCallback
+Notificationss Completion Callback
+
+**Kind**: inner typedef of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [err] | <code>Excption</code> | <code></code> | Error encountered processing request |
+| notifications | <code>external.notifications.notifications</code> |  | Notifications found. |
 
