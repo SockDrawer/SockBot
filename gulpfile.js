@@ -101,6 +101,9 @@ gulp.task('lintCore', (done) => {
  * Run all js files through eslint and report status.
  */
 gulp.task('lintExterns', (done) => {
+    if (!runDocs) {
+        return done();
+    }
     return gulp.src(sockExterns)
         .pipe(eslint())
         .pipe(eslint.format())
