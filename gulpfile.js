@@ -1,5 +1,6 @@
 'use strict';
 const gulp = require('gulp'),
+    gulpFilter = require('gulp-filter'),
     gulpJsdoc2md = require('gulp-jsdoc-to-markdown'),
     rename = require('gulp-rename'),
     istanbul = require('gulp-istanbul'),
@@ -75,8 +76,9 @@ gulp.task('docs', ['gitBranch', 'lintExterns', 'docList'], (done) => {
     if (!runDocs) {
         return done();
     }
+    let filter = gulpFilter(docgenFiles);
     gulp.src(sockFiles.concat(sockExterns))
-        .filter(docgenFiles)
+        .pipe(filter)
         .pipe(gulpJsdoc2md({}))
         .on('error', done)
         .pipe(rename((path) => {
