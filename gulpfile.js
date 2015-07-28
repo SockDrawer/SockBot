@@ -14,8 +14,32 @@ const sockFiles = ['*.js', '!./gulpfile.js', '**/plugins/**/*.js', '!node_module
     sockTests = ['test/**/*.js'];
 
 const JobNumber = process.env.TRAVIS_JOB_NUMBER,
+    CommitRange = process.env.TRAVIS_COMMIT_RANGE,
     runDocs = !JobNumber || /[.]1$/.test(JobNumber);
 
+/**
+ * Construct the array of file globs for gulpJsdoc2md
+ */
+function getFilesForDocGen() {
+    let files = [];
+    if (CommitRange) {
+        git.exec({
+            args: 'show --pretty="format:" --name-only ' + CommitRange
+        }, (err, stdout) => {
+            if (err) {
+                console.log('Error fetching files in commit range\n' + err);
+                return;
+            }
+            stdout.split(/\r?\n/).foreach((file) => {
+                if (file && file.length > 3 && file.endsWith('.js')){
+                    files.push('./' + file);
+                }
+                console.log(file);
+            });
+        });
+    }
+    return files.length > 0 ? files : sockFiles.concat(sockExterns);
+}
 
 /**
  * Pull git branch locally (solves detached head issue in CI)
@@ -46,7 +70,7 @@ gulp.task('docs', ['gitBranch', 'lintExterns'], function (done) {
     if (!runDocs) {
         return done();
     }
-    gulp.src(sockFiles.concat(sockExterns))
+    gulp.src(getFilesForDocGen())
         .pipe(gulpJsdoc2md({}))
         .on('error', done)
         .pipe(rename((path) => {
