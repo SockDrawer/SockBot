@@ -84,7 +84,8 @@ const signature = '\n\n<!-- Posted by a clever robot -->',
         getPost: getPost,
         getTopic: getTopic,
         login: login,
-        messageBus: messageBus
+        messageBus: messageBus,
+        getNotifications: getNotifications
     };
 
 internals.current = internals.core;
@@ -384,6 +385,31 @@ function messageBus(channels, clientId, callback) {
 }
 
 /**
+ * Poll for notifications
+ *
+ * @param {notificationsCallback} callback Completion callback
+ */
+function getNotifications(callback) {
+    const ctx = this;
+    this.queue.push({
+        method: 'GET',
+        url: '/notifications.json',
+        delay: this.delay,
+        callback: (err, notifications) => {
+            if (err){
+                return callback(err);
+            }
+            ctx.queue.push({
+                method: 'PUT',
+                url: '/notifications/mark-read',
+                delay: ctx.delay,
+                callback: (err2) => callback(err2, notifications)
+            });
+        }
+    });
+}
+
+/**
  * construct direct post link and direct in reply to link
  *
  * @see {@link ../external/posts/#external.module_posts.Post|Post}
@@ -576,6 +602,15 @@ function cleanPost(post) {
  * @name messageBusCallback
  * @param {Excption} [err=null] Error encountered processing request
  * @param {external.messageBus.message[]} messages Messages found.
+ */
+
+/**
+ * Notificationss Completion Callback
+ *
+ * @callback
+ * @name notificationsCallback
+ * @param {Excption} [err=null] Error encountered processing request
+ * @param {external.notifications.notifications} notifications Notifications found.
  */
 
 /* istanbul ignore else */

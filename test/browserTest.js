@@ -129,7 +129,9 @@ describe('browser', () => {
         });
     });
     describe('externals', () => {
-        const fns = ['createPost', 'createPrivateMessage', 'editPost', 'login', 'messageBus', 'getPost', 'getTopic'],
+        const fns = ['createPost', 'createPrivateMessage', 'editPost', 'login', 'messageBus', 'getPost', 'getTopic',
+                'getNotifications'
+            ],
             objs = ['trustLevels'];
         describe('should include expected functions:', () => {
             fns.forEach((fn) => {
@@ -663,7 +665,7 @@ describe('browser', () => {
                 spy.lastCall.args[1].url.should.deep.equal(expected);
             });
         });
-        describe('getPost()', () => {
+        describe('getTopic()', () => {
             const object = {
                 delay: 0,
                 queue: {
@@ -762,6 +764,111 @@ describe('browser', () => {
                 object.queue.push.yieldsTo('callback', null, topic);
                 object.getTopic(0, spy);
                 topic.url.should.equal(expected);
+            });
+        });
+        describe('getNotifications()', () => {
+            const object = {
+                delay: Math.random(),
+                queue: {
+                    push: sinon.stub()
+                },
+                getNotifications: browserModule.externals.getNotifications
+            };
+            beforeEach(() => object.queue.push.reset());
+            it('frist request should set HTTP status', () => {
+                object.getNotifications(() => 0);
+                object.queue.push.callCount.should.equal(1);
+                const task = object.queue.push.firstCall.args[0];
+                task.should.be.a('object');
+                task.method.should.equal('GET');
+            });
+            it('frist request should set URL', () => {
+                object.getNotifications(() => 0);
+                object.queue.push.callCount.should.equal(1);
+                const task = object.queue.push.firstCall.args[0];
+                task.should.be.a('object');
+                task.url.should.equal('/notifications.json');
+            });
+            it('frist request should set delay', () => {
+                object.getNotifications(() => 0);
+                object.queue.push.callCount.should.equal(1);
+                const task = object.queue.push.firstCall.args[0];
+                task.should.be.a('object');
+                task.delay.should.equal(object.delay);
+            });
+            it('frist request should not set form', () => {
+                object.getNotifications(() => 0);
+                object.queue.push.callCount.should.equal(1);
+                const task = object.queue.push.firstCall.args[0];
+                task.should.be.a('object');
+                expect(task.form).to.be.undefined;
+            });
+            it('second request should set HTTP status', () => {
+                object.getNotifications(() => 0);
+                const callback1 = object.queue.push.firstCall.args[0].callback;
+                callback1(null, null);
+                object.queue.push.callCount.should.equal(2);
+                const task = object.queue.push.secondCall.args[0];
+                task.should.be.a('object');
+                task.method.should.equal('PUT');
+            });
+            it('second request should set URL', () => {
+                object.getNotifications(() => 0);
+                const callback1 = object.queue.push.firstCall.args[0].callback;
+                callback1(null, null);
+                object.queue.push.callCount.should.equal(2);
+                const task = object.queue.push.secondCall.args[0];
+                task.should.be.a('object');
+                task.url.should.equal('/notifications/mark-read');
+            });
+            it('second request should set delay', () => {
+                object.getNotifications(() => 0);
+                const callback1 = object.queue.push.firstCall.args[0].callback;
+                callback1(null, null);
+                object.queue.push.callCount.should.equal(2);
+                const task = object.queue.push.secondCall.args[0];
+                task.should.be.a('object');
+                task.delay.should.equal(object.delay);
+            });
+            it('second request should not set form', () => {
+                object.getNotifications(() => 0);
+                const callback1 = object.queue.push.firstCall.args[0].callback;
+                callback1(null, null);
+                object.queue.push.callCount.should.equal(2);
+                const task = object.queue.push.secondCall.args[0];
+                task.should.be.a('object');
+                expect(task.form).to.be.undefined;
+            });
+            it('should not make second request if frist failed', () => {
+                object.getNotifications(() => 0);
+                const callback1 = object.queue.push.firstCall.args[0].callback;
+                callback1('error', null);
+                object.queue.push.callCount.should.equal(1);
+            });
+            it('should pass error onto callback from first request', () => {
+                const spy = sinon.spy();
+                object.getNotifications(spy);
+                const callback1 = object.queue.push.firstCall.args[0].callback;
+                callback1('error', null);
+                spy.calledWith('error').should.be.true;
+            });
+            it('should pass error onto callback from second request', () => {
+                const spy = sinon.spy();
+                object.getNotifications(spy);
+                const callback1 = object.queue.push.firstCall.args[0].callback;
+                callback1(null, 'notifications');
+                const callback2 = object.queue.push.secondCall.args[0].callback;
+                callback2('error2');
+                spy.calledWith('error2', 'notifications').should.be.true;
+            });
+            it('should pass notifications from first request onto callback on success', () => {
+                const spy = sinon.spy();
+                object.getNotifications(spy);
+                const callback1 = object.queue.push.firstCall.args[0].callback;
+                callback1(null, 'notifications');
+                const callback2 = object.queue.push.secondCall.args[0].callback;
+                callback2(null);
+                spy.calledWith(null, 'notifications').should.be.true;
             });
         });
     });
