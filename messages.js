@@ -7,8 +7,7 @@
  */
 const async = require('async');
 
-const utils = require('./utils'),
-    config = require('./config');
+const utils = require('./utils');
 const browser = require('./browser')();
 
 const internals = {
