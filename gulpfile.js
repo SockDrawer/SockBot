@@ -53,12 +53,9 @@ gulp.task('docList', ['gitBranch'], (done) => {
             } else {
                 stdout.split(/\r?\n/).forEach((file) => {
                     if (file && file.length > 3 && file.endsWith('.js')){
-                        docgenFiles.push('./' + file);
+                        docgenFiles.push(file);
                     }
                 });
-            }
-            if (docgenFiles.length === 0) {
-                docgenFiles.push('**');
             }
             done();
         });
