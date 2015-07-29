@@ -9,6 +9,7 @@ Documentation for message-bus JSON objects
   * [~postMessage](#external.module_messageBus..postMessage) : <code>object</code>
   * [~topicMessage](#external.module_messageBus..topicMessage) : <code>object</code>
   * [~topicTrackingState](#external.module_messageBus..topicTrackingState) : <code>object</code>
+  * [~notificationsMessage](#external.module_messageBus..notificationsMessage) : <code>object</code>
 
 <a name="external.module_messageBus..message"></a>
 ### messageBus~message : <code>object</code>
@@ -62,4 +63,15 @@ Topic Tracking State
 | created_at | <code>string</code> | ISO formatted datetime of topic creation |
 | category_id | <code>number</code> | Category ID of the topic |
 | notification_level | <code>external.topics.NotificationLevel</code> | Notification level of the topic |
+
+<a name="external.module_messageBus..notificationsMessage"></a>
+### messageBus~notificationsMessage : <code>object</code>
+Message relating to notifications
+
+**Kind**: inner typedef of <code>[messageBus](#external.module_messageBus)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| unread_notifications | <code>number</code> | Number of unread notifications |
+| unread_private_messages | <code>number</code> | Number of unread Message notifcations |
 
