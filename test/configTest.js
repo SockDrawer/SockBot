@@ -182,7 +182,7 @@ describe('config', () => {
                         password: 'crayon'
                     }
                 },
-                expected = utils.mergeObjects(config.internals.defaultConfig, input);
+                expected = utils.mergeObjects(true, config.internals.defaultConfig, input);
             fs.readFile.reset();
             fs.readFile.yields(null, JSON.stringify(input));
             const spy = sinon.spy();
