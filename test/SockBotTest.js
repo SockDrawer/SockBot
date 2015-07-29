@@ -40,6 +40,7 @@ describe('SockBot', () => {
 		let sandbox;
 		beforeEach(function() {
 			sandbox = sinon.sandbox.create();
+			sandbox.stub(console, 'log');
 		});
 		afterEach(function() {
 			sandbox.restore();
