@@ -87,7 +87,7 @@ describe('notifications', () => {
         });
     });
     describe('privateFns', () => {
-        const fns = ['onNotificationMessage', 'handleTopicNotification'];
+        const fns = ['onNotificationMessage', 'handleTopicNotification', 'onNotification', 'removeNotification'];
         describe('should export expected functions:', () => {
             fns.forEach((fn) => {
                 it(fn + '()', () => expect(notifications.privateFns[fn]).to.be.a('function'));
@@ -287,6 +287,64 @@ describe('notifications', () => {
                 browser.getPost.restore();
             });
         });
+        describe('onNotification()', () => {
+            const onNotification = notifications.privateFns.onNotification;
+            let sandbox;
+            beforeEach(() => {
+                sandbox = sinon.sandbox.create();
+                sandbox.stub(utils, 'warn');
+                notifications.internals.events = {
+                    on: sinon.spy()
+                };
+            });
+            afterEach(() => sandbox.restore());
+            after(() => notifications.internals.events = null);
+            describe('type validation', () => {
+                it('should print warning on unrecognized type', () => {
+                    const type = '' + Math.random();
+                    onNotification(type, () => 0);
+                    utils.warn.called.should.be.true;
+                    utils.warn.firstCall.args[0].should.equal('Notification type `' + type + '` is not recognized.');
+                });
+                Object.keys(notifyTypeMap).map((t) => notifyTypeMap[t]).forEach((type) => {
+                    it('should not print warning on recognized type: ' + type, () => {
+                        onNotification(type, () => 0);
+                        utils.warn.called.should.be.false;
+                    });
+                });
+            });
+            it('should return events object for chaining', () => {
+                const events = onNotification('', () => 0);
+                events.should.equal(notifications.internals.events);
+            });
+            it('should add listener to events', () => {
+                const spy = sinon.spy();
+                onNotification('foobar', spy);
+                notifications.internals.events.on.called.should.be.true;
+                const args = notifications.internals.events.on.firstCall.args;
+                args.should.deep.equal(['notification#foobar', spy]);
+            });
+        });
+        describe('removeNotification()', () => {
+            const removeNotification = notifications.privateFns.removeNotification;
+            beforeEach(() => {
+                notifications.internals.events = {
+                    removeListener: sinon.spy()
+                };
+            });
+            after(() => notifications.internals.events = null);
+            it('should return events object for chaining', () => {
+                const events = removeNotification('', () => 0);
+                events.should.equal(notifications.internals.events);
+            });
+            it('should add listener to events', () => {
+                const spy = sinon.spy();
+                removeNotification('foobar', spy);
+                notifications.internals.events.removeListener.called.should.be.true;
+                const args = notifications.internals.events.removeListener.firstCall.args;
+                args.should.deep.equal(['notification#foobar', spy]);
+            });
+        });
     });
     describe('pollNotifications()', () => {
         let sandbox;
@@ -465,6 +523,28 @@ describe('notifications', () => {
             notifications.prepare(events, spy);
             events.onChannel.calledWith('/notifications/9753',
                 notifications.privateFns.onNotificationMessage).should.be.true;
+        });
+        it('should add onNotification function to events', () => {
+            const events = {
+                    onChannel: sinon.spy()
+                },
+                spy = sinon.spy();
+            config.user = {
+                id: 9753
+            };
+            notifications.prepare(events, spy);
+            expect(events.onNotification).to.equal(notifications.privateFns.onNotification);
+        });
+        it('should add removeNotification function to events', () => {
+            const events = {
+                    onChannel: sinon.spy()
+                },
+                spy = sinon.spy();
+            config.user = {
+                id: 9753
+            };
+            notifications.prepare(events, spy);
+            expect(events.removeNotification).to.equal(notifications.privateFns.removeNotification);
         });
         after(() => {
             notifications.internals.events = null;

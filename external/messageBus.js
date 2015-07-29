@@ -50,3 +50,12 @@
   * @param {number} category_id Category ID of the topic
   * @param {external.topics.NotificationLevel} notification_level Notification level of the topic
   */
+
+/**
+ * Message relating to notifications
+ *
+ * @typedef {object}
+ * @name notificationsMessage
+ * @param {number} unread_notifications Number of unread notifications
+ * @param {number} unread_private_messages Number of unread Message notifcations
+ */
