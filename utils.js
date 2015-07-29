@@ -123,7 +123,7 @@ function mergeHelper(base, mixin, name, mergeArrays) {
         if (Array.isArray(newBase)) {
             newBase = {};
         }
-        mergeInner(newBase, mixin[name]);
+        mergeInner(newBase, mixin[name], mergeArrays);
         base[name] = newBase;
     } else {
         base[name] = mixin[name];
