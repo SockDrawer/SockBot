@@ -1,5 +1,5 @@
 'use strict';
-/*globals describe, it, before, beforeEach, after, afterEach*/
+/*globals describe, it, before, beforeEach, after*/
 /*eslint no-unused-expressions:0 */
 
 const chai = require('chai'),
@@ -9,7 +9,6 @@ chai.should();
 const expect = chai.expect;
 
 const messages = require('../messages'),
-    config = require('../config'),
     utils = require('../utils');
 const browser = require('../browser')();
 
