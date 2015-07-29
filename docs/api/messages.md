@@ -6,9 +6,6 @@ message-bus handler for SockBot2.0
 **License**: MIT  
 
 * [messages](#module_messages)
-  * [~filterIgnoredOnPost(post, topic, callback)](#module_messages..filterIgnoredOnPost) ⇒ <code>null</code>
-  * [~filterIgnoredOnTopic(post, topic, callback)](#module_messages..filterIgnoredOnTopic) ⇒ <code>null</code>
-  * [~filterIgnored(post, topic, callback)](#module_messages..filterIgnored)
   * [~processTopicMessage(message)](#module_messages..processTopicMessage)
   * [~updateChannelPositions(messages)](#module_messages..updateChannelPositions)
   * [~resetChannelPositions()](#module_messages..resetChannelPositions)
@@ -23,44 +20,6 @@ message-bus handler for SockBot2.0
   * [~filterCallback](#module_messages..filterCallback)
   * [~messageHandler](#module_messages..messageHandler)
   * [~topicMessageHandler](#module_messages..topicMessageHandler)
-
-<a name="module_messages..filterIgnoredOnPost"></a>
-### messages~filterIgnoredOnPost(post, topic, callback) ⇒ <code>null</code>
-Proccess post for ignore contitions
-
-**Kind**: inner method of <code>[messages](#module_messages)</code>  
-**Returns**: <code>null</code> - No return value  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| post | <code>externals.posts.CleanedPost</code> | Post to filter |
-| topic | <code>externals.topics.Topic</code> | Topic `post` belongs to |
-| callback | <code>filterCallback</code> | Completion Callback |
-
-<a name="module_messages..filterIgnoredOnTopic"></a>
-### messages~filterIgnoredOnTopic(post, topic, callback) ⇒ <code>null</code>
-Proccess topic for ignore contitions
-
-**Kind**: inner method of <code>[messages](#module_messages)</code>  
-**Returns**: <code>null</code> - No return value  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| post | <code>externals.posts.CleanedPost</code> | Triggering post |
-| topic | <code>externals.topics.Topic</code> | Topic to filter |
-| callback | <code>filterCallback</code> | Completion Callback |
-
-<a name="module_messages..filterIgnored"></a>
-### messages~filterIgnored(post, topic, callback)
-Filter post/topic for ignore conditions
-
-**Kind**: inner method of <code>[messages](#module_messages)</code>  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| post | <code>externals.posts.CleanedPost</code> | Post to filter |
-| topic | <code>externals.topics.Topic</code> | Topic to filter |
-| callback | <code>completionCallback</code> | Completion Callback |
 
 <a name="module_messages..processTopicMessage"></a>
 ### messages~processTopicMessage(message)
