@@ -1,5 +1,5 @@
 'use strict';
-/*globals describe, it, before, after*/
+/*globals describe, it, beforeEach, afterEach*/
 /*eslint no-unused-expressions:0 */
 
 const chai = require('chai'),
@@ -61,7 +61,15 @@ describe('config', () => {
     });
     describe('readFile()', () => {
         const readFile = config.internals.readFile;
-        before(() => sinon.stub(fs, 'readFile'));
+		let sandbox;
+		beforeEach(() => {
+			sandbox = sinon.sandbox.create();
+			sandbox.stub(console, 'log');
+			sandbox.stub(fs, 'readFile');
+		});
+		afterEach(() => {
+			sandbox.restore();
+		});
         describe('Should error on non string input:', () => {
             [undefined, null, 1, 2.4, false, '', [], {}].forEach((test) => {
                 it(JSON.stringify(test), () => {
@@ -155,11 +163,18 @@ describe('config', () => {
             expect(spy.lastCall.args[0]).to.equal(null);
             spy.lastCall.args[1].should.deep.equal(result);
         });
-        after(() => fs.readFile.restore());
     });
     describe('loadConfiguration()', () => {
         const loadConfiguration = config.loadConfiguration;
-        before(() => sinon.stub(fs, 'readFile'));
+		let sandbox;
+		beforeEach(() => {
+			sandbox = sinon.sandbox.create();
+			sandbox.stub(console, 'log');
+			sandbox.stub(fs, 'readFile');
+		});
+		afterEach(() => {
+			sandbox.restore();
+		});
         it('should load valid config', () => {
             const input = {
                     core: {
@@ -195,6 +210,5 @@ describe('config', () => {
             spy.lastCall.args.should.have.length(1);
             expect(spy.lastCall.args[0]).to.be.instanceOf(Error);
         });
-        after(() => fs.readFile.restore());
     });
 });

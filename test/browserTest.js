@@ -1,5 +1,5 @@
 'use strict';
-/*globals describe, it, before, beforeEach, after*/
+/*globals describe, it, before, beforeEach, after, afterEach*/
 /*eslint no-unused-expressions:0 */
 
 const chai = require('chai'),
@@ -486,13 +486,14 @@ describe('browser', () => {
         });
         describe('login', () => {
             const object = {
-                login: browserModule.externals.login,
-                delay: Math.ceil(1500 + Math.random() * 5000),
-                queue: {
-                    push: sinon.stub()
-                }
-            };
-            beforeEach(() => object.queue.push.reset());
+                    login: browserModule.externals.login,
+                    delay: Math.ceil(1500 + Math.random() * 5000),
+                    queue: {
+                        push: sinon.stub()
+                    }
+                },
+                queue = object.queue;
+            beforeEach(() => queue.push.reset());
             it('should require a callback', () => {
                 expect(() => object.login()).to.throw('callback must be supplied');
             });
@@ -502,16 +503,16 @@ describe('browser', () => {
             it('should pass error on CSRF failure', () => {
                 const spy = sinon.spy(),
                     error = new Error('testErrot');
-                object.queue.push
+                queue.push
                     .throws(new Error('unexpected call'))
                     .onFirstCall().yieldsTo('callback', error);
                 object.login(spy);
                 spy.firstCall.args[0].should.equal(error);
-                object.queue.push.lastCall.args[0].url.should.equal('/session/csrf.json');
+                queue.push.lastCall.args[0].url.should.equal('/session/csrf.json');
             });
             it('should call doLogin on csrf success', () => {
                 const spy = sinon.spy();
-                object.queue.push
+                queue.push
                     .throws(new Error('unexpected call'))
                     .onFirstCall().yieldsTo('callback', null, 'CSRF')
                     .onSecondCall().yieldsTo('callback', null, {
@@ -520,28 +521,29 @@ describe('browser', () => {
                 object.login(spy);
                 expect(spy.firstCall.args[0]).to.equal(null);
                 spy.firstCall.args[1].should.equal('user info');
-                object.queue.push.lastCall.args[0].url.should.equal('/session');
+                queue.push.lastCall.args[0].url.should.equal('/session');
             });
         });
         describe('messageBus()', () => {
             const object = {
-                delay: 0,
-                queue: {
-                    push: sinon.stub()
+                    delay: 0,
+                    queue: {
+                        push: sinon.stub()
+                    },
+                    messageBus: browserModule.externals.messageBus
                 },
-                messageBus: browserModule.externals.messageBus
-            };
-            beforeEach(() => object.queue.push.reset());
+                queue = object.queue;
+            beforeEach(() => queue.push.reset());
             it('should set http method to POST', () => {
                 object.messageBus({}, '', () => 0);
-                const args = object.queue.push.lastCall.args;
+                const args = queue.push.lastCall.args;
                 args.should.have.length(1);
                 args[0].should.have.any.key('method');
                 args[0].method.should.equal('POST');
             });
             it('should set url', () => {
                 object.messageBus({}, 'foobarbaz', () => 0);
-                const args = object.queue.push.lastCall.args;
+                const args = queue.push.lastCall.args;
                 args.should.have.length(1);
                 args[0].should.have.any.key('url');
                 args[0].url.should.equal('/message-bus/foobarbaz/poll');
@@ -549,7 +551,7 @@ describe('browser', () => {
             it('should set form', () => {
                 const form = {};
                 object.messageBus(form, '', () => 0);
-                const args = object.queue.push.lastCall.args;
+                const args = queue.push.lastCall.args;
                 args.should.have.length(1);
                 args[0].should.have.any.key('form');
                 args[0].form.should.equal(form);
@@ -557,7 +559,7 @@ describe('browser', () => {
             it('should set callback', () => {
                 const fn = () => 0;
                 object.messageBus({}, '', fn);
-                const args = object.queue.push.lastCall.args;
+                const args = queue.push.lastCall.args;
                 args.should.have.length(1);
                 args[0].should.have.any.key('callback');
                 args[0].callback.should.equal(fn);
@@ -566,13 +568,13 @@ describe('browser', () => {
                 const delay = Math.ceil(1500 + Math.random() * 5000);
                 object.delay = delay;
                 object.messageBus({}, '', () => 0);
-                const args = object.queue.push.lastCall.args;
+                const args = queue.push.lastCall.args;
                 args.should.have.length(1);
                 args[0].should.have.any.key('delay');
                 args[0].delay.should.equal(delay);
             });
             it('should pass err to external callback on completion', () => {
-                object.queue.push.yieldsTo('callback', new Error('test error!'));
+                queue.push.yieldsTo('callback', new Error('test error!'));
                 const spy = sinon.spy();
                 object.messageBus({}, '', spy);
                 spy.called.should.be.true;
@@ -580,7 +582,7 @@ describe('browser', () => {
                 spy.lastCall.args[0].should.be.an.instanceOf(Error);
             });
             it('should pass post to external callback on completion', () => {
-                object.queue.push.yieldsTo('callback', null, {});
+                queue.push.yieldsTo('callback', null, {});
                 const spy = sinon.spy();
                 object.messageBus({}, '', spy);
                 spy.called.should.be.true;
@@ -590,40 +592,41 @@ describe('browser', () => {
         });
         describe('getPost()', () => {
             const object = {
-                delay: 0,
-                queue: {
-                    push: sinon.stub()
+                    delay: 0,
+                    queue: {
+                        push: sinon.stub()
+                    },
+                    getPost: browserModule.externals.getPost
                 },
-                getPost: browserModule.externals.getPost
-            };
-            beforeEach(() => object.queue.push.reset());
+                queue = object.queue;
+            beforeEach(() => queue.push.reset());
             it('should set HTTP get method', () => {
                 object.getPost(0, () => 0);
-                object.queue.push.lastCall.args[0].should.have.any.key('method');
-                object.queue.push.lastCall.args[0].method.should.equal('GET');
+                queue.push.lastCall.args[0].should.have.any.key('method');
+                queue.push.lastCall.args[0].method.should.equal('GET');
             });
             it('should set URL', () => {
                 const id = Math.ceil(5000 + Math.random() * 5000);
                 object.getPost(id, () => 0);
-                object.queue.push.lastCall.args[0].should.have.any.key('url');
-                object.queue.push.lastCall.args[0].url.should.equal('/posts/' + id + '.json');
+                queue.push.lastCall.args[0].should.have.any.key('url');
+                queue.push.lastCall.args[0].url.should.equal('/posts/' + id + '.json');
             });
             it('should set delay', () => {
                 const delay = Math.ceil(5000 + Math.random() * 5000);
                 object.delay = delay;
                 object.getPost(0, () => 0);
-                object.queue.push.lastCall.args[0].should.have.any.key('delay');
-                object.queue.push.lastCall.args[0].delay.should.equal(delay);
+                queue.push.lastCall.args[0].should.have.any.key('delay');
+                queue.push.lastCall.args[0].delay.should.equal(delay);
             });
             it('should set callback', () => {
                 object.getPost(0, () => 0);
-                object.queue.push.lastCall.args[0].should.have.any.key('callback');
-                object.queue.push.lastCall.args[0].callback.should.be.a('function');
+                queue.push.lastCall.args[0].should.have.any.key('callback');
+                queue.push.lastCall.args[0].callback.should.be.a('function');
             });
             it('should pass callbac error to callback', () => {
                 const spy = sinon.spy(),
                     err = new Error('this is an error');
-                object.queue.push.yieldsTo('callback', err);
+                queue.push.yieldsTo('callback', err);
                 object.getPost(0, spy);
                 spy.lastCall.args.should.deep.equal([err]);
             });
@@ -633,7 +636,7 @@ describe('browser', () => {
                     },
                     expected = 'this is passing',
                     spy = sinon.spy();
-                object.queue.push.yieldsTo('callback', null, post);
+                queue.push.yieldsTo('callback', null, post);
                 object.getPost(0, spy);
                 expect(spy.lastCall.args[0]).to.equal(null);
                 spy.lastCall.args[1].should.have.any.key('cleaned');
@@ -645,7 +648,7 @@ describe('browser', () => {
                         'trust_level': coreBrowser.trustLevels.tl2
                     },
                     spy = sinon.spy();
-                object.queue.push.yieldsTo('callback', null, post);
+                queue.push.yieldsTo('callback', null, post);
                 object.getPost(0, spy);
                 expect(spy.lastCall.args[0]).to.equal(null);
                 spy.lastCall.args[1].trust_level.should.equal(coreBrowser.trustLevels.admin);
@@ -658,7 +661,7 @@ describe('browser', () => {
                     },
                     expected = 'https://what.thedailywtf.com/t/topic/1234/17',
                     spy = sinon.spy();
-                object.queue.push.yieldsTo('callback', null, post);
+                queue.push.yieldsTo('callback', null, post);
                 object.getPost(0, spy);
                 expect(spy.lastCall.args[0]).to.equal(null);
                 spy.lastCall.args[1].should.have.any.key('url');
@@ -667,48 +670,49 @@ describe('browser', () => {
         });
         describe('getTopic()', () => {
             const object = {
-                delay: 0,
-                queue: {
-                    push: sinon.stub()
+                    delay: 0,
+                    queue: {
+                        push: sinon.stub()
+                    },
+                    getTopic: browserModule.externals.getTopic
                 },
-                getTopic: browserModule.externals.getTopic
-            };
-            beforeEach(() => object.queue.push.reset());
+                queue = object.queue;
+            beforeEach(() => queue.push.reset());
             it('should set HTTP get method', () => {
                 object.getTopic(0, () => 0);
-                object.queue.push.lastCall.args[0].should.have.any.key('method');
-                object.queue.push.lastCall.args[0].method.should.equal('GET');
+                queue.push.lastCall.args[0].should.have.any.key('method');
+                queue.push.lastCall.args[0].method.should.equal('GET');
             });
             it('should set URL', () => {
                 const id = Math.ceil(5000 + Math.random() * 5000),
                     expected = '/t/' + id + '.json?include_raw=1&track_visit=true';
                 object.getTopic(id, () => 0);
-                object.queue.push.lastCall.args[0].should.have.any.key('url');
-                object.queue.push.lastCall.args[0].url.should.equal(expected);
+                queue.push.lastCall.args[0].should.have.any.key('url');
+                queue.push.lastCall.args[0].url.should.equal(expected);
             });
             it('should set delay', () => {
                 const delay = Math.ceil(5000 + Math.random() * 5000);
                 object.delay = delay;
                 object.getTopic(0, () => 0);
-                object.queue.push.lastCall.args[0].should.have.any.key('delay');
-                object.queue.push.lastCall.args[0].delay.should.equal(delay);
+                queue.push.lastCall.args[0].should.have.any.key('delay');
+                queue.push.lastCall.args[0].delay.should.equal(delay);
             });
             it('should set callback', () => {
                 object.getTopic(0, () => 0);
-                object.queue.push.lastCall.args[0].should.have.any.key('callback');
-                object.queue.push.lastCall.args[0].callback.should.be.a('function');
+                queue.push.lastCall.args[0].should.have.any.key('callback');
+                queue.push.lastCall.args[0].callback.should.be.a('function');
             });
             it('should pass callback error to callback', () => {
                 const spy = sinon.spy(),
                     err = new Error('this is an error');
-                object.queue.push.yieldsTo('callback', err);
+                queue.push.yieldsTo('callback', err);
                 object.getTopic(0, spy);
                 spy.lastCall.args.should.deep.equal([err]);
             });
             it('should pass result topic to callback', () => {
                 const spy = sinon.spy(),
                     topic = {};
-                object.queue.push.yieldsTo('callback', null, topic);
+                queue.push.yieldsTo('callback', null, topic);
                 object.getTopic(0, spy);
                 spy.lastCall.args.should.deep.equal([null, topic]);
             });
@@ -717,7 +721,7 @@ describe('browser', () => {
                     topic = {
                         'post_stream': true
                     };
-                object.queue.push.yieldsTo('callback', null, topic);
+                queue.push.yieldsTo('callback', null, topic);
                 object.getTopic(0, spy);
                 topic.should.not.have.any.key('post_stream');
             });
@@ -728,7 +732,7 @@ describe('browser', () => {
                             links: true
                         }
                     };
-                object.queue.push.yieldsTo('callback', null, topic);
+                queue.push.yieldsTo('callback', null, topic);
                 object.getTopic(0, spy);
                 topic.details.should.not.have.any.key('links');
             });
@@ -739,7 +743,7 @@ describe('browser', () => {
                             participants: true
                         }
                     };
-                object.queue.push.yieldsTo('callback', null, topic);
+                queue.push.yieldsTo('callback', null, topic);
                 object.getTopic(0, spy);
                 topic.details.should.not.have.any.key('participants');
             });
@@ -750,7 +754,7 @@ describe('browser', () => {
                             'suggested_topics': true
                         }
                     };
-                object.queue.push.yieldsTo('callback', null, topic);
+                queue.push.yieldsTo('callback', null, topic);
                 object.getTopic(0, spy);
                 topic.details.should.not.have.any.key('suggested_topics');
             });
@@ -761,112 +765,113 @@ describe('browser', () => {
                         id: Math.ceil(5000 + Math.random() * 5000)
                     },
                     expected = '/t/' + topic.slug + '/' + topic.id;
-                object.queue.push.yieldsTo('callback', null, topic);
+                queue.push.yieldsTo('callback', null, topic);
                 object.getTopic(0, spy);
                 topic.url.should.equal(expected);
             });
         });
         describe('getNotifications()', () => {
             const object = {
-                delay: Math.random(),
-                queue: {
-                    push: sinon.stub()
+                    delay: Math.random(),
+                    queue: {
+                        push: sinon.stub()
+                    },
+                    getNotifications: browserModule.externals.getNotifications
                 },
-                getNotifications: browserModule.externals.getNotifications
-            };
-            beforeEach(() => object.queue.push.reset());
+                queue = object.queue;
+            beforeEach(() => queue.push.reset());
             it('frist request should set HTTP status', () => {
                 object.getNotifications(() => 0);
-                object.queue.push.callCount.should.equal(1);
-                const task = object.queue.push.firstCall.args[0];
+                queue.push.callCount.should.equal(1);
+                const task = queue.push.firstCall.args[0];
                 task.should.be.a('object');
                 task.method.should.equal('GET');
             });
             it('frist request should set URL', () => {
                 object.getNotifications(() => 0);
-                object.queue.push.callCount.should.equal(1);
-                const task = object.queue.push.firstCall.args[0];
+                queue.push.callCount.should.equal(1);
+                const task = queue.push.firstCall.args[0];
                 task.should.be.a('object');
                 task.url.should.equal('/notifications.json');
             });
             it('frist request should set delay', () => {
                 object.getNotifications(() => 0);
-                object.queue.push.callCount.should.equal(1);
-                const task = object.queue.push.firstCall.args[0];
+                queue.push.callCount.should.equal(1);
+                const task = queue.push.firstCall.args[0];
                 task.should.be.a('object');
                 task.delay.should.equal(object.delay);
             });
             it('frist request should not set form', () => {
                 object.getNotifications(() => 0);
-                object.queue.push.callCount.should.equal(1);
-                const task = object.queue.push.firstCall.args[0];
+                queue.push.callCount.should.equal(1);
+                const task = queue.push.firstCall.args[0];
                 task.should.be.a('object');
                 expect(task.form).to.be.undefined;
             });
             it('second request should set HTTP status', () => {
                 object.getNotifications(() => 0);
-                const callback1 = object.queue.push.firstCall.args[0].callback;
+                const callback1 = queue.push.firstCall.args[0].callback;
                 callback1(null, null);
-                object.queue.push.callCount.should.equal(2);
-                const task = object.queue.push.secondCall.args[0];
+                queue.push.callCount.should.equal(2);
+                const task = queue.push.secondCall.args[0];
                 task.should.be.a('object');
                 task.method.should.equal('PUT');
             });
             it('second request should set URL', () => {
                 object.getNotifications(() => 0);
-                const callback1 = object.queue.push.firstCall.args[0].callback;
+                const callback1 = queue.push.firstCall.args[0].callback;
                 callback1(null, null);
-                object.queue.push.callCount.should.equal(2);
-                const task = object.queue.push.secondCall.args[0];
+                queue.push.callCount.should.equal(2);
+                const task = queue.push.secondCall.args[0];
                 task.should.be.a('object');
                 task.url.should.equal('/notifications/mark-read');
             });
             it('second request should set delay', () => {
                 object.getNotifications(() => 0);
-                const callback1 = object.queue.push.firstCall.args[0].callback;
+                const callback1 = queue.push.firstCall.args[0].callback;
                 callback1(null, null);
-                object.queue.push.callCount.should.equal(2);
-                const task = object.queue.push.secondCall.args[0];
+                queue.push.callCount.should.equal(2);
+                const task = queue.push.secondCall.args[0];
                 task.should.be.a('object');
                 task.delay.should.equal(object.delay);
             });
             it('second request should not set form', () => {
                 object.getNotifications(() => 0);
-                const callback1 = object.queue.push.firstCall.args[0].callback;
+                const callback1 = queue.push.firstCall.args[0].callback;
                 callback1(null, null);
-                object.queue.push.callCount.should.equal(2);
-                const task = object.queue.push.secondCall.args[0];
+                queue.push.callCount.should.equal(2);
+                const task = queue.push.secondCall.args[0];
                 task.should.be.a('object');
                 expect(task.form).to.be.undefined;
             });
             it('should not make second request if frist failed', () => {
                 object.getNotifications(() => 0);
-                const callback1 = object.queue.push.firstCall.args[0].callback;
+                const callback1 = queue.push.firstCall.args[0].callback;
                 callback1('error', null);
-                object.queue.push.callCount.should.equal(1);
+                queue.push.callCount.should.equal(1);
             });
             it('should pass error onto callback from first request', () => {
                 const spy = sinon.spy();
                 object.getNotifications(spy);
-                const callback1 = object.queue.push.firstCall.args[0].callback;
+                const callback1 = queue.push.firstCall.args[0].callback;
                 callback1('error', null);
                 spy.calledWith('error').should.be.true;
             });
             it('should pass error onto callback from second request', () => {
                 const spy = sinon.spy();
                 object.getNotifications(spy);
-                const callback1 = object.queue.push.firstCall.args[0].callback;
+                const callback1 = queue.push.firstCall.args[0].callback;
                 callback1(null, 'notifications');
-                const callback2 = object.queue.push.secondCall.args[0].callback;
+                const callback2 = queue.push.secondCall.args[0].callback;
                 callback2('error2');
                 spy.calledWith('error2', 'notifications').should.be.true;
             });
             it('should pass notifications from first request onto callback on success', () => {
                 const spy = sinon.spy();
                 object.getNotifications(spy);
-                const callback1 = object.queue.push.firstCall.args[0].callback;
+                const callback1 = queue.push.firstCall.args[0].callback;
                 callback1(null, 'notifications');
-                const callback2 = object.queue.push.secondCall.args[0].callback;
+                const callback2 = queue.push.secondCall.args[0].callback;
                 callback2(null);
                 spy.calledWith(null, 'notifications').should.be.true;
             });

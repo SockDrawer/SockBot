@@ -1,5 +1,5 @@
 'use strict';
-/*globals describe, it, before, beforeEach, after*/
+/*globals describe, it, beforeEach, after, afterEach*/
 /*eslint no-unused-expressions:0 */
 
 const chai = require('chai'),
@@ -114,27 +114,20 @@ describe('messages', () => {
         });
     });
     describe('pollMessages()', () => {
-        before(() => {
-            sinon.stub(browser, 'messageBus');
-            sinon.stub(utils, 'warn');
-            sinon.stub(messages.privateFns, 'resetChannelPositions');
-            sinon.stub(messages.privateFns, 'updateChannelPositions');
-            sinon.stub(messages.privateFns, 'processTopicMessage');
+        let sandbox;
+        beforeEach(() => {
+            sandbox = sinon.sandbox.create();
+            sandbox.stub(browser, 'messageBus');
+            sandbox.stub(utils, 'warn');
+            sandbox.stub(messages.privateFns, 'resetChannelPositions');
+            sandbox.stub(messages.privateFns, 'updateChannelPositions');
+            sandbox.stub(messages.privateFns, 'processTopicMessage');
             messages.internals.events = {
-                emit: sinon.stub()
+                emit: sandbox.stub()
             };
         });
-        beforeEach(() => {
-            browser.messageBus.reset();
-            utils.warn.reset();
-            messages.privateFns.resetChannelPositions.reset();
-            messages.privateFns.updateChannelPositions.reset();
-            messages.privateFns.processTopicMessage.reset();
-            messages.internals.events.emit.reset();
-            //randomize data
-            messages.internals.clientId = Math.random();
-            messages.internals.channels = {};
-            messages.internals.channels['foo' + Math.random()] = Math.random();
+        afterEach(() => {
+            sandbox.restore();
         });
         it('should call browser.messageBus()', () => {
             const spy = sinon.spy();
@@ -231,16 +224,6 @@ describe('messages', () => {
             messages.internals.events.emit.returns(true);
             messages.pollMessages(spy);
             utils.warn.called.should.be.false;
-        });
-        after(() => {
-            browser.messageBus.restore();
-            utils.warn.restore();
-            messages.privateFns.resetChannelPositions.restore();
-            messages.privateFns.updateChannelPositions.restore();
-            messages.privateFns.processTopicMessage.restore();
-            messages.internals.events = null;
-            messages.internals.channels = null;
-            messages.internals.clientId = null;
         });
     });
     describe('privateFns', () => {
@@ -587,21 +570,20 @@ describe('messages', () => {
         });
         describe('processTopicMessage()', () => {
             const processTopicMessage = messages.privateFns.processTopicMessage;
-            before(() => {
-                sinon.stub(utils, 'warn');
-                sinon.stub(browser, 'getTopic');
-                sinon.stub(browser, 'getPost');
-                sinon.stub(utils, 'filterIgnored');
+            let sandbox;
+            beforeEach(() => {
+                sandbox = sinon.sandbox.create();
+                sandbox.stub(console, 'log');
+                sandbox.stub(utils, 'warn');
+                sandbox.stub(browser, 'getTopic');
+                sandbox.stub(browser, 'getPost');
+                sandbox.stub(utils, 'filterIgnored');
                 messages.internals.events = {
-                    emit: sinon.stub()
+                    emit: sandbox.stub()
                 };
             });
-            beforeEach(() => {
-                utils.warn.reset();
-                browser.getTopic.reset();
-                browser.getPost.reset();
-                utils.filterIgnored.reset();
-                messages.internals.events.emit.reset();
+            afterEach(() => {
+                sandbox.restore();
             });
             it('should call browser.getPost()', () => {
                 browser.getPost.yields('stubbed');
@@ -721,13 +703,6 @@ describe('messages', () => {
                     data: {}
                 });
                 utils.warn.called.should.be.false;
-            });
-            after(() => {
-                utils.warn.restore();
-                browser.getTopic.restore();
-                browser.getPost.restore();
-                utils.filterIgnored.restore();
-                messages.internals.events = null;
             });
         });
     });

@@ -292,6 +292,8 @@ describe('utils', () => {
             const filterIgnoredOnPost = utils.privateFns.filterIgnoredOnPost;
             let timers;
             before(() => timers = sinon.useFakeTimers());
+            afterEach(() => utils.internals.cooldownTimers = {});
+            after(() => timers.restore());
             describe('Basic trust levels', () => {
                 it('should ignore TL0 user', () => {
                     const post = {
@@ -429,13 +431,12 @@ describe('utils', () => {
                     spy.calledWith(null, 'Poster is TL4+').should.be.true;
                 }));
             });
-            after(() => timers.restore());
-            afterEach(() => utils.internals.cooldownTimers = {});
         });
         describe('filterIgnoredOnTopic()', () => {
             const filterIgnoredOnTopic = utils.privateFns.filterIgnoredOnTopic;
             let timers;
             before(() => timers = sinon.useFakeTimers());
+            after(() => timers.restore());
             describe('Basic trust levels', () => {
                 [0, 1, 2, 3, 4].forEach((level) =>
                     it('should accept TL' + level + ' user', () => {
@@ -580,19 +581,18 @@ describe('utils', () => {
                     spy.calledWith(null, 'Poster is Staff').should.be.true;
                 }));
             });
-            after(() => timers.restore());
         });
         describe('filterIgnored()', () => {
             const filterIgnored = utils.filterIgnored;
-            before(() => {
-                sinon.stub(utils.privateFns, 'filterIgnoredOnPost');
-                sinon.stub(utils.privateFns, 'filterIgnoredOnTopic');
-                sinon.stub(utils, 'warn');
-            });
+            let sandbox;
             beforeEach(() => {
-                utils.warn.reset();
-                utils.privateFns.filterIgnoredOnPost.reset();
-                utils.privateFns.filterIgnoredOnTopic.reset();
+                sandbox = sinon.sandbox.create();
+                sandbox.stub(utils.privateFns, 'filterIgnoredOnPost');
+                sandbox.stub(utils.privateFns, 'filterIgnoredOnTopic');
+                sandbox.stub(utils, 'warn');
+            });
+            afterEach(() => {
+                sandbox.restore();
             });
             it('should filter using filterIgnoredOnPost', () => {
                 utils.privateFns.filterIgnoredOnPost.yields(null);
@@ -630,11 +630,6 @@ describe('utils', () => {
                 spy.lastCall.args.should.deep.equal(['ignore']);
                 utils.warn.called.should.be.true;
                 utils.warn.lastCall.args.should.deep.equal(['Post #undefined Ignored: POST OK, TOPIC NOT OK']);
-            });
-            after(() => {
-                utils.warn.restore();
-                utils.privateFns.filterIgnoredOnPost.restore();
-                utils.privateFns.filterIgnoredOnTopic.restore();
             });
         });
     });

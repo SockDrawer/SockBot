@@ -1,5 +1,5 @@
 'use strict';
-/*globals describe, it, before, beforeEach, after*/
+/*globals describe, it, before, beforeEach, after, afterEach*/
 /*eslint no-unused-expressions:0 */
 
 const chai = require('chai'),
@@ -96,14 +96,21 @@ describe('commands', () => {
     });
     describe('internals.cmdError', () => {
         const cmdError = commands.internals.cmdError;
+        let sandbox;
         before(() => {
             commands.internals.commands = {};
-            sinon.stub(browser, 'createPost');
         });
-        beforeEach(() => browser.createPost.reset());
+        beforeEach(() => {
+            sandbox = sinon.sandbox.create();
+            sandbox.stub(console, 'log');
+            sandbox.stub(browser, 'createPost');
+        });
+        afterEach(() => {
+            sandbox.restore();
+        });
         it('should be registered as `command#ERROR` event', (done) => {
             const spy = sinon.spy();
-            sinon.stub(utils, 'log');
+            sandbox.stub(utils, 'log');
             commands.prepareCommands({
                 on: spy
             }, () => {
@@ -141,17 +148,26 @@ describe('commands', () => {
             browser.createPost.lastCall.args[3].should.be.a('function');
             browser.createPost.lastCall.args[3]().should.equal(0);
         });
-        after(() => browser.createPost.restore());
     });
     describe('internals.cmdHelp', () => {
         const cmdHelp = commands.internals.cmdHelp;
         let clock;
+        let sandbox;
         before(() => {
             commands.internals.commands = {};
-            sinon.stub(browser, 'createPost');
             clock = sinon.useFakeTimers();
         });
-        beforeEach(() => browser.createPost.reset());
+        beforeEach(() => {
+            sandbox = sinon.sandbox.create();
+            sandbox.stub(console, 'log');
+            sandbox.stub(browser, 'createPost');
+        });
+        afterEach(() => {
+            sandbox.restore();
+        });
+        after(() => {
+            clock.restore();
+        });
         it('should be registered as `command#help` event', (done) => {
             const spy = sinon.spy();
             sinon.stub(utils, 'log');
@@ -192,10 +208,6 @@ describe('commands', () => {
             });
             browser.createPost.lastCall.args[3].should.be.a('function');
             browser.createPost.lastCall.args[3]().should.equal(0);
-        });
-        after(() => {
-            browser.createPost.restore();
-            clock.restore();
         });
     });
     describe('internals.parseShortCommand()', () => {
@@ -264,15 +276,21 @@ describe('commands', () => {
         const commandProtect = commands.internals.commandProtect,
             events = {};
         let cmds;
+        let sandbox;
         before(() => {
-            sinon.stub(utils, 'warn');
+            commands.internals.commands = {};
             events.removeListener = sinon.spy();
             commands.internals.events = events;
         });
         beforeEach(() => {
-            events.removeListener.reset();
+            sandbox = sinon.sandbox.create();
+            sandbox.stub(console, 'log');
+            sandbox.stub(utils, 'warn');
             cmds = {};
             commands.internals.commands = cmds;
+        });
+        afterEach(() => {
+            sandbox.restore();
         });
         it('should not trigger for incorrect prefix', () => {
             commandProtect('postRecieved').should.be.false;
@@ -305,9 +323,6 @@ describe('commands', () => {
             commandProtect('command#cmd1', func);
             events.removeListener.calledWith('command#cmd1', func).should.be.true;
             utils.warn.calledWith(err).should.be.true;
-        });
-        after(() => {
-            utils.warn.restore();
         });
     });
     describe('internals.parseMentionCommand()', () => {
@@ -406,17 +421,19 @@ describe('commands', () => {
         const registerCommand = commands.internals.registerCommand,
             events = {},
             spy = sinon.spy();
+        let sandbox;
         before(() => {
             events.on = sinon.spy();
             commands.internals.events = events;
-            sinon.stub(utils, 'log');
         });
         beforeEach(() => {
-            //reset everything
+            sandbox = sinon.sandbox.create();
+            sandbox.stub(console, 'log');
+            sandbox.stub(utils, 'log');
             commands.internals.commands = {};
-            spy.reset();
-            events.on.reset();
-            utils.log.reset();
+        });
+        afterEach(() => {
+            sandbox.restore();
         });
         describe('parameter validation', () => {
             it('should require a callback', () => {
@@ -513,15 +530,20 @@ describe('commands', () => {
                 events.on.calledWith('command#___command', func).should.be.true;
             });
         });
-        after(() => {
-            utils.log.restore();
-        });
     });
     describe('prepareParser()', () => {
         const prepareCommands = commands.prepareCommands;
+        let sandbox;
         before(() => {
             config.core.username = 'foo';
-            sinon.stub(utils, 'log');
+        });
+        beforeEach(() => {
+            sandbox = sinon.sandbox.create();
+            sandbox.stub(console, 'log');
+            sandbox.stub(utils, 'log');
+        });
+        afterEach(() => {
+            sandbox.restore();
         });
         it('should call callback on completion', () => {
             const spy = sinon.spy();
@@ -552,25 +574,30 @@ describe('commands', () => {
             }, () => 0);
             spy.calledWith('newListener', commands.internals.commandProtect).should.be.true;
         });
-        after(() => utils.log.restore());
     });
     describe('parseCommands()', () => {
-        let parseShortCommand, parseMentionCommand, events, callbackSpy, clocks;
+        let parseShortCommand, parseMentionCommand, events, callbackSpy, clocks, sandbox;
         before(() => {
-            sinon.stub(commands.internals, 'parseShortCommand');
-            sinon.stub(commands.internals, 'parseMentionCommand');
-            parseShortCommand = commands.internals.parseShortCommand;
-            parseMentionCommand = commands.internals.parseMentionCommand;
             clocks = sinon.useFakeTimers();
         });
         beforeEach(() => {
-            parseShortCommand.reset();
-            parseMentionCommand.reset();
+            sandbox = sinon.sandbox.create();
+            sandbox.stub(commands.internals, 'parseShortCommand');
+            sandbox.stub(commands.internals, 'parseMentionCommand');
+            parseShortCommand = commands.internals.parseShortCommand;
+            parseMentionCommand = commands.internals.parseMentionCommand;
             events = {
                 emit: sinon.stub()
             };
             commands.internals.events = events;
             callbackSpy = sinon.spy();
+        });
+        afterEach(() => {
+            sandbox.restore();
+        });
+        after(() => {
+            clocks.restore();
+            commands.internals.events = null;
         });
         it('should require callback', () => {
             expect(() => commands.parseCommands({}, null)).to.throw('callback must be supplied');
@@ -681,12 +708,6 @@ describe('commands', () => {
             events.emit.callCount.should.equal(3);
             events.emit.calledWith('command#ERROR').should.be.true;
             events.emit.calledWith('error').should.be.true;
-        });
-        after(() => {
-            parseShortCommand.restore();
-            parseMentionCommand.restore();
-            clocks.restore();
-            commands.internals.events = null;
         });
     });
 });
