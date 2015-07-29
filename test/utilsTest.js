@@ -207,31 +207,77 @@ describe('utils', () => {
             mergeInner(base, mixin);
             base.should.deep.equal(expected);
         });
-        it('should concatenate arrays', () => {
-            const base = {
-                    a: [1]
-                },
-                mixin = {
-                    a: [2]
-                },
-                expected = {
-                    a: [1, 2]
-                };
-            mergeInner(base, mixin);
-            base.should.deep.equal(expected);
-        });
-        it('should merge arrays', () => {
-            const base = {
-                    a: [1]
-                },
-                mixin = {
-                    a: [2]
-                },
-                expected = {
-                    a: [2]
-                };
-            mergeInner(base, mixin, true);
-            base.should.deep.equal(expected);
+        describe('array concatenation/merging tests', () => {
+            it('should concatenate arrays', () => {
+                const base = {
+                        a: [1]
+                    },
+                    mixin = {
+                        a: [2]
+                    },
+                    expected = {
+                        a: [1, 2]
+                    };
+                mergeInner(base, mixin);
+                base.should.deep.equal(expected);
+            });
+            it('should merge arrays', () => {
+                const base = {
+                        a: [1]
+                    },
+                    mixin = {
+                        a: [2]
+                    },
+                    expected = {
+                        a: [2]
+                    };
+                mergeInner(base, mixin, true);
+                base.should.deep.equal(expected);
+            });
+            it('should concatenate arrays recursively', () => {
+                const base = {
+                        a: [1],
+                        b: {
+                            c: [1]
+                        }
+                    },
+                    mixin = {
+                        a: [2],
+                        b: {
+                            c: [2]
+                        }
+                    },
+                    expected = {
+                        a: [1, 2],
+                        b: {
+                            c: [1, 2]
+                        }
+                    };
+                mergeInner(base, mixin);
+                base.should.deep.equal(expected);
+            });
+            it('should merge arrays recursively', () => {
+                const base = {
+                        a: [1],
+                        b: {
+                            c: [1]
+                        }
+                    },
+                    mixin = {
+                        a: [2],
+                        b: {
+                            c: [2]
+                        }
+                    },
+                    expected = {
+                        a: [2],
+                        b: {
+                            c: [2]
+                        }
+                    };
+                mergeInner(base, mixin, true);
+                base.should.deep.equal(expected);
+            });
         });
         it('should replace non-array with array', () => {
             const base = {
