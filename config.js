@@ -127,7 +127,7 @@ exports.loadConfiguration = function loadConfiguration(path, callback) {
             return;
         }
         try {
-            const cfg = utils.mergeObjects(defaultConfig, config);
+            const cfg = utils.mergeObjects(true, defaultConfig, config);
             exports.core = cfg.core;
             exports.plugins = cfg.plugins;
             callback(null, cfg);
