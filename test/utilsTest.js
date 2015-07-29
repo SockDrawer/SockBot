@@ -220,6 +220,19 @@ describe('utils', () => {
             mergeInner(base, mixin);
             base.should.deep.equal(expected);
         });
+        it('should merge arrays', () => {
+            const base = {
+                    a: [1]
+                },
+                mixin = {
+                    a: [2]
+                },
+                expected = {
+                    a: [2]
+                };
+            mergeInner(base, mixin, true);
+            base.should.deep.equal(expected);
+        });
         it('should replace non-array with array', () => {
             const base = {
                     a: {}
@@ -311,6 +324,30 @@ describe('utils', () => {
                     baz: 'quux'
                 };
             mergeObjects(base, mixin, mixin2).should.deep.equal(expected);
+        });
+        it('should merge two objects and concatenate arrays', () => {
+            const base = {
+                    foo: [1]
+                },
+                mixin = {
+                    foo: [2]
+                },
+                expected = {
+                    foo: [1, 2]
+                };
+            mergeObjects(base, mixin).should.deep.equal(expected);
+        });
+        it('should merge two objects and merge arrays', () => {
+            const base = {
+                    foo: [1]
+                },
+                mixin = {
+                    foo: [2]
+                },
+                expected = {
+                    foo: [2]
+                };
+            mergeObjects(true, base, mixin).should.deep.equal(expected);
         });
     });
     describe('message filters', () => {

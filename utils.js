@@ -88,8 +88,9 @@ exports.cloneData = function cloneData(original) {
  *
  * @param {object} base Base object to merge `mixin` into
  * @param {object} mixin Mixin object to merge into `base`
+ * @param {boolean} [mergeArrays] Merge arrays instead of concatenating them
  */
-function mergeInner(base, mixin) {
+function mergeInner(base, mixin, mergeArrays) {
     if (base == null || typeof base !== 'object' || Array.isArray(base)) {
         throw new Error('base must be object');
     }
@@ -98,7 +99,7 @@ function mergeInner(base, mixin) {
     }
     let name;
     for (name in mixin) {
-        mergeHelper(base, mixin, name);
+        mergeHelper(base, mixin, name, mergeArrays);
     }
 }
 
@@ -108,10 +109,11 @@ function mergeInner(base, mixin) {
  * @param {object} base Base object to merge `mixin` into
  * @param {object} mixin Mixin object to merge into `base`
  * @param {string} name Name of property to merge
+ * @param {boolean} [mergeArrays] Merge arrays instead of concatenating them
  */
-function mergeHelper(base, mixin, name) {
+function mergeHelper(base, mixin, name, mergeArrays) {
     if (Array.isArray(mixin[name])) {
-        if (base[name] && Array.isArray(base[name])) {
+        if (!mergeArrays && base[name] && Array.isArray(base[name])) {
             base[name] = base[name].concat(mixin[name]);
         } else {
             base[name] = mixin[name];
@@ -133,15 +135,20 @@ function mergeHelper(base, mixin, name) {
  *
  * Later objects override earlier objects
  *
+ * @param {boolean} [mergeArrays] Merge arrays instead of concatenating them
  * @param {...object} mixin Objects to merge
  * @returns {object} object constructed by merging `mixin`s from left to right
  */
-exports.mergeObjects = function mergeObjects(mixin) { //eslint-disable-line no-unused-vars
+exports.mergeObjects = function mergeObjects(mergeArrays, mixin) { //eslint-disable-line no-unused-vars
     const args = Array.prototype.slice.apply(arguments),
         res = {};
+    let reallyMergeArrays = false;
+    if (typeof args[0] === 'boolean') {
+        reallyMergeArrays = args.shift();
+    }
     let obj;
     while ((obj = args.shift())) {
-        mergeInner(res, exports.cloneData(obj));
+        mergeInner(res, exports.cloneData(obj), reallyMergeArrays);
     }
     return res;
 };
