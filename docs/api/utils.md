@@ -113,7 +113,7 @@ Recursively merge objects
 | Param | Type | Description |
 | --- | --- | --- |
 | base | <code>object</code> | Base object to merge `mixin` into |
-| mixin | <code>object</code> | Misin object to merge into `base` |
+| mixin | <code>object</code> | Mixin object to merge into `base` |
 
 <a name="module_utils..filterIgnoredOnPost"></a>
 ### utils~filterIgnoredOnPost(post, topic, callback) ⇒ <code>null</code>
