@@ -41,7 +41,7 @@ exports.pollNotifications = function pollNotifications(callback) {
         if (err) {
             return callback(err);
         }
-        notifications.filter((n) => !n.read).forEach((n) => {
+        notifications.notifications.filter((n) => !n.read).forEach((n) => {
             n.type = internals.notifyTypes[n.notification_type];
             if (!n.type) {
                 n.type = 'UNKNOWN';

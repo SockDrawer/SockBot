@@ -287,4 +287,48 @@ describe('notifications', () => {
             });
         });
     });
+    describe('pollNotifications()', () => {
+        before(() => {
+            sinon.stub(browser, 'getNotifications');
+            sinon.stub(notifications.privateFns, 'handleTopicNotification');
+            sinon.stub(utils, 'warn');
+            notifications.internals.events = {
+                emit: sinon.stub()
+            };
+        });
+        beforeEach(() => {
+            browser.getNotifications.reset();
+            utils.warn.reset();
+            notifications.privateFns.handleTopicNotification.reset();
+            notifications.internals.events.emit.reset();
+        });
+        it('should call browser.getNotifications()', () => {
+            const spy = sinon.spy();
+            notifications.pollNotifications(spy);
+            browser.getNotifications.called.should.be.true;
+            spy.called.should.be.false;
+        });
+        it('should pass error to callback on failure', () => {
+            browser.getNotifications.yields('i am error');
+            const spy = sinon.spy();
+            notifications.pollNotifications(spy);
+            spy.called.should.be.true;
+            spy.firstCall.args[0].should.equal('i am error');
+        });
+        it('should signal success to callback on poll success', () => {
+            browser.getNotifications.yields(null, {
+                notifications: []
+            });
+            const spy = sinon.spy();
+            notifications.pollNotifications(spy);
+            spy.called.should.be.true;
+            expect(spy.firstCall.args[0]).to.equal(null);
+        });
+        after(() => {
+            browser.getNotifications.restore();
+            utils.warn.restore();
+            notifications.privateFns.handleTopicNotification.restore();
+            notifications.internals.events = null;
+        });
+    });
 });
