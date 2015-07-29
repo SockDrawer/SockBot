@@ -192,6 +192,22 @@ describe('config', () => {
             expect(spy.lastCall.args[0]).to.equal(null);
             spy.lastCall.args[1].should.deep.equal(expected);
         });
+        it('should remove ignored users', () => {
+            const input = {
+                    core: {
+                        ignoreUsers: []
+                    }
+                },
+                expected = utils.mergeObjects(true, config.internals.defaultConfig, input);
+            fs.readFile.reset();
+            fs.readFile.yields(null, JSON.stringify(input));
+            const spy = sinon.spy();
+            loadConfiguration('config.js', spy);
+            spy.called.should.be.true;
+            spy.lastCall.args.should.have.length(2);
+            expect(spy.lastCall.args[0]).to.equal(null);
+            spy.lastCall.args[1].should.deep.equal(expected);
+        });
         it('should pass on read error', () => {
             fs.readFile.reset();
             fs.readFile.yields(new Error('E_NO_ENT'));
