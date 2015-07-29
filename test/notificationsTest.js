@@ -9,10 +9,25 @@ chai.should();
 const expect = chai.expect;
 
 const notifications = require('../notifications'),
-    utils = require('../utils');
+    utils = require('../utils'),
+    config = require('../config');
 const browser = require('../browser')();
 
 describe('notifications', () => {
+    const notifyTypeMap = {
+        1: 'mentioned',
+        2: 'replied',
+        3: 'quoted',
+        4: 'edited',
+        5: 'liked',
+        6: 'private_message',
+        7: 'invited_to_private_message',
+        8: 'invitee_accepted',
+        9: 'posted',
+        10: 'moved_post',
+        11: 'linked',
+        12: 'granted_badge'
+    };
     describe('exports', () => {
         const fns = ['prepare', 'pollNotifications'],
             objs = ['internals', 'privateFns'],
@@ -64,23 +79,9 @@ describe('notifications', () => {
                 const types = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
                 notifyTypes.should.have.all.keys(types);
             });
-            const expectedMap = {
-                1: 'mentioned',
-                2: 'replied',
-                3: 'quoted',
-                4: 'edited',
-                5: 'liked',
-                6: 'private_message',
-                7: 'invited_to_private_message',
-                8: 'invitee_accepted',
-                9: 'posted',
-                10: 'moved_post',
-                11: 'linked',
-                12: 'granted_badge'
-            };
-            Object.keys(expectedMap).forEach((key) => {
-                it('should map #' + key + 'to type `' + expectedMap[key] + '`', () => {
-                    notifyTypes[key].should.equal(expectedMap[key]);
+            Object.keys(notifyTypeMap).forEach((key) => {
+                it('should map #' + key + 'to type `' + notifyTypeMap[key] + '`', () => {
+                    notifyTypes[key].should.equal(notifyTypeMap[key]);
                 });
             });
         });
@@ -288,20 +289,18 @@ describe('notifications', () => {
         });
     });
     describe('pollNotifications()', () => {
-        before(() => {
-            sinon.stub(browser, 'getNotifications');
-            sinon.stub(notifications.privateFns, 'handleTopicNotification');
-            sinon.stub(utils, 'warn');
+        let sandbox;
+        beforeEach(() => {
+            sandbox = sinon.sandbox.create();
+            sandbox.stub(browser, 'getNotifications');
+            sandbox.stub(notifications.privateFns, 'handleTopicNotification');
+            sandbox.stub(utils, 'warn');
             notifications.internals.events = {
-                emit: sinon.stub()
+                emit: sandbox.stub()
             };
         });
-        beforeEach(() => {
-            browser.getNotifications.reset();
-            utils.warn.reset();
-            notifications.privateFns.handleTopicNotification.reset();
-            notifications.internals.events.emit.reset();
-        });
+        afterEach(() => sandbox.restore());
+        after(() => notifications.internals.events = null);
         it('should call browser.getNotifications()', () => {
             const spy = sinon.spy();
             notifications.pollNotifications(spy);
@@ -324,11 +323,152 @@ describe('notifications', () => {
             spy.called.should.be.true;
             expect(spy.firstCall.args[0]).to.equal(null);
         });
+        it('should filter read notifications', () => {
+            browser.getNotifications.yields(null, {
+                notifications: [{
+                    read: true
+                }]
+            });
+            notifications.pollNotifications(() => 0);
+            notifications.internals.events.emit.called.should.be.false;
+            notifications.privateFns.handleTopicNotification.called.should.be.false;
+        });
+        it('should emit expected message on non-topic notification', () => {
+            const notify = {
+                'topic_id': null
+            };
+            browser.getNotifications.yields(null, {
+                notifications: [notify]
+            });
+            notifications.pollNotifications(() => 0);
+            notifications.internals.events.emit.called.should.be.true;
+            notifications.internals.events.emit.calledWith('notification#UNKNOWN', notify, null, null).should.be.true;
+        });
+        it('should emit expected message on non-topic notification', () => {
+            const notify = {
+                'topic_id': 1
+            };
+            browser.getNotifications.yields(null, {
+                notifications: [notify]
+            });
+            notifications.pollNotifications(() => 0);
+            notifications.privateFns.handleTopicNotification.called.should.be.true;
+            notifications.privateFns.handleTopicNotification.calledWith(notify).should.be.true;
+        });
+        it('should print warning on unhandled notification', () => {
+            const notify = {
+                id: Math.random()
+            };
+            browser.getNotifications.yields(null, {
+                notifications: [notify]
+            });
+            notifications.pollNotifications(() => 0);
+            utils.warn.called.should.be.true;
+            utils.warn.firstCall.args[0].should.equal('UNKNOWN notification #' + notify.id + ' was not handled!');
+        });
+        it('should not print warning on handled notification', () => {
+            const notify = {
+                id: Math.random()
+            };
+            notifications.internals.events.emit.returns(true);
+            browser.getNotifications.yields(null, {
+                notifications: [notify]
+            });
+            notifications.pollNotifications(() => 0);
+            utils.warn.called.should.be.false;
+        });
+        describe('type mapping', () => {
+            it('should map invalid notification_type to `UNKNOWN`', () => {
+                const notify = {
+                    'notification_type': -1
+                };
+                browser.getNotifications.yields(null, {
+                    notifications: [notify]
+                });
+                notifications.pollNotifications(() => 0);
+                expect(notify.type).to.equal('UNKNOWN');
+            });
+            Object.keys(notifyTypeMap).forEach((type) => {
+                it('should map notification_type ' + type + ' to `' + notifyTypeMap[type] + '`', () => {
+                    const notify = {
+                        'notification_type': type
+                    };
+                    browser.getNotifications.yields(null, {
+                        notifications: [notify]
+                    });
+                    notifications.pollNotifications(() => 0);
+                    expect(notify.type).to.equal(notifyTypeMap[type]);
+                });
+            });
+        });
+        describe('event type mapping', () => {
+            it('should emit `notification#UNKNOWN` for invalid type', () => {
+                const notify = {
+                    'notification_type': -1
+                };
+                browser.getNotifications.yields(null, {
+                    notifications: [notify]
+                });
+                notifications.pollNotifications(() => 0);
+                const call = notifications.internals.events.emit.firstCall;
+                call.args[0].should.equal('notification#UNKNOWN');
+            });
+            Object.keys(notifyTypeMap).forEach((type) => {
+                it('should emit `notification#' + notifyTypeMap[type] + '` for type ' + type, () => {
+                    const notify = {
+                        'notification_type': type
+                    };
+                    browser.getNotifications.yields(null, {
+                        notifications: [notify]
+                    });
+                    notifications.pollNotifications(() => 0);
+                    const call = notifications.internals.events.emit.firstCall;
+                    call.args[0].should.equal('notification#' + notifyTypeMap[type]);
+                });
+            });
+        });
+
+    });
+    describe('prepare()', () => {
+        it('should call callback on completion', () => {
+            const events = {
+                    onChannel: sinon.spy()
+                },
+                spy = sinon.spy();
+            notifications.prepare(events, spy);
+            spy.called.should.be.true;
+        });
+        it('should set events into internal store', () => {
+            const events = {
+                    onChannel: sinon.spy()
+                },
+                spy = sinon.spy();
+            notifications.prepare(events, spy);
+            notifications.internals.events.should.equal(events);
+        });
+        it('should register channel listener', () => {
+            const events = {
+                    onChannel: sinon.spy()
+                },
+                spy = sinon.spy();
+            notifications.prepare(events, spy);
+            events.onChannel.called.should.be.true;
+        });
+        it('should register onNotificationMessage as channel listener', () => {
+            const events = {
+                    onChannel: sinon.spy()
+                },
+                spy = sinon.spy();
+            config.user = {
+                id: 9753
+            };
+            notifications.prepare(events, spy);
+            events.onChannel.calledWith('/notifications/9753',
+                notifications.privateFns.onNotificationMessage).should.be.true;
+        });
         after(() => {
-            browser.getNotifications.restore();
-            utils.warn.restore();
-            notifications.privateFns.handleTopicNotification.restore();
             notifications.internals.events = null;
+            config.user = {};
         });
     });
 });
