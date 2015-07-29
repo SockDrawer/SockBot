@@ -12,8 +12,8 @@ const gulp = require('gulp'),
 const sockFiles = ['*.js', '!./gulpfile.js', '**/plugins/**/*.js', '!node_modules/**'],
     sockExterns = ['**/external/**/*.js'],
     sockDocs = ['README.md', 'docs/**/*.md'],
-    sockTests = ['test/**/*.js'];
-let docgenFiles = [];
+    sockTests = ['test/**/*.js'],
+    docgenFiles = [];
 
 const JobNumber = process.env.TRAVIS_JOB_NUMBER,
     CommitRange = process.env.TRAVIS_COMMIT_RANGE,
@@ -49,7 +49,7 @@ gulp.task('docList', ['gitBranch'], (done) => {
             args: 'show --pretty="format:" --name-only ' + CommitRange
         }, (err, stdout) => {
             if (err) {
-                console.log('Error fetching files in commit range\n' + err);
+                console.log('Error fetching files in commit range\n' + err); //eslint-disable-line no-console
             } else {
                 stdout.split(/\r?\n/).forEach((file) => {
                     if (file && file.length > 3 && file.endsWith('.js')){
@@ -73,7 +73,7 @@ gulp.task('docs', ['gitBranch', 'lintExterns', 'docList'], (done) => {
     if (!runDocs) {
         return done();
     }
-    let filter = gulpFilter(docgenFiles);
+    const filter = gulpFilter(docgenFiles);
     gulp.src(sockFiles.concat(sockExterns))
         .pipe(filter)
         .pipe(gulpJsdoc2md({}))
@@ -88,7 +88,7 @@ gulp.task('docs', ['gitBranch', 'lintExterns', 'docList'], (done) => {
 /**
  * Run all js files through eslint and report status.
  */
-gulp.task('lintCore', (done) => {
+gulp.task('lintCore', () => {
     return gulp.src(sockFiles)
         .pipe(eslint())
         .pipe(eslint.format())
@@ -110,7 +110,7 @@ gulp.task('lintExterns', (done) => {
 /**
  * Run all tests through eslint and report status.
  */
-gulp.task('lintTests', (done) => {
+gulp.task('lintTests', () => {
     return gulp.src(sockTests)
         .pipe(eslint())
         .pipe(eslint.format())
