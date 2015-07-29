@@ -11,11 +11,11 @@ Core Utilities for Sockbot
     * [.warn(message)](#module_utils.warn)
     * [.error(message)](#module_utils.error)
     * [.cloneData(original)](#module_utils.cloneData) ⇒ <code>\*</code>
-    * [.mergeObjects(...mixin)](#module_utils.mergeObjects) ⇒ <code>object</code>
+    * [.mergeObjects([mergeArrays], ...mixin)](#module_utils.mergeObjects) ⇒ <code>object</code>
     * [.filterIgnored(post, topic, callback)](#module_utils.filterIgnored)
   * _inner_
     * [~addTimestamp(message)](#module_utils..addTimestamp) ⇒ <code>string</code>
-    * [~mergeInner(base, mixin)](#module_utils..mergeInner)
+    * [~mergeInner(base, mixin, [mergeArrays])](#module_utils..mergeInner)
     * [~filterIgnoredOnPost(post, topic, callback)](#module_utils..filterIgnoredOnPost) ⇒ <code>null</code>
     * [~filterIgnoredOnTopic(post, topic, callback)](#module_utils..filterIgnoredOnTopic) ⇒ <code>null</code>
 
@@ -69,7 +69,7 @@ Clone object
 | original | <code>\*</code> | Data to clone |
 
 <a name="module_utils.mergeObjects"></a>
-### utils.mergeObjects(...mixin) ⇒ <code>object</code>
+### utils.mergeObjects([mergeArrays], ...mixin) ⇒ <code>object</code>
 Merge multiple objects into one object
 
 Later objects override earlier objects
@@ -79,6 +79,7 @@ Later objects override earlier objects
 
 | Param | Type | Description |
 | --- | --- | --- |
+| [mergeArrays] | <code>boolean</code> | Merge arrays instead of concatenating them |
 | ...mixin | <code>object</code> | Objects to merge |
 
 <a name="module_utils.filterIgnored"></a>
@@ -105,7 +106,7 @@ Add timestamp to message.
 | message | <code>\*</code> | Message to timestamp |
 
 <a name="module_utils..mergeInner"></a>
-### utils~mergeInner(base, mixin)
+### utils~mergeInner(base, mixin, [mergeArrays])
 Recursively merge objects
 
 **Kind**: inner method of <code>[utils](#module_utils)</code>  
@@ -114,6 +115,7 @@ Recursively merge objects
 | --- | --- | --- |
 | base | <code>object</code> | Base object to merge `mixin` into |
 | mixin | <code>object</code> | Mixin object to merge into `base` |
+| [mergeArrays] | <code>boolean</code> | Merge arrays instead of concatenating them |
 
 <a name="module_utils..filterIgnoredOnPost"></a>
 ### utils~filterIgnoredOnPost(post, topic, callback) ⇒ <code>null</code>
