@@ -105,7 +105,7 @@ function mergeInner(base, mixin) {
                 base[name] = mixin[name];
             }
         }
-        else if (typeof mixin[name] === 'object' {
+        else if (typeof mixin[name] === 'object') {
             const newBase = base[name] || {};
             mergeInner(newBase, mixin[name]);
             base[name] = newBase;
