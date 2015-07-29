@@ -98,7 +98,14 @@ function mergeInner(base, mixin) {
     }
     let name;
     for (name in mixin) {
-        if (typeof mixin[name] === 'object' && !Array.isArray(mixin[name])) {
+        if (Array.isArray(mixin[name])) {
+            if (base[name]) {
+                base[name] = base[name].concat(mixin[name]);
+            } else {
+                base[name] = mixin[name];
+            }
+        }
+        else if (typeof mixin[name] === 'object' {
             const newBase = base[name] || {};
             mergeInner(newBase, mixin[name]);
             base[name] = newBase;
