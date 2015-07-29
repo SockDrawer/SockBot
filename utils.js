@@ -87,7 +87,7 @@ exports.cloneData = function cloneData(original) {
  * Recursively merge objects
  *
  * @param {object} base Base object to merge `mixin` into
- * @param {object} mixin Misin object to merge into `base`
+ * @param {object} mixin Mixin object to merge into `base`
  */
 function mergeInner(base, mixin) {
     if (base == null || typeof base !== 'object' || Array.isArray(base)) {
@@ -98,20 +98,33 @@ function mergeInner(base, mixin) {
     }
     let name;
     for (name in mixin) {
-        if (Array.isArray(mixin[name])) {
-            if (base[name]) {
-                base[name] = base[name].concat(mixin[name]);
-            } else {
-                base[name] = mixin[name];
-            }
-        }
-        else if (typeof mixin[name] === 'object') {
-            const newBase = base[name] || {};
-            mergeInner(newBase, mixin[name]);
-            base[name] = newBase;
+        mergeHelper(base, mixin, name);
+    }
+}
+
+/*
+ * Merge helper - FOR INTERNAL USE ONLY
+ *
+ * @param {object} base Base object to merge `mixin` into
+ * @param {object} mixin Mixin object to merge into `base`
+ * @param {string} name Name of property to merge
+ */
+function mergeHelper(base, mixin, name) {
+    if (Array.isArray(mixin[name])) {
+        if (base[name] && Array.isArray(base[name])) {
+            base[name] = base[name].concat(mixin[name]);
         } else {
             base[name] = mixin[name];
         }
+    } else if (typeof mixin[name] === 'object') {
+        let newBase = base[name] || {};
+        if (Array.isArray(newBase)) {
+            newBase = {};
+        }
+        mergeInner(newBase, mixin[name]);
+        base[name] = newBase;
+    } else {
+        base[name] = mixin[name];
     }
 }
 

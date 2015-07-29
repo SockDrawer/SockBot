@@ -207,7 +207,7 @@ describe('utils', () => {
             mergeInner(base, mixin);
             base.should.deep.equal(expected);
         });
-        it('should replace array with mixin', () => {
+        it('should concatenate arrays', () => {
             const base = {
                     a: [1]
                 },
@@ -215,7 +215,33 @@ describe('utils', () => {
                     a: [2]
                 },
                 expected = {
+                    a: [1, 2]
+                };
+            mergeInner(base, mixin);
+            base.should.deep.equal(expected);
+        });
+        it('should replace non-array with array', () => {
+            const base = {
+                    a: {}
+                },
+                mixin = {
                     a: [2]
+                },
+                expected = {
+                    a: [2]
+                };
+            mergeInner(base, mixin);
+            base.should.deep.equal(expected);
+        });
+        it('should replace array with non-array', () => {
+            const base = {
+                    a: [1]
+                },
+                mixin = {
+                    a: {}
+                },
+                expected = {
+                    a: {}
                 };
             mergeInner(base, mixin);
             base.should.deep.equal(expected);
