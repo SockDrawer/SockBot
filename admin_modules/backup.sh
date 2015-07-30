@@ -11,7 +11,7 @@ restoreBackup() {
         return 1
     }
     echo 'RESTORE: Dropping Old `restore` Schema;'
-    psql -q -d 'discourse' -c 'DROP SCHEMA backup CASCADE' || return 1;
+    psql -q -d 'discourse' -c 'DROP SCHEMA backup CASCADE'
     echo 'RESTORE: Loading to `restore` Schema'
     tar -xOzf "$1" 'dump.sql' > 'dump.sql' || return 1
     < dump.sql psql -q -d 'discourse' || return 1
