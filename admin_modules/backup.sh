@@ -13,7 +13,9 @@ restoreBackup() {
     echo 'RESTORE: Dropping Old `restore` Schema;'
     psql -q -d 'discourse' -c 'DROP SCHEMA backup CASCADE' || return 1;
     echo 'RESTORE: Loading to `restore` Schema'
-    tar -xOzf "$1" 'dump.sql' | psql -q -d 'discourse' || return 1
+    tar -xOzf "$1" 'dump.sql' > 'dump.sql' || return 1
+    < dump.sql psql -q -d 'discourse' || return 1
+    rm dump.sql;
     echo 'RESTORE: Renaming Old Schema to `backup`';
     psql -d 'discourse' -c 'ALTER SCHEMA public RENAME TO backup' || return 1
     echo 'RESTORE: Finalizing Restore';
