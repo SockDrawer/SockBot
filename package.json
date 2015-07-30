@@ -32,8 +32,8 @@
   },
   "scripts": {
     "start": "node --harmony --harmony_arrow_functions SockBot.js",
-    "lint": "node --harmony --harmony_arrow_functions node_modules/.bin/gulp lint",
-    "test": "node --harmony --harmony_arrow_functions node_modules/.bin/gulp test",
-    "gulp": "node --harmony --harmony_arrow_functions node_modules/.bin/gulp"
+    "lint": "node --harmony --harmony_arrow_functions node_modules/gulp/bin/gulp.js lint",
+    "test": "node --harmony --harmony_arrow_functions node_modules/gulp/bin/gulp.js test",
+    "gulp": "node --harmony --harmony_arrow_functions node_modules/gulp/bin/gulp.js"
   }
 }
