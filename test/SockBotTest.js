@@ -14,7 +14,7 @@ const SockBot = require('../SockBot'),
 
 describe('SockBot', () => {
     describe('exports', () => {
-        const fns = ['start', 'stop', 'reloadConfig'],
+        const fns = ['start', 'stop', 'prepare'],
             objs = [],
             vals = ['version'];
         describe('should export expected functions:', () => {
@@ -44,37 +44,6 @@ describe('SockBot', () => {
 		});
 		afterEach(function() {
 			sandbox.restore();
-		});
-		it('should load the config', () => {
-			sandbox.stub(config, 'loadConfiguration').yields();
-			sandbox.stub(browser.externals, 'login').yields(null, {});
-			SockBot.start('example.config.yml');
-			browser.externals.login.called.should.be.true;
-			config.loadConfiguration.calledWith('example.config.yml').should.be.true;
-		});
-	});
-    describe('stop', () => {
-		let sandbox;
-		beforeEach(function() {
-			sandbox = sinon.sandbox.create();
-		});
-		afterEach(function() {
-			sandbox.restore();
-		});
-		it('should do nothing', () => {
-			SockBot.stop();
-		});
-	});
-    describe('reloadConfig', () => {
-		let sandbox;
-		beforeEach(function() {
-			sandbox = sinon.sandbox.create();
-		});
-		afterEach(function() {
-			sandbox.restore();
-		});
-		it('should do nothing', () => {
-			SockBot.reloadConfig();
 		});
 	});
 });
