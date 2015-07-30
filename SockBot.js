@@ -24,6 +24,9 @@ exports.start = function (cfg) {
 exports.stop = function() {
 };
 
+exports.reloadConfig = function() {
+};
+
 /* istanbul ignore if */
 if (require.main === module) {
     config.loadConfiguration(process.argv[2], () => {

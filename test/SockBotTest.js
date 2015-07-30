@@ -14,7 +14,7 @@ const SockBot = require('../SockBot'),
 
 describe('SockBot', () => {
     describe('exports', () => {
-        const fns = ['start', 'stop'],
+        const fns = ['start', 'stop', 'reloadConfig'],
             objs = [],
             vals = ['version'];
         describe('should export expected functions:', () => {
@@ -63,6 +63,18 @@ describe('SockBot', () => {
 		});
 		it('should do nothing', () => {
 			SockBot.stop();
+		});
+	});
+    describe('reloadConfig', () => {
+		let sandbox;
+		beforeEach(function() {
+			sandbox = sinon.sandbox.create();
+		});
+		afterEach(function() {
+			sandbox.restore();
+		});
+		it('should do nothing', () => {
+			SockBot.reloadConfig();
 		});
 	});
 });
