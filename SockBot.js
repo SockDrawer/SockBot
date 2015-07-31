@@ -1,4 +1,5 @@
 #!/usr/bin/env node --harmony
+
 'use strict';
 /**
  * Main Module for SockBot2.0
@@ -18,7 +19,13 @@ const config = require('./config'),
     commands = require('./commands'),
     utils = require('./utils');
 const browser = require('./browser')();
-const plugins = [];
+const plugins = [],
+    privateFns = {
+        doPluginRequire: doPluginRequire,
+        loadConfig: loadConfig,
+        loadPlugins: loadPlugins,
+        prepareEvents: prepareEvents
+    };
 let running = false;
 
 /**
@@ -47,11 +54,11 @@ let running = false;
  */
 exports.prepare = function prepare(configuration, callback) {
     async.waterfall([(next) => {
-        loadConfig(configuration, next);
+        privateFns.loadConfig(configuration, next);
     }, (next) => {
-        prepareEvents(next);
+        privateFns.prepareEvents(next);
     }, (events, pluginBrowser, next) => {
-        loadPlugins();
+        privateFns.loadPlugins();
         plugins.forEach((plugin) => {
             plugin.prepare(config.plugin[plugin.prepare.pluginName], config, events, pluginBrowser);
         });
@@ -97,16 +104,17 @@ exports.stop = function () {
  * Load module as plugin
  *
  * @param {string} module Module to require
+ * @param {function} requireIt nodejs core require function (for unti testing purposes is parameter)
  * @returns {object} requested module
  */
-function doPluginRequire(module) {
+function doPluginRequire(module, requireIt) {
     try {
         // Look in plugins first
-        return require('./plugins/' + module);
+        return requireIt('./plugins/' + module);
     } catch (e) {
         // Error! check if it's ENOENT and try raw module
         if (/^Cannot find module/.test(e.message)) {
-            return require(module);
+            return requireIt(module);
         }
         // Rethrow error if it wasn't ENOENT
         throw e;
@@ -143,7 +151,7 @@ function prepareEvents(callback) {
  */
 function loadPlugins() {
     Object.keys(config.plugins).forEach((module) => {
-        const plugin = doPluginRequire(module);
+        const plugin = privateFns.doPluginRequire(module, require);
         if (typeof plugin.prepare !== 'function') {
             console.error('Plugin `' + module + '` does not export `prepare()` function');
         } else if (typeof plugin.start !== 'function') {
@@ -176,4 +184,10 @@ function loadConfig(cfg, callback) {
 /* istanbul ignore if */
 if (require.main === module) {
     exports.start(process.argv[2]);
+}
+
+/* istanbul ignore else */
+if (typeof GLOBAL.describe === 'function') {
+    //test is running
+    exports.privateFns = privateFns;
 }
