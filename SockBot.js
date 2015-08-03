@@ -7,8 +7,6 @@
  * @author Accalia
  * @license MIT
  */
-
-/*eslint-disable no-console */
 exports.version = 'v2.0.0';
 
 const async = require('async');
@@ -19,7 +17,9 @@ const config = require('./config'),
     commands = require('./commands'),
     utils = require('./utils');
 const browser = require('./browser')();
-const plugins = [],
+const internals = {
+        plugins: []
+    },
     privateFns = {
         doPluginRequire: doPluginRequire,
         loadConfig: loadConfig,
@@ -55,12 +55,12 @@ let running = false;
 exports.prepare = function prepare(configuration, callback) {
     async.waterfall([(next) => {
         privateFns.loadConfig(configuration, next);
-    }, (next) => {
+    }, (_, next) => {
         privateFns.prepareEvents(next);
     }, (events, pluginBrowser, next) => {
         privateFns.loadPlugins();
-        plugins.forEach((plugin) => {
-            plugin.prepare(config.plugin[plugin.prepare.pluginName], config, events, pluginBrowser);
+        internals.plugins.forEach((plugin) => {
+            plugin.prepare(config.plugins[plugin.prepare.pluginName], config, events, pluginBrowser);
         });
         next(null, events, pluginBrowser);
     }], callback);
@@ -78,7 +78,7 @@ exports.start = function (callback) {
             return callback(err);
         }
         config.user = user;
-        plugins.forEach((plugin) => plugin.start());
+        internals.plugins.forEach((plugin) => plugin.start());
         utils.log('SockBot `' + config.user.username + '` Started');
         running = true;
         async.whilst(() => running, (next) => {
@@ -96,7 +96,7 @@ exports.start = function (callback) {
  */
 exports.stop = function () {
     running = false;
-    plugins.forEach((plugin) => plugin.stop());
+    internals.plugins.forEach((plugin) => plugin.stop());
 };
 
 
@@ -153,14 +153,14 @@ function loadPlugins() {
     Object.keys(config.plugins).forEach((module) => {
         const plugin = privateFns.doPluginRequire(module, require);
         if (typeof plugin.prepare !== 'function') {
-            console.error('Plugin `' + module + '` does not export `prepare()` function');
+            utils.error('Plugin `' + module + '` does not export `prepare()` function');
         } else if (typeof plugin.start !== 'function') {
-            console.error('Plugin `' + module + '` does not export `start()` function');
+            utils.error('Plugin `' + module + '` does not export `start()` function');
         } else if (typeof plugin.stop !== 'function') {
-            console.error('Plugin `' + module + '` does not export `start()` function');
+            utils.error('Plugin `' + module + '` does not export `stop()` function');
         } else {
             plugin.prepare.pluginName = module;
-            plugins.push(plugin);
+            internals.plugins.push(plugin);
         }
     });
 }
@@ -175,7 +175,7 @@ function loadConfig(cfg, callback) {
     if (typeof cfg === 'object' && typeof cfg.core === 'object' && typeof cfg.plugins === 'object') {
         config.core = cfg.core;
         config.plugins = cfg.plugins;
-        callback(null);
+        callback(null, null);
     } else {
         config.loadConfiguration(cfg, callback);
     }
@@ -189,5 +189,6 @@ if (require.main === module) {
 /* istanbul ignore else */
 if (typeof GLOBAL.describe === 'function') {
     //test is running
+    exports.internals = internals;
     exports.privateFns = privateFns;
 }
