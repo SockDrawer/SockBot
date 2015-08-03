@@ -12,7 +12,7 @@ var discourse,
     helpMatcher,
     cooldownTimers = [],
     spaces = '[ \f\r\t\v\u00a0\u1680\u180e\u2000-\u200a' +
-        '\u2028\u2029\u202f\u205f\u3000]+';
+    '\u2028\u2029\u202f\u205f\u3000]+';
 exports.name = 'StatsPorn';
 exports.version = '0.5.0';
 exports.description = 'Provide stats about TDWTF and its users';
@@ -134,13 +134,13 @@ function queryToTable(cmd, query, date, rows, callback) {
         '```',
         cmd.str,
         'Backup Date: ' + toString(date),
-        '```',
-        '<details><summary>Query</summary>',
+        '```', '',
+        '<details><summary>Query</summary>', '',
         '```',
         query.query.replace(/c09fa970-5a9a-11e4-8ed6-0800200c9a66/g,
             '[Magic Exclusion UUID]').trim(),
-        '```',
-        '</details>',
+        '```', '',
+        '</details>', '',
         '```'
     ];
     if (rows && rows[0]) {
@@ -208,13 +208,13 @@ function queryToChart(cmd, query, date, filename, rows, callback) {
             '```',
             cmd.str,
             'Backup Date: ' + toString(date),
-            '```',
-            '<details><summary>Query</summary>',
+            '```', '',
+            '<details><summary>Query</summary>', '',
             '```',
             query.query.replace(/c09fa970-5a9a-11e4-8ed6-0800200c9a66/g,
                 '[Magic Exclusion UUID]').trim(),
-            '```',
-            '</details>'
+            '```', '',
+            '</details>', ''
         ];
         var txt = '[<img src="%%.svg" height="500" width="700" /><br/>' +
             'Click for interactive graph.](%%)';
@@ -268,8 +268,7 @@ function listQueries(notification, callback) {
     if (!queries) {
         discourse.warn('Queries not loaded');
         return discourse.createPost(notification.topic_id,
-            notification.post_number, 'No queries available;'
-                + ' someone probably @&shy;accalia\'d the YAML :blush:',
+            notification.post_number, 'No queries available;' + ' someone probably @&shy;accalia\'d the YAML :blush:',
             function () {
                 callback(true);
             });
