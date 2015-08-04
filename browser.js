@@ -292,9 +292,9 @@ function readPosts(topicId, postIds, callback) {
             method: 'POST',
             url: '/topics/timings',
             form: form,
-            delay: ctx.delay
+            delay: ctx.delay,
+            callback: next
         });
-        next();
     }, callback);
 }
 

@@ -521,6 +521,13 @@ describe('browser', () => {
                     args[0].should.have.any.key('form');
                     args[0].form.should.be.a('object');
                 });
+                it('should set callback', () => {
+                    object.readPosts(1, [2], () => 0);
+                    const args = queue.push.lastCall.args;
+                    args.should.have.length(1);
+                    args[0].should.have.any.key('callback');
+                    args[0].callback.should.be.a('function');
+                });
                 it('should set delay', () => {
                     object.delay = Math.ceil(1500 + Math.random() * 5000);
                     object.readPosts(1, [2], () => 0);
