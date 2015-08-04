@@ -1,9 +1,10 @@
 'use strict';
-/*globals describe, it, before, beforeEach, after*/
+/*globals describe, it, before, beforeEach, after, afterEach*/
 /*eslint no-unused-expressions:0 */
 
 const chai = require('chai'),
-    sinon = require('sinon');
+    sinon = require('sinon'),
+    async = require('async');
 chai.should();
 const expect = chai.expect;
 
@@ -668,6 +669,208 @@ describe('browser', () => {
                 spy.lastCall.args[1].url.should.deep.equal(expected);
             });
         });
+        describe('getPosts()', () => {
+            let object, queue, sandbox;
+            beforeEach(() => {
+                sandbox = sinon.sandbox.create();
+                sandbox.useFakeTimers();
+                async.setImmediate = (fn) => setTimeout(fn, 0);
+                async.nextTick = (fn) => setTimeout(fn, 0);
+                object = {
+                    delay: 0,
+                    queue: {
+                        push: sinon.stub()
+                    },
+                    getPosts: browserModule.externals.getPosts
+                };
+                queue = object.queue;
+            });
+            afterEach(() => sandbox.restore());
+            describe('Phase 1: get postIds', () => {
+                it('should set HTTP get method', () => {
+                    object.getPosts(0, () => 0, () => 0);
+                    queue.push.lastCall.args[0].should.have.any.key('method');
+                    queue.push.lastCall.args[0].method.should.equal('GET');
+                });
+                it('should set URL', () => {
+                    const url = '/t/314159/posts.json?include_raw=1&post_ids=0';
+                    object.getPosts(314159, () => 0, () => 0);
+                    queue.push.lastCall.args[0].should.have.any.key('url');
+                    queue.push.lastCall.args[0].url.should.equal(url);
+                });
+                it('should not set delay', () => {
+                    const delay = Math.ceil(5000 + Math.random() * 5000);
+                    object.delay = delay;
+                    object.getPosts(0, () => 0, () => 0);
+                    queue.push.lastCall.args[0].should.not.have.any.key('delay');
+                });
+                it('should set callback', () => {
+                    object.getPosts(0, () => 0, () => 0);
+                    queue.push.lastCall.args[0].should.have.any.key('callback');
+                    queue.push.lastCall.args[0].callback.should.be.a('function');
+                });
+                it('should pass callback error to callback', () => {
+                    const spy = sinon.spy(),
+                        err = new Error('this is an error');
+                    queue.push.yieldsTo('callback', err);
+                    object.getPosts(0, () => 0, spy);
+                    spy.lastCall.args.should.deep.equal([err]);
+                });
+                it('should pass success to complete to callback', () => {
+                    const spy = sinon.spy(),
+                        eachSpy = sinon.spy(),
+                        topic = {
+                            'post_stream': {
+                                stream: []
+                            }
+                        };
+                    queue.push.yieldsTo('callback', null, topic);
+                    object.getPosts(0, eachSpy, spy);
+                    eachSpy.called.should.be.false;
+                    spy.lastCall.args.should.deep.equal([null]);
+                });
+            });
+            describe('Phase 2: get all the posts', () => {
+                it('should set HTTP get method', () => {
+                    const spy = sinon.spy(),
+                        eachSpy = sinon.spy(),
+                        topic = {
+                            'post_stream': {
+                                stream: [2]
+                            }
+                        };
+                    queue.push.onFirstCall().yieldsTo('callback', null, topic);
+                    object.getPosts(0, eachSpy, spy);
+                    sandbox.clock.tick(0);
+                    queue.push.lastCall.args[0].should.have.any.key('method');
+                    queue.push.lastCall.args[0].method.should.equal('GET');
+                });
+                it('should set URL', () => {
+                    const url = '/t/314159/posts.json?include_raw=1&post_ids[]=2';
+                    const spy = sinon.spy(),
+                        eachSpy = sinon.spy(),
+                        topic = {
+                            'post_stream': {
+                                stream: [2]
+                            }
+                        };
+                    queue.push.onFirstCall().yieldsTo('callback', null, topic);
+                    object.getPosts(314159, eachSpy, spy);
+                    sandbox.clock.tick(0);
+                    queue.push.lastCall.args[0].should.have.any.key('url');
+                    queue.push.lastCall.args[0].url.should.equal(url);
+                });
+                it('should set delay', () => {
+                    const spy = sinon.spy(),
+                        eachSpy = sinon.spy(),
+                        topic = {
+                            'post_stream': {
+                                stream: [2]
+                            }
+                        },
+                        delay = Math.ceil(5000 + Math.random() * 5000);
+                    object.delay = delay;
+                    queue.push.onFirstCall().yieldsTo('callback', null, topic);
+                    object.getPosts(0, eachSpy, spy);
+                    sandbox.clock.tick(0);
+                    queue.push.lastCall.args[0].should.have.any.key('delay');
+                    queue.push.lastCall.args[0].delay.should.equal(delay);
+                });
+                it('should set callback', () => {
+                    const spy = sinon.spy(),
+                        eachSpy = sinon.spy(),
+                        topic = {
+                            'post_stream': {
+                                stream: [2]
+                            }
+                        };
+                    queue.push.onFirstCall().yieldsTo('callback', null, topic);
+                    object.getPosts(314159, eachSpy, spy);
+                    sandbox.clock.tick(0);
+                    queue.push.lastCall.args[0].should.have.any.key('callback');
+                    queue.push.lastCall.args[0].callback.should.be.a('function');
+                });
+                it('should pass callback error to callback', () => {
+                    const spy = sinon.spy(),
+                        err = new Error('this is an error'),
+                        eachSpy = sinon.spy(),
+                        topic = {
+                            'post_stream': {
+                                stream: [2]
+                            }
+                        };
+                    queue.push.onFirstCall().yieldsTo('callback', null, topic);
+                    queue.push.onSecondCall().yieldsTo('callback', err);
+                    object.getPosts(314159, eachSpy, spy);
+                    sandbox.clock.tick(0);
+                    spy.lastCall.args.should.deep.equal([err]);
+                });
+                it('should not call eachChunk with no results', () => {
+                    const spy = sinon.spy(),
+                        eachSpy = sinon.spy(),
+                        topic = {
+                            'post_stream': {
+                                stream: [2]
+                            }
+                        },
+                        posts = {
+                            'post_stream': {
+                                posts: []
+                            }
+                        };
+                    queue.push.onFirstCall().yieldsTo('callback', null, topic);
+                    queue.push.onSecondCall().yieldsTo('callback', null, posts);
+                    object.getPosts(314159, eachSpy, spy);
+                    sandbox.clock.tick(0);
+                    eachSpy.called.should.be.false;
+                    spy.lastCall.args.should.deep.equal([null]);
+                });
+                it('should call eachChunk with results', () => {
+                    const spy = sinon.spy(),
+                        eachSpy = sinon.spy(),
+                        topic = {
+                            'post_stream': {
+                                stream: [2]
+                            }
+                        },
+                        posts = {
+                            'post_stream': {
+                                posts: [{}, {}, {}]
+                            }
+                        };
+                    queue.push.onFirstCall().yieldsTo('callback', null, topic);
+                    queue.push.onSecondCall().yieldsTo('callback', null, posts);
+                    object.getPosts(314159, eachSpy, spy);
+                    sandbox.clock.tick(0);
+                    eachSpy.callCount.should.equal(3);
+                    spy.lastCall.args.should.deep.equal([null]);
+                });
+                it('should pass results to cleanPost', () => {
+                    const spy = sinon.spy(),
+                        eachSpy = sinon.spy(),
+                        topic = {
+                            'post_stream': {
+                                stream: [2]
+                            }
+                        },
+                        posts = {
+                            'post_stream': {
+                                posts: [{}]
+                            }
+                        };
+                    queue.push.onFirstCall().yieldsTo('callback', null, topic);
+                    queue.push.onSecondCall().yieldsTo('callback', null, posts);
+                    object.getPosts(314159, eachSpy, spy);
+                    sandbox.clock.tick(0);
+                    eachSpy.lastCall.args[0].should.deep.equal({
+                        cleaned: '',
+                        'reply_to': 'https://what.thedailywtf.com/t/undefined/undefined/',
+                        url: 'https://what.thedailywtf.com/t/undefined/undefined/undefined'
+                    });
+                    spy.lastCall.args.should.deep.equal([null]);
+                });
+            });
+        });
         describe('getTopic()', () => {
             const object = {
                     delay: 0,
@@ -768,6 +971,104 @@ describe('browser', () => {
                 queue.push.yieldsTo('callback', null, topic);
                 object.getTopic(0, spy);
                 topic.url.should.equal(expected);
+            });
+        });
+        describe('getTopics()', () => {
+            let object, queue, sandbox;
+            beforeEach(() => {
+                sandbox = sinon.sandbox.create();
+                sandbox.useFakeTimers();
+                sandbox.stub(async, 'whilst');
+                object = {
+                    delay: 0,
+                    queue: {
+                        push: sinon.stub()
+                    },
+                    getTopics: browserModule.externals.getTopics
+                };
+                queue = object.queue;
+            });
+            afterEach(() => sandbox.restore());
+            it('should set whilst for latest url', () => {
+                object.getTopics(() => 0, () => 0);
+                async.whilst.firstCall.args[0].should.be.a('function');
+                async.whilst.firstCall.args[0]().should.equal('/latest.json?no_definitions=true');
+            });
+            it('should set HTTP method for call', () => {
+                async.whilst.callsArgWith(1, null);
+                object.getTopics(() => 0, () => 0);
+                queue.push.firstCall.args[0].method.should.equal('GET');
+            });
+            it('should set URL for call', () => {
+                async.whilst.callsArgWith(1, null);
+                object.getTopics(() => 0, () => 0);
+                queue.push.firstCall.args[0].url.should.equal('/latest.json?no_definitions=true');
+            });
+            it('should set delay for call', () => {
+                object.delay = Math.random();
+                async.whilst.callsArgWith(1, null);
+                object.getTopics(() => 0, () => 0);
+                queue.push.firstCall.args[0].delay.should.equal(object.delay);
+            });
+            it('should set callback for call', () => {
+                async.whilst.callsArgWith(1, null);
+                object.getTopics(() => 0, () => 0);
+                queue.push.firstCall.args[0].callback.should.be.a('function');
+            });
+            it('should pass error to eachCallback on error', () => {
+                const spy = sinon.spy();
+                async.whilst.callsArgWith(1, spy);
+                object.getTopics(() => 0, () => 0);
+                const each = queue.push.firstCall.args[0].callback,
+                    err = new Error();
+                each(err);
+                spy.calledWith(err).should.be.true;
+            });
+            it('should set next url on success', () => {
+                const spy = sinon.spy(),
+                    list = {
+                        'topic_list': {
+                            'more_topics_url': 3.1415926,
+                            topics: []
+                        }
+                    };
+                async.whilst.callsArgWith(1, spy);
+                object.getTopics(() => 0, () => 0);
+                const each = queue.push.firstCall.args[0].callback;
+                each(null, list);
+                async.whilst.firstCall.args[0]().should.equal(3.1415926);
+            });
+            it('should not call eachTopic on no results', () => {
+                const spy = sinon.spy(),
+                    list = {
+                        'topic_list': {
+                            'more_topics_url': 3.1415926,
+                            topics: []
+                        }
+                    };
+                async.whilst.callsArgWith(1, () => 0);
+                object.getTopics(spy, () => 0);
+                const each = queue.push.firstCall.args[0].callback;
+                each(null, list);
+                spy.called.should.be.false;
+            });
+            it('should call eachTopic fore each result', () => {
+                const spy = sinon.spy(),
+                    list = {
+                        'topic_list': {
+                            'more_topics_url': 3.1415926,
+                            topics: [1, 2, 3]
+                        }
+                    };
+                async.whilst.callsArgWith(1, () => 0);
+                object.getTopics(spy, () => 0);
+                const each = queue.push.firstCall.args[0].callback;
+                each(null, list);
+                sandbox.clock.tick(0);
+                spy.callCount.should.equal(3);
+                spy.calledWith(1).should.be.true;
+                spy.calledWith(2).should.be.true;
+                spy.calledWith(3).should.be.true;
             });
         });
         describe('getNotifications()', () => {
@@ -874,6 +1175,55 @@ describe('browser', () => {
                 const callback2 = queue.push.secondCall.args[0].callback;
                 callback2(null);
                 spy.calledWith(null, 'notifications').should.be.true;
+            });
+        });
+        describe('postAction()', () => {
+            let object, queue;
+            beforeEach(() => {
+                object = {
+                    delay: 0,
+                    queue: {
+                        push: sinon.stub()
+                    },
+                    postAction: browserModule.externals.postAction
+                };
+                queue = object.queue;
+            });
+            it('should set HTTP method', () => {
+                object.postAction('like', 0, '', () => 0);
+                queue.push.firstCall.args[0].method.should.equal('POST');
+            });
+            it('should set URL', () => {
+                object.postAction('like', 0, '', () => 0);
+                queue.push.firstCall.args[0].url.should.equal('/post_actions');
+            });
+            it('should set delay', () => {
+                object.delay = Math.random();
+                object.postAction('like', 0, '', () => 0);
+                queue.push.firstCall.args[0].delay.should.equal(object.delay);
+            });
+            it('should set form.id', () => {
+                const id = Math.random();
+                object.postAction('like', id, '', () => 0);
+                queue.push.firstCall.args[0].form.id.should.equal(id);
+            });
+            it('should set form.post_action_type_id method', () => {
+                object.postAction('like', 0, '', () => 0);
+                queue.push.firstCall.args[0].form.post_action_type_id.should.equal(2);
+            });
+            it('should set form.flag_topic', () => {
+                object.postAction('like', 0, '', () => 0);
+                queue.push.firstCall.args[0].form.flag_topic.should.be.false;
+            });
+            it('should set form.message', () => {
+                const message = Math.random();
+                object.postAction('like', 0, message, () => 0);
+                queue.push.firstCall.args[0].form.message.should.equal(message);
+            });
+            it('should set callback', () => {
+                const spy = sinon.spy();
+                object.postAction('like', 0, '', spy);
+                queue.push.firstCall.args[0].callback.should.equal(spy);
             });
         });
     });

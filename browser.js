@@ -307,7 +307,7 @@ function getPosts(topicId, eachPost, complete) {
                         if (err2) {
                             return next(err2);
                         }
-                        topic2.post_stream.posts.map((p) => cleanPost(p)).forEach(post=>eachPost(post));
+                        topic2.post_stream.posts.map((p) => cleanPost(p)).forEach(post => eachPost(post));
                         next();
                     }
                 });
@@ -329,7 +329,7 @@ function getTopics(eachTopic, complete) {
                     return next(err);
                 }
                 url = topics.topic_list.more_topics_url;
-                topics.topic_list.topics.forEach(topic=>setTimeout(()=>eachTopic(topic), 0));
+                topics.topic_list.topics.forEach(topic => setTimeout(() => eachTopic(topic), 0));
                 next();
             }
         });
