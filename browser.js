@@ -283,8 +283,8 @@ function getPost(postId, callback) {
     });
 }
 
-function getPosts(topicId, eachChunk, complete) {
-    const base = 't/' + topicId + '/posts.json?include_raw=1',
+function getPosts(topicId, eachPost, complete) {
+    const base = '/t/' + topicId + '/posts.json?include_raw=1',
         ctx = this;
     this.queue.push({
         method: 'GET',
@@ -307,7 +307,7 @@ function getPosts(topicId, eachChunk, complete) {
                         if (err2) {
                             return next(err2);
                         }
-                        eachChunk(topic2.post_stream.posts.map((p) => cleanPost(p)));
+                        topic2.post_stream.posts.map((p) => cleanPost(p)).forEach(post=>eachPost(post));
                         next();
                     }
                 });
@@ -316,7 +316,7 @@ function getPosts(topicId, eachChunk, complete) {
     });
 }
 
-function getTopics(eachChunk, complete) {
+function getTopics(eachTopic, complete) {
     const ctx = this;
     let url = '/latest.json?no_definitions=true';
     async.whilst(() => url, (next) => {
@@ -329,7 +329,7 @@ function getTopics(eachChunk, complete) {
                     return next(err);
                 }
                 url = topics.topic_list.more_topics_url;
-                eachChunk(topics.topic_list.topics);
+                topics.topic_list.topics.forEach(topic=>setTimeout(()=>eachTopic(topic), 0));
                 next();
             }
         });
