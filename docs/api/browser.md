@@ -10,6 +10,7 @@ Webbrowser abstraction for communicating with discourse
   * [~createPost(topicId, [replyTo], content, callback)](#module_browser..createPost)
   * [~createPrivateMessage(to, title, content, callback)](#module_browser..createPrivateMessage)
   * [~editPost(postId, content, [editReason], callback)](#module_browser..editPost)
+  * [~readPosts(topicId, postIds, callback)](#module_browser..readPosts)
   * [~getPost(postId, callback)](#module_browser..getPost)
   * [~getTopic(topicId, callback)](#module_browser..getTopic)
   * [~getCSRF(delay, queue, callback)](#module_browser..getCSRF)
@@ -103,6 +104,18 @@ Edit an existing post.
 | postId | <code>number</code> | Id number of the post to edit |
 | content | <code>string</code> | New post content |
 | [editReason] | <code>string</code> | Optional Edit Reason that no one ever uses |
+| callback | <code>postedCallback</code> | Completion callback |
+
+<a name="module_browser..readPosts"></a>
+### browser~readPosts(topicId, postIds, callback)
+Read post
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| topicId | <code>number</code> | Id of topic to read |
+| postIds | <code>Array.&lt;number&gt;</code> | Ids of posts to read |
 | callback | <code>postedCallback</code> | Completion callback |
 
 <a name="module_browser..getPost"></a>
