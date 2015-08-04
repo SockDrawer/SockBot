@@ -9,7 +9,7 @@ const gulp = require('gulp'),
     eslint = require('gulp-eslint'),
     git = require('gulp-git');
 
-const sockFiles = ['*.js', '!./gulpfile.js', '**/plugins/**/*.js', '!node_modules/**'],
+const sockFiles = ['*.js', '!./gulpfile.js', 'plugins/**/*.js', '!node_modules/**'],
     sockExterns = ['**/external/**/*.js'],
     sockDocs = ['README.md', 'docs/**/*.md'],
     sockTests = ['test/**/*.js'],
