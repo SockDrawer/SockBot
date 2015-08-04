@@ -7,8 +7,9 @@ Command Parser for SockBot2.0
 
 * [commands](#module_commands)
   * _static_
-    * [.prepareCommands(events, callback)](#module_commands.prepareCommands)
-    * [.parseCommands(post, callback)](#module_commands.parseCommands)
+    * [.prepare(events, callback)](#module_commands.prepare)
+    * [.start()](#module_commands.start)
+    * [.parseCommands(post, topic, callback)](#module_commands.parseCommands)
   * _inner_
     * [~parseShortCommand(line)](#module_commands..parseShortCommand) ⇒ <code>command</code>
     * [~parseMentionCommand(line)](#module_commands..parseMentionCommand) ⇒ <code>command</code>
@@ -22,8 +23,8 @@ Command Parser for SockBot2.0
     * [~parseCallback](#module_commands..parseCallback)
     * [~commandHandler](#module_commands..commandHandler)
 
-<a name="module_commands.prepareCommands"></a>
-### commands.prepareCommands(events, callback)
+<a name="module_commands.prepare"></a>
+### commands.prepare(events, callback)
 Perpare the command parser
 
 Needs to be called to set the internals of the parser after reading config file.
@@ -35,8 +36,13 @@ Needs to be called to set the internals of the parser after reading config file.
 | events | <code>EventEmitter</code> | EventEmitter that will be core comms for SockBot |
 | callback | <code>completedCallback</code> | Completion callback |
 
+<a name="module_commands.start"></a>
+### commands.start()
+Start the command parser after bot login
+
+**Kind**: static method of <code>[commands](#module_commands)</code>  
 <a name="module_commands.parseCommands"></a>
-### commands.parseCommands(post, callback)
+### commands.parseCommands(post, topic, callback)
 Parse commands from post and emit command events
 
 **Kind**: static method of <code>[commands](#module_commands)</code>  
@@ -44,6 +50,7 @@ Parse commands from post and emit command events
 | Param | Type | Description |
 | --- | --- | --- |
 | post | <code>external.posts.CleanedPost</code> | Post to parse commands from |
+| topic | <code>external.topics.Topic</code> | Topic comamnd belongs to |
 | callback | <code>parseCallback</code> | CompletionCallback |
 
 <a name="module_commands..parseShortCommand"></a>
