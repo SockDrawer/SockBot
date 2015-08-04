@@ -92,13 +92,14 @@ const signature = '\n\n<!-- Posted by a clever robot -->',
         createPrivateMessage: createPrivateMessage,
         editPost: editPost,
         getPost: getPost,
+        getPosts: getPosts,
+        readPosts: readPosts,
         getTopic: getTopic,
+        getTopics: getTopics,
         login: login,
         messageBus: messageBus,
         getNotifications: getNotifications,
-        postAction: postAction,
-        getPosts: getPosts,
-        getTopics: getTopics
+        postAction: postAction
     };
 
 internals.current = internals.core;
@@ -261,6 +262,16 @@ function editPost(postId, content, editReason, callback) {
         },
         delay: this.delay
     });
+}
+
+/**
+ * Read post
+ *
+ * @param {number} topicId Id of topic to read
+ * @param {number[]} postIds Ids of posts to read
+ * @param {postedCallback} callback Completion callback
+ */
+function readPosts(topicId, postIds, callback) {
 }
 
 /**
