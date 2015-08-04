@@ -47,6 +47,16 @@ const signature = '\n\n<!-- Posted by a clever robot -->',
         /** Ignored User Trust Level */
         ignored: 0
     },
+    actionIds = {
+        'bookmark': 1,
+        'like': 2,
+        'off_topic': 3,
+        'inappropriate': 4,
+        'vote': 5,
+        'notify_user': 6,
+        'notify_moderators': 7,
+        'spam': 8
+    },
     coreQueue = {
         queue: async.queue(queueWorker, 1),
         delay: 0
@@ -85,7 +95,10 @@ const signature = '\n\n<!-- Posted by a clever robot -->',
         getTopic: getTopic,
         login: login,
         messageBus: messageBus,
-        getNotifications: getNotifications
+        getNotifications: getNotifications,
+        postAction: postAction,
+        getPosts: getPosts,
+        getTopics: getTopics
     };
 
 internals.current = internals.core;
@@ -270,6 +283,75 @@ function getPost(postId, callback) {
     });
 }
 
+function getPosts(topicId, eachChunk, complete) {
+    const base = 't/' + topicId + '/posts.json?include_raw=1',
+        ctx = this;
+    this.queue.push({
+        method: 'GET',
+        url: base + '&post_ids=0',
+        callback: (err, topic) => {
+            if (err) {
+                return complete(err);
+            }
+            const posts = topic.post_stream.stream;
+            async.whilst(() => posts.length > 0, (next) => {
+                const part = [];
+                while (part.length < 200 && posts.length > 0) {
+                    part.push(posts.shift());
+                }
+                ctx.queue.push({
+                    method: 'GET',
+                    url: base + '&post_ids[]=' + part.join('&post_ids[]='),
+                    delay: ctx.delay,
+                    callback: (err2, topic2) => {
+                        if (err2) {
+                            return next(err2);
+                        }
+                        eachChunk(topic2.post_stream.posts.map((p) => cleanPost(p)));
+                        next();
+                    }
+                });
+            }, complete);
+        }
+    });
+}
+
+function getTopics(eachChunk, complete) {
+    const ctx = this;
+    let url = '/latest.json?no_definitions=true';
+    async.whilst(() => url, (next) => {
+        ctx.queue.push({
+            method: 'GET',
+            url: url,
+            delay: ctx.delay,
+            callback: (err, topics) => {
+                if (err) {
+                    return next(err);
+                }
+                url = topics.topic_list.more_topics_url;
+                eachChunk(topics.topic_list.topics);
+                next();
+            }
+        });
+    }, complete);
+}
+
+function postAction(action, postId, message, callback) {
+    const actionId = actionIds[action];
+    this.queue.push({
+        method: 'POST',
+        url: '/post_actions',
+        form: {
+            id: postId,
+            'post_action_type_id': actionId,
+            'flag_topic': false,
+            message: message
+        },
+        delay: this.delay,
+        callback: callback
+    });
+}
+
 /**
  * Get topic details
  *
@@ -396,7 +478,7 @@ function getNotifications(callback) {
         url: '/notifications.json',
         delay: this.delay,
         callback: (err, notifications) => {
-            if (err){
+            if (err) {
                 return callback(err);
             }
             ctx.queue.push({

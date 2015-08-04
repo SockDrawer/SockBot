@@ -130,7 +130,7 @@ describe('browser', () => {
     });
     describe('externals', () => {
         const fns = ['createPost', 'createPrivateMessage', 'editPost', 'login', 'messageBus', 'getPost', 'getTopic',
-                'getNotifications'
+                'getNotifications', 'postAction', 'getPosts', 'getTopics'
             ],
             objs = ['trustLevels'];
         describe('should include expected functions:', () => {
