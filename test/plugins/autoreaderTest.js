@@ -98,6 +98,7 @@ describe('autoreader', () => {
             utils.log.calledOnce.should.be.true;
             utils.log.firstCall.calledWith('Reading topic `Test`').should.be.true;
         });
+        /*eslint-disable camelcase */
         it('should read the unread post', () => {
             sandbox.stub(browser, 'getTopics', (each, complete) => {
                     each({id: 1, slug: 'Test'}, complete);
@@ -139,6 +140,7 @@ describe('autoreader', () => {
             utils.log.firstCall.calledWith('Reading topic `Test`').should.be.true;
             browser.readPosts.callCount.should.equal(0);
         });
+        /*eslint-enable camelcase */
         it('should not read the post that does not exist', () => {
             sandbox.stub(browser, 'getTopics', (each, complete) => {
                     each({id: 1, slug: 'Test'}, complete);

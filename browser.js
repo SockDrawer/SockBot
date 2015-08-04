@@ -272,6 +272,30 @@ function editPost(postId, content, editReason, callback) {
  * @param {postedCallback} callback Completion callback
  */
 function readPosts(topicId, postIds, callback) {
+    const ctx = this;
+    if (typeof callback !== 'function') {
+        throw new Error('callback must be supplied');
+    }
+    if (typeof postIds === 'number') {
+        postIds = [postIds];
+    }
+    async.whilst(function () {
+        return postIds.length > 0;
+    }, function (next) {
+        const part = postIds.splice(0, 200),
+            form = {
+                'topic_id': topicId,
+                'topic_time': 4242
+            };
+        part.forEach(v => form['timings[' + v + ']'] = 4242);
+        ctx.queue.push({
+            method: 'POST',
+            url: '/topics/timings',
+            form: form,
+            delay: ctx.delay
+        });
+        next();
+    }, callback);
 }
 
 /**

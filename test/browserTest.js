@@ -147,342 +147,418 @@ describe('browser', () => {
         it('should include only expected keys', () => {
             browserModule.externals.should.have.all.keys(fns.concat(objs));
         });
-        describe('createPost()', () => {
-            const object = {
-                    createPost: browserModule.externals.createPost,
-                    delay: Math.ceil(1500 + Math.random() * 5000),
-                    queue: {
-                        push: sinon.stub()
-                    }
-                },
-                queue = object.queue;
-            beforeEach(() => queue.push.reset());
-            it('should accept four parameters version', () => {
-                object.createPost(1, 2, '', () => 0);
-                queue.push.called.should.be.true;
+        describe('post operations', () => {
+            describe('createPost()', () => {
+                const object = {
+                        createPost: browserModule.externals.createPost,
+                        delay: Math.ceil(1500 + Math.random() * 5000),
+                        queue: {
+                            push: sinon.stub()
+                        }
+                    },
+                    queue = object.queue;
+                beforeEach(() => queue.push.reset());
+                it('should accept four parameters version', () => {
+                    object.createPost(1, 2, '', () => 0);
+                    queue.push.called.should.be.true;
+                });
+                it('should accept three parameters version', () => {
+                    object.createPost(1, '', () => 0);
+                    queue.push.called.should.be.true;
+                });
+                it('should reject four parameters version with no callback', () => {
+                    expect(() => object.createPost(1, 2, '', null)).to.throw('callback must be supplied');
+                    queue.push.called.should.be.false;
+                });
+                it('should reject three parameters version with no callback', () => {
+                    expect(() => object.createPost(1, 2, '')).to.throw('callback must be supplied');
+                    queue.push.called.should.be.false;
+                });
+                it('should set http method to POST', () => {
+                    object.createPost(100, '', () => 0);
+                    const args = queue.push.lastCall.args;
+                    args.should.have.length(1);
+                    args[0].should.have.any.key('method');
+                    args[0].method.should.equal('POST');
+                });
+                it('should set url', () => {
+                    object.createPost(100, '', () => 0);
+                    const args = queue.push.lastCall.args;
+                    args.should.have.length(1);
+                    args[0].should.have.any.key('url');
+                    args[0].url.should.equal('/posts');
+                });
+                it('should set form', () => {
+                    object.createPost(100, '', () => 0);
+                    const args = queue.push.lastCall.args;
+                    args.should.have.length(1);
+                    args[0].should.have.any.key('form');
+                    args[0].form.should.be.a('object');
+                });
+                it('should set callback', () => {
+                    object.createPost(100, '', () => 0);
+                    const args = queue.push.lastCall.args;
+                    args.should.have.length(1);
+                    args[0].should.have.any.key('callback');
+                    args[0].callback.should.be.a('function');
+                });
+                it('should set delay', () => {
+                    object.createPost(100, '', () => 0);
+                    const args = queue.push.lastCall.args;
+                    args.should.have.length(1);
+                    args[0].should.have.any.key('delay');
+                    args[0].delay.should.equal(object.delay);
+                });
+                describe('form', () => {
+                    it('should set `raw`', () => {
+                        browserModule.internals.signature = '\nthis is my signature';
+                        object.createPost(100, 'i have content', () => 0);
+                        const form = queue.push.lastCall.args[0].form;
+                        form.should.have.any.key('raw');
+                        form.raw.should.equal('i have content\nthis is my signature');
+                    });
+                    it('should set `topic_id`', () => {
+                        object.createPost(100, '', () => 0);
+                        const form = queue.push.lastCall.args[0].form;
+                        form.should.have.any.key('topic_id');
+                        form.topic_id.should.equal(100);
+                    });
+                    it('should set `is_warning`', () => {
+                        object.createPost(100, '', () => 0);
+                        const form = queue.push.lastCall.args[0].form;
+                        form.should.have.any.key('is_warning');
+                        form.is_warning.should.equal(false);
+                    });
+                    it('should set `reply_to_post_number`', () => {
+                        object.createPost(100, 42, '', () => 0);
+                        const form = queue.push.lastCall.args[0].form;
+                        form.should.have.any.key('reply_to_post_number');
+                        form.reply_to_post_number.should.equal(42);
+                    });
+                    it('should set `category`', () => {
+                        object.createPost(100, '', () => 0);
+                        const form = queue.push.lastCall.args[0].form;
+                        form.should.have.any.key('category');
+                        form.category.should.equal('');
+                    });
+                    it('should set `archetype`', () => {
+                        object.createPost(100, '', () => 0);
+                        const form = queue.push.lastCall.args[0].form;
+                        form.should.have.any.key('archetype');
+                        form.archetype.should.equal('regular');
+                    });
+                    it('should set `auto_close_time`', () => {
+                        object.createPost(100, '', () => 0);
+                        const form = queue.push.lastCall.args[0].form;
+                        form.should.have.any.key('auto_close_time');
+                        form.auto_close_time.should.equal('');
+                    });
+                });
+                it('should pass err to external callback on completion', () => {
+                    queue.push.yieldsTo('callback', new Error('test error!'));
+                    const spy = sinon.spy();
+                    object.createPost(100, '', spy);
+                    spy.called.should.be.true;
+                    spy.lastCall.args.should.have.length(1);
+                    spy.lastCall.args[0].should.be.an.instanceOf(Error);
+                });
+                it('should pass post to external callback on completion', () => {
+                    queue.push.yieldsTo('callback', null, {});
+                    const spy = sinon.spy();
+                    object.createPost(100, '', spy);
+                    spy.called.should.be.true;
+                    spy.lastCall.args.should.have.length(2);
+                    expect(spy.lastCall.args[0]).to.equal(null);
+                    // cleanPost should have been called, adding these keys
+                    spy.lastCall.args[1].should.have.keys('cleaned', 'url', 'reply_to');
+                });
             });
-            it('should accept three parameters version', () => {
-                object.createPost(1, '', () => 0);
-                queue.push.called.should.be.true;
+            describe('createPrivateMessage()', () => {
+                const object = {
+                        createPrivateMessage: browserModule.externals.createPrivateMessage,
+                        delay: Math.ceil(1500 + Math.random() * 5000),
+                        queue: {
+                            push: sinon.stub()
+                        }
+                    },
+                    queue = object.queue;
+                beforeEach(() => queue.push.reset());
+                it('should accept four parameters', () => {
+                    object.createPrivateMessage('', '', '', () => 0);
+                    queue.push.called.should.be.true;
+                });
+                it('should reject four parameters with no callback', () => {
+                    expect(() => object.createPrivateMessage('', '', '', null)).to.throw('callback must be supplied');
+                    queue.push.called.should.be.false;
+                });
+                it('should set http method to POST', () => {
+                    object.createPrivateMessage('', '', '', () => 0);
+                    const args = queue.push.lastCall.args;
+                    args.should.have.length(1);
+                    args[0].should.have.any.key('method');
+                    args[0].method.should.equal('POST');
+                });
+                it('should set url', () => {
+                    object.createPrivateMessage('', '', '', () => 0);
+                    const args = queue.push.lastCall.args;
+                    args.should.have.length(1);
+                    args[0].should.have.any.key('url');
+                    args[0].url.should.equal('/posts');
+                });
+                it('should set form', () => {
+                    object.createPrivateMessage('', '', '', () => 0);
+                    const args = queue.push.lastCall.args;
+                    args.should.have.length(1);
+                    args[0].should.have.any.key('form');
+                    args[0].form.should.be.a('object');
+                });
+                it('should set callback', () => {
+                    object.createPrivateMessage('', '', '', () => 0);
+                    const args = queue.push.lastCall.args;
+                    args.should.have.length(1);
+                    args[0].should.have.any.key('callback');
+                    args[0].callback.should.be.a('function');
+                });
+                it('should set delay', () => {
+                    object.delay = Math.ceil(1500 + Math.random() * 5000);
+                    object.createPrivateMessage('', '', '', () => 0);
+                    const args = queue.push.lastCall.args;
+                    args.should.have.length(1);
+                    args[0].should.have.any.key('delay');
+                    args[0].delay.should.equal(object.delay);
+                });
+                describe('form', () => {
+                    it('should set `raw`', () => {
+                        browserModule.internals.signature = '\nthis is my signature';
+                        object.createPrivateMessage('', '', 'i have content', () => 0);
+                        const form = queue.push.lastCall.args[0].form;
+                        form.should.have.any.key('raw');
+                        form.raw.should.equal('i have content\nthis is my signature');
+                    });
+                    it('should set `title`', () => {
+                        object.createPrivateMessage('', 'this is title', '', () => 0);
+                        const form = queue.push.lastCall.args[0].form;
+                        form.should.have.any.key('title');
+                        form.title.should.equal('this is title');
+                    });
+                    it('should set `is_warning`', () => {
+                        object.createPrivateMessage('', 100, '', () => 0);
+                        const form = queue.push.lastCall.args[0].form;
+                        form.should.have.any.key('is_warning');
+                        form.is_warning.should.equal(false);
+                    });
+                    it('should set `target_usernames` with single target', () => {
+                        object.createPrivateMessage('accalia', 42, '', () => 0);
+                        const form = queue.push.lastCall.args[0].form;
+                        form.should.have.any.key('target_usernames');
+                        form.target_usernames.should.equal('accalia');
+                    });
+                    it('should set `target_usernames` with multiple targets', () => {
+                        object.createPrivateMessage(['accalia', 'sockbot'], 100, '', () => 0);
+                        const form = queue.push.lastCall.args[0].form;
+                        form.should.have.any.key('target_usernames');
+                        form.target_usernames.should.deep.equal(['accalia', 'sockbot']);
+                    });
+                    it('should set `archetype`', () => {
+                        object.createPrivateMessage('', 100, '', () => 0);
+                        const form = queue.push.lastCall.args[0].form;
+                        form.should.have.any.key('archetype');
+                        form.archetype.should.equal('private_message');
+                    });
+                });
+                it('should pass err to external callback on completion', () => {
+                    queue.push.yieldsTo('callback', new Error('test error!'));
+                    const spy = sinon.spy();
+                    object.createPrivateMessage('', 100, '', spy);
+                    spy.called.should.be.true;
+                    spy.lastCall.args.should.have.length(1);
+                    spy.lastCall.args[0].should.be.an.instanceOf(Error);
+                });
+                it('should pass post to external callback on completion', () => {
+                    queue.push.yieldsTo('callback', null, {});
+                    const spy = sinon.spy();
+                    object.createPrivateMessage('', 100, '', spy);
+                    spy.called.should.be.true;
+                    spy.lastCall.args.should.have.length(2);
+                    expect(spy.lastCall.args[0]).to.equal(null);
+                    // cleanPost should have been called, adding these keys
+                    spy.lastCall.args[1].should.have.keys('cleaned', 'url', 'reply_to');
+                });
             });
-            it('should reject four parameters version with no callback', () => {
-                expect(() => object.createPost(1, 2, '', null)).to.throw('callback must be supplied');
-                queue.push.called.should.be.false;
-            });
-            it('should reject three parameters version with no callback', () => {
-                expect(() => object.createPost(1, 2, '')).to.throw('callback must be supplied');
-                queue.push.called.should.be.false;
-            });
-            it('should set http method to POST', () => {
-                object.createPost(100, '', () => 0);
-                const args = queue.push.lastCall.args;
-                args.should.have.length(1);
-                args[0].should.have.any.key('method');
-                args[0].method.should.equal('POST');
-            });
-            it('should set url', () => {
-                object.createPost(100, '', () => 0);
-                const args = queue.push.lastCall.args;
-                args.should.have.length(1);
-                args[0].should.have.any.key('url');
-                args[0].url.should.equal('/posts');
-            });
-            it('should set form', () => {
-                object.createPost(100, '', () => 0);
-                const args = queue.push.lastCall.args;
-                args.should.have.length(1);
-                args[0].should.have.any.key('form');
-                args[0].form.should.be.a('object');
-            });
-            it('should set callback', () => {
-                object.createPost(100, '', () => 0);
-                const args = queue.push.lastCall.args;
-                args.should.have.length(1);
-                args[0].should.have.any.key('callback');
-                args[0].callback.should.be.a('function');
-            });
-            it('should set delay', () => {
-                object.createPost(100, '', () => 0);
-                const args = queue.push.lastCall.args;
-                args.should.have.length(1);
-                args[0].should.have.any.key('delay');
-                args[0].delay.should.equal(object.delay);
-            });
-            describe('form', () => {
-                it('should set `raw`', () => {
+            describe('editPost()', () => {
+                const object = {
+                        editPost: browserModule.externals.editPost,
+                        delay: Math.ceil(1500 + Math.random() * 5000),
+                        queue: {
+                            push: sinon.stub()
+                        }
+                    },
+                    queue = object.queue;
+                beforeEach(() => queue.push.reset());
+                it('should accept four parameters version', () => {
+                    object.editPost(1, '', '', () => 0);
+                    queue.push.called.should.be.true;
+                });
+                it('should accept three parameters version', () => {
+                    object.editPost(1, '', () => 0);
+                    queue.push.called.should.be.true;
+                });
+                it('should reject four parameters version with no callback', () => {
+                    expect(() => object.editPost(1, 2, '', null)).to.throw('callback must be supplied');
+                    queue.push.called.should.be.false;
+                });
+                it('should reject three parameters version with no callback', () => {
+                    expect(() => object.editPost(1, 2, '')).to.throw('callback must be supplied');
+                    queue.push.called.should.be.false;
+                });
+                it('should set http method to PUT', () => {
+                    object.editPost(100, '', () => 0);
+                    const args = queue.push.lastCall.args;
+                    args.should.have.length(1);
+                    args[0].should.have.any.key('method');
+                    args[0].method.should.equal('PUT');
+                });
+                it('should set url', () => {
+                    object.editPost(100, '', () => 0);
+                    const args = queue.push.lastCall.args;
+                    args.should.have.length(1);
+                    args[0].should.have.any.key('url');
+                    args[0].url.should.equal('/posts/100');
+                });
+                it('should set form', () => {
+                    object.editPost(100, '', () => 0);
+                    const args = queue.push.lastCall.args;
+                    args.should.have.length(1);
+                    args[0].should.have.any.key('form');
+                    args[0].form.should.be.a('object');
+                });
+                it('should set callback', () => {
+                    object.editPost(100, '', () => 0);
+                    const args = queue.push.lastCall.args;
+                    args.should.have.length(1);
+                    args[0].should.have.any.key('callback');
+                    args[0].callback.should.be.a('function');
+                });
+                it('should set delay', () => {
+                    object.delay = Math.ceil(1500 + Math.random() * 5000);
+                    object.editPost(100, '', () => 0);
+                    const args = queue.push.lastCall.args;
+                    args.should.have.length(1);
+                    args[0].should.have.any.key('delay');
+                    args[0].delay.should.equal(object.delay);
+                });
+                it('should set `form.post` without edit reason', () => {
                     browserModule.internals.signature = '\nthis is my signature';
-                    object.createPost(100, 'i have content', () => 0);
+                    object.editPost(100, 'i have content', () => 0);
                     const form = queue.push.lastCall.args[0].form;
-                    form.should.have.any.key('raw');
-                    form.raw.should.equal('i have content\nthis is my signature');
+                    form.should.have.any.key('post');
+                    form.post.should.deep.equal({
+                        raw: 'i have content\nthis is my signature',
+                        'edit_reason': ''
+                    });
                 });
-                it('should set `topic_id`', () => {
-                    object.createPost(100, '', () => 0);
-                    const form = queue.push.lastCall.args[0].form;
-                    form.should.have.any.key('topic_id');
-                    form.topic_id.should.equal(100);
-                });
-                it('should set `is_warning`', () => {
-                    object.createPost(100, '', () => 0);
-                    const form = queue.push.lastCall.args[0].form;
-                    form.should.have.any.key('is_warning');
-                    form.is_warning.should.equal(false);
-                });
-                it('should set `reply_to_post_number`', () => {
-                    object.createPost(100, 42, '', () => 0);
-                    const form = queue.push.lastCall.args[0].form;
-                    form.should.have.any.key('reply_to_post_number');
-                    form.reply_to_post_number.should.equal(42);
-                });
-                it('should set `category`', () => {
-                    object.createPost(100, '', () => 0);
-                    const form = queue.push.lastCall.args[0].form;
-                    form.should.have.any.key('category');
-                    form.category.should.equal('');
-                });
-                it('should set `archetype`', () => {
-                    object.createPost(100, '', () => 0);
-                    const form = queue.push.lastCall.args[0].form;
-                    form.should.have.any.key('archetype');
-                    form.archetype.should.equal('regular');
-                });
-                it('should set `auto_close_time`', () => {
-                    object.createPost(100, '', () => 0);
-                    const form = queue.push.lastCall.args[0].form;
-                    form.should.have.any.key('auto_close_time');
-                    form.auto_close_time.should.equal('');
-                });
-            });
-            it('should pass err to external callback on completion', () => {
-                queue.push.yieldsTo('callback', new Error('test error!'));
-                const spy = sinon.spy();
-                object.createPost(100, '', spy);
-                spy.called.should.be.true;
-                spy.lastCall.args.should.have.length(1);
-                spy.lastCall.args[0].should.be.an.instanceOf(Error);
-            });
-            it('should pass post to external callback on completion', () => {
-                queue.push.yieldsTo('callback', null, {});
-                const spy = sinon.spy();
-                object.createPost(100, '', spy);
-                spy.called.should.be.true;
-                spy.lastCall.args.should.have.length(2);
-                expect(spy.lastCall.args[0]).to.equal(null);
-                // cleanPost should have been called, adding these keys
-                spy.lastCall.args[1].should.have.keys('cleaned', 'url', 'reply_to');
-            });
-        });
-        describe('createPrivateMessage()', () => {
-            const object = {
-                    createPrivateMessage: browserModule.externals.createPrivateMessage,
-                    delay: Math.ceil(1500 + Math.random() * 5000),
-                    queue: {
-                        push: sinon.stub()
-                    }
-                },
-                queue = object.queue;
-            beforeEach(() => queue.push.reset());
-            it('should accept four parameters', () => {
-                object.createPrivateMessage('', '', '', () => 0);
-                queue.push.called.should.be.true;
-            });
-            it('should reject four parameters with no callback', () => {
-                expect(() => object.createPrivateMessage('', '', '', null)).to.throw('callback must be supplied');
-                queue.push.called.should.be.false;
-            });
-            it('should set http method to POST', () => {
-                object.createPrivateMessage('', '', '', () => 0);
-                const args = queue.push.lastCall.args;
-                args.should.have.length(1);
-                args[0].should.have.any.key('method');
-                args[0].method.should.equal('POST');
-            });
-            it('should set url', () => {
-                object.createPrivateMessage('', '', '', () => 0);
-                const args = queue.push.lastCall.args;
-                args.should.have.length(1);
-                args[0].should.have.any.key('url');
-                args[0].url.should.equal('/posts');
-            });
-            it('should set form', () => {
-                object.createPrivateMessage('', '', '', () => 0);
-                const args = queue.push.lastCall.args;
-                args.should.have.length(1);
-                args[0].should.have.any.key('form');
-                args[0].form.should.be.a('object');
-            });
-            it('should set callback', () => {
-                object.createPrivateMessage('', '', '', () => 0);
-                const args = queue.push.lastCall.args;
-                args.should.have.length(1);
-                args[0].should.have.any.key('callback');
-                args[0].callback.should.be.a('function');
-            });
-            it('should set delay', () => {
-                object.delay = Math.ceil(1500 + Math.random() * 5000);
-                object.createPrivateMessage('', '', '', () => 0);
-                const args = queue.push.lastCall.args;
-                args.should.have.length(1);
-                args[0].should.have.any.key('delay');
-                args[0].delay.should.equal(object.delay);
-            });
-            describe('form', () => {
-                it('should set `raw`', () => {
+                it('should set `form.post` with edit reason', () => {
                     browserModule.internals.signature = '\nthis is my signature';
-                    object.createPrivateMessage('', '', 'i have content', () => 0);
+                    object.editPost(100, 'i have content', 'i have my reasons', () => 0);
                     const form = queue.push.lastCall.args[0].form;
-                    form.should.have.any.key('raw');
-                    form.raw.should.equal('i have content\nthis is my signature');
+                    form.should.have.any.key('post');
+                    form.post.should.deep.equal({
+                        raw: 'i have content\nthis is my signature',
+                        'edit_reason': 'i have my reasons'
+                    });
                 });
-                it('should set `title`', () => {
-                    object.createPrivateMessage('', 'this is title', '', () => 0);
+                it('should pass err to external callback on completion', () => {
+                    queue.push.yieldsTo('callback', new Error('test error!'));
+                    const spy = sinon.spy();
+                    object.editPost(100, '', spy);
+                    spy.called.should.be.true;
+                    spy.lastCall.args.should.have.length(1);
+                    spy.lastCall.args[0].should.be.an.instanceOf(Error);
+                });
+                it('should pass post to external callback on completion', () => {
+                    queue.push.yieldsTo('callback', null, {});
+                    const spy = sinon.spy();
+                    object.editPost(100, '', spy);
+                    spy.called.should.be.true;
+                    spy.lastCall.args.should.have.length(2);
+                    expect(spy.lastCall.args[0]).to.equal(null);
+                    // cleanPost should have been called, adding these keys
+                    spy.lastCall.args[1].should.have.keys('cleaned', 'url', 'reply_to');
+                });
+            });
+            describe('readPosts()', () => {
+                const object = {
+                        readPosts: browserModule.externals.readPosts,
+                        delay: Math.ceil(1500 + Math.random() * 5000),
+                        queue: {
+                            push: sinon.stub()
+                        }
+                    },
+                    queue = object.queue;
+                beforeEach(() => queue.push.reset());
+                it('should reject no callback', () => {
+                    expect(() => object.readPosts(null, null, null)).to.throw('callback must be supplied');
+                    queue.push.called.should.be.false;
+                });
+                it('should set http method to POST', () => {
+                    object.readPosts(1, [2], () => 0);
+                    const args = queue.push.lastCall.args;
+                    args.should.have.length(1);
+                    args[0].should.have.any.key('method');
+                    args[0].method.should.equal('POST');
+                });
+                it('should set url', () => {
+                    object.readPosts(1, [2], () => 0);
+                    const args = queue.push.lastCall.args;
+                    args.should.have.length(1);
+                    args[0].should.have.any.key('url');
+                    args[0].url.should.equal('/topics/timings');
+                });
+                it('should set form', () => {
+                    object.readPosts(1, [2], () => 0);
+                    const args = queue.push.lastCall.args;
+                    args.should.have.length(1);
+                    args[0].should.have.any.key('form');
+                    args[0].form.should.be.a('object');
+                });
+                it('should set delay', () => {
+                    object.delay = Math.ceil(1500 + Math.random() * 5000);
+                    object.readPosts(1, [2], () => 0);
+                    const args = queue.push.lastCall.args;
+                    args.should.have.length(1);
+                    args[0].should.have.any.key('delay');
+                    args[0].delay.should.equal(object.delay);
+                });
+                /*eslint-disable camelcase */
+                it('should set form contents based on an array of one element', () => {
+                    object.readPosts(1, [2], () => 0);
                     const form = queue.push.lastCall.args[0].form;
-                    form.should.have.any.key('title');
-                    form.title.should.equal('this is title');
+                    form.should.deep.equal({
+                        topic_id: 1,
+                        topic_time: 4242,
+                        'timings[2]': 4242
+                    });
                 });
-                it('should set `is_warning`', () => {
-                    object.createPrivateMessage('', 100, '', () => 0);
+                it('should set form contents based on an array of two elements', () => {
+                    object.readPosts(1, [2, 3], () => 0);
                     const form = queue.push.lastCall.args[0].form;
-                    form.should.have.any.key('is_warning');
-                    form.is_warning.should.equal(false);
+                    form.should.deep.equal({
+                        topic_id: 1,
+                        topic_time: 4242,
+                        'timings[2]': 4242,
+                        'timings[3]': 4242
+                    });
                 });
-                it('should set `target_usernames` with single target', () => {
-                    object.createPrivateMessage('accalia', 42, '', () => 0);
+                it('should form contents based on a number', () => {
+                    object.readPosts(1, 2, () => 0);
                     const form = queue.push.lastCall.args[0].form;
-                    form.should.have.any.key('target_usernames');
-                    form.target_usernames.should.equal('accalia');
+                    form.should.deep.equal({
+                        topic_id: 1,
+                        topic_time: 4242,
+                        'timings[2]': 4242
+                    });
                 });
-                it('should set `target_usernames` with multiple targets', () => {
-                    object.createPrivateMessage(['accalia', 'sockbot'], 100, '', () => 0);
-                    const form = queue.push.lastCall.args[0].form;
-                    form.should.have.any.key('target_usernames');
-                    form.target_usernames.should.deep.equal(['accalia', 'sockbot']);
-                });
-                it('should set `archetype`', () => {
-                    object.createPrivateMessage('', 100, '', () => 0);
-                    const form = queue.push.lastCall.args[0].form;
-                    form.should.have.any.key('archetype');
-                    form.archetype.should.equal('private_message');
-                });
-            });
-            it('should pass err to external callback on completion', () => {
-                queue.push.yieldsTo('callback', new Error('test error!'));
-                const spy = sinon.spy();
-                object.createPrivateMessage('', 100, '', spy);
-                spy.called.should.be.true;
-                spy.lastCall.args.should.have.length(1);
-                spy.lastCall.args[0].should.be.an.instanceOf(Error);
-            });
-            it('should pass post to external callback on completion', () => {
-                queue.push.yieldsTo('callback', null, {});
-                const spy = sinon.spy();
-                object.createPrivateMessage('', 100, '', spy);
-                spy.called.should.be.true;
-                spy.lastCall.args.should.have.length(2);
-                expect(spy.lastCall.args[0]).to.equal(null);
-                // cleanPost should have been called, adding these keys
-                spy.lastCall.args[1].should.have.keys('cleaned', 'url', 'reply_to');
-            });
-        });
-        describe('editPost()', () => {
-            const object = {
-                    editPost: browserModule.externals.editPost,
-                    delay: Math.ceil(1500 + Math.random() * 5000),
-                    queue: {
-                        push: sinon.stub()
-                    }
-                },
-                queue = object.queue;
-            beforeEach(() => queue.push.reset());
-            it('should accept four parameters version', () => {
-                object.editPost(1, '', '', () => 0);
-                queue.push.called.should.be.true;
-            });
-            it('should accept three parameters version', () => {
-                object.editPost(1, '', () => 0);
-                queue.push.called.should.be.true;
-            });
-            it('should reject four parameters version with no callback', () => {
-                expect(() => object.editPost(1, 2, '', null)).to.throw('callback must be supplied');
-                queue.push.called.should.be.false;
-            });
-            it('should reject three parameters version with no callback', () => {
-                expect(() => object.editPost(1, 2, '')).to.throw('callback must be supplied');
-                queue.push.called.should.be.false;
-            });
-            it('should set http method to PUT', () => {
-                object.editPost(100, '', () => 0);
-                const args = queue.push.lastCall.args;
-                args.should.have.length(1);
-                args[0].should.have.any.key('method');
-                args[0].method.should.equal('PUT');
-            });
-            it('should set url', () => {
-                object.editPost(100, '', () => 0);
-                const args = queue.push.lastCall.args;
-                args.should.have.length(1);
-                args[0].should.have.any.key('url');
-                args[0].url.should.equal('/posts/100');
-            });
-            it('should set form', () => {
-                object.editPost(100, '', () => 0);
-                const args = queue.push.lastCall.args;
-                args.should.have.length(1);
-                args[0].should.have.any.key('form');
-                args[0].form.should.be.a('object');
-            });
-            it('should set callback', () => {
-                object.editPost(100, '', () => 0);
-                const args = queue.push.lastCall.args;
-                args.should.have.length(1);
-                args[0].should.have.any.key('callback');
-                args[0].callback.should.be.a('function');
-            });
-            it('should set delay', () => {
-                object.delay = Math.ceil(1500 + Math.random() * 5000);
-                object.editPost(100, '', () => 0);
-                const args = queue.push.lastCall.args;
-                args.should.have.length(1);
-                args[0].should.have.any.key('delay');
-                args[0].delay.should.equal(object.delay);
-            });
-            it('should set `form.post` without edit reason', () => {
-                browserModule.internals.signature = '\nthis is my signature';
-                object.editPost(100, 'i have content', () => 0);
-                const form = queue.push.lastCall.args[0].form;
-                form.should.have.any.key('post');
-                form.post.should.deep.equal({
-                    raw: 'i have content\nthis is my signature',
-                    'edit_reason': ''
-                });
-            });
-            it('should set `form.post` with edit reason', () => {
-                browserModule.internals.signature = '\nthis is my signature';
-                object.editPost(100, 'i have content', 'i have my reasons', () => 0);
-                const form = queue.push.lastCall.args[0].form;
-                form.should.have.any.key('post');
-                form.post.should.deep.equal({
-                    raw: 'i have content\nthis is my signature',
-                    'edit_reason': 'i have my reasons'
-                });
-            });
-            it('should pass err to external callback on completion', () => {
-                queue.push.yieldsTo('callback', new Error('test error!'));
-                const spy = sinon.spy();
-                object.editPost(100, '', spy);
-                spy.called.should.be.true;
-                spy.lastCall.args.should.have.length(1);
-                spy.lastCall.args[0].should.be.an.instanceOf(Error);
-            });
-            it('should pass post to external callback on completion', () => {
-                queue.push.yieldsTo('callback', null, {});
-                const spy = sinon.spy();
-                object.editPost(100, '', spy);
-                spy.called.should.be.true;
-                spy.lastCall.args.should.have.length(2);
-                expect(spy.lastCall.args[0]).to.equal(null);
-                // cleanPost should have been called, adding these keys
-                spy.lastCall.args[1].should.have.keys('cleaned', 'url', 'reply_to');
+                /*eslint-enable camelcase */
             });
         });
         describe('login', () => {
