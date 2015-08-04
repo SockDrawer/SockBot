@@ -1,5 +1,5 @@
 'use strict';
-/*globals describe, it */
+/*globals describe, it*/
 
 const chai = require('chai'),
     sinon = require('sinon');
