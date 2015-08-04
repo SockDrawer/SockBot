@@ -1,6 +1,5 @@
 'use strict';
-/*globals describe, it, beforeEach, afterEach*/
-/*eslint no-unused-expressions:0 */
+/*globals describe, it */
 
 const chai = require('chai'),
     sinon = require('sinon');
