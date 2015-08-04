@@ -827,7 +827,7 @@ describe('browser', () => {
                 });
                 it('should call eachChunk with results', () => {
                     const spy = sinon.spy(),
-                        eachSpy = sinon.spy(),
+                        eachSpy = sinon.stub(),
                         topic = {
                             'post_stream': {
                                 stream: [2]
@@ -838,6 +838,7 @@ describe('browser', () => {
                                 posts: [{}, {}, {}]
                             }
                         };
+                    eachSpy.yields(null);
                     queue.push.onFirstCall().yieldsTo('callback', null, topic);
                     queue.push.onSecondCall().yieldsTo('callback', null, posts);
                     object.getPosts(314159, eachSpy, spy);
@@ -847,7 +848,7 @@ describe('browser', () => {
                 });
                 it('should pass results to cleanPost', () => {
                     const spy = sinon.spy(),
-                        eachSpy = sinon.spy(),
+                        eachSpy = sinon.stub(),
                         topic = {
                             'post_stream': {
                                 stream: [2]
@@ -858,6 +859,7 @@ describe('browser', () => {
                                 posts: [{}]
                             }
                         };
+                    eachSpy.yields(null);
                     queue.push.onFirstCall().yieldsTo('callback', null, topic);
                     queue.push.onSecondCall().yieldsTo('callback', null, posts);
                     object.getPosts(314159, eachSpy, spy);
@@ -1053,13 +1055,14 @@ describe('browser', () => {
                 spy.called.should.be.false;
             });
             it('should call eachTopic fore each result', () => {
-                const spy = sinon.spy(),
+                const spy = sinon.stub(),
                     list = {
                         'topic_list': {
                             'more_topics_url': 3.1415926,
                             topics: [1, 2, 3]
                         }
                     };
+                spy.yields(null);
                 async.whilst.callsArgWith(1, () => 0);
                 object.getTopics(spy, () => 0);
                 const each = queue.push.firstCall.args[0].callback;

@@ -307,8 +307,9 @@ function getPosts(topicId, eachPost, complete) {
                         if (err2) {
                             return next(err2);
                         }
-                        topic2.post_stream.posts.map((p) => cleanPost(p)).forEach(post => eachPost(post));
-                        next();
+                        async.eachSeries(topic2.post_stream.posts.map((p) => cleanPost(p)), (post, postNext) => {
+                            setTimeout(() => eachPost(post, (error) => postNext(error)), 0);
+                        }, next);
                     }
                 });
             }, complete);
@@ -329,8 +330,9 @@ function getTopics(eachTopic, complete) {
                     return next(err);
                 }
                 url = topics.topic_list.more_topics_url;
-                topics.topic_list.topics.forEach(topic => setTimeout(() => eachTopic(topic), 0));
-                next();
+                async.eachSeries(topics.topic_list.topics, (topic, topicNext) => {
+                    setTimeout(() => eachTopic(topic, (error) => topicNext(error)), 0);
+                }, next);
             }
         });
     }, complete);
