@@ -7,7 +7,8 @@
  */
 const async = require('async');
 const config = require('./config'),
-    utils = require('./utils');
+    utils = require('./utils'),
+    commands = require('./commands');
 const browser = require('./browser')();
 const internals = {
         notifyTypes: {
@@ -98,15 +99,22 @@ function handleTopicNotification(notification) {
         if (err) {
             return;
         }
-        utils.filterIgnored(result.topic, result.post, (ignored) => {
-            if (!ignored) {
-                const handled = internals.events.emit('notification#' + notification.type, notification, result.topic,
-                    result.post);
-                if (!handled) {
-                    utils.warn(notification.type + ' notification #' + notification.id + ' was not handled!');
-                }
+        async.series([(next) => {
+            utils.filterIgnored(result.topic, result.post, next);
+        }, (next) => {
+            if (['mentioned', 'replied', 'quoted', 'private_message', 'posted'].indexOf(notification.type) > -1) {
+                commands.parseCommands(result.post, result.topic, (err2, commands2) => next(err2 || commands2));
+            } else {
+                next();
             }
-        });
+        }, (next) => {
+            const handled = internals.events.emit('notification#' + notification.type, notification, result.topic,
+                result.post);
+            if (!handled) {
+                utils.warn(notification.type + ' notification #' + notification.id + ' was not handled!');
+            }
+            next();
+        }]);
     });
 }
 

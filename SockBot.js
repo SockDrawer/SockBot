@@ -138,7 +138,7 @@ function prepareEvents(callback) {
         }, (next) => {
             notifications.prepare(events, next);
         }, (next) => {
-            commands.prepareCommands(events, next);
+            commands.prepare(events, next);
         }
     ], (err) => {
         if (err) {

@@ -14,7 +14,7 @@ let mBrowser;
  * @param {Config} config Overall Bot Configuration
  * @param {externals.events.SockEvents} events EventEmitter used for the bot
  * @param {Browser} browser Web browser for communicating with discourse
-*/
+ */
 exports.prepare = function (plugConfig, config, events, browser) {
     mBrowser = browser;
     events.onNotification('mentioned', exports.handler);

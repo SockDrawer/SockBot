@@ -14,7 +14,7 @@ const commands = require('../commands'),
 const browser = require('../browser')();
 describe('commands', () => {
     describe('exports', () => {
-        const fns = ['prepareCommands', 'parseCommands'],
+        const fns = ['prepare', 'start', 'parseCommands'],
             objs = ['internals'],
             vals = [];
         describe('should export expected functions:', () => {
@@ -102,7 +102,7 @@ describe('commands', () => {
         });
         beforeEach(() => {
             sandbox = sinon.sandbox.create();
-            sandbox.stub(console, 'log');
+            sandbox.stub(utils, 'log');
             sandbox.stub(browser, 'createPost');
         });
         afterEach(() => {
@@ -110,11 +110,9 @@ describe('commands', () => {
         });
         it('should be registered as `command#ERROR` event', (done) => {
             const spy = sinon.spy();
-            sandbox.stub(utils, 'log');
-            commands.prepareCommands({
+            commands.prepare({
                 on: spy
             }, () => {
-                utils.log.restore();
                 spy.calledWith('command#ERROR', cmdError).should.be.true;
                 done();
             });
@@ -159,7 +157,7 @@ describe('commands', () => {
         });
         beforeEach(() => {
             sandbox = sinon.sandbox.create();
-            sandbox.stub(console, 'log');
+            sandbox.stub(utils, 'log');
             sandbox.stub(browser, 'createPost');
         });
         afterEach(() => {
@@ -170,11 +168,9 @@ describe('commands', () => {
         });
         it('should be registered as `command#help` event', (done) => {
             const spy = sinon.spy();
-            sinon.stub(utils, 'log');
-            commands.prepareCommands({
+            commands.prepare({
                 on: spy
             }, () => {
-                utils.log.restore();
                 clock.tick(0);
                 spy.calledWith('command#help', cmdHelp).should.be.true;
                 done();
@@ -330,9 +326,10 @@ describe('commands', () => {
         before((done) => {
             config.core.username = 'foobar';
             sinon.stub(utils, 'log');
-            commands.prepareCommands({
+            commands.prepare({
                 on: () => 0
             }, () => {
+                commands.start();
                 utils.log.restore();
                 done();
             });
@@ -531,8 +528,24 @@ describe('commands', () => {
             });
         });
     });
+    describe('start()', () => {
+        let sandbox;
+        beforeEach(() => {
+            config.core.username = 'foo';
+            sandbox = sinon.sandbox.create();
+            sandbox.stub(console, 'log');
+            sandbox.stub(utils, 'log');
+        });
+        afterEach(() => {
+            sandbox.restore();
+        });
+        it('should produce expected mentionCommand regexp', () => {
+            commands.start();
+            commands.internals.mention.toString().should.equal('/^@foo\\s\\S{3,}(\\s|$)/i');
+        });
+    });
     describe('prepareParser()', () => {
-        const prepareCommands = commands.prepareCommands;
+        const prepare = commands.prepare;
         let sandbox;
         before(() => {
             config.core.username = 'foo';
@@ -547,7 +560,7 @@ describe('commands', () => {
         });
         it('should call callback on completion', () => {
             const spy = sinon.spy();
-            prepareCommands({
+            prepare({
                 on: () => 0
             }, spy);
             spy.called.should.be.true;
@@ -558,18 +571,12 @@ describe('commands', () => {
                 events = {
                     on: () => 0
                 };
-            prepareCommands(events, spy);
+            prepare(events, spy);
             commands.internals.events.should.equal(events);
-        });
-        it('should produce expected mentionCommand regexp', () => {
-            prepareCommands({
-                on: () => 0
-            }, () => 0);
-            commands.internals.mention.toString().should.equal('/^@foo\\s\\S{3,}(\\s|$)/i');
         });
         it('should produce register commandPotect as newListener listener', () => {
             const spy = sinon.spy();
-            prepareCommands({
+            prepare({
                 on: spy
             }, () => 0);
             spy.calledWith('newListener', commands.internals.commandProtect).should.be.true;
@@ -600,12 +607,12 @@ describe('commands', () => {
             commands.internals.events = null;
         });
         it('should require callback', () => {
-            expect(() => commands.parseCommands({}, null)).to.throw('callback must be supplied');
+            expect(() => commands.parseCommands({}, {}, null)).to.throw('callback must be supplied');
             parseShortCommand.called.should.be.false;
             parseMentionCommand.called.should.be.false;
         });
         it('should accept empty post', () => {
-            commands.parseCommands(null, callbackSpy);
+            commands.parseCommands(null, null, callbackSpy);
             callbackSpy.called.should.be.true;
             callbackSpy.lastCall.args.should.deep.equal([null, []]);
             parseShortCommand.called.should.be.false;
@@ -614,7 +621,7 @@ describe('commands', () => {
         it('should accept blank post', () => {
             commands.parseCommands({
                 raw: ''
-            }, callbackSpy);
+            }, null, callbackSpy);
             callbackSpy.called.should.be.true;
             callbackSpy.lastCall.args.should.deep.equal([null, []]);
             parseShortCommand.called.should.be.false;
@@ -623,7 +630,7 @@ describe('commands', () => {
         it('should not emit on non command post', () => {
             commands.parseCommands({
                 raw: 'i am a little text short and stout'
-            }, callbackSpy);
+            }, null, callbackSpy);
             callbackSpy.called.should.be.true;
             callbackSpy.lastCall.args.should.deep.equal([null, []]);
             parseShortCommand.called.should.be.false;
@@ -633,7 +640,7 @@ describe('commands', () => {
         it('should not emit on non command post 2', () => {
             commands.parseCommands({
                 raw: '!i am a little text short and stout'
-            }, callbackSpy);
+            }, null, callbackSpy);
             callbackSpy.called.should.be.true;
             callbackSpy.lastCall.args.should.deep.equal([null, []]);
             parseShortCommand.called.should.be.true;
@@ -641,20 +648,22 @@ describe('commands', () => {
             events.emit.called.should.be.false;
         });
         it('should emit on post containing command', () => {
+            const topic = Math.random();
             parseShortCommand.returns({
                 command: 'foobar'
             });
             events.emit.returns(true);
             commands.parseCommands({
                 raw: '!i am a little text short and stout'
-            }, callbackSpy);
+            }, topic, callbackSpy);
             clocks.tick(0);
             events.emit.called.should.be.true;
             events.emit.lastCall.args.should.deep.equal(['command#foobar', {
                 command: 'foobar',
                 post: {
                     raw: '!i am a little text short and stout'
-                }
+                },
+                topic: topic
             }]);
         });
         it('should multi emit on post containing multiple commands', () => {
@@ -664,7 +673,7 @@ describe('commands', () => {
             events.emit.returns(true);
             commands.parseCommands({
                 raw: '!i am a little\ntext short\n!and stout'
-            }, callbackSpy);
+            }, null, callbackSpy);
             clocks.tick(0);
             events.emit.called.should.be.true;
             events.emit.callCount.should.equal(2);
@@ -678,7 +687,7 @@ describe('commands', () => {
             events.emit.returns(false);
             commands.parseCommands({
                 raw: '!i am a little text short and stout'
-            }, callbackSpy);
+            }, null, callbackSpy);
             clocks.tick(0);
             events.emit.calledWith('command#ERROR').should.be.false;
         });
@@ -690,7 +699,7 @@ describe('commands', () => {
                 .onSecondCall().returns(true);
             commands.parseCommands({
                 raw: '!i am a little text short and stout'
-            }, callbackSpy);
+            }, null, callbackSpy);
             clocks.tick(0);
             events.emit.callCount.should.equal(2);
             events.emit.calledWith('command#ERROR').should.be.true;
@@ -703,7 +712,7 @@ describe('commands', () => {
             events.emit.returns(false);
             commands.parseCommands({
                 raw: '!i am a little text short and stout'
-            }, callbackSpy);
+            }, null, callbackSpy);
             clocks.tick(0);
             events.emit.callCount.should.equal(3);
             events.emit.calledWith('command#ERROR').should.be.true;

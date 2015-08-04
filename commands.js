@@ -31,13 +31,19 @@ const internals = {
  * @param {EventEmitter} events EventEmitter that will be core comms for SockBot
  * @param {completedCallback} callback Completion callback
  */
-exports.prepareCommands = function prepareCommands(events, callback) {
-    internals.mention = new RegExp('^@' + config.core.username + '\\s\\S{3,}(\\s|$)', 'i');
+exports.prepare = function prepare(events, callback) {
     internals.events = events;
     events.on('command#ERROR', cmdError);
     events.onCommand = registerCommand;
     events.on('newListener', commandProtect);
     events.onCommand('help', 'print command help listing', cmdHelp, callback);
+};
+
+/**
+ * Start the command parser after bot login
+ */
+exports.start = function start(){
+    internals.mention = new RegExp('^@' + config.core.username + '\\s\\S{3,}(\\s|$)', 'i');
 };
 
 /**
@@ -85,9 +91,10 @@ function parseMentionCommand(line) {
  * Parse commands from post and emit command events
  *
  * @param {external.posts.CleanedPost} post Post to parse commands from
+ * @param {external.topics.Topic} topic Topic comamnd belongs to
  * @param {parseCallback} callback CompletionCallback
  */
-exports.parseCommands = function parseCommands(post, callback) {
+exports.parseCommands = function parseCommands(post, topic, callback) {
     if (typeof callback !== 'function') {
         throw new Error('callback must be supplied');
     }
@@ -105,6 +112,7 @@ exports.parseCommands = function parseCommands(post, callback) {
     commands.forEach((command) => {
         setImmediate(() => {
             command.post = post;
+            command.topic = topic;
             const handled = internals.events.emit('command#' + command.command, command);
             if (!handled && !command.mention) {
                 if (!internals.events.emit('command#ERROR', command)) {

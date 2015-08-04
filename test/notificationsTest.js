@@ -3,14 +3,16 @@
 /*eslint no-unused-expressions:0 */
 
 const chai = require('chai'),
-    sinon = require('sinon');
+    sinon = require('sinon'),
+    async = require('async');
 
 chai.should();
 const expect = chai.expect;
 
 const notifications = require('../notifications'),
     utils = require('../utils'),
-    config = require('../config');
+    config = require('../config'),
+    commands = require('../commands');
 const browser = require('../browser')();
 
 describe('notifications', () => {
@@ -175,49 +177,55 @@ describe('notifications', () => {
                 events = {
                     emit: sinon.stub()
                 };
-            before(() => {
-                notifications.internals.events = events;
-                sinon.stub(utils, 'filterIgnored');
-                sinon.stub(utils, 'warn');
-                sinon.stub(browser, 'getTopic');
-                sinon.stub(browser, 'getPost');
-            });
+            let sandbox;
             beforeEach(() => {
-                events.emit.reset();
-                utils.filterIgnored.reset();
-                utils.warn.reset();
-                browser.getTopic.reset();
-                browser.getPost.reset();
+                notifications.internals.events = events;
+                events.emit = sinon.stub();
+                sandbox = sinon.sandbox.create();
+                sandbox.stub(utils, 'filterIgnored');
+                sandbox.stub(utils, 'warn');
+                sandbox.stub(browser, 'getTopic');
+                sandbox.stub(browser, 'getPost');
+                sandbox.stub(commands, 'parseCommands');
+                sandbox.useFakeTimers();
+                async.nextTick = (fn) => setTimeout(fn, 0);
+                async.setImmediate = (fn) => setTimeout(fn, 0);
             });
+            afterEach(() => sandbox.restore());
             describe('getTopic/getPost subtasks', () => {
                 it('should get topic from topic_id in notification', () => {
                     browser.getTopic.yields(null);
                     browser.getPost.yields(null);
                     handleTopicNotification(notification);
+                    sandbox.clock.tick(0);
                     browser.getTopic.calledWith(1234).should.be.true;
                 });
                 it('should get post from data.original_post_id in notification', () => {
                     browser.getTopic.yields(null);
                     browser.getPost.yields(null);
                     handleTopicNotification(notification);
+                    sandbox.clock.tick(0);
                     browser.getPost.calledWith(5432).should.be.true;
                 });
                 it('should drop notification if getTopic errors', () => {
                     browser.getTopic.yields('error');
                     browser.getPost.yields(null);
                     handleTopicNotification(notification);
+                    sandbox.clock.tick(0);
                     utils.filterIgnored.called.should.be.false;
                 });
                 it('should drop notification if getPost errors', () => {
                     browser.getTopic.yields(null);
                     browser.getPost.yields('error');
                     handleTopicNotification(notification);
+                    sandbox.clock.tick(0);
                     utils.filterIgnored.called.should.be.false;
                 });
                 it('should drop notification if getTopic errors', () => {
                     browser.getTopic.yields('error');
                     browser.getPost.yields(null);
                     handleTopicNotification(notification);
+                    sandbox.clock.tick(0);
                     utils.filterIgnored.called.should.be.false;
                 });
             });
@@ -226,6 +234,7 @@ describe('notifications', () => {
                 browser.getTopic.yields(null, topic);
                 browser.getPost.yields(null);
                 handleTopicNotification(notification);
+                sandbox.clock.tick(0);
                 utils.filterIgnored.called.should.be.true;
                 utils.filterIgnored.firstCall.args[0].should.equal(topic);
             });
@@ -234,30 +243,118 @@ describe('notifications', () => {
                 browser.getTopic.yields(null);
                 browser.getPost.yields(null, post);
                 handleTopicNotification(notification);
+                sandbox.clock.tick(0);
                 utils.filterIgnored.called.should.be.true;
                 utils.filterIgnored.firstCall.args[1].should.equal(post);
             });
             it('should not emit event on ignored', () => {
                 browser.getTopic.yields(null);
                 browser.getPost.yields(null);
+                commands.parseCommands.yields(null);
                 utils.filterIgnored.yields('ignore');
                 handleTopicNotification(notification);
+                sandbox.clock.tick(0);
                 events.emit.called.should.be.false;
             });
             it('should not emit event on ignored', () => {
                 browser.getTopic.yields(null);
                 browser.getPost.yields(null);
+                commands.parseCommands.yields(null);
                 utils.filterIgnored.yields(null);
                 handleTopicNotification(notification);
+                sandbox.clock.tick(0);
                 events.emit.called.should.be.true;
+            });
+            describe('commands', () => {
+                it('should not parse commands on invalid notification type', () => {
+                    browser.getTopic.yields(null);
+                    browser.getPost.yields(null);
+                    commands.parseCommands.yields(null);
+                    utils.filterIgnored.yields(null);
+                    handleTopicNotification(notification);
+                    sandbox.clock.tick(0);
+                    commands.parseCommands.called.should.be.false;
+                });
+                it('should parse commands on mentioned notification type', () => {
+                    notification.type = 'mentioned';
+                    browser.getTopic.yields(null);
+                    browser.getPost.yields(null);
+                    commands.parseCommands.yields(null);
+                    utils.filterIgnored.yields(null);
+                    handleTopicNotification(notification);
+                    sandbox.clock.tick(0);
+                    commands.parseCommands.called.should.be.true;
+                });
+                it('should parse commands on replied notification type', () => {
+                    notification.type = 'replied';
+                    browser.getTopic.yields(null);
+                    browser.getPost.yields(null);
+                    commands.parseCommands.yields(null);
+                    utils.filterIgnored.yields(null);
+                    handleTopicNotification(notification);
+                    sandbox.clock.tick(0);
+                    commands.parseCommands.called.should.be.true;
+                });
+                it('should parse commands on quoted notification type', () => {
+                    notification.type = 'quoted';
+                    browser.getTopic.yields(null);
+                    browser.getPost.yields(null);
+                    commands.parseCommands.yields(null);
+                    utils.filterIgnored.yields(null);
+                    handleTopicNotification(notification);
+                    sandbox.clock.tick(0);
+                    commands.parseCommands.called.should.be.true;
+                });
+                it('should parse commands on private_message notification type', () => {
+                    notification.type = 'private_message';
+                    browser.getTopic.yields(null);
+                    browser.getPost.yields(null);
+                    commands.parseCommands.yields(null);
+                    utils.filterIgnored.yields(null);
+                    handleTopicNotification(notification);
+                    sandbox.clock.tick(0);
+                    commands.parseCommands.called.should.be.true;
+                });
+                it('should parse commands on posted notification type', () => {
+                    notification.type = 'posted';
+                    browser.getTopic.yields(null);
+                    browser.getPost.yields(null);
+                    commands.parseCommands.yields(null);
+                    utils.filterIgnored.yields(null);
+                    handleTopicNotification(notification);
+                    sandbox.clock.tick(0);
+                    commands.parseCommands.called.should.be.true;
+                });
+                it('should not emit event on parseCommands error', () => {
+                    notification.type = 'mentioned';
+                    browser.getTopic.yields(null);
+                    browser.getPost.yields(null);
+                    commands.parseCommands.yields(new Error());
+                    utils.filterIgnored.yields(null);
+                    handleTopicNotification(notification);
+                    sandbox.clock.tick(0);
+                    events.emit.called.should.be.false;
+                });
+                it('should not emit event on parseCommands finding commands', () => {
+                    notification.type = 'mentioned';
+                    browser.getTopic.yields(null);
+                    browser.getPost.yields(null);
+                    commands.parseCommands.yields(null, [{}]);
+                    utils.filterIgnored.yields(null);
+                    handleTopicNotification(notification);
+                    sandbox.clock.tick(0);
+                    events.emit.called.should.be.false;
+                });
             });
             it('should emit proper event on success', () => {
                 const topic = {},
                     post = {};
                 browser.getTopic.yields(null, topic);
                 browser.getPost.yields(null, post);
+                commands.parseCommands.yields(null);
                 utils.filterIgnored.yields(null);
                 handleTopicNotification(notification);
+                sandbox.clock.tick(0);
                 events.emit.calledWith('notification#someNotification', notification, topic, post).should.be.true;
             });
             it('should warn on unhandled notification', () => {
@@ -265,8 +362,10 @@ describe('notifications', () => {
                     post = {};
                 browser.getTopic.yields(null, topic);
                 browser.getPost.yields(null, post);
+                commands.parseCommands.yields(null);
                 utils.filterIgnored.yields(null);
                 handleTopicNotification(notification);
+                sandbox.clock.tick(0);
                 utils.warn.called.should.be.true;
                 utils.warn.firstCall.args[0].should.equal('someNotification notification #' +
                     notification.id + ' was not handled!');
@@ -276,16 +375,12 @@ describe('notifications', () => {
                     post = {};
                 browser.getTopic.yields(null, topic);
                 browser.getPost.yields(null, post);
+                commands.parseCommands.yields(null);
                 utils.filterIgnored.yields(null);
                 events.emit.returns(true);
                 handleTopicNotification(notification);
+                sandbox.clock.tick(0);
                 utils.warn.called.should.be.false;
-            });
-            after(() => {
-                utils.filterIgnored.restore();
-                utils.warn.restore();
-                browser.getTopic.restore();
-                browser.getPost.restore();
             });
         });
         describe('onNotification()', () => {
