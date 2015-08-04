@@ -22,7 +22,9 @@ const internals = {
             9: 'posted',
             10: 'moved_post',
             11: 'linked',
-            12: 'granted_badge'
+            12: 'granted_badge',
+            13: 'invited_to_topic',
+            14: 'custom'
         }
     },
     privateFns = {

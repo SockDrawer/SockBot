@@ -26,7 +26,9 @@ describe('notifications', () => {
         9: 'posted',
         10: 'moved_post',
         11: 'linked',
-        12: 'granted_badge'
+        12: 'granted_badge',
+        13: 'invited_to_topic',
+        14: 'custom'
     };
     describe('exports', () => {
         const fns = ['prepare', 'start', 'pollNotifications'],
@@ -76,7 +78,7 @@ describe('notifications', () => {
         describe('notifyTypes', () => {
             const notifyTypes = notifications.internals.notifyTypes;
             it('should only have expected notification types', () => {
-                const types = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+                const types = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14'];
                 notifyTypes.should.have.all.keys(types);
             });
             Object.keys(notifyTypeMap).forEach((key) => {
