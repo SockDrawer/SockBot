@@ -18,7 +18,8 @@ const config = require('./config'),
     utils = require('./utils');
 const browser = require('./browser')();
 const internals = {
-        plugins: []
+        plugins: [],
+        running: false
     },
     privateFns = {
         doPluginRequire: doPluginRequire,
@@ -26,7 +27,6 @@ const internals = {
         loadPlugins: loadPlugins,
         prepareEvents: prepareEvents
     };
-let running = false;
 
 /**
  * Prepared Callback
@@ -80,12 +80,12 @@ exports.start = function (callback) {
         config.user = user;
         internals.plugins.forEach((plugin) => plugin.start());
         utils.log('SockBot `' + config.user.username + '` Started');
-        running = true;
-        async.whilst(() => running, (next) => {
+        internals.running = true;
+        async.whilst(() => internals.running, (next) => {
             messages.pollMessages(() => setTimeout(next, 3 * 1000));
         });
-        async.whilst(() => running, (next) => {
-            notifications.pollNotifications(() => setTimeout(next), 5 * 60 * 1000);
+        async.whilst(() => internals.running, (next) => {
+            notifications.pollNotifications(() => setTimeout(next, 5 * 60 * 1000));
         });
         callback(null);
     });
@@ -95,7 +95,7 @@ exports.start = function (callback) {
  * Stop the event loop and signal plugins to stop
  */
 exports.stop = function () {
-    running = false;
+    internals.running = false;
     internals.plugins.forEach((plugin) => plugin.stop());
 };
 

@@ -520,11 +520,165 @@ describe('SockBot', () => {
             SockBot.privateFns.loadPlugins.called.should.be.false;
         });
     });
-    describe('start', () => {
+    describe('start()', () => {
         let sandbox;
         beforeEach(function () {
             sandbox = sinon.sandbox.create();
-            sandbox.stub(console, 'log');
+            sandbox.stub(utils, 'log');
+            sandbox.stub(utils, 'warn');
+            sandbox.stub(browser, 'login');
+            sandbox.stub(async, 'whilst');
+            sandbox.stub(messages, 'pollMessages');
+            sandbox.stub(notifications, 'pollNotifications');
+            sandbox.useFakeTimers();
+        });
+        afterEach(function () {
+            sandbox.restore();
+        });
+        it('should pass error to callback on login error', () => {
+            const err = new Error(),
+                spy = sinon.spy();
+            browser.login.yields(err);
+            SockBot.start(spy);
+            spy.calledWith(err).should.be.true;
+        });
+        it('should pass null to callback on login success', () => {
+            const spy = sinon.spy();
+            browser.login.yields(null, {});
+            SockBot.start(spy);
+            spy.calledWith(null).should.be.true;
+        });
+        it('should warn on login error', () => {
+            const err = new Error('i am a scary error! wooo!');
+            browser.login.yields(err);
+            SockBot.start(() => 0);
+            utils.warn.calledWith('Login Failed: Error: i am a scary error! wooo!').should.be.true;
+        });
+        it('should set config.user', () => {
+            const user = {};
+            browser.login.yields(null, user);
+            SockBot.start(() => 0);
+            config.user.should.equal(user);
+        });
+        it('should log startup message', () => {
+            const user = {
+                username: 'fred' + Math.random()
+            };
+            browser.login.yields(null, user);
+            SockBot.start(() => 0);
+            utils.log.calledWith('SockBot `' + user.username + '` Started');
+        });
+        it('should set run flag', () => {
+            SockBot.internals.running = undefined;
+            browser.login.yields(null, {});
+            SockBot.start(() => 0);
+            SockBot.internals.running.should.be.true;
+        });
+        it('should set set two async forevers', () => {
+            SockBot.internals.running = undefined;
+            browser.login.yields(null, {});
+            SockBot.start(() => 0);
+            async.whilst.callCount.should.equal(2);
+        });
+        describe('messages', () => {
+            it('should respect running flag in messages poll', () => {
+                SockBot.internals.running = undefined;
+                browser.login.yields(null, {});
+                SockBot.start(() => 0);
+                const test = async.whilst.firstCall.args[0];
+                SockBot.internals.running = Math.random();
+                test().should.equal(SockBot.internals.running);
+            });
+            it('should call messages.pollMessages() from first async forever', () => {
+                SockBot.internals.running = undefined;
+                browser.login.yields(null, {});
+                SockBot.start(() => 0);
+                const test = async.whilst.firstCall.args[1],
+                    spy = sinon.spy();
+                test(spy);
+                messages.pollMessages.called.should.be.true;
+            });
+            it('should schedule next message poll for three sedonds from now', () => {
+                SockBot.internals.running = undefined;
+                browser.login.yields(null, {});
+                SockBot.start(() => 0);
+                const test = async.whilst.firstCall.args[1],
+                    spy = sinon.spy();
+                messages.pollMessages.yields(null);
+                test(spy);
+                sandbox.clock.tick(2999);
+                spy.called.should.be.false;
+                sandbox.clock.tick(1);
+                spy.called.should.be.true;
+            });
+        });
+        describe('notifications', () => {
+            it('should respect running flag in notrifications poll', () => {
+                SockBot.internals.running = undefined;
+                browser.login.yields(null, {});
+                SockBot.start(() => 0);
+                const test = async.whilst.secondCall.args[0];
+                SockBot.internals.running = Math.random();
+                test().should.equal(SockBot.internals.running);
+            });
+            it('should call notifications.pollNotifications() from second async forever', () => {
+                SockBot.internals.running = undefined;
+                browser.login.yields(null, {});
+                SockBot.start(() => 0);
+                const test = async.whilst.secondCall.args[1],
+                    spy = sinon.spy();
+                test(spy);
+                notifications.pollNotifications.called.should.be.true;
+            });
+            it('should schedule next notifications.poll for five minutes from now', () => {
+                SockBot.internals.running = undefined;
+                browser.login.yields(null, {});
+                SockBot.start(() => 0);
+                const test = async.whilst.secondCall.args[1],
+                    spy = sinon.spy();
+                notifications.pollNotifications.yields(null);
+                test(spy);
+                sandbox.clock.tick(5 * 60 * 1000 - 1);
+                spy.called.should.be.false;
+                sandbox.clock.tick(1);
+                spy.called.should.be.trued;
+            });
+        });
+        it('should start plugins', () => {
+            const plugin1 = {
+                    start: sinon.spy()
+                },
+                plugin2 = {
+                    start: sinon.spy()
+                };
+            SockBot.internals.plugins = [plugin1, plugin2];
+            browser.login.yields(null, {});
+            SockBot.start(() => 0);
+            plugin1.start.called.should.be.true;
+            plugin2.start.called.should.be.true;
+        });
+    });
+    describe('stop()', () => {
+        let sandbox;
+        beforeEach(function () {
+            sandbox = sinon.sandbox.create();
+        });
+        it('should stop plugins', () => {
+            const plugin1 = {
+                    stop: sinon.spy()
+                },
+                plugin2 = {
+                    stop: sinon.spy()
+                };
+            SockBot.internals.plugins = [plugin1, plugin2];
+            SockBot.stop();
+            plugin1.stop.called.should.be.true;
+            plugin2.stop.called.should.be.true;
+        });
+        it('should unset running flag', () => {
+            SockBot.internals.running = true;
+            SockBot.stop();
+            SockBot.internals.running.should.be.false;
         });
         afterEach(function () {
             sandbox.restore();
