@@ -8,6 +8,7 @@ notifications handler for SockBot2.0
 * [notifications](#module_notifications)
   * _static_
     * [.prepare(events, callback)](#module_notifications.prepare)
+    * [.start(events, callback)](#module_notifications.start)
     * [.pollNotifications(callback)](#module_notifications.pollNotifications)
   * _inner_
     * [~handleTopicNotification(notification)](#module_notifications..handleTopicNotification)
@@ -19,6 +20,17 @@ notifications handler for SockBot2.0
 
 <a name="module_notifications.prepare"></a>
 ### notifications.prepare(events, callback)
+Prepare notifications for bot start
+
+**Kind**: static method of <code>[notifications](#module_notifications)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| events | <code>EventEmitter</code> | EventEmitter that will eb used for communication |
+| callback | <code>completionCallback</code> | Completion Callback |
+
+<a name="module_notifications.start"></a>
+### notifications.start(events, callback)
 Prepare notifications for bot start
 
 **Kind**: static method of <code>[notifications](#module_notifications)</code>  
