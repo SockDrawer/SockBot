@@ -522,6 +522,7 @@ describe('SockBot', () => {
     });
     describe('start()', () => {
         let sandbox;
+        const ievents = notifications.internals;
         beforeEach(function () {
             sandbox = sinon.sandbox.create();
             sandbox.stub(utils, 'log');
@@ -531,9 +532,13 @@ describe('SockBot', () => {
             sandbox.stub(messages, 'pollMessages');
             sandbox.stub(notifications, 'pollNotifications');
             sandbox.useFakeTimers();
+            notifications.internals.events = {
+                onChannel: () => 0
+            };
         });
         afterEach(function () {
             sandbox.restore();
+            notifications.internals = ievents;
         });
         it('should pass error to callback on login error', () => {
             const err = new Error(),

@@ -78,6 +78,8 @@ exports.start = function (callback) {
             return callback(err);
         }
         config.user = user;
+        notifications.start();
+        messages.start();
         internals.plugins.forEach((plugin) => plugin.start());
         utils.log('SockBot `' + config.user.username + '` Started');
         internals.running = true;
@@ -183,7 +185,11 @@ function loadConfig(cfg, callback) {
 
 /* istanbul ignore if */
 if (require.main === module) {
-    exports.start(process.argv[2]);
+    exports.prepare(process.argv[2], (err) => {
+        if (!err) {
+            exports.start(() => 0);
+        }
+    });
 }
 
 /* istanbul ignore else */

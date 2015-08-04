@@ -45,11 +45,14 @@ exports.prepare = function prepare(events, clientId, callback) {
     events.removeTopic = removeTopic;
     events.on('newListener', onMessageAdd);
     events.on('removeListener', onMessageRemove);
-    onChannel('/__status', statusChannelHandler);
+    events.onChannel('/__status', statusChannelHandler);
     callback();
 };
 
+exports.start = function start() {};
+
 exports.pollMessages = function pollMessages(callback) {
+    utils.log('Polling Messages');
     browser.messageBus(internals.channels, internals.clientId, (err, messages) => {
         if (err) {
             //Reset channel position on error
@@ -62,7 +65,7 @@ exports.pollMessages = function pollMessages(callback) {
             if (/\/topic\//.test(message.channel)) {
                 privateFns.processTopicMessage(message);
             } else {
-                const handled = internals.events.emit(message.channel, message.data);
+                const handled = internals.events.emit('message#' + message.channel, message.data);
                 if (!handled) {
                     utils.warn('Message ' + message.message_id + ' for channel ' +
                         message.channel + ' was not handled!');

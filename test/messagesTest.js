@@ -14,7 +14,7 @@ const browser = require('../browser')();
 
 describe('messages', () => {
     describe('exports', () => {
-        const fns = ['prepare', 'pollMessages'],
+        const fns = ['prepare', 'start', 'pollMessages'],
             objs = ['internals', 'privateFns'],
             vals = [];
         describe('should export expected functions:', () => {
@@ -119,6 +119,7 @@ describe('messages', () => {
             sandbox = sinon.sandbox.create();
             sandbox.stub(browser, 'messageBus');
             sandbox.stub(utils, 'warn');
+            sandbox.stub(utils, 'log');
             sandbox.stub(messages.privateFns, 'resetChannelPositions');
             sandbox.stub(messages.privateFns, 'updateChannelPositions');
             sandbox.stub(messages.privateFns, 'processTopicMessage');
@@ -138,6 +139,11 @@ describe('messages', () => {
             args[0].should.deep.equal(messages.internals.channels);
             args[1].should.deep.equal(messages.internals.clientId);
             args[2].should.be.a('function');
+        });
+        it('should call browser.messageBus()', () => {
+            const spy = sinon.spy();
+            messages.pollMessages(spy);
+            utils.log.calledWith('Polling Messages').should.be.true;
         });
         it('should log message on poll failure', () => {
             const spy = sinon.spy();
@@ -193,7 +199,7 @@ describe('messages', () => {
                 msgs = [msg];
             browser.messageBus.yields(null, msgs);
             messages.pollMessages(spy);
-            messages.internals.events.emit.calledWith(msg.channel, msg.data).should.be.true;
+            messages.internals.events.emit.calledWith('message#' + msg.channel, msg.data).should.be.true;
         });
         it('should print warning when no listeners registered for event', () => {
             const spy = sinon.spy(),
@@ -225,6 +231,9 @@ describe('messages', () => {
             messages.pollMessages(spy);
             utils.warn.called.should.be.false;
         });
+    });
+    describe('start()', () => {
+        it('should be a stub function for later', () => messages.start());
     });
     describe('privateFns', () => {
         const fns = ['onMessageAdd', 'onMessageRemove', 'onChannel', 'onTopic', 'removeChannel', 'removeTopic',

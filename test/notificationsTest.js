@@ -29,7 +29,7 @@ describe('notifications', () => {
         12: 'granted_badge'
     };
     describe('exports', () => {
-        const fns = ['prepare', 'pollNotifications'],
+        const fns = ['prepare', 'start', 'pollNotifications'],
             objs = ['internals', 'privateFns'],
             vals = [];
         describe('should export expected functions:', () => {
@@ -53,7 +53,7 @@ describe('notifications', () => {
     });
     describe('internals', () => {
         const fns = [],
-            objs = ['notifyTypes'],
+            objs = ['events', 'notifyTypes'],
             vals = [];
         describe('should export expected functions:', () => {
             fns.forEach((fn) => {
@@ -280,7 +280,6 @@ describe('notifications', () => {
                 utils.warn.called.should.be.false;
             });
             after(() => {
-                notifications.internals.events = null;
                 utils.filterIgnored.restore();
                 utils.warn.restore();
                 browser.getTopic.restore();
@@ -298,7 +297,6 @@ describe('notifications', () => {
                 };
             });
             afterEach(() => sandbox.restore());
-            after(() => notifications.internals.events = null);
             describe('type validation', () => {
                 it('should print warning on unrecognized type', () => {
                     const type = '' + Math.random();
@@ -332,7 +330,6 @@ describe('notifications', () => {
                     removeListener: sinon.spy()
                 };
             });
-            after(() => notifications.internals.events = null);
             it('should return events object for chaining', () => {
                 const events = removeNotification('', () => 0);
                 events.should.equal(notifications.internals.events);
@@ -353,17 +350,24 @@ describe('notifications', () => {
             sandbox.stub(browser, 'getNotifications');
             sandbox.stub(notifications.privateFns, 'handleTopicNotification');
             sandbox.stub(utils, 'warn');
+            sandbox.stub(utils, 'log');
             notifications.internals.events = {
                 emit: sandbox.stub()
             };
         });
-        afterEach(() => sandbox.restore());
-        after(() => notifications.internals.events = null);
+        afterEach(() => {
+            sandbox.restore();
+        });
         it('should call browser.getNotifications()', () => {
             const spy = sinon.spy();
             notifications.pollNotifications(spy);
             browser.getNotifications.called.should.be.true;
             spy.called.should.be.false;
+        });
+        it('should log notification', () => {
+            const spy = sinon.spy();
+            notifications.pollNotifications(spy);
+            utils.log.calledWith('Polling Notifications').should.be.true;
         });
         it('should pass error to callback on failure', () => {
             browser.getNotifications.yields('i am error');
@@ -485,7 +489,6 @@ describe('notifications', () => {
                 });
             });
         });
-
     });
     describe('prepare()', () => {
         it('should call callback on completion', () => {
@@ -503,26 +506,6 @@ describe('notifications', () => {
                 spy = sinon.spy();
             notifications.prepare(events, spy);
             notifications.internals.events.should.equal(events);
-        });
-        it('should register channel listener', () => {
-            const events = {
-                    onChannel: sinon.spy()
-                },
-                spy = sinon.spy();
-            notifications.prepare(events, spy);
-            events.onChannel.called.should.be.true;
-        });
-        it('should register onNotificationMessage as channel listener', () => {
-            const events = {
-                    onChannel: sinon.spy()
-                },
-                spy = sinon.spy();
-            config.user = {
-                id: 9753
-            };
-            notifications.prepare(events, spy);
-            events.onChannel.calledWith('/notifications/9753',
-                notifications.privateFns.onNotificationMessage).should.be.true;
         });
         it('should add onNotification function to events', () => {
             const events = {
@@ -547,8 +530,29 @@ describe('notifications', () => {
             expect(events.removeNotification).to.equal(notifications.privateFns.removeNotification);
         });
         after(() => {
-            notifications.internals.events = null;
             config.user = {};
+        });
+    });
+    describe('start()', () => {
+        it('should register channel listener', () => {
+            const events = {
+                onChannel: sinon.spy()
+            };
+            notifications.internals.events = events;
+            notifications.start();
+            events.onChannel.called.should.be.true;
+        });
+        it('should register onNotificationMessage as channel listener', () => {
+            const events = {
+                onChannel: sinon.spy()
+            };
+            config.user = {
+                id: 9753
+            };
+            notifications.internals.events = events;
+            notifications.start();
+            events.onChannel.calledWith('/notification/9753',
+                notifications.privateFns.onNotificationMessage).should.be.true;
         });
     });
 });

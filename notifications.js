@@ -42,8 +42,16 @@ exports.prepare = function prepare(events, callback) {
     internals.events = events;
     events.onNotification = onNotification;
     events.removeNotification = removeNotification;
-    events.onChannel('/notifications/' + config.user.id, privateFns.onNotificationMessage);
     callback();
+};
+/**
+ * Prepare notifications for bot start
+ *
+ * @param {EventEmitter} events EventEmitter that will eb used for communication
+ * @param {completionCallback} callback Completion Callback
+ */
+exports.start = function start() {
+    internals.events.onChannel('/notification/' + config.user.id, privateFns.onNotificationMessage);
 };
 
 /**
@@ -52,6 +60,7 @@ exports.prepare = function prepare(events, callback) {
  * @param {completionCallback} callback Completion callback
  */
 exports.pollNotifications = function pollNotifications(callback) {
+    utils.log('Polling Notifications');
     browser.getNotifications((err, notifications) => {
         if (err) {
             return callback(err);
