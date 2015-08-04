@@ -52,7 +52,7 @@ gulp.task('docList', ['gitBranch'], (done) => {
                 console.log('Error fetching files in commit range\n' + err); //eslint-disable-line no-console
             } else {
                 stdout.split(/\r?\n/).forEach((file) => {
-                    if (file && file.length > 3 && file.endsWith('.js')){
+                    if (file && file.length > 3 && file.endsWith('.js')) {
                         docgenFiles.push(file);
                     }
                 });
@@ -177,7 +177,8 @@ gulp.task('test', ['lintCore', 'lintTests'], (done) => {
     gulp.src(sockFiles)
         // Instrument code files with istanbulHarmony
         .pipe(istanbul({
-            instrumenter: istanbulHarmony.Instrumenter
+            instrumenter: istanbulHarmony.Instrumenter,
+            includeUntested: true
         }))
         // hook require function for complete code coverage
         .pipe(istanbul.hookRequire())
