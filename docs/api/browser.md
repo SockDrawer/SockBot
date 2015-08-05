@@ -94,7 +94,7 @@ Process browser tasks with rate limiting
 
 <a name="module_browser..createPost"></a>
 ### browser~createPost(topicId, [replyTo], content, callback)
-Post content to an existing content
+Post content to an existing topic
 
 **Kind**: inner method of <code>[browser](#module_browser)</code>  
 
