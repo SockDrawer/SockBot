@@ -9,7 +9,7 @@ const gulp = require('gulp'),
     eslint = require('gulp-eslint'),
     git = require('gulp-git');
 
-const sockFiles = ['*.js', '!./gulpfile.js', 'plugins/**/*.js', '!node_modules/**'],
+const sockFiles = ['*.js', '!./gulpfile.js', '**/plugins/**/*.js', '!node_modules/**', '!test/**'],
     sockExterns = ['**/external/**/*.js'],
     sockDocs = ['README.md', 'docs/**/*.md'],
     sockTests = ['test/**/*.js'],
@@ -75,7 +75,7 @@ gulp.task('docs', ['gitBranch', 'lintExterns', 'docList'], (done) => {
     }
     const filter = gulpFilter(docgenFiles);
     gulp.src(sockFiles.concat(sockExterns))
-        .pipe(filter)
+    .pipe(filter)
         .pipe(gulpJsdoc2md({}))
         .on('error', done)
         .pipe(rename((path) => {
