@@ -47,7 +47,13 @@ const signature = '\n\n<!-- Posted by a clever robot -->',
         /** Ignored User Trust Level */
         ignored: 0
     },
-    actionIds = {
+    /**
+     * Discourse Post Actions
+     *
+     * @readonly
+     * @enum
+     */
+    postActions = {
         'bookmark': 1,
         'like': 2,
         'off_topic': 3,
@@ -88,6 +94,7 @@ const signature = '\n\n<!-- Posted by a clever robot -->',
     },
     externals = {
         trustLevels: trustLevels,
+        postActions: postActions,
         createPost: createPost,
         createPrivateMessage: createPrivateMessage,
         editPost: editPost,
@@ -318,6 +325,13 @@ function getPost(postId, callback) {
     });
 }
 
+/**
+ * Get all posts from a topic
+ *
+ * @param {number} topicId Topic to get posts from
+ * @param {eachPostCallback} eachPost Callback to process individual posts
+ * @param {completionCallback} complete Completion callback
+ */
 function getPosts(topicId, eachPost, complete) {
     const base = '/t/' + topicId + '/posts.json?include_raw=1',
         ctx = this;
@@ -352,6 +366,12 @@ function getPosts(topicId, eachPost, complete) {
     });
 }
 
+/**
+ * Get all topics visible from `/latest`
+ *
+ * @param {eachTopicCallback} eachTopic Callback to process individual topics
+ * @param {completionCallback} complete Completion callback
+ */
 function getTopics(eachTopic, complete) {
     const ctx = this;
     let url = '/latest.json?no_definitions=true';
@@ -373,8 +393,16 @@ function getTopics(eachTopic, complete) {
     }, complete);
 }
 
+/**
+ * Perform a post action
+ *
+ * @param {postActions} action Action to perform
+ * @param {number} postId Id of post to act on
+ * @param {string} message Message to leave as part of post action
+ * @param {completionCallback} callback Completion callback
+ */
 function postAction(action, postId, message, callback) {
-    const actionId = actionIds[action];
+    const actionId = postActions[action];
     this.queue.push({
         method: 'POST',
         url: '/post_actions',
@@ -702,7 +730,7 @@ function cleanPost(post) {
  *
  * @callback
  * @name completedCallback
- * @param {Exception} [err=null] Error encountered processing request
+ * @param {Exception} [err=null] Error encountered
  */
 
 /**
@@ -724,12 +752,30 @@ function cleanPost(post) {
  */
 
 /**
- * Notificationss Completion Callback
+ * Notifications Completion Callback
  *
  * @callback
  * @name notificationsCallback
  * @param {Excption} [err=null] Error encountered processing request
  * @param {external.notifications.notifications} notifications Notifications found.
+ */
+
+/**
+ * Each Topic Callback
+ *
+ * @callback
+ * @name eachTopicCallback
+ * @param {external.topics.Topic} topic Topic to process
+ * @param {completedCallback} callback Completion callback
+ */
+
+/**
+ * Each Post Callback
+ *
+ * @callback
+ * @name eachPostCallback
+ * @param {external.posts.CleanedPost} post Post to process
+ * @param {completedCallback} callback Completion callback
  */
 
 /* istanbul ignore else */
