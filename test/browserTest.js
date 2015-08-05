@@ -133,7 +133,7 @@ describe('browser', () => {
         const fns = ['createPost', 'createPrivateMessage', 'editPost', 'login', 'messageBus', 'getPost', 'getTopic',
                 'getNotifications', 'postAction', 'getPosts', 'getTopics', 'readPosts'
             ],
-            objs = ['trustLevels'];
+            objs = ['trustLevels', 'postActions'];
         describe('should include expected functions:', () => {
             fns.forEach((fn) => {
                 it('should have: ' + fn + '()', () => expect(browserModule.externals[fn]).to.be.a('function'));
