@@ -1,0 +1,160 @@
+'use strict';
+
+const async = require('async');
+const utils = require('../utils');
+
+/**
+ * Default configuration settings
+ * @typedef {object}
+ */
+const defaultConfig = {
+        /**
+         * Whether like binges should be performed
+         * @type {boolean}
+         */
+        binge: false,
+        /**
+         * Maximum number of likes to hand out as part of a like binge
+         * @type {number}
+         */
+        bingeCap: 500,
+        /**
+         * Topics to hand out likes in
+         * @type {number[]}
+         */
+        topics: [1000],
+        /**
+         * Time to delay liking post as posts are streamed in
+         * @type {number}
+         */
+        delay: 15 * 1000,
+        /**
+         * Amount of time to scatter likes by
+         * @type {number}
+         */
+        scatter: 5 * 1000
+    },
+    /**
+     * Internal status store
+     * @typedef {object}
+     */
+    internals = {
+        /**
+         * Browser to use for communication with discourse
+         * @type {Browser}
+         */
+        browser: null,
+        /**
+         * Instance configuration
+         * @type {object}
+         */
+        config: defaultConfig,
+        /**
+         * Interval token for like binges
+         * @type {*}
+         */
+        bingeInterval: null,
+        /**
+         * Count of likes handed out durring latest binge
+         * @type {number}
+         */
+        likeCount: 0
+    };
+exports.defaultConfig = defaultConfig;
+exports.internals = internals;
+
+/**
+ * Prepare plugin prior to login
+ *
+ * @param {*} plugConfig Plugin specific configuration
+ * @param {Config} config Overall Bot Configuration
+ * @param {externals.events.SockEvents} events EventEmitter used for the bot
+ * @param {Browser} browser Web browser for communicating with discourse
+ */
+exports.prepare = function prepare(plugConfig, config, events, browser) {
+    internals.browser = browser;
+    if (typeof plugConfig !== 'object') {
+        plugConfig = {};
+    }
+    internals.config = utils.mergeObjects(defaultConfig, plugConfig);
+    internals.config.topics.forEach((topic) => events.onTopic(topic, exports.messageHandler));
+};
+
+/**
+ * Start the plugin after login
+ */
+exports.start = function start() {
+    if (internals.config.binge) {
+        internals.bingeInterval = setInterval(exports.binge, 24 * 60 * 60 * 1000);
+    }
+};
+
+/**
+ * Stop the plugin prior to exit or reload
+ */
+exports.stop = function stop() {
+    if (internals.bingeInterval) {
+        clearInterval(internals.bingeInterval);
+    }
+};
+
+/**
+ * Handle topic message
+ *
+ * @param {external.notifications.notification} data Notification data
+ * @param {external.topics.Topic} topic Topic containing post generating notification
+ * @param {external.posts.CleanedPost} post Post that generated notification
+ */
+exports.messageHandler = function messageHandler(data, topic, post) {
+    if (data.type !== 'created') {
+        return;
+    }
+    const delay = Math.ceil(internals.config.delay + Math.random() * internals.config.scatter);
+    setTimeout(() => {
+        utils.log('Liking Post /t/' + post.topic_id + '/' + post.post_number + ' by @' + post.username);
+        internals.browser.postAction('like', post.id, '', () => 0);
+    }, delay);
+};
+
+/**
+ * Perform a like binge
+ */
+exports.binge = function binge() {
+    internals.likeCount = 0;
+    utils.log('Beginning Like Binge');
+    async.eachSeries(internals.config.topics, (topicId, next) => {
+        internals.browser.getPosts(topicId, exports.handlePost, next);
+    }, (err) => utils.log('Like Binge Completed: ' + err));
+};
+
+/**
+ * Handle a post in a like binge
+ *
+ * @param {external.posts.CleanedPost} post Post to handle
+ * @param {completionCallback} callback Completion Callback
+ */
+exports.handlePost = function handlePost(post, callback) {
+    const likeable = post.actions_summary.some((action) => action.id === 2 && action.can_act);
+    if (likeable) {
+        internals.browser.postAction('like', post.id, '', (err) => {
+            if (err) {
+                return callback(err);
+            }
+            internals.likeCount += 1;
+            if (internals.likeCount >= internals.config.bingeCap) {
+                return callback('Like Binge Limit Reached');
+            }
+            setTimeout(callback, 1000);
+        });
+    } else {
+        callback();
+    }
+};
+
+/**
+ * Completion callback
+ *
+ * @callback
+ * @name completionCallback
+ * @param {Error} [err=null] Error encountered before completion
+ */
