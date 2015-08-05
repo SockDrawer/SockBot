@@ -5,7 +5,8 @@
  * @license MIT
  */
 
-const config = require('./config');
+const config = require('./config'),
+    PostBuffer = require('./classes/PostBuffer');
 
 const request = require('request'),
     async = require('async');
@@ -90,7 +91,10 @@ const signature = '\n\n<!-- Posted by a clever robot -->',
         defaults: defaults,
         signature: signature,
         coreQueue: coreQueue,
-        pluginQueue: pluginQueue
+        pluginQueue: pluginQueue,
+        postBuffer: null, //Set by the first call to createPost()
+        postBufferDelay: 5000,
+        postSeparator: '\n\n---\n\n'
     },
     externals = {
         trustLevels: trustLevels,
@@ -166,7 +170,7 @@ function queueWorker(task, callback) {
 }
 
 /**
- * Post content to an existing content
+ * Post content to an existing topic
  *
  * @param {number} topicId Topic to post to
  * @param {number} [replyTo] Post Number in topic that this post is in reply to
@@ -174,34 +178,45 @@ function queueWorker(task, callback) {
  * @param {postedCallback} callback Completion callback
  */
 function createPost(topicId, replyTo, content, callback) {
+    const ctx = this;
     if (callback === undefined) {
         callback = content;
         content = replyTo;
         replyTo = undefined;
     }
+    if (replyTo === null) {
+        replyTo = undefined;
+    }
     if (typeof callback !== 'function') {
         throw new Error('callback must be supplied');
     }
-    this.queue.push({
-        method: 'POST',
-        url: '/posts',
-        form: {
-            raw: content + internals.signature,
-            'topic_id': topicId,
-            'is_warning': false,
-            'reply_to_post_number': replyTo,
-            category: '',
-            archetype: 'regular',
-            'auto_close_time': ''
-        },
-        callback: (err, body) => {
-            if (err) {
-                return callback(err);
-            }
-            callback(null, cleanPost(body));
-        },
-        delay: this.delay
-    });
+    if (!internals.postBuffer){
+        internals.postBuffer = new PostBuffer(internals.postBufferDelay, (key, values) => {
+            const replies = [];
+            values.forEach(value => replies.push(value.content));
+            ctx.queue.push({
+                method: 'POST',
+                url: '/posts',
+                form: {
+                    raw: replies.join(internals.postSeparator) + internals.signature,
+                    'topic_id': key.topicId,
+                    'is_warning': false,
+                    'reply_to_post_number': key.replyTo,
+                    category: '',
+                    archetype: 'regular',
+                    'auto_close_time': ''
+                },
+                callback: (err, body) => {
+                    if (err) {
+                        body = null;
+                    }
+                    values.forEach(value => value.callback(err, cleanPost(body)));
+                },
+                delay: ctx.delay
+            });
+        });
+    }
+    internals.postBuffer.add(topicId, replyTo, content, callback);
 }
 
 /**
@@ -688,6 +703,9 @@ function cleanPostRaw(post) {
  * @returns {external.posts.CleanedPost} Cleaned Post
  */
 function cleanPost(post) {
+    if (!post) {
+        return null;
+    }
     cleanPostRaw(post);
     setTrustLevel(post);
     setPostUrl(post);

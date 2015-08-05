@@ -11,7 +11,8 @@ const expect = chai.expect;
 // The thing we're testing
 const browserModule = require('../browser'),
     utils = require('../utils'),
-    config = require('../config');
+    config = require('../config'),
+    PostBuffer = require('../classes/PostBuffer');
 const coreBrowser = browserModule.internals.core,
     pluginBrowser = browserModule.internals.plugins;
 
@@ -38,7 +39,8 @@ describe('browser', () => {
     describe('internals', () => {
         const fns = ['request'],
             objs = ['core', 'plugins', 'current', 'defaults', 'coreQueue', 'pluginQueue'],
-            vals = ['signature'];
+            vals = ['signature', 'postBufferDelay', 'postSeparator'],
+            nulls = ['postBuffer'];
         describe('should include expected functions:', () => {
             fns.forEach((fn) => {
                 it(fn + '()', () => expect(browserModule.internals[fn]).to.be.a('function'));
@@ -54,8 +56,13 @@ describe('browser', () => {
                 it(val, () => expect(browserModule.internals[val]).to.not.be.undefined);
             });
         });
+        describe('should include expected nulls', () => {
+            nulls.forEach((val) => {
+                it(val, () => expect(browserModule.internals[val]).to.be.null);
+            });
+        });
         it('should include only expected keys', () => {
-            browserModule.internals.should.have.all.keys(fns.concat(objs, vals));
+            browserModule.internals.should.have.all.keys(fns.concat(objs, vals, nulls));
         });
     });
     describe('core mode', () => {
@@ -156,121 +163,260 @@ describe('browser', () => {
                             push: sinon.stub()
                         }
                     },
-                    queue = object.queue;
-                beforeEach(() => queue.push.reset());
-                it('should accept four parameters version', () => {
-                    object.createPost(1, 2, '', () => 0);
-                    queue.push.called.should.be.true;
-                });
-                it('should accept three parameters version', () => {
-                    object.createPost(1, '', () => 0);
-                    queue.push.called.should.be.true;
-                });
-                it('should reject four parameters version with no callback', () => {
-                    expect(() => object.createPost(1, 2, '', null)).to.throw('callback must be supplied');
-                    queue.push.called.should.be.false;
-                });
-                it('should reject three parameters version with no callback', () => {
-                    expect(() => object.createPost(1, 2, '')).to.throw('callback must be supplied');
-                    queue.push.called.should.be.false;
-                });
-                it('should set http method to POST', () => {
-                    object.createPost(100, '', () => 0);
-                    const args = queue.push.lastCall.args;
-                    args.should.have.length(1);
-                    args[0].should.have.any.key('method');
-                    args[0].method.should.equal('POST');
-                });
-                it('should set url', () => {
-                    object.createPost(100, '', () => 0);
-                    const args = queue.push.lastCall.args;
-                    args.should.have.length(1);
-                    args[0].should.have.any.key('url');
-                    args[0].url.should.equal('/posts');
-                });
-                it('should set form', () => {
-                    object.createPost(100, '', () => 0);
-                    const args = queue.push.lastCall.args;
-                    args.should.have.length(1);
-                    args[0].should.have.any.key('form');
-                    args[0].form.should.be.a('object');
-                });
-                it('should set callback', () => {
-                    object.createPost(100, '', () => 0);
-                    const args = queue.push.lastCall.args;
-                    args.should.have.length(1);
-                    args[0].should.have.any.key('callback');
-                    args[0].callback.should.be.a('function');
-                });
-                it('should set delay', () => {
-                    object.createPost(100, '', () => 0);
-                    const args = queue.push.lastCall.args;
-                    args.should.have.length(1);
-                    args[0].should.have.any.key('delay');
-                    args[0].delay.should.equal(object.delay);
+                    queue = object.queue,
+                    bufferTicks = browserModule.internals.postBufferDelay;
+                let clock;
+                before(() => clock = sinon.useFakeTimers());
+                beforeEach(() => {
+                        queue.push.reset();
+                        browserModule.internals.postBuffer = null;
+                    });
+                after(() => clock.restore());
+                describe('parameters', () => {
+                    it('should accept four parameters version', () => {
+                        object.createPost(1, 2, '', () => 0);
+                        clock.tick(bufferTicks);
+                        queue.push.called.should.be.true;
+                    });
+                    it('should accept three parameters version', () => {
+                        object.createPost(1, '', () => 0);
+                        clock.tick(bufferTicks);
+                        queue.push.called.should.be.true;
+                    });
+                    it('should reject four parameters version with no callback', () => {
+                        expect(() => object.createPost(1, 2, '', null)).to.throw('callback must be supplied');
+                        clock.tick(bufferTicks);
+                        queue.push.called.should.be.false;
+                    });
+                    it('should reject three parameters version with no callback', () => {
+                        expect(() => object.createPost(1, 2, '')).to.throw('callback must be supplied');
+                        clock.tick(bufferTicks);
+                        queue.push.called.should.be.false;
+                    });
+                    it('should set http method to POST', () => {
+                        object.createPost(100, '', () => 0);
+                        clock.tick(bufferTicks);
+                        const args = queue.push.lastCall.args;
+                        args.should.have.length(1);
+                        args[0].should.have.any.key('method');
+                        args[0].method.should.equal('POST');
+                    });
+                    it('should set url', () => {
+                        object.createPost(100, '', () => 0);
+                        clock.tick(bufferTicks);
+                        const args = queue.push.lastCall.args;
+                        args.should.have.length(1);
+                        args[0].should.have.any.key('url');
+                        args[0].url.should.equal('/posts');
+                    });
+                    it('should set form', () => {
+                        object.createPost(100, '', () => 0);
+                        clock.tick(bufferTicks);
+                        const args = queue.push.lastCall.args;
+                        args.should.have.length(1);
+                        args[0].should.have.any.key('form');
+                        args[0].form.should.be.a('object');
+                    });
+                    it('should set callback', () => {
+                        object.createPost(100, '', () => 0);
+                        clock.tick(bufferTicks);
+                        const args = queue.push.lastCall.args;
+                        args.should.have.length(1);
+                        args[0].should.have.any.key('callback');
+                        args[0].callback.should.be.a('function');
+                    });
+                    it('should set delay', () => {
+                        object.createPost(100, '', () => 0);
+                        clock.tick(bufferTicks);
+                        const args = queue.push.lastCall.args;
+                        args.should.have.length(1);
+                        args[0].should.have.any.key('delay');
+                        args[0].delay.should.equal(object.delay);
+                    });
                 });
                 describe('form', () => {
                     it('should set `raw`', () => {
                         browserModule.internals.signature = '\nthis is my signature';
                         object.createPost(100, 'i have content', () => 0);
+                        clock.tick(bufferTicks);
                         const form = queue.push.lastCall.args[0].form;
                         form.should.have.any.key('raw');
                         form.raw.should.equal('i have content\nthis is my signature');
                     });
                     it('should set `topic_id`', () => {
                         object.createPost(100, '', () => 0);
+                        clock.tick(bufferTicks);
                         const form = queue.push.lastCall.args[0].form;
                         form.should.have.any.key('topic_id');
                         form.topic_id.should.equal(100);
                     });
                     it('should set `is_warning`', () => {
                         object.createPost(100, '', () => 0);
+                        clock.tick(bufferTicks);
                         const form = queue.push.lastCall.args[0].form;
                         form.should.have.any.key('is_warning');
                         form.is_warning.should.equal(false);
                     });
                     it('should set `reply_to_post_number`', () => {
                         object.createPost(100, 42, '', () => 0);
+                        clock.tick(bufferTicks);
                         const form = queue.push.lastCall.args[0].form;
                         form.should.have.any.key('reply_to_post_number');
                         form.reply_to_post_number.should.equal(42);
                     });
+                    it('should set undefined `reply_to_post_number` to undefined', () => {
+                        object.createPost(100, undefined, '', () => 0);
+                        clock.tick(bufferTicks);
+                        const form = queue.push.lastCall.args[0].form;
+                        form.should.have.any.key('reply_to_post_number');
+                        expect(form.reply_to_post_number).to.be.undefined;
+                    });
+                    it('should set null `reply_to_post_number` to undefined', () => {
+                        object.createPost(100, null, '', () => 0);
+                        clock.tick(bufferTicks);
+                        const form = queue.push.lastCall.args[0].form;
+                        form.should.have.any.key('reply_to_post_number');
+                        expect(form.reply_to_post_number).to.be.undefined;
+                    });
                     it('should set `category`', () => {
                         object.createPost(100, '', () => 0);
+                        clock.tick(bufferTicks);
                         const form = queue.push.lastCall.args[0].form;
                         form.should.have.any.key('category');
                         form.category.should.equal('');
                     });
                     it('should set `archetype`', () => {
                         object.createPost(100, '', () => 0);
+                        clock.tick(bufferTicks);
                         const form = queue.push.lastCall.args[0].form;
                         form.should.have.any.key('archetype');
                         form.archetype.should.equal('regular');
                     });
                     it('should set `auto_close_time`', () => {
                         object.createPost(100, '', () => 0);
+                        clock.tick(bufferTicks);
                         const form = queue.push.lastCall.args[0].form;
                         form.should.have.any.key('auto_close_time');
                         form.auto_close_time.should.equal('');
                     });
                 });
-                it('should pass err to external callback on completion', () => {
-                    queue.push.yieldsTo('callback', new Error('test error!'));
-                    const spy = sinon.spy();
-                    object.createPost(100, '', spy);
-                    spy.called.should.be.true;
-                    spy.lastCall.args.should.have.length(1);
-                    spy.lastCall.args[0].should.be.an.instanceOf(Error);
+                describe('callbacks', () => {
+                    it('should pass err to external callback on completion', () => {
+                        queue.push.yieldsTo('callback', new Error('test error!'));
+                        const spy = sinon.spy();
+                        object.createPost(100, '', spy);
+                        clock.tick(bufferTicks);
+                        spy.called.should.be.true;
+                        spy.lastCall.args.should.have.length(2);
+                        spy.lastCall.args[0].should.be.an.instanceOf(Error);
+                        expect(spy.lastCall.args[1]).to.be.null;
+                    });
+                    it('should pass post to external callback on completion', () => {
+                        queue.push.yieldsTo('callback', null, {});
+                        const spy = sinon.spy();
+                        object.createPost(100, '', spy);
+                        clock.tick(bufferTicks);
+                        spy.called.should.be.true;
+                        spy.lastCall.args.should.have.length(2);
+                        expect(spy.lastCall.args[0]).to.equal(null);
+                        // cleanPost should have been called, adding these keys
+                        spy.lastCall.args[1].should.have.keys('cleaned', 'url', 'reply_to');
+                    });
                 });
-                it('should pass post to external callback on completion', () => {
-                    queue.push.yieldsTo('callback', null, {});
-                    const spy = sinon.spy();
-                    object.createPost(100, '', spy);
-                    spy.called.should.be.true;
-                    spy.lastCall.args.should.have.length(2);
-                    expect(spy.lastCall.args[0]).to.equal(null);
-                    // cleanPost should have been called, adding these keys
-                    spy.lastCall.args[1].should.have.keys('cleaned', 'url', 'reply_to');
+                describe('buffering', () => {
+                    it('should create the post buffer on first call', () => {
+                        expect(browserModule.internals.postBuffer).to.be.null;
+                        object.createPost(100, '', () => 0);
+                        clock.tick(bufferTicks);
+                        expect(browserModule.internals.postBuffer).to.not.be.null;
+                    });
+                    it('should not create the post buffer on second call', () => {
+                        const pb = new PostBuffer(bufferTicks, () => 0);
+                        browserModule.internals.postBuffer = pb;
+                        object.createPost(100, '', () => 0);
+                        clock.tick(bufferTicks);
+                        browserModule.internals.postBuffer.should.equal(pb);
+                    });
+                    it('should combine two posts posted within the buffer period', () => {
+                        const p1 = '\npost one';
+                        const p2 = '\npost two';
+                        const p = [p1, p2].join(browserModule.internals.postSeparator);
+                        const sig = '\nmerged signature';
+                        browserModule.internals.signature = sig;
+                        object.createPost(100, p1, () => 0);
+                        clock.tick(bufferTicks - 1);
+                        object.createPost(100, p2, () => 0);
+                        clock.tick(bufferTicks);
+                        const form = queue.push.lastCall.args[0].form;
+                        form.raw.should.equal(p + sig);
+                    });
+                    it('should not combine two posts posted outside the buffer period', () => {
+                        const p1 = '\npost one';
+                        const p2 = '\npost two';
+                        const sig = '\nmerged signature';
+                        browserModule.internals.signature = sig;
+                        object.createPost(100, p1, () => 0);
+                        clock.tick(bufferTicks);
+                        object.createPost(100, p2, () => 0);
+                        clock.tick(bufferTicks);
+                        let form = queue.push.firstCall.args[0].form;
+                        form.raw.should.equal(p1 + sig);
+                        form = queue.push.lastCall.args[0].form;
+                        form.raw.should.equal(p2 + sig);
+                    });
+                    it('should combine two posts with the same topic and replyTo', () => {
+                        const p1 = '\npost one';
+                        const p2 = '\npost two';
+                        const p = [p1, p2].join(browserModule.internals.postSeparator);
+                        const sig = '\nmerged signature';
+                        browserModule.internals.signature = sig;
+                        object.createPost(100, 1, p1, () => 0);
+                        object.createPost(100, 1, p2, () => 0);
+                        clock.tick(bufferTicks);
+                        const form = queue.push.lastCall.args[0].form;
+                        form.raw.should.equal(p + sig);
+                    });
+                    it('should not combine two posts with the same topic and different replyTo', () => {
+                        const p1 = '\npost one';
+                        const p2 = '\npost two';
+                        const sig = '\nmerged signature';
+                        browserModule.internals.signature = sig;
+                        object.createPost(100, 1, p1, () => 0);
+                        object.createPost(100, 2, p2, () => 0);
+                        clock.tick(bufferTicks);
+                        let form = queue.push.firstCall.args[0].form;
+                        form.raw.should.equal(p1 + sig);
+                        form = queue.push.lastCall.args[0].form;
+                        form.raw.should.equal(p2 + sig);
+                    });
+                    it('should not combine two posts with different topic', () => {
+                        const p1 = '\npost one';
+                        const p2 = '\npost two';
+                        const sig = '\nmerged signature';
+                        browserModule.internals.signature = sig;
+                        object.createPost(100, p1, () => 0);
+                        object.createPost(101, p2, () => 0);
+                        clock.tick(bufferTicks);
+                        let form = queue.push.firstCall.args[0].form;
+                        form.raw.should.equal(p1 + sig);
+                        form = queue.push.lastCall.args[0].form;
+                        form.raw.should.equal(p2 + sig);
+                    });
+                    it('should call both callbacks for merged post', () => {
+                        const spy = sinon.stub();
+                        object.createPost(100, '', spy);
+                        object.createPost(100, '', spy);
+                        clock.tick(bufferTicks);
+                        spy.calledTwice.should.be.true;
+                    });
+                    it('should call both callbacks for unmerged posts', () => {
+                        const spy = sinon.stub();
+                        object.createPost(100, '', spy);
+                        clock.tick(bufferTicks);
+                        object.createPost(100, '', spy);
+                        clock.tick(bufferTicks);
+                        spy.calledTwice.should.be.true;
+                    });
                 });
             });
             describe('createPrivateMessage()', () => {
