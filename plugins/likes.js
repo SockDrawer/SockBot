@@ -1,5 +1,13 @@
 'use strict';
-
+/**
+ * Auto-like module.
+ *
+ * Watches threads for new posts and likes them, includes "binge" functionality to catch up with likes on older posts
+ *
+ * @module likes
+ * @author Accalia
+ * @license MIT
+ */
 const async = require('async');
 const utils = require('../utils');
 
