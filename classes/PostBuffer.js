@@ -1,10 +1,16 @@
 'use strict';
 /**
  * Data structure to manage post merging to prevent spamming
- * @module PostBuffer
+ * @module classes.PostBuffer
  * @license MIT
  */
 
+/**
+ * Create a new PostBuffer
+ *
+ * @param {number} delay Buffering time before posting
+ * @param {postBufferCallback} callback Buffer delay expiry callback
+ */
 function PostBuffer(delay, callback) {
     if (!delay || typeof delay !== 'number') {
         throw 'delay must be supplied';
@@ -45,3 +51,14 @@ PostBuffer.prototype.add = (topicId, replyTo, content, callback) => {
 };
 
 module.exports = PostBuffer;
+
+/**
+ * PostBuffer Callback
+ *
+ * @see {@link #classes.PostBuffer.add|add} for more information about the members of key and values
+ *
+ * @callback
+ * @name postBufferCallback
+ * @param {Object} key Contains the members `topicId` and `replyTo`
+ * @param {Object} values Array of objects with the members `content` and `callback`
+ */
