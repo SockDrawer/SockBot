@@ -7,16 +7,38 @@
  */
 const utils = require('../utils');
 
+/**
+ * Default configuration settings
+ * @typedef {object}
+ */
 const defaultConfig = {
+        /**
+         * How old a post must be to be auro-read
+         * @type {number}
+         */
         readWait: 3 * 24 * 60 * 60 * 1000
     },
+    /**
+     * Internal status store
+     * @typedef {object}
+     */
     internals = {
+        /**
+         * Browser to use for communication with discourse
+         * @type {Browser}
+         */
+        browser: null,
+        /**
+         * Instance configuration
+         * @type {object}
+         */
         config: defaultConfig,
-        timer: undefined,
-        readify: readify
+        /**
+         * Instance configuration
+         * @type {object}
+         */
+        timer: undefined
     };
-
-let mBrowser;
 
 /**
  * Prepare Plugin prior to login
@@ -27,7 +49,7 @@ let mBrowser;
  * @param {Browser} browser Web browser for communicating with discourse
 */
 exports.prepare = function (plugConfig, config, events, browser) {
-    mBrowser = browser;
+    internals.browser = browser;
     internals.config = utils.mergeObjects(true, defaultConfig, plugConfig);
 };
 
@@ -35,7 +57,7 @@ exports.prepare = function (plugConfig, config, events, browser) {
  * Start the plugin after login
  */
 exports.start = function () {
-    internals.timer = setInterval(readify, 24 * 60 * 60 * 1000); //Daily
+    internals.timer = setInterval(exports.readify, 24 * 60 * 60 * 1000); //Daily
 };
 
 /**
@@ -47,35 +69,29 @@ exports.stop = function () {
 };
 
 /**
- * Handle notifications
- *
- * @param {external.notifications.Notification} notification Notification recieved
- * @param {external.topics.Topic} topic Topic trigger post belongs to
- * @param {external.posts.CleanedPost} post Post that triggered notification
+ * Autoread posts
  */
-exports.handler = function handler(notification, topic, post) {}; //eslint-disable-line no-unused-vars
-
-function readify() {
-    mBrowser.getTopics((topic, nextTopic) => {
+exports.readify = function readify() {
+    internals.browser.getTopics((topic, nextTopic) => {
         if (!topic) {
             return;
         }
         utils.log('Reading topic `' + topic.slug + '`');
         const now = new Date().getTime() - internals.config.readWait;
         const postIds = [];
-        mBrowser.getPosts(topic.id, (post, nextPost) => {
+        internals.browser.getPosts(topic.id, (post, nextPost) => {
             if (post && !post.read && Date.parse(post.created_at) < now) {
                 postIds.push(post.id);
             }
             nextPost();
         }, () => {
             if (postIds.length > 0){
-                mBrowser.readPosts(topic.id, postIds, () => 0);
+                internals.browser.readPosts(topic.id, postIds, () => 0);
             }
         });
         nextTopic();
     }, () => 0);
-}
+};
 
 /* istanbul ignore else */
 if (typeof GLOBAL.describe === 'function') {

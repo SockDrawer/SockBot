@@ -22,11 +22,8 @@ describe('autoreader', () => {
     it('should export stop()', () => {
         expect(autoreader.stop).to.be.a('function');
     });
-    it('should export handler()', () => {
-        expect(autoreader.handler).to.be.a('function');
-    });
-    it('should have handler() as a stub function', () => {
-        expect(autoreader.handler).to.not.throw();
+    it('should export readify()', () => {
+        expect(autoreader.readify).to.be.a('function');
     });
     describe('prepare()', () => {
         it('should use default config', () => {
@@ -86,7 +83,7 @@ describe('autoreader', () => {
             const spy = sandbox.stub(browser, 'getTopics');
             spy.callsArgWith(0, undefined);
             autoreader.prepare(undefined, undefined, undefined, browser);
-            autoreader.internals.readify();
+            autoreader.readify();
             utils.log.callCount.should.equal(0);
         });
         it('should read the topic', () => {
@@ -94,7 +91,7 @@ describe('autoreader', () => {
             topicSpy.callsArgWith(0, {id: 1, slug: 'Test'}, () => 0);
             sandbox.stub(browser, 'getPosts');
             autoreader.prepare(undefined, undefined, undefined, browser);
-            autoreader.internals.readify();
+            autoreader.readify();
             utils.log.calledOnce.should.be.true;
             utils.log.firstCall.calledWith('Reading topic `Test`').should.be.true;
         });
@@ -107,7 +104,7 @@ describe('autoreader', () => {
                     each({id: 1, read: false, created_at: '2000-01-01 00:00'}, complete);
                 });
             autoreader.prepare(undefined, undefined, undefined, browser);
-            autoreader.internals.readify();
+            autoreader.readify();
             utils.log.calledOnce.should.be.true;
             utils.log.firstCall.calledWith('Reading topic `Test`').should.be.true;
             browser.readPosts.calledOnce.should.be.true;
@@ -122,7 +119,7 @@ describe('autoreader', () => {
                     each({id: 1, read: true, created_at: '2000-01-01 00:00'}, complete);
                 });
             autoreader.prepare(undefined, undefined, undefined, browser);
-            autoreader.internals.readify();
+            autoreader.readify();
             utils.log.calledOnce.should.be.true;
             utils.log.firstCall.calledWith('Reading topic `Test`').should.be.true;
             browser.readPosts.callCount.should.equal(0);
@@ -135,7 +132,7 @@ describe('autoreader', () => {
                     each({id: 1, read: false, created_at: '2100-01-01 00:00'}, complete);
                 });
             autoreader.prepare(undefined, undefined, undefined, browser);
-            autoreader.internals.readify();
+            autoreader.readify();
             utils.log.calledOnce.should.be.true;
             utils.log.firstCall.calledWith('Reading topic `Test`').should.be.true;
             browser.readPosts.callCount.should.equal(0);
@@ -149,7 +146,7 @@ describe('autoreader', () => {
                     each(undefined, complete);
                 });
             autoreader.prepare(undefined, undefined, undefined, browser);
-            autoreader.internals.readify();
+            autoreader.readify();
             utils.log.calledOnce.should.be.true;
             utils.log.firstCall.calledWith('Reading topic `Test`').should.be.true;
             browser.readPosts.callCount.should.equal(0);
