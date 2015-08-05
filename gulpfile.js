@@ -75,7 +75,7 @@ gulp.task('docs', ['gitBranch', 'lintExterns', 'docList'], (done) => {
     }
     const filter = gulpFilter(docgenFiles);
     gulp.src(sockFiles.concat(sockExterns))
-    .pipe(filter)
+        .pipe(filter)
         .pipe(gulpJsdoc2md({}))
         .on('error', done)
         .pipe(rename((path) => {
@@ -143,7 +143,7 @@ gulp.task('gitConfig', (done) => {
  */
 gulp.task('commitDocs', ['gitConfig'], (done) => {
     gulp.src(sockDocs)
-        .pipe(git.add(['**/docs/**.md']))
+        .pipe(git.add())
         .pipe(git.commit('Automatically push updated documentation [ci skip]'))
         .on('error', () => 0)
         .on('finish', done);
