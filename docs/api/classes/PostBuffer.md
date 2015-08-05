@@ -38,7 +38,7 @@ Add details of a post to buffer
 PostBuffer Callback
 
 **Kind**: inner typedef of <code>[PostBuffer](#classes.module_PostBuffer)</code>  
-**See**: [add](#classes.PostBuffer.add) for more information about the members of key and values  
+**See**: [`add`](#classes.module_PostBuffer..PostBuffer+add) for more information about the members of key and values  
 
 | Param | Type | Description |
 | --- | --- | --- |
