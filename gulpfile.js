@@ -143,7 +143,7 @@ gulp.task('gitConfig', (done) => {
  */
 gulp.task('commitDocs', ['gitConfig'], (done) => {
     gulp.src(sockDocs)
-        .pipe(git.add())
+        .pipe(git.add(['**/docs/**.md']))
         .pipe(git.commit('Automatically push updated documentation [ci skip]'))
         .on('error', () => 0)
         .on('finish', done);
