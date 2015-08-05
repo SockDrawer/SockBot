@@ -6,12 +6,16 @@ Webbrowser abstraction for communicating with discourse
 
 * [browser](#module_browser)
   * [~trustLevels](#module_browser..trustLevels)
+  * [~postActions](#module_browser..postActions)
   * [~queueWorker(task, callback)](#module_browser..queueWorker)
   * [~createPost(topicId, [replyTo], content, callback)](#module_browser..createPost)
   * [~createPrivateMessage(to, title, content, callback)](#module_browser..createPrivateMessage)
   * [~editPost(postId, content, [editReason], callback)](#module_browser..editPost)
   * [~readPosts(topicId, postIds, callback)](#module_browser..readPosts)
   * [~getPost(postId, callback)](#module_browser..getPost)
+  * [~getPosts(topicId, eachPost, complete)](#module_browser..getPosts)
+  * [~getTopics(eachTopic, complete)](#module_browser..getTopics)
+  * [~postAction(action, postId, message, callback)](#module_browser..postAction)
   * [~getTopic(topicId, callback)](#module_browser..getTopic)
   * [~getCSRF(delay, queue, callback)](#module_browser..getCSRF)
   * [~doLogin(delay, queue, callback)](#module_browser..doLogin)
@@ -29,6 +33,8 @@ Webbrowser abstraction for communicating with discourse
   * [~loginCallback](#module_browser..loginCallback)
   * [~messageBusCallback](#module_browser..messageBusCallback)
   * [~notificationsCallback](#module_browser..notificationsCallback)
+  * [~eachTopicCallback](#module_browser..eachTopicCallback)
+  * [~eachPostCallback](#module_browser..eachPostCallback)
 
 <a name="module_browser..trustLevels"></a>
 ### browser~trustLevels
@@ -50,6 +56,25 @@ SockBot Virtual Trust Levels
 | tl1 | <code>1</code> | Discourst trust_level 1 Trust Level |
 | tl0 | <code>0</code> | Discourst trust_level 0 Trust Level |
 | ignored | <code>0</code> | Ignored User Trust Level |
+
+<a name="module_browser..postActions"></a>
+### browser~postActions
+Discourse Post Actions
+
+**Kind**: inner constant of <code>[browser](#module_browser)</code>  
+**Read only**: true  
+**Properties**
+
+| Name | Default |
+| --- | --- |
+| bookmark | <code>1</code> | 
+| like | <code>2</code> | 
+| off_topic | <code>3</code> | 
+| inappropriate | <code>4</code> | 
+| vote | <code>5</code> | 
+| notify_user | <code>6</code> | 
+| notify_moderators | <code>7</code> | 
+| spam | <code>8</code> | 
 
 <a name="module_browser..queueWorker"></a>
 ### browser~queueWorker(task, callback)
@@ -128,6 +153,42 @@ Get post details
 | --- | --- | --- |
 | postId | <code>number</code> | Id of post to retrieve |
 | callback | <code>postedCallback</code> | Completion callback |
+
+<a name="module_browser..getPosts"></a>
+### browser~getPosts(topicId, eachPost, complete)
+Get all posts from a topic
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| topicId | <code>number</code> | Topic to get posts from |
+| eachPost | <code>eachPostCallback</code> | Callback to process individual posts |
+| complete | <code>completionCallback</code> | Completion callback |
+
+<a name="module_browser..getTopics"></a>
+### browser~getTopics(eachTopic, complete)
+Get all topics visible from `/latest`
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| eachTopic | <code>eachTopicCallback</code> | Callback to process individual topics |
+| complete | <code>completionCallback</code> | Completion callback |
+
+<a name="module_browser..postAction"></a>
+### browser~postAction(action, postId, message, callback)
+Perform a post action
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| action | <code>postActions</code> | Action to perform |
+| postId | <code>number</code> | Id of post to act on |
+| message | <code>string</code> | Message to leave as part of post action |
+| callback | <code>completionCallback</code> | Completion callback |
 
 <a name="module_browser..getTopic"></a>
 ### browser~getTopic(topicId, callback)
@@ -311,7 +372,7 @@ Completion Callback
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| [err] | <code>Exception</code> | <code></code> | Error encountered processing request |
+| [err] | <code>Exception</code> | <code></code> | Error encountered |
 
 <a name="module_browser..loginCallback"></a>
 ### browser~loginCallback
@@ -337,7 +398,7 @@ MessageBus Completion Callback
 
 <a name="module_browser..notificationsCallback"></a>
 ### browser~notificationsCallback
-Notificationss Completion Callback
+Notifications Completion Callback
 
 **Kind**: inner typedef of <code>[browser](#module_browser)</code>  
 
@@ -345,4 +406,26 @@ Notificationss Completion Callback
 | --- | --- | --- | --- |
 | [err] | <code>Excption</code> | <code></code> | Error encountered processing request |
 | notifications | <code>external.notifications.notifications</code> |  | Notifications found. |
+
+<a name="module_browser..eachTopicCallback"></a>
+### browser~eachTopicCallback
+Each Topic Callback
+
+**Kind**: inner typedef of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| topic | <code>external.topics.Topic</code> | Topic to process |
+| callback | <code>completedCallback</code> | Completion callback |
+
+<a name="module_browser..eachPostCallback"></a>
+### browser~eachPostCallback
+Each Post Callback
+
+**Kind**: inner typedef of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| post | <code>external.posts.CleanedPost</code> | Post to process |
+| callback | <code>completedCallback</code> | Completion callback |
 
