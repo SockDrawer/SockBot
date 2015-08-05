@@ -1,6 +1,5 @@
 'use strict';
 const gulp = require('gulp'),
-    gulpFilter = require('gulp-filter'),
     gulpJsdoc2md = require('gulp-jsdoc-to-markdown'),
     rename = require('gulp-rename'),
     istanbul = require('gulp-istanbul'),
@@ -12,11 +11,9 @@ const gulp = require('gulp'),
 const sockFiles = ['*.js', '!./gulpfile.js', '**/plugins/**/*.js', '!node_modules/**', '!test/**'],
     sockExterns = ['**/external/**/*.js'],
     sockDocs = ['README.md', 'docs/**/*.md'],
-    sockTests = ['test/**/*.js'],
-    docgenFiles = [];
+    sockTests = ['test/**/*.js'];
 
 const JobNumber = process.env.TRAVIS_JOB_NUMBER,
-    CommitRange = process.env.TRAVIS_COMMIT_RANGE,
     runDocs = !JobNumber || /[.]1$/.test(JobNumber);
 
 /**
@@ -41,41 +38,14 @@ gulp.task('gitBranch', (done) => {
 });
 
 /**
- * Construct the array of file globs for gulpJsdoc2md
- */
-gulp.task('docList', ['gitBranch'], (done) => {
-    if (CommitRange) {
-        git.exec({
-            args: 'show --pretty="format:" --name-only ' + CommitRange
-        }, (err, stdout) => {
-            if (err) {
-                console.log('Error fetching files in commit range\n' + err); //eslint-disable-line no-console
-            } else {
-                stdout.split(/\r?\n/).forEach((file) => {
-                    if (file && file.length > 3 && file.endsWith('.js')) {
-                        docgenFiles.push(file);
-                    }
-                });
-            }
-            done();
-        });
-    } else {
-        docgenFiles.push('**');
-        done();
-    }
-});
-
-/**
  * Generate API documentation for all js files, place markup in the correct folder for readthedocs.org
  */
-gulp.task('docs', ['gitBranch', 'lintExterns', 'docList'], (done) => {
+gulp.task('docs', ['gitBranch', 'lintExterns'], (done) => {
     // Abort(successfully) early if running in CI and not job #1
     if (!runDocs) {
         return done();
     }
-    const filter = gulpFilter(docgenFiles);
     gulp.src(sockFiles.concat(sockExterns))
-        .pipe(filter)
         .pipe(gulpJsdoc2md({}))
         .on('error', done)
         .pipe(rename((path) => {
