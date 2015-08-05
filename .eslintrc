@@ -4,10 +4,12 @@
     "node": true
   },
   "rules": {
+    "array-bracket-spacing":[2,"never"],
     "block-scoped-var": 2,
     "brace-style": [2, "1tbs"],
     "camelcase": 1,
     "complexity": [2, 10],
+    "computed-property-spacing":[2,"never"],
     "consistent-return": 2,
     "curly": 2,
     "eol-last": 2,
@@ -27,11 +29,11 @@
     "no-undef": 2,
     "no-unused-vars": 1,
     "no-var": 2,
+    "object-curly-spacing": [2,"never"],
     "prefer-const": 2,
     "quotes": [2, "single", "avoid-escape"],
     "semi": [2, "always"],
     "space-after-keywords": [2, "always"],
-    "space-in-brackets": [2, "never"],
     "space-unary-ops": 2,
     "valid-jsdoc": [2, {
       "prefer": {
