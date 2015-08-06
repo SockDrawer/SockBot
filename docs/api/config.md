@@ -75,6 +75,8 @@ Default configuration options
     * [.ignoreCategories](#defaultConfig.core.ignoreCategories) : <code>Array.&lt;Number&gt;</code>
     * [.cooldownPeriod](#defaultConfig.core.cooldownPeriod) : <code>Number</code>
     * [.handleActedMessage](#defaultConfig.core.handleActedMessage) : <code>boolean</code>
+    * [.pollMessages](#defaultConfig.core.pollMessages) : <code>boolean</code>
+    * [.pollNotifications](#defaultConfig.core.pollNotifications) : <code>boolean</code>
   * [.plugins](#defaultConfig.plugins) : <code>object</code>
 
 <a name="defaultConfig.core"></a>
@@ -92,6 +94,8 @@ Core configuration options
   * [.ignoreCategories](#defaultConfig.core.ignoreCategories) : <code>Array.&lt;Number&gt;</code>
   * [.cooldownPeriod](#defaultConfig.core.cooldownPeriod) : <code>Number</code>
   * [.handleActedMessage](#defaultConfig.core.handleActedMessage) : <code>boolean</code>
+  * [.pollMessages](#defaultConfig.core.pollMessages) : <code>boolean</code>
+  * [.pollNotifications](#defaultConfig.core.pollNotifications) : <code>boolean</code>
 
 <a name="defaultConfig.core.username"></a>
 #### core.username : <code>string</code>
@@ -150,6 +154,23 @@ Disabling reduces load on the host forum.
 
 **Kind**: static property of <code>[core](#defaultConfig.core)</code>  
 **Default**: <code>false</code>  
+<a name="defaultConfig.core.pollMessages"></a>
+#### core.pollMessages : <code>boolean</code>
+Set whether to poll for messages.
+
+If the bot only needs to handle notifications, set this to `false` to reduce load on the host forum.
+
+**Kind**: static property of <code>[core](#defaultConfig.core)</code>  
+**Default**: <code>true</code>  
+<a name="defaultConfig.core.pollNotifications"></a>
+#### core.pollNotifications : <code>boolean</code>
+Set whether to poll for notifications.
+
+For bots, this will normally be left `true`.
+For cyberparts, set this to `false` to stop the bot marking notifications as read.
+
+**Kind**: static property of <code>[core](#defaultConfig.core)</code>  
+**Default**: <code>true</code>  
 <a name="defaultConfig.plugins"></a>
 ### defaultConfig.plugins : <code>object</code>
 Plugin configuration.
