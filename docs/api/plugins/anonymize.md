@@ -5,7 +5,7 @@ Post replies anonymously.
 Usage: Send a PM to the bot with a quote that specifies both the topic ID and the post number to reply to.
 
 Example:
-```text
+```lang-nohighlight
 [quote="username, post:x, topic:y, full:true"]
 Content inside the quote
 [/quote]
