@@ -95,13 +95,13 @@ Once a configuration file has been created it's time to start the bot! For this 
 the configuration file is named `config.yml` and is placed in the same folder as SockBot proper.
 
 A npm script has been created to run SockBot. In order to use this method execute the following command in 
-the folder SockBot is installed to.Cloning our repository
+the folder SockBot is installed to.
 ```
 npm start config.yml
 ```
 
 SockBot can also be started directly from the command line without using npm. To start SockBot this way
-execute the apropriate command below in the folder that SockBot is installed to.Cloning our repository
+execute the apropriate command below in the folder that SockBot is installed to.
 
 For Node.js
 ```
@@ -110,10 +110,13 @@ node --harmony SockBot.js config.yml
 
 For io.js
 ```
-node --harmony_arrow_functions SockBot.js config.yml
+iojs --harmony_arrow_functions SockBot.js config.yml
 ```
 
-At this point the bot should start and connect to discourse. If all goes well SockBot should produce output
+Note: On some platforms e.g. Ubuntu, the `node` binary may installed as `nodejs`; this to avoid clashing with
+an older `node` package that existed in the repositories before Node.js was added.
+
+At this point the bot should start and connect to Discourse. If all goes well SockBot should produce output
 similar to the example below.
 ```
 accalia@sockdrawer:~/workspace/SockBot $ npm start config.yml
