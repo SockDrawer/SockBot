@@ -596,6 +596,7 @@ describe('SockBot', () => {
                 test().should.equal(SockBot.internals.running);
             });
             it('should respect config setting disabling message polling', () => {
+                sandbox.stub(messages, 'start');
                 SockBot.internals.running = undefined;
                 config.core.pollMessages = false;
                 browser.login.yields(null, {});
@@ -641,6 +642,7 @@ describe('SockBot', () => {
                 test().should.equal(SockBot.internals.running);
             });
             it('should respect config setting disabling notifications polling', () => {
+                sandbox.stub(notifications, 'start');
                 SockBot.internals.running = undefined;
                 config.core.pollNotifications = false;
                 browser.login.yields(null, {});
