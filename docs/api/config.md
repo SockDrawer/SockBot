@@ -160,6 +160,9 @@ Set whether to poll for messages.
 
 If the bot only needs to handle notifications, set this to `false` to reduce load on the host forum.
 
+Note: Setting this to `false` will cause notifications to be polled less frequently;
+leave `true` if you want a more responsive bot
+
 **Kind**: static property of <code>[core](#defaultConfig.core)</code>  
 **Default**: <code>true</code>  
 <a name="defaultConfig.core.pollNotifications"></a>
