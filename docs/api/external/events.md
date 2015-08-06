@@ -6,12 +6,115 @@ SockEvents for SockBot2.0
 **License**: MIT  
 
 * [events](#module_events)
+  * [~onChannel(channel, handler)](#module_events..onChannel)
+  * [~onTopic(topicId, handler)](#module_events..onTopic)
+  * [~removeChannel(channel, handler)](#module_events..removeChannel) ⇒ <code>SockEvents</code>
+  * [~removeFunction(topicId, handler)](#module_events..removeFunction) ⇒ <code>SockEvents</code>
+  * [~onNotification(type, handler)](#module_events..onNotification) ⇒ <code>SockEvents</code>
+  * [~removeNotification(type, handler)](#module_events..removeNotification) ⇒ <code>SockEvents</code>
+  * [~onCommand(type, helpstring, handler)](#module_events..onCommand) ⇒ <code>SockEvents</code>
+  * [~removeCommand(command, handler)](#module_events..removeCommand) ⇒ <code>SockEvents</code>
   * [~SockEvents](#module_events..SockEvents) : <code>object</code>
   * [~command](#module_events..command) : <code>object</code>
   * [~messageHandler](#module_events..messageHandler)
   * [~topicMessageHandler](#module_events..topicMessageHandler)
   * [~notificationHandler](#module_events..notificationHandler)
   * [~commandHandler](#module_events..commandHandler)
+
+<a name="module_events..onChannel"></a>
+### events~onChannel(channel, handler)
+Register a message-bus channel listener
+
+**Kind**: inner method of <code>[events](#module_events)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| channel | <code>string</code> | Message-bus channel to subscribe to |
+| handler | <code>messageHandler</code> | Event Handler |
+
+<a name="module_events..onTopic"></a>
+### events~onTopic(topicId, handler)
+Register a message-bus topic listener
+
+**Kind**: inner method of <code>[events](#module_events)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| topicId | <code>Number</code> | Numerical ID of topic to subscribe to |
+| handler | <code>topicMessageHandler</code> | Event Handler |
+
+<a name="module_events..removeChannel"></a>
+### events~removeChannel(channel, handler) ⇒ <code>SockEvents</code>
+Unregister a message-bus channel listener
+
+**Kind**: inner method of <code>[events](#module_events)</code>  
+**Returns**: <code>SockEvents</code> - SockEvents for chaining calls  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| channel | <code>string</code> | Message-bus channel to subscribe to |
+| handler | <code>messageHandler</code> | Event Handler |
+
+<a name="module_events..removeFunction"></a>
+### events~removeFunction(topicId, handler) ⇒ <code>SockEvents</code>
+Unregister a message-bus topic listener
+
+**Kind**: inner method of <code>[events](#module_events)</code>  
+**Returns**: <code>SockEvents</code> - SockEvents for chaining calls  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| topicId | <code>Number</code> | Numerical ID of topic to subscribe to |
+| handler | <code>topicMessageHandler</code> | Event Handler |
+
+<a name="module_events..onNotification"></a>
+### events~onNotification(type, handler) ⇒ <code>SockEvents</code>
+Add a notification listener
+
+**Kind**: inner method of <code>[events](#module_events)</code>  
+**Returns**: <code>SockEvents</code> - SockEvents for chaining calls  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| type | <code>string</code> | Notification type |
+| handler | <code>notificationHandler</code> | Notification handler |
+
+<a name="module_events..removeNotification"></a>
+### events~removeNotification(type, handler) ⇒ <code>SockEvents</code>
+Remove a notification listener
+
+**Kind**: inner method of <code>[events](#module_events)</code>  
+**Returns**: <code>SockEvents</code> - SockEvents for chaining calls  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| type | <code>string</code> | Notification type |
+| handler | <code>notificationHandler</code> | Notification handler |
+
+<a name="module_events..onCommand"></a>
+### events~onCommand(type, helpstring, handler) ⇒ <code>SockEvents</code>
+Add a notification listener
+
+**Kind**: inner method of <code>[events](#module_events)</code>  
+**Returns**: <code>SockEvents</code> - SockEvents for chaining calls  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| type | <code>string</code> | Command name |
+| helpstring | <code>string</code> | Short help text for command |
+| handler | <code>commandHandler</code> | Command handler |
+
+<a name="module_events..removeCommand"></a>
+### events~removeCommand(command, handler) ⇒ <code>SockEvents</code>
+Remove a command listener
+
+**Kind**: inner method of <code>[events](#module_events)</code>  
+**Returns**: <code>SockEvents</code> - SockEvents for chaining calls  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| command | <code>string</code> | Command type |
+| handler | <code>commandHandler</code> | Command handler |
 
 <a name="module_events..SockEvents"></a>
 ### events~SockEvents : <code>object</code>
