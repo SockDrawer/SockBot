@@ -19,26 +19,31 @@ const defaultConfig = {
         /**
          * Whether like binges should be performed
          * @type {boolean}
+         * @default
          */
         binge: false,
         /**
          * Maximum number of likes to hand out as part of a like binge
          * @type {number}
+         * @default
          */
         bingeCap: 500,
         /**
          * Topics to hand out likes in
          * @type {number[]}
+         * @default
          */
         topics: [1000],
         /**
          * Time to delay liking post as posts are streamed in
          * @type {number}
+         * @default
          */
         delay: 15 * 1000,
         /**
          * Amount of time to scatter likes by
          * @type {number}
+         * @default
          */
         scatter: 5 * 1000
     },
