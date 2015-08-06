@@ -14,7 +14,7 @@ Required software:
 
 *or*
 
-* iojs version 1.7 or greater (version 2.4 or greater recommended)
+* io.js version 1.7 or greater (version 2.4 or greater recommended)
 
 ## Installation
 
@@ -118,7 +118,7 @@ similar to the example below.
 ```
 accalia@sockdrawer:~/workspace/SockBot $ npm start config.yml
 
-> sockbot@2.0.0 start /home/ubuntu/workspace/SockBot-ES6
+> sockbot@2.0.0 start /home/ubuntu/workspace/SockBot
 > node --harmony --harmony_arrow_functions SockBot.js "config.yml"
 
 [17:22:38] Command Registered: help: print command help listing
