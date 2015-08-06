@@ -55,7 +55,8 @@ module.exports = PostBuffer;
 /**
  * PostBuffer Callback
  *
- * @see {@link #classes.module_PostBuffer..PostBuffer+add|`add`} for more information about the members of key and values
+ * @see {@link #classes.module_PostBuffer..PostBuffer+add|`add`}
+ * for more information about the members of key and values
  *
  * @callback
  * @name postBufferCallback
