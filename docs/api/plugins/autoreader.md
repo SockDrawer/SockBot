@@ -1,6 +1,6 @@
 <a name="module_autoreader"></a>
 ## autoreader
-Auto-reader plugin
+Automatically read posts older than the configured interval.
 
 **Author:** RaceProUK  
 **License**: MIT  
@@ -44,7 +44,8 @@ Stop the plugin prior to exit or reload
 **Kind**: static method of <code>[autoreader](#module_autoreader)</code>  
 <a name="module_autoreader.readify"></a>
 ### autoreader.readify()
-Autoread posts
+Autoread posts worker method; gets the list of accessible topics, then scans each in turn,
+reading any unread posts it finds that are older than the configured interval.
 
 **Kind**: static method of <code>[autoreader](#module_autoreader)</code>  
 <a name="module_autoreader..defaultConfig"></a>
@@ -80,6 +81,6 @@ Instance configuration
 **Kind**: static property of <code>[internals](#module_autoreader..internals)</code>  
 <a name="module_autoreader..internals.timer"></a>
 #### internals.timer : <code>object</code>
-Instance configuration
+Used to stop the autoreading when the plugin is stopped
 
 **Kind**: static property of <code>[internals](#module_autoreader..internals)</code>  
