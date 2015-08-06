@@ -74,6 +74,7 @@ Default configuration options
     * [.ignoreUsers](#defaultConfig.core.ignoreUsers) : <code>Array.&lt;string&gt;</code>
     * [.ignoreCategories](#defaultConfig.core.ignoreCategories) : <code>Array.&lt;Number&gt;</code>
     * [.cooldownPeriod](#defaultConfig.core.cooldownPeriod) : <code>Number</code>
+    * [.handleActedMessage](#defaultConfig.core.handleActedMessage) : <code>boolean</code>
   * [.plugins](#defaultConfig.plugins) : <code>object</code>
 
 <a name="defaultConfig.core"></a>
@@ -90,6 +91,7 @@ Core configuration options
   * [.ignoreUsers](#defaultConfig.core.ignoreUsers) : <code>Array.&lt;string&gt;</code>
   * [.ignoreCategories](#defaultConfig.core.ignoreCategories) : <code>Array.&lt;Number&gt;</code>
   * [.cooldownPeriod](#defaultConfig.core.cooldownPeriod) : <code>Number</code>
+  * [.handleActedMessage](#defaultConfig.core.handleActedMessage) : <code>boolean</code>
 
 <a name="defaultConfig.core.username"></a>
 #### core.username : <code>string</code>
@@ -139,6 +141,15 @@ Cooldown timer for users that map to virtual trust level 1 or lower
 
 **Kind**: static property of <code>[core](#defaultConfig.core)</code>  
 **Default**: <code>3600000</code>  
+<a name="defaultConfig.core.handleActedMessage"></a>
+#### core.handleActedMessage : <code>boolean</code>
+Switch to handle `acted` type channel messages.
+
+This type of message is often not needed for bot operation and generates a fair bit of traffic.
+Disabling reduces load on the host forum.
+
+**Kind**: static property of <code>[core](#defaultConfig.core)</code>  
+**Default**: <code>false</code>  
 <a name="defaultConfig.plugins"></a>
 ### defaultConfig.plugins : <code>object</code>
 Plugin configuration.

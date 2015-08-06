@@ -98,16 +98,19 @@ Default configuration settings
 Whether like binges should be performed
 
 **Kind**: static property of <code>[defaultConfig](#module_likes..defaultConfig)</code>  
+**Default**: <code>false</code>  
 <a name="module_likes..defaultConfig.bingeCap"></a>
 #### defaultConfig.bingeCap : <code>number</code>
 Maximum number of likes to hand out as part of a like binge
 
 **Kind**: static property of <code>[defaultConfig](#module_likes..defaultConfig)</code>  
+**Default**: <code>500</code>  
 <a name="module_likes..defaultConfig.topics"></a>
 #### defaultConfig.topics : <code>Array.&lt;number&gt;</code>
 Topics to hand out likes in
 
 **Kind**: static property of <code>[defaultConfig](#module_likes..defaultConfig)</code>  
+**Default**: <code>[1000]</code>  
 <a name="module_likes..defaultConfig.delay"></a>
 #### defaultConfig.delay : <code>number</code>
 Time to delay liking post as posts are streamed in
