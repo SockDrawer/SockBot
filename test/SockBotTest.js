@@ -259,6 +259,7 @@ describe('SockBot', () => {
                 sandbox = sinon.sandbox.create();
                 doPluginRequire = sandbox.stub(SockBot.privateFns, 'doPluginRequire');
                 sandbox.stub(utils, 'error');
+                sandbox.stub(utils, 'log');
                 SockBot.internals.plugins = [];
             });
             afterEach(() => sandbox.restore());
@@ -323,6 +324,19 @@ describe('SockBot', () => {
                 utils.error.called.should.equal(false);
                 SockBot.internals.plugins.should.deep.equal([module]);
                 module.prepare.pluginName.should.equal('myModule');
+            });
+            it('should log message on success', () => {
+                const module = {
+                    prepare: () => 0,
+                    start: () => 0,
+                    stop: () => 0
+                };
+                doPluginRequire.returns(module);
+                config.plugins = {
+                    'myModule': true
+                };
+                loadPlugins();
+                utils.log.calledWith('Plugin `myModule` Loaded').should.be.true;
             });
             it('should support multiple plugins', () => {
                 const module1 = {
@@ -531,6 +545,9 @@ describe('SockBot', () => {
             sandbox.stub(async, 'whilst');
             sandbox.stub(messages, 'pollMessages');
             sandbox.stub(notifications, 'pollNotifications');
+            sandbox.stub(messages, 'start');
+            sandbox.stub(notifications, 'start');
+            sandbox.stub(commands, 'start');
             sandbox.useFakeTimers();
             notifications.internals.events = {
                 onChannel: () => 0
@@ -584,6 +601,20 @@ describe('SockBot', () => {
             browser.login.yields(null, {});
             SockBot.start(() => 0);
             async.whilst.callCount.should.equal(2);
+        });
+        describe('start core', () => {
+            it('should call messages.start()', () => {
+            browser.login.yields(null, {});    SockBot.start(() => 0);
+                messages.start.called.should.be.true;
+            });
+            it('should call notifications.start()', () => {
+                browser.login.yields(null, {});SockBot.start(() => 0);
+                notifications.start.called.should.be.true;
+            });
+            it('should call commands.start()', () => {
+                browser.login.yields(null, {});SockBot.start(() => 0);
+                commands.start.called.should.be.true;
+            });
         });
         describe('messages', () => {
             it('should respect running flag in messages poll', () => {
