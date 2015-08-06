@@ -1,6 +1,23 @@
 'use strict';
 /**
- * Anonymizer plugin
+ * Post replies anonymously.
+ *
+ * Usage: Send a PM to the bot with a quote that specifies both the topic ID and the post number to reply to.
+ *
+ * Example:
+ * ```
+ * [quote="username, post:x, topic:y, full:true"]
+ * Content inside the quote
+ * [/quote]
+ * Content outside the quote
+ * ```
+ * Replace `x` with the post number and `y` with the topic ID;
+ * the bot will then echo the message in its entirely in the desired topic.
+ *
+ * The `username` and `full:true` can be omitted as desired.
+ *
+ * Note: Bot must have permission to post in the topic specified.
+ *
  * @module anonymizer
  * @author RaceProUK
  * @license MIT

@@ -1,6 +1,7 @@
 'use strict';
 /**
- * Auto-reader plugin
+ * Automatically read posts older than the configured interval.
+ *
  * @module autoreader
  * @author RaceProUK
  * @license MIT
@@ -14,6 +15,7 @@ const utils = require('../utils');
 const defaultConfig = {
         /**
          * How old a post must be to be auro-read
+         * @default
          * @type {number}
          */
         readWait: 3 * 24 * 60 * 60 * 1000
@@ -34,7 +36,7 @@ const defaultConfig = {
          */
         config: defaultConfig,
         /**
-         * Instance configuration
+         * Used to stop the autoreading when the plugin is stopped
          * @type {object}
          */
         timer: undefined
@@ -69,9 +71,10 @@ exports.stop = function () {
 };
 
 /**
- * Autoread posts
+ * Autoread posts worker method; gets the list of accessible topics, then scans each in turn,
+ * reading any unread posts it finds that are older than the configured interval.
  */
-exports.readify = function readify() {
+exports.readify = function () {
     internals.browser.getTopics((topic, nextTopic) => {
         if (!topic) {
             return;
