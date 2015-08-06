@@ -16,7 +16,9 @@ exports.PostType = {
     /** Represents a regular forum post */
     'regular': 1,
     /** Represents a post that is the result of a moderator action */
-    'moderator_action': 2
+    'moderator_action': 2,
+    /** Represents a post that is the result of a listing/unlisting action */
+    'listing_action': 3
 };
 
 /**
@@ -105,6 +107,10 @@ exports.ActionSummary = {};
  * @param {boolean} wiki Is this post a wiki post?
  * @param {external.users.UserSummary|null} reply_to_user User that the post is in reply to
  * @param {ActionSummary[]} actions_summary Actions summaries for this post
+ * @param {string} action_code The type of action the post represents; used to determine the displayed icon
+ * @param {boolean} can_accept_answer Whether this post can be accepted as an answer
+ * @param {boolean} can_unaccept_answer Whether this post can be unaccepted as an answer
+ * @param {boolean|null} accepted_answer Whether this post is an accepted answer
  */
 exports.Post = {};
 
