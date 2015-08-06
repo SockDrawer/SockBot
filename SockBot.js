@@ -80,6 +80,7 @@ exports.start = function (callback) {
         config.user = user;
         notifications.start();
         messages.start();
+        commands.start();
         internals.plugins.forEach((plugin) => plugin.start());
         utils.log('SockBot `' + config.user.username + '` Started');
         internals.running = true;
