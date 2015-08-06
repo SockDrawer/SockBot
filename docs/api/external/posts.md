@@ -23,6 +23,7 @@ Discourse Post Type Enum
 | --- | --- | --- |
 | regular | <code>1</code> | Represents a regular forum post |
 | moderator_action | <code>2</code> | Represents a post that is the result of a moderator action |
+| listing_action | <code>3</code> | Represents a post that is the result of a listing/unlisting action |
 
 <a name="external.module_posts.PostActionType"></a>
 ### posts.PostActionType
@@ -110,6 +111,10 @@ Can be retrieved directly at `/posts/<postid>.json`
 | wiki | <code>boolean</code> | Is this post a wiki post? |
 | reply_to_user | <code>external.users.UserSummary</code> &#124; <code>null</code> | User that the post is in reply to |
 | actions_summary | <code>Array.&lt;ActionSummary&gt;</code> | Actions summaries for this post |
+| action_code | <code>string</code> | The type of action the post represents; used to determine the displayed icon |
+| can_accept_answer | <code>boolean</code> | Whether this post can be accepted as an answer |
+| can_unaccept_answer | <code>boolean</code> | Whether this post can be unaccepted as an answer |
+| accepted_answer | <code>boolean</code> &#124; <code>null</code> | Whether this post is an accepted answer |
 
 <a name="external.module_posts.CleanedPost"></a>
 ### posts.CleanedPost : <code>object</code>
