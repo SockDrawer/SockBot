@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "A sockpuppet bot to use on http://what.thedailywtf.com.",
   "main": "SockBot.js",
-  "repository": "https://github.com/AccaliaDeElementia/SockBot",
+  "repository": "https://github.com/SockDrawer/SockBot",
   "author": "Accalia Elementia <Accalia.de.elementia>",
   "contributors": [
     "RaceProUK <RaceProUK> (https://github.com/RaceProUK)",
