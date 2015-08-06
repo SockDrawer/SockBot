@@ -259,6 +259,7 @@ describe('SockBot', () => {
                 sandbox = sinon.sandbox.create();
                 doPluginRequire = sandbox.stub(SockBot.privateFns, 'doPluginRequire');
                 sandbox.stub(utils, 'error');
+                sandbox.stub(utils, 'log');
                 SockBot.internals.plugins = [];
             });
             afterEach(() => sandbox.restore());
@@ -323,6 +324,19 @@ describe('SockBot', () => {
                 utils.error.called.should.equal(false);
                 SockBot.internals.plugins.should.deep.equal([module]);
                 module.prepare.pluginName.should.equal('myModule');
+            });
+            it('should log message on success', () => {
+                const module = {
+                    prepare: () => 0,
+                    start: () => 0,
+                    stop: () => 0
+                };
+                doPluginRequire.returns(module);
+                config.plugins = {
+                    'myModule': true
+                };
+                loadPlugins();
+                utils.log.calledWith('Plugin `myModule` Loaded').should.be.true;
             });
             it('should support multiple plugins', () => {
                 const module1 = {

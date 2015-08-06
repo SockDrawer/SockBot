@@ -166,6 +166,7 @@ function loadPlugins() {
         } else if (typeof plugin.stop !== 'function') {
             utils.error('Plugin `' + module + '` does not export `stop()` function');
         } else {
+            utils.log('Plugin `' + module + '` Loaded');
             plugin.prepare.pluginName = module;
             internals.plugins.push(plugin);
         }
