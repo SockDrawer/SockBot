@@ -83,12 +83,16 @@ exports.start = function (callback) {
         internals.plugins.forEach((plugin) => plugin.start());
         utils.log('SockBot `' + config.user.username + '` Started');
         internals.running = true;
-        async.whilst(() => internals.running, (next) => {
-            messages.pollMessages(() => setTimeout(next, 3 * 1000));
-        });
-        async.whilst(() => internals.running, (next) => {
-            notifications.pollNotifications(() => setTimeout(next, 5 * 60 * 1000));
-        });
+        if (config.core.pollMessages) {
+            async.whilst(() => internals.running, (next) => {
+                messages.pollMessages(() => setTimeout(next, 3 * 1000));
+            });
+        }
+        if (config.core.pollNotifications) {
+            async.whilst(() => internals.running, (next) => {
+                notifications.pollNotifications(() => setTimeout(next, 5 * 60 * 1000));
+            });
+        }
         callback(null);
     });
 };

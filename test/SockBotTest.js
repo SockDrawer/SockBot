@@ -588,14 +588,26 @@ describe('SockBot', () => {
         describe('messages', () => {
             it('should respect running flag in messages poll', () => {
                 SockBot.internals.running = undefined;
+                config.core.pollMessages = true;
                 browser.login.yields(null, {});
                 SockBot.start(() => 0);
                 const test = async.whilst.firstCall.args[0];
                 SockBot.internals.running = Math.random();
                 test().should.equal(SockBot.internals.running);
             });
+            it('should respect config setting disabling message polling', () => {
+                SockBot.internals.running = undefined;
+                config.core.pollMessages = false;
+                browser.login.yields(null, {});
+                SockBot.start(() => 0);
+                const test = async.whilst.firstCall.args[1],
+                    spy = sinon.spy();
+                test(spy);
+                messages.pollMessages.called.should.be.false;
+            });
             it('should call messages.pollMessages() from first async forever', () => {
                 SockBot.internals.running = undefined;
+                config.core.pollMessages = true;
                 browser.login.yields(null, {});
                 SockBot.start(() => 0);
                 const test = async.whilst.firstCall.args[1],
@@ -605,6 +617,7 @@ describe('SockBot', () => {
             });
             it('should schedule next message poll for three sedonds from now', () => {
                 SockBot.internals.running = undefined;
+                config.core.pollMessages = true;
                 browser.login.yields(null, {});
                 SockBot.start(() => 0);
                 const test = async.whilst.firstCall.args[1],
@@ -618,7 +631,7 @@ describe('SockBot', () => {
             });
         });
         describe('notifications', () => {
-            it('should respect running flag in notrifications poll', () => {
+            it('should respect running flag in notifications poll', () => {
                 SockBot.internals.running = undefined;
                 browser.login.yields(null, {});
                 SockBot.start(() => 0);
@@ -626,8 +639,19 @@ describe('SockBot', () => {
                 SockBot.internals.running = Math.random();
                 test().should.equal(SockBot.internals.running);
             });
+            it('should respect config setting disabling notifications polling', () => {
+                SockBot.internals.running = undefined;
+                config.core.pollNotifications = false;
+                browser.login.yields(null, {});
+                SockBot.start(() => 0);
+                const test = async.whilst.firstCall.args[1], //Using secondCall errors, as there's no second call
+                    spy = sinon.spy();
+                test(spy);
+                notifications.pollNotifications.called.should.be.false;
+            });
             it('should call notifications.pollNotifications() from second async forever', () => {
                 SockBot.internals.running = undefined;
+                config.core.pollNotifications = true;
                 browser.login.yields(null, {});
                 SockBot.start(() => 0);
                 const test = async.whilst.secondCall.args[1],
@@ -637,6 +661,7 @@ describe('SockBot', () => {
             });
             it('should schedule next notifications.poll for five minutes from now', () => {
                 SockBot.internals.running = undefined;
+                config.core.pollNotifications = true;
                 browser.login.yields(null, {});
                 SockBot.start(() => 0);
                 const test = async.whilst.secondCall.args[1],

@@ -84,7 +84,26 @@ const defaultConfig = {
          * @default
          * @type {boolean}
          */
-        handleActedMessage: false
+        handleActedMessage: false,
+        /**
+         * Set whether to poll for messages.
+         *
+         * If the bot only needs to handle notifications, set this to `false` to reduce load on the host forum.
+         *
+         * @default
+         * @type {boolean}
+         */
+        pollMessages: true,
+        /**
+         * Set whether to poll for notifications.
+         *
+         * For bots, this will normally be left `true`.
+         * For cyberparts, set this to `false` to stop the bot marking notifications as read.
+         *
+         * @default
+         * @type {boolean}
+         */
+        pollNotifications: true
     },
     /**
      * Plugin configuration.
