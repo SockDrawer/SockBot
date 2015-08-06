@@ -545,6 +545,9 @@ describe('SockBot', () => {
             sandbox.stub(async, 'whilst');
             sandbox.stub(messages, 'pollMessages');
             sandbox.stub(notifications, 'pollNotifications');
+            sandbox.stub(messages, 'start');
+            sandbox.stub(notifications, 'start');
+            sandbox.stub(commands, 'start');
             sandbox.useFakeTimers();
             notifications.internals.events = {
                 onChannel: () => 0
@@ -598,6 +601,20 @@ describe('SockBot', () => {
             browser.login.yields(null, {});
             SockBot.start(() => 0);
             async.whilst.callCount.should.equal(2);
+        });
+        describe('start core', () => {
+            it('should call messages.start()', () => {
+            browser.login.yields(null, {});    SockBot.start(() => 0);
+                messages.start.called.should.be.true;
+            });
+            it('should call notifications.start()', () => {
+                browser.login.yields(null, {});SockBot.start(() => 0);
+                notifications.start.called.should.be.true;
+            });
+            it('should call commands.start()', () => {
+                browser.login.yields(null, {});SockBot.start(() => 0);
+                commands.start.called.should.be.true;
+            });
         });
         describe('messages', () => {
             it('should respect running flag in messages poll', () => {
