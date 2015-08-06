@@ -345,6 +345,16 @@ describe('notifications', () => {
                     sandbox.clock.tick(0);
                     events.emit.called.should.be.false;
                 });
+                it('should emit event on parseCommands finding no commands', () => {
+                    notification.type = 'mentioned';
+                    browser.getTopic.yields(null);
+                    browser.getPost.yields(null);
+                    commands.parseCommands.yields(null, []);
+                    utils.filterIgnored.yields(null);
+                    handleTopicNotification(notification);
+                    sandbox.clock.tick(0);
+                    events.emit.called.should.be.true;
+                });
             });
             it('should emit proper event on success', () => {
                 const topic = {},

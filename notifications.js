@@ -103,7 +103,9 @@ function handleTopicNotification(notification) {
             utils.filterIgnored(result.topic, result.post, next);
         }, (next) => {
             if (['mentioned', 'replied', 'quoted', 'private_message', 'posted'].indexOf(notification.type) > -1) {
-                commands.parseCommands(result.post, result.topic, (err2, commands2) => next(err2 || commands2));
+                commands.parseCommands(result.post, result.topic, (err2, commands2) => {
+                    next(err2 || (commands2 && commands2.length));
+                });
             } else {
                 next();
             }
