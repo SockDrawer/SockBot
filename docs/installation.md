@@ -137,6 +137,3 @@ SockBot should reply to such a summons by replying with the text of the post use
 
 Once function has been verified more complex behaviors can be enabled by crafting the appropriate 
 configuration file that activates and configures the appropriate plugins.
-
-
-

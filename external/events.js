@@ -68,71 +68,79 @@ exports.SockEvents = {
     /**
      * Register a message-bus channel listener
      *
+     * @function
+     * @name onChannel
      * @param {string} channel Message-bus channel to subscribe to
      * @param {messageHandler} handler Event Handler
      */
-    onChannel: true,
 
     /**
      * Register a message-bus topic listener
      *
+     * @function
+     * @name onTopic
      * @param {Number} topicId Numerical ID of topic to subscribe to
      * @param {topicMessageHandler} handler Event Handler
      */
-    onTopic: true,
 
     /**
      * Unregister a message-bus channel listener
      *
+     * @function
+     * @name removeChannel
      * @param {string} channel Message-bus channel to subscribe to
      * @param {messageHandler} handler Event Handler
      * @returns {SockEvents} SockEvents for chaining calls
      */
-    removeChannel: true,
 
     /**
      * Unregister a message-bus topic listener
      *
+     * @function
+     * @name removeFunction
      * @param {Number} topicId Numerical ID of topic to subscribe to
      * @param {topicMessageHandler} handler Event Handler
      * @returns {SockEvents} SockEvents for chaining calls
      */
-    removeTopic: true,
 
     /**
      * Add a notification listener
      *
+     * @function
+     * @name onNotification
      * @param {string} type Notification type
      * @param {notificationHandler} handler Notification handler
      * @returns {SockEvents} SockEvents for chaining calls
      */
-    onNotification: true,
 
     /**
      * Remove a notification listener
      *
+     * @function
+     * @name removeNotification
      * @param {string} type Notification type
      * @param {notificationHandler} handler Notification handler
      * @returns {SockEvents} SockEvents for chaining calls
      */
-    removeNotification: true,
 
     /**
      * Add a notification listener
      *
+     * @function
+     * @name onCommand
      * @param {string} type Command name
      * @param {string} helpstring Short help text for command
      * @param {commandHandler} handler Command handler
      * @returns {SockEvents} SockEvents for chaining calls
      */
-    onCommand: true,
 
     /**
      * Remove a command listener
      *
+     * @function
+     * @name removeCommand
      * @param {string} command Command type
      * @param {commandHandler} handler Command handler
      * @returns {SockEvents} SockEvents for chaining calls
      */
-    removeCommand: true
 };
