@@ -90,6 +90,9 @@ const defaultConfig = {
          *
          * If the bot only needs to handle notifications, set this to `false` to reduce load on the host forum.
          *
+         * Note: Setting this to `false` will cause notifications to be polled less frequently;
+         * leave `true` if you want a more responsive bot
+         *
          * @default
          * @type {boolean}
          */

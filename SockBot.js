@@ -78,18 +78,18 @@ exports.start = function (callback) {
             return callback(err);
         }
         config.user = user;
-        notifications.start();
-        messages.start();
         commands.start();
         internals.plugins.forEach((plugin) => plugin.start());
         utils.log('SockBot `' + config.user.username + '` Started');
         internals.running = true;
         if (config.core.pollMessages) {
+            messages.start();
             async.whilst(() => internals.running, (next) => {
                 messages.pollMessages(() => setTimeout(next, 3 * 1000));
             });
         }
         if (config.core.pollNotifications) {
+            notifications.start();
             async.whilst(() => internals.running, (next) => {
                 notifications.pollNotifications(() => setTimeout(next, 5 * 60 * 1000));
             });

@@ -603,6 +603,7 @@ describe('SockBot', () => {
                 const test = async.whilst.firstCall.args[1],
                     spy = sinon.spy();
                 test(spy);
+                messages.start.called.should.be.false;
                 messages.pollMessages.called.should.be.false;
             });
             it('should call messages.pollMessages() from first async forever', () => {
@@ -647,6 +648,7 @@ describe('SockBot', () => {
                 const test = async.whilst.firstCall.args[1], //Using secondCall errors, as there's no second call
                     spy = sinon.spy();
                 test(spy);
+                notifications.start.called.should.be.false;
                 notifications.pollNotifications.called.should.be.false;
             });
             it('should call notifications.pollNotifications() from second async forever', () => {
