@@ -604,15 +604,18 @@ describe('SockBot', () => {
         });
         describe('start core', () => {
             it('should call messages.start()', () => {
-            browser.login.yields(null, {});    SockBot.start(() => 0);
+                browser.login.yields(null, {});
+                SockBot.start(() => 0);
                 messages.start.called.should.be.true;
             });
             it('should call notifications.start()', () => {
-                browser.login.yields(null, {});SockBot.start(() => 0);
+                browser.login.yields(null, {});
+                SockBot.start(() => 0);
                 notifications.start.called.should.be.true;
             });
             it('should call commands.start()', () => {
-                browser.login.yields(null, {});SockBot.start(() => 0);
+                browser.login.yields(null, {});
+                SockBot.start(() => 0);
                 commands.start.called.should.be.true;
             });
         });
@@ -627,7 +630,6 @@ describe('SockBot', () => {
                 test().should.equal(SockBot.internals.running);
             });
             it('should respect config setting disabling message polling', () => {
-                sandbox.stub(messages, 'start');
                 SockBot.internals.running = undefined;
                 config.core.pollMessages = false;
                 browser.login.yields(null, {});
@@ -673,7 +675,6 @@ describe('SockBot', () => {
                 test().should.equal(SockBot.internals.running);
             });
             it('should respect config setting disabling notifications polling', () => {
-                sandbox.stub(notifications, 'start');
                 SockBot.internals.running = undefined;
                 config.core.pollNotifications = false;
                 browser.login.yields(null, {});
