@@ -3,13 +3,15 @@
 /*eslint no-unused-expressions:0 */
 
 const chai = require('chai'),
-    sinon = require('sinon');
+    sinon = require('sinon'),
+    async = require('async');
 
 chai.should();
 const expect = chai.expect;
 
 const messages = require('../messages'),
-    utils = require('../utils');
+    utils = require('../utils'),
+    config = require('../config');
 const browser = require('../browser')();
 
 describe('messages', () => {
@@ -587,6 +589,7 @@ describe('messages', () => {
                 sandbox.stub(browser, 'getTopic');
                 sandbox.stub(browser, 'getPost');
                 sandbox.stub(utils, 'filterIgnored');
+                sandbox.spy(async, 'parallel');
                 messages.internals.events = {
                     emit: sandbox.stub()
                 };
@@ -712,6 +715,52 @@ describe('messages', () => {
                     data: {}
                 });
                 utils.warn.called.should.be.false;
+            });
+            describe('processActed', () => {
+                it('should not process acted message when processActed is false', () => {
+                    config.core.processActed = false;
+                    processTopicMessage({
+                        channel: '/topic/1234',
+                        'message_id': 5432,
+                        data: {
+                            type: 'acted'
+                        }
+                    });
+                    async.parallel.called.should.be.false;
+                });
+                it('should process nonacted message when processActed is false', () => {
+                    config.core.processActed = false;
+                    processTopicMessage({
+                        channel: '/topic/1234',
+                        'message_id': 5432,
+                        data: {
+                            type: 'some weirdo type'
+                        }
+                    });
+                    async.parallel.called.should.be.true;
+                });
+                it('should process acted message when processActed is true', () => {
+                    config.core.processActed = true;
+                    processTopicMessage({
+                        channel: '/topic/1234',
+                        'message_id': 5432,
+                        data: {
+                            type: 'acted'
+                        }
+                    });
+                    async.parallel.called.should.be.true;
+                });
+                it('should process nonacted message when processActed is true', () => {
+                    config.core.processActed = true;
+                    processTopicMessage({
+                        channel: '/topic/1234',
+                        'message_id': 5432,
+                        data: {
+                            type: 'some weirdo type'
+                        }
+                    });
+                    async.parallel.called.should.be.true;
+                });
             });
         });
     });

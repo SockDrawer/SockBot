@@ -74,7 +74,17 @@ const defaultConfig = {
          * @default
          * @type {Number}
          */
-        cooldownPeriod: 3.6E6
+        cooldownPeriod: 3.6E6,
+        /**
+         * Switch to handle `acted` type channel messages.
+         *
+         * This type of message is often not needed for bot operation and generates a fair bit of traffic.
+         * Disabling reduces load on the host forum.
+         *
+         * @default
+         * @type {boolean}
+         */
+        handleActedMessage: false
     },
     /**
      * Plugin configuration.

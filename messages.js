@@ -7,7 +7,8 @@
  */
 const async = require('async');
 
-const utils = require('./utils');
+const config = require('./config'),
+    utils = require('./utils');
 const browser = require('./browser')();
 
 const internals = {
@@ -84,6 +85,9 @@ exports.pollMessages = function pollMessages(callback) {
  * @param {externals.messageBus.message} message Message to process
  */
 function processTopicMessage(message) {
+    if (!config.core.processActed && message.data.type === 'acted') {
+        return;
+    }
     const topic = message.channel.replace('/topic/', '');
     async.parallel({
         topic: (cb) => browser.getTopic(topic, cb),
