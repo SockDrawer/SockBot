@@ -19,7 +19,7 @@ const signature = '\n\n<!-- Posted by a clever robot -->',
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
             'User-Agent': 'SockBot/' + packageInfo.version + ' (' + packageInfo.releaseName
-                + '; owner:' + config.core.owner + ')'
+                + '; owner:' + config.core.owner + '; user:' + config.core.username + ')'
         }
     },
     /**
