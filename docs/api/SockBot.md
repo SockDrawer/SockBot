@@ -9,7 +9,7 @@ Main Module for SockBot2.0
   * _static_
     * [.prepare(configuration, callback)](#module_SockBot.prepare)
     * [.start(callback)](#module_SockBot.start)
-    * [.stop()](#module_SockBot.stop)
+    * [.stop(callback)](#module_SockBot.stop)
   * _inner_
     * [~doPluginRequire(module, requireIt)](#module_SockBot..doPluginRequire) ⇒ <code>object</code>
     * [~prepareEvents(callback)](#module_SockBot..prepareEvents)
@@ -40,10 +40,15 @@ Start the bot
 | callback | <code>completedCallback</code> | Completion Callback |
 
 <a name="module_SockBot.stop"></a>
-### SockBot.stop()
+### SockBot.stop(callback)
 Stop the event loop and signal plugins to stop
 
 **Kind**: static method of <code>[SockBot](#module_SockBot)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| callback | <code>function</code> | Completion callback |
+
 <a name="module_SockBot..doPluginRequire"></a>
 ### SockBot~doPluginRequire(module, requireIt) ⇒ <code>object</code>
 Load module as plugin
