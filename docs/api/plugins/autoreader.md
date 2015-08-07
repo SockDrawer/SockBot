@@ -13,7 +13,7 @@ Automatically read posts older than the configured interval.
     * [.readify()](#module_autoreader.readify)
   * _inner_
     * [~defaultConfig](#module_autoreader..defaultConfig) : <code>object</code>
-      * [.readWait](#module_autoreader..defaultConfig.readWait) : <code>number</code>
+      * [.minAge](#module_autoreader..defaultConfig.minAge) : <code>number</code>
     * [~internals](#module_autoreader..internals) : <code>object</code>
       * [.browser](#module_autoreader..internals.browser) : <code>Browser</code>
       * [.config](#module_autoreader..internals.config) : <code>object</code>
@@ -53,8 +53,8 @@ reading any unread posts it finds that are older than the configured interval.
 Default configuration settings
 
 **Kind**: inner typedef of <code>[autoreader](#module_autoreader)</code>  
-<a name="module_autoreader..defaultConfig.readWait"></a>
-#### defaultConfig.readWait : <code>number</code>
+<a name="module_autoreader..defaultConfig.minAge"></a>
+#### defaultConfig.minAge : <code>number</code>
 How old a post must be to be auro-read
 
 **Kind**: static property of <code>[defaultConfig](#module_autoreader..defaultConfig)</code>  

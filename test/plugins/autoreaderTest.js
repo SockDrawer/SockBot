@@ -28,13 +28,13 @@ describe('autoreader', () => {
     describe('prepare()', () => {
         it('should use default config', () => {
             autoreader.prepare(undefined, undefined, undefined, undefined);
-            autoreader.internals.config.readWait.should.equal(3 * 24 * 60 * 60 * 1000);
+            autoreader.internals.config.minAge.should.equal(3 * 24 * 60 * 60 * 1000);
         });
         it('should override default config', () => {
             autoreader.prepare({
-                    readWait: 1 * 24 * 60 * 60 * 1000
+                    minAge: 1 * 24 * 60 * 60 * 1000
                 }, undefined, undefined, undefined);
-            autoreader.internals.config.readWait.should.equal(1 * 24 * 60 * 60 * 1000);
+            autoreader.internals.config.minAge.should.equal(1 * 24 * 60 * 60 * 1000);
         });
     });
     describe('start()', () => {

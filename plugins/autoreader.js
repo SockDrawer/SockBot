@@ -18,7 +18,7 @@ const defaultConfig = {
          * @default
          * @type {number}
          */
-        readWait: 3 * 24 * 60 * 60 * 1000
+        minAge: 3 * 24 * 60 * 60 * 1000
     },
     /**
      * Internal status store
@@ -80,7 +80,7 @@ exports.readify = function () {
             return;
         }
         utils.log('Reading topic `' + topic.slug + '`');
-        const now = new Date().getTime() - internals.config.readWait;
+        const now = new Date().getTime() - internals.config.minAge;
         const postIds = [];
         internals.browser.getPosts(topic.id, (post, nextPost) => {
             if (post && !post.read && Date.parse(post.created_at) < now) {
