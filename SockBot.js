@@ -108,7 +108,9 @@ exports.stop = function (callback) {
     utils.log('Stopping SockBot ' + packageInfo.version + ' ' + packageInfo.releaseName);
     internals.running = false;
     internals.plugins.forEach((plugin) => plugin.stop());
-    callback();
+    if (callback) {
+        callback();
+    }
 };
 
 

@@ -747,6 +747,11 @@ describe('SockBot', () => {
             SockBot.stop();
             SockBot.internals.running.should.be.false;
         });
+        it('should call callback', () => {
+            const spy = sinon.spy();
+            SockBot.stop(spy);
+            spy.called.should.be.true;
+        });
         afterEach(function () {
             sandbox.restore();
         });
