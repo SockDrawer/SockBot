@@ -1,6 +1,7 @@
 {
   "name": "sockbot",
   "version": "2.0.0",
+  "releaseName": "Smeghead",
   "description": "A sockpuppet bot to use on http://what.thedailywtf.com.",
   "main": "SockBot.js",
   "repository": "https://github.com/SockDrawer/SockBot",

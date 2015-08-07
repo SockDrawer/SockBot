@@ -6,7 +6,8 @@
  */
 
 const config = require('./config'),
-    PostBuffer = require('./classes/PostBuffer');
+    PostBuffer = require('./classes/PostBuffer'),
+    packageInfo = require('./package.json');
 
 const request = require('request'),
     async = require('async');
@@ -17,7 +18,8 @@ const signature = '\n\n<!-- Posted by a clever robot -->',
         jar: request.jar(),
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
-            'User-Agent': 'SockBot 2.0.x Angelic Ariel'
+            'User-Agent': 'SockBot/' + packageInfo.version + ' (' + packageInfo.releaseName
+                + '; owner:' + config.core.owner + ')'
         }
     },
     /**

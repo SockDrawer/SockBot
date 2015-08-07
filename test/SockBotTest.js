@@ -24,7 +24,7 @@ describe('SockBot', () => {
     describe('exports', () => {
         const fns = ['start', 'stop', 'prepare'],
             objs = ['privateFns', 'internals'],
-            vals = ['version'];
+            vals = [];
         describe('should export expected functions:', () => {
             fns.forEach((fn) => {
                 it(fn + '()', () => expect(SockBot[fn]).to.be.a('function'));
@@ -728,6 +728,7 @@ describe('SockBot', () => {
         let sandbox;
         beforeEach(function () {
             sandbox = sinon.sandbox.create();
+            sandbox.stub(utils, 'log');
         });
         it('should stop plugins', () => {
             const plugin1 = {

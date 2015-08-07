@@ -7,7 +7,6 @@
  * @author Accalia
  * @license MIT
  */
-exports.version = 'v2.0.0';
 
 const async = require('async');
 const EventEmitter = require('events').EventEmitter;
@@ -15,7 +14,8 @@ const config = require('./config'),
     messages = require('./messages'),
     notifications = require('./notifications'),
     commands = require('./commands'),
-    utils = require('./utils');
+    utils = require('./utils'),
+    packageInfo = require('./package.json');
 const browser = require('./browser')();
 const internals = {
         plugins: [],
@@ -72,6 +72,7 @@ exports.prepare = function prepare(configuration, callback) {
  * @param {completedCallback} callback Completion Callback
  */
 exports.start = function (callback) {
+    utils.log('Starting SockBot ' + packageInfo.version + ' ' + packageInfo.releaseName);
     browser.login((err, user) => {
         if (err) {
             utils.warn('Login Failed: ' + err);
@@ -102,6 +103,7 @@ exports.start = function (callback) {
  * Stop the event loop and signal plugins to stop
  */
 exports.stop = function () {
+    utils.log('Stopping SockBot ' + packageInfo.version + ' ' + packageInfo.releaseName);
     internals.running = false;
     internals.plugins.forEach((plugin) => plugin.stop());
 };
