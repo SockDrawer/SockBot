@@ -101,11 +101,14 @@ exports.start = function (callback) {
 
 /**
  * Stop the event loop and signal plugins to stop
+ * 
+ * @param {function} callback Completion callback
  */
-exports.stop = function () {
+exports.stop = function (callback) {
     utils.log('Stopping SockBot ' + packageInfo.version + ' ' + packageInfo.releaseName);
     internals.running = false;
     internals.plugins.forEach((plugin) => plugin.stop());
+    callback();
 };
 
 
