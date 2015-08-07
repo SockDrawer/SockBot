@@ -1,53 +1,45 @@
-<a name="module_events"></a>
-## events
-SockEvents for SockBot2.0
+<a name="module_SockEvents"></a>
+## SockEvents ⇐ <code>EventEmitter</code>
+SockEvents object
 
+All methods from core EventEmitter are preserved, refer to the [core api](https://nodejs.org/api/events.html)
+for details.
+
+**Extends:** <code>EventEmitter</code>  
 **Author:** Accalia  
 **License**: MIT  
 
-* [events](#module_events)
-  * [~onChannel(channel, handler)](#module_events..onChannel)
-  * [~onTopic(topicId, handler)](#module_events..onTopic)
-  * [~removeChannel(channel, handler)](#module_events..removeChannel) ⇒ <code>SockEvents</code>
-  * [~removeFunction(topicId, handler)](#module_events..removeFunction) ⇒ <code>SockEvents</code>
-  * [~onNotification(type, handler)](#module_events..onNotification) ⇒ <code>SockEvents</code>
-  * [~removeNotification(type, handler)](#module_events..removeNotification) ⇒ <code>SockEvents</code>
-  * [~onCommand(type, helpstring, handler)](#module_events..onCommand) ⇒ <code>SockEvents</code>
-  * [~removeCommand(command, handler)](#module_events..removeCommand) ⇒ <code>SockEvents</code>
-  * [~SockEvents](#module_events..SockEvents) : <code>object</code>
-  * [~command](#module_events..command) : <code>object</code>
-  * [~messageHandler](#module_events..messageHandler)
-  * [~topicMessageHandler](#module_events..topicMessageHandler)
-  * [~notificationHandler](#module_events..notificationHandler)
-  * [~commandHandler](#module_events..commandHandler)
+* [SockEvents](#module_SockEvents) ⇐ <code>EventEmitter</code>
+  * [~onChannel(channel, handler)](#module_SockEvents..onChannel) ⇒ <code>SockEvents</code>
+  * [~removeChannel(channel, handler)](#module_SockEvents..removeChannel) ⇒ <code>SockEvents</code>
+  * [~removeTopic(topicId, handler)](#module_SockEvents..removeTopic) ⇒ <code>SockEvents</code>
+  * [~onNotification(type, handler)](#module_SockEvents..onNotification) ⇒ <code>SockEvents</code>
+  * [~removeNotification(type, handler)](#module_SockEvents..removeNotification) ⇒ <code>SockEvents</code>
+  * [~onCommand(type, helpstring, handler)](#module_SockEvents..onCommand) ⇒ <code>SockEvents</code>
+  * [~removeCommand(command, handler)](#module_SockEvents..removeCommand) ⇒ <code>SockEvents</code>
+  * [~command](#module_SockEvents..command) : <code>object</code>
+  * [~messageHandler](#module_SockEvents..messageHandler)
+  * [~topicMessageHandler](#module_SockEvents..topicMessageHandler)
+  * [~notificationHandler](#module_SockEvents..notificationHandler)
+  * [~commandHandler](#module_SockEvents..commandHandler)
 
-<a name="module_events..onChannel"></a>
-### events~onChannel(channel, handler)
+<a name="module_SockEvents..onChannel"></a>
+### SockEvents~onChannel(channel, handler) ⇒ <code>SockEvents</code>
 Register a message-bus channel listener
 
-**Kind**: inner method of <code>[events](#module_events)</code>  
+**Kind**: inner method of <code>[SockEvents](#module_SockEvents)</code>  
+**Returns**: <code>SockEvents</code> - SockEvents for chaining calls  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | channel | <code>string</code> | Message-bus channel to subscribe to |
 | handler | <code>messageHandler</code> | Event Handler |
 
-<a name="module_events..onTopic"></a>
-### events~onTopic(topicId, handler)
-Register a message-bus topic listener
-
-**Kind**: inner method of <code>[events](#module_events)</code>  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| topicId | <code>Number</code> | Numerical ID of topic to subscribe to |
-| handler | <code>topicMessageHandler</code> | Event Handler |
-
-<a name="module_events..removeChannel"></a>
-### events~removeChannel(channel, handler) ⇒ <code>SockEvents</code>
+<a name="module_SockEvents..removeChannel"></a>
+### SockEvents~removeChannel(channel, handler) ⇒ <code>SockEvents</code>
 Unregister a message-bus channel listener
 
-**Kind**: inner method of <code>[events](#module_events)</code>  
+**Kind**: inner method of <code>[SockEvents](#module_SockEvents)</code>  
 **Returns**: <code>SockEvents</code> - SockEvents for chaining calls  
 
 | Param | Type | Description |
@@ -55,11 +47,11 @@ Unregister a message-bus channel listener
 | channel | <code>string</code> | Message-bus channel to subscribe to |
 | handler | <code>messageHandler</code> | Event Handler |
 
-<a name="module_events..removeFunction"></a>
-### events~removeFunction(topicId, handler) ⇒ <code>SockEvents</code>
+<a name="module_SockEvents..removeTopic"></a>
+### SockEvents~removeTopic(topicId, handler) ⇒ <code>SockEvents</code>
 Unregister a message-bus topic listener
 
-**Kind**: inner method of <code>[events](#module_events)</code>  
+**Kind**: inner method of <code>[SockEvents](#module_SockEvents)</code>  
 **Returns**: <code>SockEvents</code> - SockEvents for chaining calls  
 
 | Param | Type | Description |
@@ -67,11 +59,11 @@ Unregister a message-bus topic listener
 | topicId | <code>Number</code> | Numerical ID of topic to subscribe to |
 | handler | <code>topicMessageHandler</code> | Event Handler |
 
-<a name="module_events..onNotification"></a>
-### events~onNotification(type, handler) ⇒ <code>SockEvents</code>
+<a name="module_SockEvents..onNotification"></a>
+### SockEvents~onNotification(type, handler) ⇒ <code>SockEvents</code>
 Add a notification listener
 
-**Kind**: inner method of <code>[events](#module_events)</code>  
+**Kind**: inner method of <code>[SockEvents](#module_SockEvents)</code>  
 **Returns**: <code>SockEvents</code> - SockEvents for chaining calls  
 
 | Param | Type | Description |
@@ -79,11 +71,11 @@ Add a notification listener
 | type | <code>string</code> | Notification type |
 | handler | <code>notificationHandler</code> | Notification handler |
 
-<a name="module_events..removeNotification"></a>
-### events~removeNotification(type, handler) ⇒ <code>SockEvents</code>
+<a name="module_SockEvents..removeNotification"></a>
+### SockEvents~removeNotification(type, handler) ⇒ <code>SockEvents</code>
 Remove a notification listener
 
-**Kind**: inner method of <code>[events](#module_events)</code>  
+**Kind**: inner method of <code>[SockEvents](#module_SockEvents)</code>  
 **Returns**: <code>SockEvents</code> - SockEvents for chaining calls  
 
 | Param | Type | Description |
@@ -91,11 +83,11 @@ Remove a notification listener
 | type | <code>string</code> | Notification type |
 | handler | <code>notificationHandler</code> | Notification handler |
 
-<a name="module_events..onCommand"></a>
-### events~onCommand(type, helpstring, handler) ⇒ <code>SockEvents</code>
+<a name="module_SockEvents..onCommand"></a>
+### SockEvents~onCommand(type, helpstring, handler) ⇒ <code>SockEvents</code>
 Add a notification listener
 
-**Kind**: inner method of <code>[events](#module_events)</code>  
+**Kind**: inner method of <code>[SockEvents](#module_SockEvents)</code>  
 **Returns**: <code>SockEvents</code> - SockEvents for chaining calls  
 
 | Param | Type | Description |
@@ -104,11 +96,11 @@ Add a notification listener
 | helpstring | <code>string</code> | Short help text for command |
 | handler | <code>commandHandler</code> | Command handler |
 
-<a name="module_events..removeCommand"></a>
-### events~removeCommand(command, handler) ⇒ <code>SockEvents</code>
+<a name="module_SockEvents..removeCommand"></a>
+### SockEvents~removeCommand(command, handler) ⇒ <code>SockEvents</code>
 Remove a command listener
 
-**Kind**: inner method of <code>[events](#module_events)</code>  
+**Kind**: inner method of <code>[SockEvents](#module_SockEvents)</code>  
 **Returns**: <code>SockEvents</code> - SockEvents for chaining calls  
 
 | Param | Type | Description |
@@ -116,20 +108,11 @@ Remove a command listener
 | command | <code>string</code> | Command type |
 | handler | <code>commandHandler</code> | Command handler |
 
-<a name="module_events..SockEvents"></a>
-### events~SockEvents : <code>object</code>
-SockEvents object
-
-All methods from core EventEmitter are preserved, refer to the [core api](https://nodejs.org/api/events.html)
-for details.
-
-**Kind**: inner typedef of <code>[events](#module_events)</code>  
-**Extends:** <code>EventEmitter</code>  
-<a name="module_events..command"></a>
-### events~command : <code>object</code>
+<a name="module_SockEvents..command"></a>
+### SockEvents~command : <code>object</code>
 Parsed Command Data
 
-**Kind**: inner typedef of <code>[events](#module_events)</code>  
+**Kind**: inner typedef of <code>[SockEvents](#module_SockEvents)</code>  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -139,21 +122,21 @@ Parsed Command Data
 | mention | <code>string</code> | Mention text that was included in command |
 | post | <code>external.posts.CleanedPost</code> | Post that triggered the command |
 
-<a name="module_events..messageHandler"></a>
-### events~messageHandler
+<a name="module_SockEvents..messageHandler"></a>
+### SockEvents~messageHandler
 Discourse message-bus channel message handler
 
-**Kind**: inner typedef of <code>[events](#module_events)</code>  
+**Kind**: inner typedef of <code>[SockEvents](#module_SockEvents)</code>  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | message | <code>externals.messageBus.message</code> | Message to handle |
 
-<a name="module_events..topicMessageHandler"></a>
-### events~topicMessageHandler
+<a name="module_SockEvents..topicMessageHandler"></a>
+### SockEvents~topicMessageHandler
 Discourse message-bus topic message handler
 
-**Kind**: inner typedef of <code>[events](#module_events)</code>  
+**Kind**: inner typedef of <code>[SockEvents](#module_SockEvents)</code>  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -161,11 +144,11 @@ Discourse message-bus topic message handler
 | topic | <code>externals.topics.Topic</code> | Topic containing post |
 | post | <code>externals.posts.CleanedPost</code> | Post that triggered the message |
 
-<a name="module_events..notificationHandler"></a>
-### events~notificationHandler
+<a name="module_SockEvents..notificationHandler"></a>
+### SockEvents~notificationHandler
 Notification Handler
 
-**Kind**: inner typedef of <code>[events](#module_events)</code>  
+**Kind**: inner typedef of <code>[SockEvents](#module_SockEvents)</code>  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -173,11 +156,11 @@ Notification Handler
 | [topic] | <code>external.topics.Topic</code> | Topic data for received notification |
 | [post] | <code>external.posts.CleanedPost</code> | Post data for recieved notification |
 
-<a name="module_events..commandHandler"></a>
-### events~commandHandler
+<a name="module_SockEvents..commandHandler"></a>
+### SockEvents~commandHandler
 Command handler
 
-**Kind**: inner typedef of <code>[events](#module_events)</code>  
+**Kind**: inner typedef of <code>[SockEvents](#module_SockEvents)</code>  
 
 | Param | Type | Description |
 | --- | --- | --- |
