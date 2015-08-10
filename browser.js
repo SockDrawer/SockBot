@@ -17,8 +17,8 @@ const defaults = {
         jar: request.jar(),
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
-            'User-Agent': 'SockBot/' + packageInfo.version + ' (' + packageInfo.releaseName
-                + '; owner:%OWNER%; user:%USER%)'
+            'User-Agent': 'SockBot/' + packageInfo.version + ' (' + packageInfo.releaseName +
+                '; owner:%OWNER%; user:%USER%)'
         }
     },
     /**
@@ -66,7 +66,7 @@ const defaults = {
         'spam': 8
     },
     coreQueue = {
-        queue: async.queue(queueWorker, 1),
+        queue: async.queue(queueWorker, 5),
         delay: 0
     },
     pluginQueue = {
@@ -133,31 +133,67 @@ exports = module.exports = function get() {
     return internals.current;
 };
 
+/**
+ * Set module to core mode instance
+ *
+ * Only available on core mode instance
+ *
+ * Sets the currently active instance to the core mode instance which has no request delay
+ *
+ * @returns {browser} Core browser instance
+ */
 function setCore() {
     internals.current = internals.core;
     return internals.current;
 }
 
+/**
+ * Set module to core mode instance
+ *
+ * Only available on core mode instance
+ *
+ * Sets the currently active instance to the plugin mode instance which has a 5 second delay between requests
+ *
+ * @returns {browser} Plugin browser instance
+ */
 function setPlugins() {
     internals.current = internals.plugins;
     return internals.current;
 }
 
+/**
+ * Prepare the browser module prior to bot start
+ *
+ * @param {EventEmitter} events Central Events channel
+ * @param {function} callback Completion callback
+ */
 function prepare(events, callback) {
     callback(null);
 }
 
+/**
+ * Stop the browser module
+ *
+ * Kill the core mode and plugin mode request queues, preventing any further communication with discourse until restart
+ */
 function stop() {
     coreQueue.queue.kill();
     pluginQueue.queue.kill();
 }
 
+/**
+ * Start the browser module
+ *
+ * Set the request User-Agent based on configuration, set post signature, create core and plugin request queues
+ */
 function start() {
     let ua = defaults.headers['User-Agent'].replace('%USER%', config.core.username);
     ua = ua.replace('%OWNER%', config.core.owner);
     defaults.headers['User-Agent'] = ua;
     internals.signature = '\n\n<!-- ' + ua + ' %NOW% -->';
     internals.request = request.defaults(defaults);
+    internals.coreQueue.queue = async.queue(queueWorker, 5);
+    internals.pluginQueue.queue = async.queue(queueWorker, 1);
 }
 
 /**
