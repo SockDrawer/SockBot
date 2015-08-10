@@ -17,8 +17,7 @@ const defaults = {
         jar: request.jar(),
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
-            'User-Agent': 'SockBot/' + packageInfo.version + ' (' + packageInfo.releaseName
-                + '; owner:%OWNER%; user:%USER%)'
+            'User-Agent': 'SockBot/' + packageInfo.version + ' (' + packageInfo.releaseName + '; owner:%OWNER%; user:%USER%)'
         }
     },
     /**
@@ -87,7 +86,7 @@ const defaults = {
         core: {
             setCore: setCore,
             setPlugins: setPlugins,
-            prepare:prepare,
+            prepare: prepare,
             start: start,
             stop: stop
         },
@@ -143,20 +142,20 @@ function setPlugins() {
     return internals.current;
 }
 
-function prepare(events, callback){
+function prepare(events, callback) {
     callback(null);
 }
 
-function stop(){
+function stop() {
     coreQueue.queue.kill();
     pluginQueue.queue.kill();
 }
 
-function start(){
+function start() {
     let ua = defaults.headers['User-Agent'].replace('%USER%', config.core.username);
     ua = ua.replace('%OWNER%', config.core.owner);
     defaults.headers['User-Agent'] = ua;
-    internals.signature = '\n\n<!-- '+ua+' %NOW% -->';
+    internals.signature = '\n\n<!-- ' + ua + ' %NOW% -->';
     internals.request = request.defaults(defaults);
 }
 
@@ -211,7 +210,7 @@ function createPost(topicId, replyTo, content, callback) {
     if (typeof callback !== 'function') {
         throw new Error('callback must be supplied');
     }
-    if (!internals.postBuffer){
+    if (!internals.postBuffer) {
         internals.postBuffer = new PostBuffer(internals.postBufferDelay, (key, values) => {
             const replies = [];
             const signature = internals.signature.replace('%NOW%', new Date().toISOString());
