@@ -7,6 +7,11 @@ Webbrowser abstraction for communicating with discourse
 * [browser](#module_browser)
   * [~trustLevels](#module_browser..trustLevels)
   * [~postActions](#module_browser..postActions)
+  * [~setCore()](#module_browser..setCore) ⇒ <code>browser</code>
+  * [~setPlugins()](#module_browser..setPlugins) ⇒ <code>browser</code>
+  * [~prepare(events, callback)](#module_browser..prepare)
+  * [~stop()](#module_browser..stop)
+  * [~start()](#module_browser..start)
   * [~queueWorker(task, callback)](#module_browser..queueWorker)
   * [~createPost(topicId, [replyTo], content, callback)](#module_browser..createPost)
   * [~createPrivateMessage(to, title, content, callback)](#module_browser..createPrivateMessage)
@@ -76,6 +81,51 @@ Discourse Post Actions
 | notify_moderators | <code>7</code> | 
 | spam | <code>8</code> | 
 
+<a name="module_browser..setCore"></a>
+### browser~setCore() ⇒ <code>browser</code>
+Set module to core mode instance
+
+Only available on core mode instance
+
+Sets the currently active instance to the core mode instance which has no request delay
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
+**Returns**: <code>browser</code> - Core browser instance  
+<a name="module_browser..setPlugins"></a>
+### browser~setPlugins() ⇒ <code>browser</code>
+Set module to core mode instance
+
+Only available on core mode instance
+
+Sets the currently active instance to the plugin mode instance which has a 5 second delay between requests
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
+**Returns**: <code>browser</code> - Plugin browser instance  
+<a name="module_browser..prepare"></a>
+### browser~prepare(events, callback)
+Prepare the browser module prior to bot start
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| events | <code>EventEmitter</code> | Central Events channel |
+| callback | <code>function</code> | Completion callback |
+
+<a name="module_browser..stop"></a>
+### browser~stop()
+Stop the browser module
+
+Kill the core mode and plugin mode request queues, preventing any further communication with discourse until restart
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
+<a name="module_browser..start"></a>
+### browser~start()
+Start the browser module
+
+Set the request User-Agent based on configuration, set post signature, create core and plugin request queues
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
 <a name="module_browser..queueWorker"></a>
 ### browser~queueWorker(task, callback)
 Process browser tasks with rate limiting
