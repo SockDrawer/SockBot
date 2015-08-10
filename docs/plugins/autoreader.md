@@ -12,7 +12,7 @@ The plugin will, once a day, automatically read posts older than the configured 
 
 | Option   | Type   | Default                                |
 |----------|--------|----------------------------------------|
-| `minAge` | Number | `3 * 24 * 60 * 60 * 1000` (three days) |
+| `minAge` | Number | `259200000` (three days) |
 
 ## `minAge`
 How old a post must be to be automatically read; value is in milliseconds.
@@ -26,7 +26,7 @@ core:
   password: someBotPassword
 plugins:
   autoreader: 
-    minAge: 3 * 24 * 60 * 60 * 1000
+    minAge: 259200000
 ```
 
 *JSON*
@@ -38,7 +38,7 @@ plugins:
   },
   "plugins": {
     "autoreader": {
-      "minAge": 3 * 24 * 60 * 60 * 1000
+      "minAge": 259200000
     }
   }
 }
