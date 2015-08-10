@@ -4,7 +4,8 @@
 
 const chai = require('chai'),
     sinon = require('sinon'),
-    async = require('async');
+    async = require('async'),
+    packageInfo = require('../package.json');
 chai.should();
 const expect = chai.expect;
 
@@ -121,14 +122,16 @@ describe('browser', () => {
             it('should update useragent', () => {
                 config.core.username = 'bob';
                 config.core.owner = 'joe';
-                const expected = 'SockBot/2.0.0 (Smeghead; owner:joe; user:bob)';
+                const expected = 'SockBot/' + packageInfo.version + ' (' + packageInfo.releaseName
+                    + '; owner:joe; user:bob)';
                 coreBrowser.start();
                 browserModule.internals.defaults.headers['User-Agent'].should.equal(expected);
             });
             it('should update signature', () => {
                 config.core.username = 'fred';
                 config.core.owner = 'billy';
-                const expected = '\n\n<!-- SockBot/2.0.0 (Smeghead; owner:billy; user:fred) %NOW% -->';
+                const expected = '\n\n<!-- SockBot/' + packageInfo.version + ' (' + packageInfo.releaseName
+                    + '; owner:billy; user:fred) %NOW% -->';
                 coreBrowser.start();
                 browserModule.internals.signature.should.equal(expected);
             });

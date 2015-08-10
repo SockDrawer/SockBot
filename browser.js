@@ -17,7 +17,8 @@ const defaults = {
         jar: request.jar(),
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
-            'User-Agent': 'SockBot/' + packageInfo.version + ' (' + packageInfo.releaseName + '; owner:%OWNER%; user:%USER%)'
+            'User-Agent': 'SockBot/' + packageInfo.version + ' (' + packageInfo.releaseName
+                + '; owner:%OWNER%; user:%USER%)'
         }
     },
     /**
