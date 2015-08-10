@@ -68,7 +68,9 @@ describe('browser', () => {
     describe('core mode', () => {
         const externalKeys = Object.keys(browserModule.externals);
         it('should expose expected keys', () => {
-            coreBrowser.should.have.all.keys(externalKeys.concat(['setCore', 'setPlugins']));
+            coreBrowser.should.have.all.keys(externalKeys.concat(['setCore', 'setPlugins', 'prepare',
+                'start', 'stop'
+            ]));
 
         });
         describe('non-function keys', () => {
@@ -103,6 +105,55 @@ describe('browser', () => {
         it('should set plugin mode', () => {
             coreBrowser.setPlugins().should.equal(pluginBrowser);
             browserModule.internals.current.should.equal(pluginBrowser);
+        });
+        describe('prepare()', () => {
+            it('should call providec callback when complete', () => {
+                const spy = sinon.spy();
+                coreBrowser.prepare({}, spy);
+                spy.calledWith(null).should.be.true;
+            });
+        });
+        describe('start()', () => {
+            const ua = browserModule.internals.defaults.headers['User-Agent'];
+            beforeEach(() => {
+                browserModule.internals.defaults.headers['User-Agent'] = ua;
+            });
+            it('should update useragent', () => {
+                config.core.username = 'bob';
+                config.core.owner = 'joe';
+                const expected = 'SockBot/2.0.0 (Smeghead; owner:joe; user:bob)';
+                coreBrowser.start();
+                browserModule.internals.defaults.headers['User-Agent'].should.equal(expected);
+            });
+            it('should update signature', () => {
+                config.core.username = 'fred';
+                config.core.owner = 'billy';
+                const expected = '\n\n<!-- SockBot/2.0.0 (Smeghead; owner:billy; user:fred) %NOW% -->';
+                coreBrowser.start();
+                browserModule.internals.signature.should.equal(expected);
+            });
+            it('should update request defaults', () => {
+                const old = browserModule.internals.request;
+                coreBrowser.start();
+                browserModule.internals.request.should.not.equal(old);
+            });
+        });
+        describe('stop()', () => {
+            let sandbox;
+            beforeEach(() => {
+                sandbox = sinon.sandbox.create();
+                sandbox.stub(browserModule.internals.coreQueue.queue, 'kill');
+                sandbox.stub(browserModule.internals.pluginQueue.queue, 'kill');
+            });
+            afterEach(() => sandbox.restore());
+            it('should kill the coreBrowser queue', () => {
+                coreBrowser.stop();
+                browserModule.internals.coreQueue.queue.kill.called.should.be.true;
+            });
+            it('should kill the pluginBrowser queue', () => {
+                coreBrowser.stop();
+                browserModule.internals.pluginQueue.queue.kill.called.should.be.true;
+            });
         });
     });
     describe('plugins mode', () => {
@@ -168,9 +219,9 @@ describe('browser', () => {
                 let clock;
                 before(() => clock = sinon.useFakeTimers());
                 beforeEach(() => {
-                        queue.push.reset();
-                        browserModule.internals.postBuffer = null;
-                    });
+                    queue.push.reset();
+                    browserModule.internals.postBuffer = null;
+                });
                 after(() => clock.restore());
                 describe('parameters', () => {
                     it('should accept four parameters version', () => {
@@ -242,6 +293,15 @@ describe('browser', () => {
                         const form = queue.push.lastCall.args[0].form;
                         form.should.have.any.key('raw');
                         form.raw.should.equal('i have content\nthis is my signature');
+                    });
+                    it('should replace %NOW% in signature', () => {
+                        browserModule.internals.signature = '%NOW%';
+                        object.createPost(100, '', () => 0);
+                        clock.tick(bufferTicks);
+                        const form = queue.push.lastCall.args[0].form,
+                            now = new Date().toISOString();
+                        form.should.have.any.key('raw');
+                        form.raw.should.equal(now);
                     });
                     it('should set `topic_id`', () => {
                         object.createPost(100, '', () => 0);
@@ -2063,23 +2123,33 @@ describe('browser', () => {
                 });
             });
             describe('owner users', () => {
+                let owner;
+                beforeEach(() => {
+                    owner = 'owner' + Math.random();
+                    config.core.owner = owner;
+                });
                 normalLevels.forEach((trustLevel) => {
-                    const post = {
-                        username: 'accalia', //accalia is default owner
-                        trust_level: trustLevel,
-                        staff: false,
-                        admin: false,
-                        moderator: false
-                    };
                     it('should set to owner trust_level for owner tl' + trustLevel, () => {
+                        const post = {
+                            username: owner,
+                            trust_level: trustLevel,
+                            staff: false,
+                            admin: false,
+                            moderator: false
+                        };
                         setTrustLevel(post).trust_level.should.equal(trust.owner);
                     });
                 });
             });
             describe('trust hierarchy ', () => {
+                let owner;
+                beforeEach(() => {
+                    owner = 'owner' + Math.random();
+                    config.core.owner = owner;
+                });
                 it('Owner status should trump Admin flag', () => {
                     const post = {
-                        username: 'accalia', //accalia is default owner
+                        username: owner,
                         trust_level: trust.tl3,
                         staff: false,
                         admin: true,
@@ -2089,7 +2159,7 @@ describe('browser', () => {
                 });
                 it('Owner status should trump Moderator flag', () => {
                     const post = {
-                        username: 'accalia', //accalia is default owner
+                        username: config.core.owner,
                         trust_level: trust.tl3,
                         staff: false,
                         admin: false,
@@ -2099,7 +2169,7 @@ describe('browser', () => {
                 });
                 it('Owner status should trump staff flag', () => {
                     const post = {
-                        username: 'accalia', //accalia is default owner
+                        username: config.core.owner,
                         trust_level: trust.tl3,
                         staff: true,
                         admin: false,

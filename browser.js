@@ -12,14 +12,13 @@ const config = require('./config'),
 const request = require('request'),
     async = require('async');
 
-const signature = '\n\n<!-- Posted by a clever robot -->',
-    defaults = {
+const defaults = {
         rejectUnauthorized: false,
         jar: request.jar(),
         headers: {
             'X-Requested-With': 'XMLHttpRequest',
             'User-Agent': 'SockBot/' + packageInfo.version + ' (' + packageInfo.releaseName
-                + '; owner:' + config.core.owner + '; user:' + config.core.username + ')'
+                + '; owner:%OWNER%; user:%USER%)'
         }
     },
     /**
@@ -87,11 +86,14 @@ const signature = '\n\n<!-- Posted by a clever robot -->',
         request: request.defaults(defaults),
         core: {
             setCore: setCore,
-            setPlugins: setPlugins
+            setPlugins: setPlugins,
+            prepare:prepare,
+            start: start,
+            stop: stop
         },
         plugins: {},
         defaults: defaults,
-        signature: signature,
+        signature: '',
         coreQueue: coreQueue,
         pluginQueue: pluginQueue,
         postBuffer: null, //Set by the first call to createPost()
@@ -139,6 +141,23 @@ function setCore() {
 function setPlugins() {
     internals.current = internals.plugins;
     return internals.current;
+}
+
+function prepare(events, callback){
+    callback(null);
+}
+
+function stop(){
+    coreQueue.queue.kill();
+    pluginQueue.queue.kill();
+}
+
+function start(){
+    let ua = defaults.headers['User-Agent'].replace('%USER%', config.core.username);
+    ua = ua.replace('%OWNER%', config.core.owner);
+    defaults.headers['User-Agent'] = ua;
+    internals.signature = '\n\n<!-- '+ua+' %NOW% -->';
+    internals.request = request.defaults(defaults);
 }
 
 /**
@@ -195,12 +214,13 @@ function createPost(topicId, replyTo, content, callback) {
     if (!internals.postBuffer){
         internals.postBuffer = new PostBuffer(internals.postBufferDelay, (key, values) => {
             const replies = [];
+            const signature = internals.signature.replace('%NOW%', new Date().toISOString());
             values.forEach(value => replies.push(value.content));
             ctx.queue.push({
                 method: 'POST',
                 url: '/posts',
                 form: {
-                    raw: replies.join(internals.postSeparator) + internals.signature,
+                    raw: replies.join(internals.postSeparator) + signature,
                     'topic_id': key.topicId,
                     'is_warning': false,
                     'reply_to_post_number': key.replyTo,
@@ -233,11 +253,12 @@ function createPrivateMessage(to, title, content, callback) {
     if (typeof callback !== 'function') {
         throw new Error('callback must be supplied');
     }
+    const signature = internals.signature.replace('%NOW%', new Date().toISOString());
     this.queue.push({
         method: 'POST',
         url: '/posts',
         form: {
-            raw: content + internals.signature,
+            raw: content + signature,
             'is_warning': false,
             'archetype': 'private_message',
             'title': title,

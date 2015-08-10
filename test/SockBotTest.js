@@ -113,6 +113,7 @@ describe('SockBot', () => {
                 sandbox.stub(messages, 'prepare');
                 sandbox.stub(notifications, 'prepare');
                 sandbox.stub(commands, 'prepare');
+                sandbox.stub(browser, 'prepare');
                 sandbox.useFakeTimers();
                 async.nextTick = (fn) => setTimeout(fn, 0);
             });
@@ -121,75 +122,112 @@ describe('SockBot', () => {
                 async.nextTick = tick;
             });
             describe('setup calls', () => {
-                it('should call browser.setPlugins()', () => {
-                    notifications.prepare.yields(null);
-                    messages.prepare.yields(null);
-                    commands.prepare.yields(null);
-                    prepareEvents(() => 0);
-                    sandbox.clock.tick(0);
-                    browser.setPlugins.called.should.be.true;
+                describe('messages', () => {
+                    it('should call messages.prepare()', () => {
+                        const spy = sinon.spy();
+                        messages.prepare.yields(null);
+                        notifications.prepare.yields(null);
+                        commands.prepare.yields(null);
+                        browser.prepare.yields(null);
+                        prepareEvents(spy);
+                        sandbox.clock.tick(0);
+                        spy.called.should.be.true;
+                        messages.prepare.called.should.be.true;
+                    });
+                    it('should give EventEmitter to messages.prepare()', () => {
+                        notifications.prepare.yields(null);
+                        messages.prepare.yields(null);
+                        notifications.prepare.yields(null);
+                        commands.prepare.yields(null);
+                        browser.prepare.yields(null);
+                        prepareEvents(() => 0);
+                        sandbox.clock.tick(0);
+                        messages.prepare.firstCall.args[0].should.be.an.instanceOf(EventEmitter);
+                    });
+                    it('should give clientId to messages.prepare()', () => {
+                        const id = Math.random();
+                        notifications.prepare.yields(null);
+                        messages.prepare.yields(null);
+                        commands.prepare.yields(null);
+                        utils.uuid.returns(id);
+                        prepareEvents(() => 0);
+                        sandbox.clock.tick(0);
+                        messages.prepare.firstCall.args[1].should.equal(id);
+                    });
                 });
-                it('should call messages.prepare()', () => {
-                    const spy = sinon.spy();
-                    notifications.prepare.yields(null);
-                    messages.prepare.yields(null);
-                    commands.prepare.yields(null);
-                    prepareEvents(spy);
-                    sandbox.clock.tick(0);
-                    spy.called.should.be.true;
-                    messages.prepare.called.should.be.true;
+                describe('notifications', () => {
+                    it('should call notifications.prepare()', () => {
+                        const spy = sinon.spy();
+                        messages.prepare.yields(null);
+                        notifications.prepare.yields(null);
+                        commands.prepare.yields(null);
+                        browser.prepare.yields(null);
+                        prepareEvents(spy);
+                        sandbox.clock.tick(0);
+                        spy.called.should.be.true;
+                        notifications.prepare.called.should.be.true;
+                    });
+                    it('should give EventEmitter to notifications.prepare()', () => {
+                        messages.prepare.yields(null);
+                        notifications.prepare.yields(null);
+                        commands.prepare.yields(null);
+                        browser.prepare.yields(null);
+                        prepareEvents(() => 0);
+                        sandbox.clock.tick(0);
+                        notifications.prepare.firstCall.args[0].should.be.an.instanceOf(EventEmitter);
+                    });
                 });
-                it('should call notifications.prepare()', () => {
-                    const spy = sinon.spy();
-                    notifications.prepare.yields(null);
-                    messages.prepare.yields(null);
-                    commands.prepare.yields(null);
-                    prepareEvents(spy);
-                    sandbox.clock.tick(0);
-                    spy.called.should.be.true;
-                    notifications.prepare.called.should.be.true;
+                describe('commands', () => {
+                    it('should call commands.prepare()', () => {
+                        notifications.prepare.yields(null);
+                        messages.prepare.yields(null);
+                        notifications.prepare.yields(null);
+                        commands.prepare.yields(null);
+                        browser.prepare.yields(null);
+                        prepareEvents(() => 0);
+                        sandbox.clock.tick(0);
+                        commands.prepare.called.should.be.true;
+                    });
+                    it('should give EventEmitter to commands.prepare()', () => {
+                        notifications.prepare.yields(null);
+                        messages.prepare.yields(null);
+                        notifications.prepare.yields(null);
+                        commands.prepare.yields(null);
+                        browser.prepare.yields(null);
+                        prepareEvents(() => 0);
+                        sandbox.clock.tick(0);
+                        commands.prepare.firstCall.args[0].should.be.an.instanceOf(EventEmitter);
+                    });
                 });
-                it('should call commands.prepareCommands()', () => {
-                    notifications.prepare.yields(null);
-                    messages.prepare.yields(null);
-                    commands.prepare.yields(null);
-                    prepareEvents(() => 0);
-                    sandbox.clock.tick(0);
-                    commands.prepare.called.should.be.true;
-                });
-                it('should give EventEmitter to messages.prepare()', () => {
-                    notifications.prepare.yields(null);
-                    messages.prepare.yields(null);
-                    commands.prepare.yields(null);
-                    prepareEvents(() => 0);
-                    sandbox.clock.tick(0);
-                    messages.prepare.firstCall.args[0].should.be.an.instanceOf(EventEmitter);
-                });
-                it('should give clientId to messages.prepare()', () => {
-                    const id = Math.random();
-                    notifications.prepare.yields(null);
-                    messages.prepare.yields(null);
-                    commands.prepare.yields(null);
-                    utils.uuid.returns(id);
-                    prepareEvents(() => 0);
-                    sandbox.clock.tick(0);
-                    messages.prepare.firstCall.args[1].should.equal(id);
-                });
-                it('should give EventEmitter to notifications.prepare()', () => {
-                    notifications.prepare.yields(null);
-                    messages.prepare.yields(null);
-                    commands.prepare.yields(null);
-                    prepareEvents(() => 0);
-                    sandbox.clock.tick(0);
-                    notifications.prepare.firstCall.args[0].should.be.an.instanceOf(EventEmitter);
-                });
-                it('should give EventEmitter to commands.prepareCommands()', () => {
-                    notifications.prepare.yields(null);
-                    messages.prepare.yields(null);
-                    commands.prepare.yields(null);
-                    prepareEvents(() => 0);
-                    sandbox.clock.tick(0);
-                    commands.prepare.firstCall.args[0].should.be.an.instanceOf(EventEmitter);
+                describe('browser', () => {
+                    it('should call browser.setPlugins()', () => {
+                        notifications.prepare.yields(null);
+                        messages.prepare.yields(null);
+                        commands.prepare.yields(null);
+                        prepareEvents(() => 0);
+                        sandbox.clock.tick(0);
+                        browser.setPlugins.called.should.be.true;
+                    });
+                    it('should call browser.prepare()', () => {
+                        notifications.prepare.yields(null);
+                        messages.prepare.yields(null);
+                        notifications.prepare.yields(null);
+                        commands.prepare.yields(null);
+                        browser.prepare.yields(null);
+                        prepareEvents(() => 0);
+                        sandbox.clock.tick(0);
+                        browser.prepare.called.should.be.true;
+                    });
+                    it('should give EventEmitter to browser.prepare()', () => {
+                        notifications.prepare.yields(null);
+                        messages.prepare.yields(null);
+                        notifications.prepare.yields(null);
+                        commands.prepare.yields(null);
+                        browser.prepare.yields(null);
+                        prepareEvents(() => 0);
+                        sandbox.clock.tick(0);
+                        browser.prepare.firstCall.args[0].should.be.an.instanceOf(EventEmitter);
+                    });
                 });
             });
             it('should yield error when messages.prepare() yields error', () => {
@@ -212,7 +250,7 @@ describe('SockBot', () => {
                 sandbox.clock.tick(0);
                 spy.calledWith(error).should.be.true;
             });
-            it('should yield error when commands.prepareCommands() yields error', () => {
+            it('should yield error when commands.prepare() yields error', () => {
                 const error = new Error('i am a friendly error!'),
                     spy = sinon.spy();
                 messages.prepare.yields(null);
@@ -222,11 +260,23 @@ describe('SockBot', () => {
                 sandbox.clock.tick(0);
                 spy.calledWith(error).should.be.true;
             });
+            it('should yield error when browser.prepare() yields error', () => {
+                const error = new Error('i am a friendly error!'),
+                    spy = sinon.spy();
+                messages.prepare.yields(null);
+                notifications.prepare.yields(null);
+                commands.prepare.yields(null);
+                browser.prepare.yields(error);
+                prepareEvents(spy);
+                sandbox.clock.tick(0);
+                spy.calledWith(error).should.be.true;
+            });
             it('should yield no error when all preparation passes', () => {
                 const spy = sinon.spy();
                 messages.prepare.yields(null);
                 notifications.prepare.yields(null);
                 commands.prepare.yields(null);
+                browser.prepare.yields(null);
                 prepareEvents(spy);
                 sandbox.clock.tick(0);
                 spy.calledWith(null).should.equal(true);
@@ -236,6 +286,7 @@ describe('SockBot', () => {
                 messages.prepare.yields(null);
                 notifications.prepare.yields(null);
                 commands.prepare.yields(null);
+                browser.prepare.yields(null);
                 prepareEvents(spy);
                 sandbox.clock.tick(0);
                 spy.firstCall.args[1].should.be.a.instanceOf(EventEmitter);
@@ -247,6 +298,7 @@ describe('SockBot', () => {
                 messages.prepare.yields(null);
                 notifications.prepare.yields(null);
                 commands.prepare.yields(null);
+                browser.prepare.yields(null);
                 prepareEvents(spy);
                 sandbox.clock.tick(0);
                 spy.firstCall.args[2].should.equal(browse);
@@ -558,6 +610,7 @@ describe('SockBot', () => {
             sandbox.stub(messages, 'start');
             sandbox.stub(notifications, 'start');
             sandbox.stub(commands, 'start');
+            sandbox.stub(browser, 'start');
             sandbox.useFakeTimers();
             notifications.internals.events = {
                 onChannel: () => 0
@@ -627,6 +680,11 @@ describe('SockBot', () => {
                 browser.login.yields(null, {});
                 SockBot.start(() => 0);
                 commands.start.called.should.be.true;
+            });
+            it('should start browser module', () => {
+                const spy = sinon.spy();
+                SockBot.start(spy);
+                browser.start.called.should.be.true;
             });
         });
         describe('messages', () => {
@@ -739,6 +797,7 @@ describe('SockBot', () => {
         beforeEach(function () {
             sandbox = sinon.sandbox.create();
             sandbox.stub(utils, 'log');
+            sandbox.stub(browser, 'stop');
         });
         it('should stop plugins', () => {
             const plugin1 = {
@@ -756,6 +815,11 @@ describe('SockBot', () => {
             SockBot.internals.running = true;
             SockBot.stop();
             SockBot.internals.running.should.be.false;
+        });
+        it('should stop browser module', () => {
+            const spy = sinon.spy();
+            SockBot.stop(spy);
+            browser.stop.called.should.be.true;
         });
         it('should call callback', () => {
             const spy = sinon.spy();

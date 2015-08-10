@@ -77,6 +77,7 @@ exports.prepare = function prepare(configuration, callback) {
  */
 exports.start = function (callback) {
     utils.log('Starting SockBot ' + packageInfo.version + ' ' + packageInfo.releaseName);
+    browser.start();
     browser.login((err, user) => {
         if (err) {
             utils.warn('Login Failed: ' + err);
@@ -112,6 +113,7 @@ exports.stop = function (callback) {
     utils.log('Stopping SockBot ' + packageInfo.version + ' ' + packageInfo.releaseName);
     internals.running = false;
     internals.plugins.forEach((plugin) => plugin.stop());
+    browser.stop();
     if (callback) {
         callback();
     }
@@ -155,6 +157,8 @@ function prepareEvents(callback) {
             notifications.prepare(events, next);
         }, (next) => {
             commands.prepare(events, next);
+        }, (next) => {
+            browser.prepare(events, next);
         }
     ], (err) => {
         if (err) {
