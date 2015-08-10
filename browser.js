@@ -502,8 +502,8 @@ function doLogin(delay, queue, callback) {
             password: config.core.password
         },
         callback: (err, data) => {
-            if (err) {
-                callback(err);
+            if (err || !data) {
+                callback(err || 'Unknown Login Failure');
             } else {
                 callback(null, data.user || {});
             }

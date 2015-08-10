@@ -1747,7 +1747,7 @@ describe('browser', () => {
                 args[0].should.have.any.key('callback');
                 args[0].callback.should.be.a('function');
             });
-            it('should pass err to external callback on completion', () => {
+            it('should pass err to external callback on failure', () => {
                 queue.push.reset();
                 queue.push.yieldsTo('callback', new Error('test error!'));
                 const spy = sinon.spy();
@@ -1755,6 +1755,15 @@ describe('browser', () => {
                 spy.called.should.be.true;
                 spy.lastCall.args.should.have.length(1);
                 spy.lastCall.args[0].should.be.an.instanceOf(Error);
+            });
+            it('should pass err to external callback on completion without data', () => {
+                queue.push.reset();
+                queue.push.yieldsTo('callback', null, '');
+                const spy = sinon.spy();
+                doLogin(0, queue, spy);
+                spy.called.should.be.true;
+                spy.lastCall.args.should.have.length(1);
+                spy.lastCall.args[0].should.equal('Unknown Login Failure');
             });
             it('should pass post to external callback on completion', () => {
                 queue.push.reset();

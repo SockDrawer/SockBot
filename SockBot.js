@@ -204,7 +204,7 @@ function loadConfig(cfg, callback) {
 if (require.main === module) {
     exports.prepare(process.argv[2], (err) => {
         if (err) {
-            utils.error(err);
+            utils.error(err.message);
         } else {
             exports.start(() => 0);
         }
