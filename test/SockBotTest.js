@@ -533,6 +533,16 @@ describe('SockBot', () => {
             spy.calledWith(err).should.be.true;
             SockBot.privateFns.loadPlugins.called.should.be.false;
         });
+        it('should yield error when loadPlugins errors', () => {
+            const spy = sinon.spy(),
+                err = new Error();
+            SockBot.privateFns.loadConfig.yields(null, null);
+            SockBot.privateFns.prepareEvents.yields(null, null, null);
+            SockBot.privateFns.loadPlugins.throws(err);
+            SockBot.prepare({}, spy);
+            sandbox.clock.tick(0);
+            spy.calledWith(err).should.be.true;
+        });
     });
     describe('start()', () => {
         let sandbox;

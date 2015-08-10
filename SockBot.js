@@ -58,7 +58,11 @@ exports.prepare = function prepare(configuration, callback) {
     }, (_, next) => {
         privateFns.prepareEvents(next);
     }, (events, pluginBrowser, next) => {
-        privateFns.loadPlugins();
+        try {
+            privateFns.loadPlugins();
+        } catch (e) {
+            callback(e);
+        }
         internals.plugins.forEach((plugin) => {
             plugin.prepare(config.plugins[plugin.prepare.pluginName], config, events, pluginBrowser);
         });
@@ -101,7 +105,7 @@ exports.start = function (callback) {
 
 /**
  * Stop the event loop and signal plugins to stop
- * 
+ *
  * @param {function} callback Completion callback
  */
 exports.stop = function (callback) {
@@ -199,7 +203,9 @@ function loadConfig(cfg, callback) {
 /* istanbul ignore if */
 if (require.main === module) {
     exports.prepare(process.argv[2], (err) => {
-        if (!err) {
+        if (err) {
+            utils.error(err);
+        } else {
             exports.start(() => 0);
         }
     });
