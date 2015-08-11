@@ -107,7 +107,7 @@ exports.backup = function backup(args, callback) {
         break;
     default:
         executing = false;
-        callback(null, 'Usage: !admin download [all|start|download|load]');
+        callback(null, 'Usage: !admin backup [all|start|download|load]');
         break;
     }
 };
