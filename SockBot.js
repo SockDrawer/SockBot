@@ -28,6 +28,9 @@ const internals = {
         prepareEvents: prepareEvents
     };
 
+exports.version = packageInfo.version;
+exports.releaseName = packageInfo.releaseName;
+
 /**
  * Prepared Callback
  *
