@@ -12,7 +12,8 @@ will automatically place the topic on cooldown, to prevent abuse of the bot.
 
 ## Phrase Replacements
 Configured catch phrases can include portions of the discourse post that summoned the bot. The text
-replacements are pulled from the [discourse Post][post] object.
+replacements are pulled from the [discourse Post][post] object. Any key in the Post object may be used; if
+the value is not text it will be coerced to text before being substituted.
 
 Text replacements are of the form `%key%`, and will be replaced with the value of the relative key in the 
 [post] that triggers the bot.
