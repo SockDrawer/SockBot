@@ -214,8 +214,8 @@ describe('summoner plugin', () => {
             it('should not replacements in replacement text', () => {
                 const expected = '%value%';
                 summoner.internals.configuration.messages = ['%key%'];
-                post['key'] = '%value%';
-                post['value'] = 'foobar';
+                post.key = '%value%';
+                post.value = 'foobar';
                 summoner.mentionHandler(undefined, topic, post);
                 const text = browser.createPost.firstCall.args[2];
                 text.should.equal(expected);
@@ -223,7 +223,7 @@ describe('summoner plugin', () => {
             it('should suppress mention in replacement text', () => {
                 const expected = '<a class="mention">@&zwj;mention</a>';
                 summoner.internals.configuration.messages = ['%key%'];
-                post['key'] = '@mention';
+                post.key = '@mention';
                 summoner.mentionHandler(undefined, topic, post);
                 const text = browser.createPost.firstCall.args[2];
                 text.should.equal(expected);
@@ -231,7 +231,7 @@ describe('summoner plugin', () => {
             it('should stringify complex replacement objects', () => {
                 const expected = '{"foo":"bar"}';
                 summoner.internals.configuration.messages = ['%key%'];
-                post['key'] = {
+                post.key = {
                     foo: 'bar'
                 };
                 summoner.mentionHandler(undefined, topic, post);
