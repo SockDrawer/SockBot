@@ -2,7 +2,7 @@
 /**
  * Summoner plugin
  *
- * Watches for @metnions and replies with a canned response
+ * Watches for @mentions and replies with a canned response
  *
  * @module summoner
  * @author Accalia
