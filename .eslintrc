@@ -12,6 +12,7 @@
     "computed-property-spacing":[2,"never"],
     "consistent-return": 2,
     "curly": 2,
+    "dot-notation": 1,
     "eol-last": 2,
     "eqeqeq": [2, "smart"],
     "max-depth": [2, 3],
