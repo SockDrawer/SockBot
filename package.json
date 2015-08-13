@@ -15,7 +15,7 @@
     "email": "support@sockdrawer.io"
   },
   "main": "./SockBot.js",
-  "bin": "./SockBot.js",
+  "bin": "./lib/cli.js",
   "engines": {
     "node": ">=0.11",
     "iojs": ">=1.7"
@@ -42,7 +42,7 @@
     "sinon": "^1.15.1"
   },
   "scripts": {
-    "start": "node --harmony --harmony_arrow_functions SockBot.js",
+    "start": "node --harmony --harmony_arrow_functions lib/cli.js",
     "lint": "node --harmony --harmony_arrow_functions node_modules/gulp/bin/gulp.js lint",
     "test": "node --harmony --harmony_arrow_functions node_modules/gulp/bin/gulp.js test",
     "gulp": "node --harmony --harmony_arrow_functions node_modules/gulp/bin/gulp.js",
