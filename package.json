@@ -11,12 +11,12 @@
     "Yamikuronue <yamikuronue> (https://github.com/yamikuronue)"
   ],
   "bugs": {
-    "url":"https://github.com/SockDrawer/SockBot/issues",
-    "email":"support@sockdrawer.io"
+    "url": "https://github.com/SockDrawer/SockBot/issues",
+    "email": "support@sockdrawer.io"
   },
   "main": "./SockBot.js",
   "bin": "./SockBot.js",
-  "engines":{
+  "engines": {
     "node": ">=0.11",
     "iojs": ">=1.7"
   },
@@ -27,6 +27,7 @@
     "xregexp": "^2.0.0"
   },
   "devDependencies": {
+    "blns": "^2.0.0",
     "chai": "^3.2.0",
     "coveralls": "^2.11.3",
     "gulp": "^3.9.0",

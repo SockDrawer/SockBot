@@ -2362,6 +2362,17 @@ describe('browser', () => {
                 expect(() => cleanPost(post)).to.not.throw();
                 post.should.have.any.key('cleaned');
             });
+            it('should handle nasty strings without barfing', () => {
+                const blns = require('blns');
+                for (let i = 0; i < blns.length; i++) {
+                    const post = {
+                        'raw': blns[i]
+                    };
+                    expect(() => cleanPost(post)).to.not.throw();
+                    post.should.have.any.key('cleaned');
+                }
+
+            });
         });
     });
 });
