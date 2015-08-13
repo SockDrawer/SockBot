@@ -2364,13 +2364,13 @@ describe('browser', () => {
             });
             it('should handle nasty strings without barfing', () => {
                 const blns = require('blns');
-                for (let i = 0; i < blns.length; i++) {
+                blns.forEach(badStr => {
                     const post = {
-                        'raw': blns[i]
+                        raw: badStr
                     };
-                    expect(() => cleanPost(post)).to.not.throw();
+                    expect(()=> cleanPost(post)).to.not.throw();
                     post.should.have.any.key('cleaned');
-                }
+                });
 
             });
         });
