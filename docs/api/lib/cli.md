@@ -12,5 +12,5 @@ Command line bootstrapper
 | Param | Type | Description |
 | --- | --- | --- |
 | cfg | <code>string</code> | Configuration to use, if string load as filepath to configuration |
-| checkCfg | <code>boolean</code> | Check the validity of the configuration file without starting the bot |
+| checkCfg | <code>boolean</code> | Check the validity of the configuration without starting the bot |
 
