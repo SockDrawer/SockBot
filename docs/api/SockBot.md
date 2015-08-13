@@ -15,6 +15,7 @@ Main Module for SockBot2.0
     * [~prepareEvents(callback)](#module_SockBot..prepareEvents)
     * [~loadPlugins()](#module_SockBot..loadPlugins)
     * [~loadConfig(cfg, callback)](#module_SockBot..loadConfig)
+    * [~bootstrap(cfg, checkCfg)](#module_SockBot..bootstrap)
     * [~preparedCallback](#module_SockBot..preparedCallback)
     * [~completedCallback](#module_SockBot..completedCallback)
 
@@ -86,6 +87,17 @@ Load configuration
 | --- | --- | --- |
 | cfg | <code>string</code> &#124; <code>object</code> | Configuration to use, if string load as filepath to configuration |
 | callback | <code>completedCallback</code> | CompletionCallback |
+
+<a name="module_SockBot..bootstrap"></a>
+### SockBot~bootstrap(cfg, checkCfg)
+Command line bootstrapper
+
+**Kind**: inner method of <code>[SockBot](#module_SockBot)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| cfg | <code>string</code> | Configuration to use, if string load as filepath to configuration |
+| checkCfg | <code>boolean</code> | Check the validity of the configuration file without starting the bot |
 
 <a name="module_SockBot..preparedCallback"></a>
 ### SockBot~preparedCallback
