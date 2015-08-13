@@ -8,7 +8,7 @@ const expect = chai.expect;
 
 // The thing we're testing
 const summoner = require('../../plugins/summoner'),
-    utils = require('../../utils');
+    utils = require('../../lib/utils');
 
 describe('summoner plugin', () => {
     describe('exports', () => {

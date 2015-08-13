@@ -9,7 +9,7 @@ const expect = chai.expect;
 
 // The thing we're testing
 const likes = require('../../plugins/likes'),
-    utils = require('../../utils');
+    utils = require('../../lib/utils');
 
 describe('likes plugin', () => {
     describe('exports', () => {

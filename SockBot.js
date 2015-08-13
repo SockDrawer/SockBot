@@ -10,13 +10,13 @@
 
 const async = require('async');
 const EventEmitter = require('events').EventEmitter;
-const config = require('./config'),
-    messages = require('./messages'),
-    notifications = require('./notifications'),
-    commands = require('./commands'),
-    utils = require('./utils'),
+const config = require('./lib/config'),
+    messages = require('./lib/messages'),
+    notifications = require('./lib/notifications'),
+    commands = require('./lib/commands'),
+    utils = require('./lib/utils'),
     packageInfo = require('./package.json');
-const browser = require('./browser')();
+const browser = require('./lib/browser')();
 const internals = {
         plugins: [],
         running: false

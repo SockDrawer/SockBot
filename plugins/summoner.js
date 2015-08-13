@@ -9,7 +9,7 @@
  * @license MIT
  */
 
-const utils = require('../utils');
+const utils = require('../lib/utils');
 
 const internals = {
     browser: null,

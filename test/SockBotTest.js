@@ -12,12 +12,12 @@ const expect = chai.expect;
 
 // The thing we're testing
 const SockBot = require('../SockBot'),
-    browserPlugin = require('../browser'),
-    commands = require('../commands'),
-    messages = require('../messages'),
-    notifications = require('../notifications'),
-    config = require('../config'),
-    utils = require('../utils');
+    browserPlugin = require('../lib/browser'),
+    commands = require('../lib/commands'),
+    messages = require('../lib/messages'),
+    notifications = require('../lib/notifications'),
+    config = require('../lib/config'),
+    utils = require('../lib/utils');
 const browser = browserPlugin();
 
 describe('SockBot', () => {

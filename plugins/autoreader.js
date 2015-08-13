@@ -6,7 +6,7 @@
  * @author RaceProUK
  * @license MIT
  */
-const utils = require('../utils');
+const utils = require('../lib/utils');
 
 /**
  * Default configuration settings

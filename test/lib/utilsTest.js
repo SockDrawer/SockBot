@@ -8,8 +8,8 @@ chai.should();
 const expect = chai.expect;
 
 // The thing we're testing
-const utils = require('../utils'),
-    config = require('../config');
+const utils = require('../../lib/utils'),
+    config = require('../../lib/config');
 
 describe('utils', () => {
     describe('exports', () => {

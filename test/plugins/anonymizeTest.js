@@ -8,7 +8,7 @@ chai.should();
 const expect = chai.expect;
 
 const anonymize = require('../../plugins/anonymize'),
-    browserModule = require('../../browser');
+    browserModule = require('../../lib/browser');
 const browser = browserModule();
 
 describe('anonymize', () => {

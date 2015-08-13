@@ -8,8 +8,8 @@ chai.should();
 const expect = chai.expect;
 
 const autoreader = require('../../plugins/autoreader'),
-    browserModule = require('../../browser'),
-    utils = require('../../utils');
+    browserModule = require('../../lib/browser'),
+    utils = require('../../lib/utils');
 const browser = browserModule();
 
 describe('autoreader', () => {
