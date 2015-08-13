@@ -31,11 +31,6 @@ test.txt
 #Cloud9 IDE
 .c9
 
-#virtualenv
-bin
-local
-include
-lib
 
 #test configuration files
 test.json
