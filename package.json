@@ -24,7 +24,8 @@
     "async": "^1.4.0",
     "js-yaml": "^3.3.1",
     "request": "^2.60.0",
-    "xregexp": "^2.0.0"
+    "xregexp": "^2.0.0",
+    "yargs": "^3.18.0"
   },
   "devDependencies": {
     "blns": "^2.0.0",

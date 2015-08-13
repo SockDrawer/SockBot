@@ -17,6 +17,13 @@ const config = require('./lib/config'),
     utils = require('./lib/utils'),
     packageInfo = require('./package.json');
 const browser = require('./lib/browser')();
+const argv = require('yargs')
+    .usage('Usage: $0 [options] <cfgFile>')
+    .demand(1, 1, 'A valid configuration file must be provided')
+    .describe({
+        checkCfg: 'Check the validity of the configuration file without starting the bot'
+    })
+    .argv;
 const internals = {
         plugins: [],
         running: false
@@ -25,7 +32,8 @@ const internals = {
         doPluginRequire: doPluginRequire,
         loadConfig: loadConfig,
         loadPlugins: loadPlugins,
-        prepareEvents: prepareEvents
+        prepareEvents: prepareEvents,
+        bootstrap: bootstrap
     };
 
 exports.version = packageInfo.version;
@@ -207,15 +215,29 @@ function loadConfig(cfg, callback) {
     }
 }
 
-/* istanbul ignore if */
-if (require.main === module) {
-    exports.prepare(process.argv[2], (err) => {
+/**
+ * Command line bootstrapper
+ *
+ * @param {string} cfg Configuration to use, if string load as filepath to configuration
+ * @param {boolean} checkCfg Check the validity of the configuration file without starting the bot
+ */
+function bootstrap(cfg, checkCfg) {
+    exports.prepare(cfg, (err) => { //argv._[0] should be the config JSON/YAML file
         if (err) {
             utils.error(err.message);
         } else {
-            exports.start(() => 0);
+            if (checkCfg){
+                utils.log('The supplied configuration file is valid');
+            } else {
+                exports.start(() => 0);
+            }
         }
     });
+}
+
+/* istanbul ignore if */
+if (require.main === module) {
+    bootstrap(argv._[0], argv.checkCfg);
 }
 
 /* istanbul ignore else */
