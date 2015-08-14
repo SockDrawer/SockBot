@@ -75,7 +75,7 @@ exports.notificationTypes = {
  * @name topicNotificationData
  * @param {string} topic_title Title of the referenced topic
  * @param {number} original_post_id Post Id of referenced post
- * @param {string} original_username Username of the priginal poster
+ * @param {string} original_username Username of the original poster
  * @param {string} display_username Username to display for notification
  */
 
@@ -84,6 +84,6 @@ exports.notificationTypes = {
  *
  * @typedef {object}
  * @name badgeNotificationData
- * @param {number} badge_id Id of the badge awarded
+ * @param {number} badge_id Id of the awarded badge
  * @param {string} badge_name Display name of the awarded badge
  */

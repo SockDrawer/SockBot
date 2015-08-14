@@ -4,7 +4,7 @@ SockBot is configured via a JSON or YAML configuration file. The configuration c
 one core configuration dictionary and one plugin configuration dictionary.
 
 Core configuration options are fixed and can be found described in the API codumentation for [defaultConfig]. 
-Plugin configuration options are determined by the indivitual plugins and will vary from plugin to plugin.
+Plugin configuration options are determined by the individual plugins and will vary from plugin to plugin.
 
 [defaultConfig]: api/config/#defaultConfig
 
@@ -48,12 +48,12 @@ will be prevented from interacting with the ignored users topics unless the inte
 
 This option was added to prevent users from being able to hijack the bot to harass other users. 
 
-By default the bot ignores `blakeyrat`, a user on [TheDailyWTF], and `PaulaBean`, another bot account responsible
-for posting the daily article discussion threads on [TheDailyWTF]
+By default the bot ignores `blakeyrat`, a user on [TheDailyWTF], and `PaulaBean`, another bot account responsible for posting the daily article discussion threads on [TheDailyWTF]
+
+Usernames are case sensitive.
 
 ### ignoreCategories
-This option sets the category ids that the bot will ignore. Within ignored categories only forum staff can
-interact with the bot.
+This option sets the category ids that the bot will ignore. Within ignored categories only forum staff can interact with the bot.
 
 This option was created to prevent users from polluting the daily article discussion threads with bot chatter.
 

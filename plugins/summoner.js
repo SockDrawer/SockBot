@@ -95,6 +95,6 @@ exports.prepare = function prepare(config, _, events, browser) {
 exports.start = function start() {};
 
 /**
- * Stop te plugin prior to exit or reload
+ * Stop the plugin prior to exit or reload
  */
 exports.stop = function stop() {};

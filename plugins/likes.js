@@ -68,7 +68,7 @@ const defaultConfig = {
          */
         bingeInterval: null,
         /**
-         * Count of likes handed out durring latest binge
+         * Count of likes handed out during latest binge
          * @type {number}
          */
         likeCount: 0

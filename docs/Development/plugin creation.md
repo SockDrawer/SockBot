@@ -25,7 +25,7 @@ for the bot and before it has logged in to discourse. The provided parameters gi
 state of SockBot as well as the [EventEmitter] used for communication within the bot, and a [browser] for 
 communicating with discourse.
 
-this function is assumed to be synchronous and *should not* set up any periodic or delayed actions. Any such 
+This function is assumed to be synchronous and *should not* set up any periodic or delayed actions. Any such 
 actions desired should be intitiated in `start()`.
 
 #### `pluginConfig`
