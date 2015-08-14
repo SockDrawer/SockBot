@@ -146,7 +146,7 @@ exports.updateSelf = function(callback) {
         /*istanbul ignore else*/
         if (callback) {
             callback(null);
-        };
+        }
         /*eslint-enable camelCase */
     });
 };

@@ -160,7 +160,7 @@ describe('Powerlevel plugin', () => {
                 expect(powerlevel.internals.me.likesGiven).to.equal(likesGiven);
                 expect(powerlevel.internals.me.likesReceived).to.equal(likesReceived);
                 expect(powerlevel.internals.me.replies).to.equal(repliesReceived);
-                expect(powerlevel.internals.me.postsMade).to.equal(topicsCreated+repliesMade);
+                expect(powerlevel.internals.me.postsMade).to.equal(topicsCreated + repliesMade);
             });
         });
     });
