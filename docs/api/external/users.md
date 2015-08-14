@@ -5,11 +5,35 @@ Documentation for discourse JSON objects
 **License**: MIT  
 
 * [users](#external.module_users)
+  * [.UserActionType](#external.module_users.UserActionType)
   * [.UserSummary](#external.module_users.UserSummary) : <code>object</code>
   * [.UserActionSummary](#external.module_users.UserActionSummary) : <code>object</code>
   * [.UserGroup](#external.module_users.UserGroup) : <code>object</code>
   * [.User](#external.module_users.User) : <code>object</code>
   * [.UserProfile](#external.module_users.UserProfile) : <code>object</code>
+
+<a name="external.module_users.UserActionType"></a>
+### users.UserActionType
+Discourse User Action Type Enum
+
+**Kind**: static enum property of <code>[users](#external.module_users)</code>  
+**Read only**: true  
+**Properties**
+
+| Name | Default | Description |
+| --- | --- | --- |
+| like | <code>1</code> | User liked a post |
+| was_liked | <code>2</code> | user's post was liked |
+| bookmark | <code>3</code> | User bookmarked a post |
+| new_topic | <code>4</code> | User started a topic |
+| reply | <code>5</code> | User replied to a post |
+| response | <code>6</code> | User's post was replied to |
+| mention | <code>7</code> | User was mentioned |
+| quote | <code>9</code> | User was quoted |
+| edit | <code>11</code> | User edited a post |
+| new_private_message | <code>12</code> | User sent a new private message |
+| got_private_message | <code>13</code> | User received a new private message |
+| pending | <code>14</code> | User queued a post |
 
 <a name="external.module_users.UserSummary"></a>
 ### users.UserSummary : <code>object</code>
@@ -32,7 +56,7 @@ User Action Summary
 
 | Param | Type | Description |
 | --- | --- | --- |
-| action_type | <code>external.posts.PostActionType</code> | PostActionType being summarized |
+| action_type | <code>external.posts.UserActionType</code> | UserActionType being summarized |
 | count | <code>number</code> | Number of times user has performed action |
 | id | <code>\*</code> | Unknown, appears to always be null |
 
