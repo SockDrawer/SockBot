@@ -192,7 +192,7 @@ describe('browser', () => {
     });
     describe('externals', () => {
         const fns = ['createPost', 'createPrivateMessage', 'editPost', 'login', 'messageBus', 'getPost', 'getTopic',
-                'getNotifications', 'postAction', 'getPosts', 'getTopics', 'readPosts'
+                'getUser','getNotifications', 'postAction', 'getPosts', 'getTopics', 'readPosts'
             ],
             objs = ['trustLevels', 'postActions'];
         describe('should include expected functions:', () => {
@@ -1364,6 +1364,70 @@ describe('browser', () => {
                 spy.calledWith(1).should.be.true;
                 spy.calledWith(2).should.be.true;
                 spy.calledWith(3).should.be.true;
+            });
+        });
+        describe('getUser()', () => {
+            const object = {
+                    delay: 0,
+                    queue: {
+                        push: sinon.stub()
+                    },
+                    getUser: browserModule.externals.getUser
+                },
+                queue = object.queue;
+            beforeEach(() => queue.push.reset());
+            it('should set HTTP get method', () => {
+                object.getUser(0, () => 0);
+                queue.push.lastCall.args[0].should.have.any.key('method');
+                queue.push.lastCall.args[0].method.should.equal('GET');
+            });
+            it('should set URL', () => {
+                const id = Math.ceil(5000 + Math.random() * 5000),
+                    expected = '/users/' + id + '.json';
+                object.getUser(id, () => 0);
+                queue.push.lastCall.args[0].should.have.any.key('url');
+                queue.push.lastCall.args[0].url.should.equal(expected);
+            });
+            it('should set delay', () => {
+                const delay = Math.ceil(5000 + Math.random() * 5000);
+                object.delay = delay;
+                object.getUser(0, () => 0);
+                queue.push.lastCall.args[0].should.have.any.key('delay');
+                queue.push.lastCall.args[0].delay.should.equal(delay);
+            });
+            it('should set callback', () => {
+                object.getUser(0, () => 0);
+                queue.push.lastCall.args[0].should.have.any.key('callback');
+                queue.push.lastCall.args[0].callback.should.be.a('function');
+            });
+            it('should pass callback error to callback', () => {
+                const spy = sinon.spy(),
+                    err = new Error('this is an error');
+                queue.push.yieldsTo('callback', err);
+                object.getUser(0, spy);
+                spy.lastCall.args.should.deep.equal([err]);
+            });
+            it('should pass result info to callback', () => {
+                const spy = sinon.spy(),
+                    info = {'badges': [
+                        {
+                          'id': 3,
+                          'name': 'Regular',
+                          'description': '',
+                          'grant_count': 90,
+                          'allow_title': true,
+                          'multiple_grant': false,
+                          'icon': 'fa-user',
+                          'image': 'fa-user',
+                          'listable': true,
+                          'enabled': true,
+                          'badge_grouping_id': 4,
+                          'system': true,
+                          'badge_type_id': 2
+                        }]};
+                queue.push.yieldsTo('callback', null, info);
+                object.getUser(0, spy);
+                spy.lastCall.args.should.deep.equal([null, info]);
             });
         });
         describe('getNotifications()', () => {
