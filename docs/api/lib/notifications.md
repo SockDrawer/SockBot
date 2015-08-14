@@ -26,7 +26,7 @@ Prepare notifications for bot start
 
 | Param | Type | Description |
 | --- | --- | --- |
-| events | <code>EventEmitter</code> | EventEmitter that will eb used for communication |
+| events | <code>EventEmitter</code> | EventEmitter that will be used for communication |
 | callback | <code>completionCallback</code> | Completion Callback |
 
 <a name="module_notifications.start"></a>
@@ -37,7 +37,7 @@ Prepare notifications for bot start
 
 | Param | Type | Description |
 | --- | --- | --- |
-| events | <code>EventEmitter</code> | EventEmitter that will eb used for communication |
+| events | <code>EventEmitter</code> | EventEmitter that will be used for communication |
 | callback | <code>completionCallback</code> | Completion Callback |
 
 <a name="module_notifications.pollNotifications"></a>

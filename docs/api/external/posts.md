@@ -68,7 +68,7 @@ Can be retrieved directly at `/posts/<postid>.json`
 
 | Param | Type | Description |
 | --- | --- | --- |
-| id | <code>number</code> | Post Id of the post. this number will not change |
+| id | <code>number</code> | Post Id of the post. This number will not change |
 | name | <code>string</code> | Long name of the post owner |
 | username | <code>string</code> | Username of the post owner |
 | avatar_template | <code>string</code> | URL template for post owner's avatar |

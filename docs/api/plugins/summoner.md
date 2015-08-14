@@ -69,6 +69,6 @@ Start the plugin after login
 **Kind**: static method of <code>[summoner](#module_summoner)</code>  
 <a name="module_summoner.stop"></a>
 ### summoner.stop()
-Stop te plugin prior to exit or reload
+Stop the plugin prior to exit or reload
 
 **Kind**: static method of <code>[summoner](#module_summoner)</code>  

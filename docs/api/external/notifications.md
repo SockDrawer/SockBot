@@ -77,7 +77,7 @@ Topic relating notification payload
 | --- | --- | --- |
 | topic_title | <code>string</code> | Title of the referenced topic |
 | original_post_id | <code>number</code> | Post Id of referenced post |
-| original_username | <code>string</code> | Username of the priginal poster |
+| original_username | <code>string</code> | Username of the original poster |
 | display_username | <code>string</code> | Username to display for notification |
 
 <a name="external.module_notifications..badgeNotificationData"></a>
@@ -88,6 +88,6 @@ Badge relating notification payload
 
 | Param | Type | Description |
 | --- | --- | --- |
-| badge_id | <code>number</code> | Id of the badge awarded |
+| badge_id | <code>number</code> | Id of the awarded badge |
 | badge_name | <code>string</code> | Display name of the awarded badge |
 

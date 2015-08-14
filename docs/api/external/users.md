@@ -43,10 +43,10 @@ Discourse User Summary
 
 | Param | Type | Description |
 | --- | --- | --- |
-| [id] | <code>number</code> | user id |
-| username | <code>string</code> | username of the summarized user |
-| avatar_template | <code>string</code> | URL template for summarized user's avatar |
-| uploaded_avatar_id | <code>number</code> | ID of the summarized user's avatar |
+| [id] | <code>number</code> | User id |
+| username | <code>string</code> | Username of the summarized user |
+| avatar_template | <code>string</code> | URL template for summarized users avatar |
+| uploaded_avatar_id | <code>number</code> | ID of the summarized users avatar |
 
 <a name="external.module_users.UserActionSummary"></a>
 ### users.UserActionSummary : <code>object</code>
@@ -74,7 +74,7 @@ User Group
 | user_count | <code>number</code> | Number of users in group |
 | alias_level | <code>\*</code> | Unknown |
 | visible | <code>boolean</code> | Is group Visible? |
-| automatic_membership_email_domains | <code>Array.&lt;string&gt;</code> | email domains that automatically give membership |
+| automatic_membership_email_domains | <code>Array.&lt;string&gt;</code> | Email domains that automatically give membership |
 | automatic_membership_retroactive | <code>boolean</code> | Does the automatic membership apply retroactively? |
 | primary_group | <code>boolean</code> | Is this a primary group? |
 | title | <code>\*</code> | Unsure. Group title? can be used as user title? |
@@ -89,9 +89,9 @@ Discourse User
 | --- | --- | --- |
 | id | <code>number</code> | User Id |
 | username | <code>string</code> | Username |
-| uploaded_avatar_id | <code>number</code> | ID of the user's avatar |
-| avatar_template | <code>string</code> | URL template for user's avatar |
-| name | <code>string</code> | User's long name |
+| uploaded_avatar_id | <code>number</code> | ID of the users avatar |
+| avatar_template | <code>string</code> | URL template for users avatar |
+| name | <code>string</code> | Users long name |
 | [email] | <code>string</code> | User Email |
 | last_posted_at | <code>string</code> | ISO formatted datetime of last post by user |
 | last_seen_at | <code>string</code> | ISO formatted datetime of last user interaction |
@@ -108,17 +108,17 @@ Discourse User
 | stats | <code>Array.&lt;UserActionSummary&gt;</code> | User post action summary |
 | can_send_private_messages | <code>boolean</code> | Can this user send private messages? |
 | can_send_private_message_to_user | <code>boolean</code> | Can the current user send a private message to this user? |
-| bio_excerpt | <code>string</code> | Short exertp from user bio |
+| bio_excerpt | <code>string</code> | Short exerpt from user bio |
 | trust_level | <code>number</code> | This user's trust level |
 | moderator | <code>boolean</code> | Is this user a moderator? |
 | admin | <code>boolean</code> | Is this user an admin? |
 | title | <code>string</code> | User's title |
 | badge_count | <code>number</code> | Number of unique badge types this user has |
-| notification_count | <code>number</code> | NUmber of notifications this user has |
+| notification_count | <code>number</code> | Number of notifications this user has |
 | has_title_badges | <code>boolean</code> | Does user have badges that can be set as title? |
 | edit_history_public | <code>boolean</code> | Does user have public edit history? |
 | custom_fields | <code>object</code> | Unsure, needs explanation |
-| (Object.<number,string>) |  | user_fields Custom site specific user fields |
+| (Object.<number,string>) |  | ´user_fields´ Custom site specific user fields |
 | pending_count | <code>number</code> | Number of posts pending moderator approval? |
 | locale | <code>string</code> | User set locale |
 | email_digests | <code>boolean</code> | User receives email digests? |
@@ -127,7 +127,7 @@ Discourse User
 | email_always | <code>boolean</code> | Does the user wish to be emailed regardless of activity? |
 | digest_after_days | <code>number</code> | Frequency to sent email digest out after |
 | mailing_list_mode | <code>boolean</code> | Unknown purpose. what is this field for? |
-| auto_track_topics_after_msecs | <code>number</code> | Time use must spend reading topic before topic is tracked |
+| auto_track_topics_after_msecs | <code>number</code> | Time user must spend reading topic before topic is tracked |
 | new_topic_duration_minutes | <code>number</code> | Time topics are considered new for |
 | external_links_in_new_tab | <code>boolean</code> | User opens external links in new tab? |
 | dynamic_favicon | <code>boolean</code> | User uses the dynamic favicon? |

@@ -15,7 +15,7 @@ message-bus handler for SockBot2.0
   * [~removeChannel(channel, handler)](#module_messages..removeChannel) ⇒ <code>EventEmitter</code>
   * [~removeTopic(topicId, handler)](#module_messages..removeTopic) ⇒ <code>EventEmitter</code>
   * [~onMessageAdd(event)](#module_messages..onMessageAdd) ⇒ <code>boolean</code>
-  * [~onMessageRemove(event,)](#module_messages..onMessageRemove) ⇒ <code>boolean</code>
+  * [~onMessageRemove(event)](#module_messages..onMessageRemove) ⇒ <code>boolean</code>
   * [~completionCallback](#module_messages..completionCallback)
   * [~filterCallback](#module_messages..filterCallback)
   * [~messageHandler](#module_messages..messageHandler)
@@ -118,7 +118,7 @@ Listen for new message-bus channels
 | event | <code>string</code> | Event that's been registered |
 
 <a name="module_messages..onMessageRemove"></a>
-### messages~onMessageRemove(event,) ⇒ <code>boolean</code>
+### messages~onMessageRemove(event) ⇒ <code>boolean</code>
 Listen for parting message-bus channels
 
 **Kind**: inner method of <code>[messages](#module_messages)</code>  
@@ -126,7 +126,7 @@ Listen for parting message-bus channels
 
 | Param | Type | Description |
 | --- | --- | --- |
-| event, | <code>string</code> | event that has unregistered a handler |
+| event | <code>string</code> | Event that has unregistered a handler |
 
 <a name="module_messages..completionCallback"></a>
 ### messages~completionCallback

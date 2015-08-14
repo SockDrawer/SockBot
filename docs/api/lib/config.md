@@ -2,7 +2,7 @@
 <dl>
 <dt><a href="#core">core</a></dt>
 <dd><p>Current core configuration</p>
-<p>Set by ineternals. Do not edit</p>
+<p>Set by internals. Do not edit</p>
 </dd>
 <dt><a href="#plugins">plugins</a></dt>
 <dd><p>Current plugin configuration</p>
@@ -22,7 +22,7 @@
 ## Functions
 <dl>
 <dt><a href="#readFile">readFile(path, callback)</a></dt>
-<dd><p>Read and parse configuration File from disc</p>
+<dd><p>Read and parse configuration file from disc</p>
 </dd>
 <dt><a href="#loadConfiguration">loadConfiguration(path, callback)</a></dt>
 <dd><p>Load configuration from disc</p>
@@ -38,7 +38,7 @@
 ## core
 Current core configuration
 
-Set by ineternals. Do not edit
+Set by internals. Do not edit
 
 **Kind**: global variable  
 **Read only**: true  
@@ -121,6 +121,8 @@ Owner promotes the user to virtual trust level 9 (above forum admins)
 #### core.forum : <code>string</code>
 Base URL for the discourse instance to log into
 
+Is case sensitive
+
 **Kind**: static property of <code>[core](#defaultConfig.core)</code>  
 **Default**: <code>&quot;https://what.thedailywtf.com&quot;</code>  
 <a name="defaultConfig.core.ignoreUsers"></a>
@@ -183,7 +185,7 @@ See `Plugin Configuration` for details
 **Kind**: static property of <code>[defaultConfig](#defaultConfig)</code>  
 <a name="readFile"></a>
 ## readFile(path, callback)
-Read and parse configuration File from disc
+Read and parse configuration file from disc
 
 **Kind**: global function  
 

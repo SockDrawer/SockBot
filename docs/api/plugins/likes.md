@@ -150,7 +150,7 @@ Interval token for like binges
 **Kind**: static property of <code>[internals](#module_likes..internals)</code>  
 <a name="module_likes..internals.likeCount"></a>
 #### internals.likeCount : <code>number</code>
-Count of likes handed out durring latest binge
+Count of likes handed out during latest binge
 
 **Kind**: static property of <code>[internals](#module_likes..internals)</code>  
 <a name="module_likes..completionCallback"></a>

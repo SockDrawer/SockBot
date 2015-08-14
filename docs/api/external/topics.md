@@ -149,15 +149,15 @@ Discourse Topic Details
 | Param | Type | Description |
 | --- | --- | --- |
 | auto_close_at | <code>string</code> &#124; <code>null</code> | ISO formatted time that topic will autoclose at |
-| auto_close_hours | <code>number</code> &#124; <code>null</code> | number of hours before topic closes relative to topic creation |
-| auto_close_based_on_last_post | <code>boolean</code> | if set `auto_close_hours` is relative to latest post |
+| auto_close_hours | <code>number</code> &#124; <code>null</code> | Number of hours before topic closes relative to topic creation |
+| auto_close_based_on_last_post | <code>boolean</code> | If set `auto_close_hours` is relative to latest post |
 | created_by | <code>external.users.UserSummary</code> | User that created topic |
 | last_poster | <code>external.users.UserSummary</code> | User that created last post |
 | participants | <code>Array.&lt;Participant&gt;</code> | Topic Top Participants |
 | suggested_topics | <code>Array.&lt;TopicSummary&gt;</code> | Suggested topics for this topic |
 | links | <code>Array.&lt;Link&gt;</code> | Links posted within the topic |
 | notification_level | <code>NotificationLevel</code> | Topic notification level |
-| notification_reason_id | <code>NotificationReason</code> | Reason for value of   notification_level` |
+| notification_reason_id | <code>NotificationReason</code> | Reason for value of `notification_level` |
 | can_edit | <code>boolean</code> | Can current user edit topic title? |
 | can_invite_to | <code>boolean</code> | Can current user issue invitations to topic? |
 | can_create_post | <code>boolean</code> | Can current user reply to topic? |
@@ -199,5 +199,5 @@ Available at `/t/slug/<topic id>/<post number>.json`
 | details | <code>TopicDetails</code> | Details about this topic |
 | deleted_by | <code>string</code> &#124; <code>null</code> | Username of the deleting user |
 | actions_summary | <code>Array.&lt;external.posts.ActionSummary&gt;</code> | Summary of actions on Topic |
-| chunk_size | <code>number</code> | Number of posts that belon in each chunk of postsx |
+| chunk_size | <code>number</code> | Number of posts that belong in each chunk of posts |
 
