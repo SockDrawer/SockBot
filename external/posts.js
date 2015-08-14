@@ -64,7 +64,7 @@ exports.ActionSummary = {};
  * Can be retrieved directly at `/posts/<postid>.json`
  *
  * @typedef {object}
- * @param {number} id Post Id of the post. this number will not change
+ * @param {number} id Post Id of the post. This number will not change
  * @param {string} name Long name of the post owner
  * @param {string} username Username of the post owner
  * @param {string} avatar_template URL template for post owner's avatar

@@ -10,10 +10,10 @@
  * Discourse User Summary
  *
  * @typedef {object}
- * @param {number} [id] user id
- * @param {string} username username of the summarized user
- * @param {string} avatar_template URL template for summarized user's avatar
- * @param {number} uploaded_avatar_id ID of the summarized user's avatar
+ * @param {number} [id] User id
+ * @param {string} username Username of the summarized user
+ * @param {string} avatar_template URL template for summarized users avatar
+ * @param {number} uploaded_avatar_id ID of the summarized users avatar
  */
 exports.UserSummary = {};
 
@@ -70,7 +70,7 @@ exports.UserActionSummary = {};
  * @param {number} user_count Number of users in group
  * @param {*} alias_level Unknown
  * @param {boolean} visible Is group Visible?
- * @param {string[]} automatic_membership_email_domains email domains that automatically give membership
+ * @param {string[]} automatic_membership_email_domains Email domains that automatically give membership
  * @param {boolean} automatic_membership_retroactive Does the automatic membership apply retroactively?
  * @param {boolean} primary_group Is this a primary group?
  * @param {*} title Unsure. Group title? can be used as user title?
@@ -84,9 +84,9 @@ exports.UserGroup = {};
  * @typedef {object}
  * @param {number} id User Id
  * @param {string} username Username
- * @param {number} uploaded_avatar_id ID of the user's avatar
- * @param {string} avatar_template URL template for user's avatar
- * @param {string} name User's long name
+ * @param {number} uploaded_avatar_id ID of the users avatar
+ * @param {string} avatar_template URL template for users avatar
+ * @param {string} name Users long name
  * @param {string} [email] User Email
  * @param {string} last_posted_at ISO formatted datetime of last post by user
  * @param {string} last_seen_at ISO formatted datetime of last user interaction
@@ -103,17 +103,17 @@ exports.UserGroup = {};
  * @param {UserActionSummary[]} stats User post action summary
  * @param {boolean} can_send_private_messages Can this user send private messages?
  * @param {boolean} can_send_private_message_to_user Can the current user send a private message to this user?
- * @param {string} bio_excerpt Short exertp from user bio
+ * @param {string} bio_excerpt Short exerpt from user bio
  * @param {number} trust_level This user's trust level
  * @param {boolean} moderator Is this user a moderator?
  * @param {boolean} admin Is this user an admin?
  * @param {string} title User's title
  * @param {number} badge_count Number of unique badge types this user has
- * @param {number} notification_count NUmber of notifications this user has
+ * @param {number} notification_count Number of notifications this user has
  * @param {boolean} has_title_badges Does user have badges that can be set as title?
  * @param {boolean} edit_history_public Does user have public edit history?
  * @param {object} custom_fields Unsure, needs explanation
- * @param (Object.<number,string>) user_fields Custom site specific user fields
+ * @param (Object.<number,string>) ´user_fields´ Custom site specific user fields
  * @param {number} pending_count Number of posts pending moderator approval?
  * @param {string} locale User set locale
  * @param {boolean} email_digests User receives email digests?
@@ -122,7 +122,7 @@ exports.UserGroup = {};
  * @param {boolean} email_always Does the user wish to be emailed regardless of activity?
  * @param {number} digest_after_days Frequency to sent email digest out after
  * @param {boolean} mailing_list_mode Unknown purpose. what is this field for?
- * @param {number} auto_track_topics_after_msecs Time use must spend reading topic before topic is tracked
+ * @param {number} auto_track_topics_after_msecs Time user must spend reading topic before topic is tracked
  * @param {number} new_topic_duration_minutes Time topics are considered new for
  * @param {boolean} external_links_in_new_tab User opens external links in new tab?
  * @param {boolean} dynamic_favicon User uses the dynamic favicon?

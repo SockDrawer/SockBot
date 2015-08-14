@@ -136,15 +136,15 @@ exports.Link = {};
  *
  * @typedef {object}
  * @param {string|null} auto_close_at ISO formatted time that topic will autoclose at
- * @param {number|null} auto_close_hours number of hours before topic closes relative to topic creation
- * @param {boolean} auto_close_based_on_last_post if set `auto_close_hours` is relative to latest post
+ * @param {number|null} auto_close_hours Number of hours before topic closes relative to topic creation
+ * @param {boolean} auto_close_based_on_last_post If set `auto_close_hours` is relative to latest post
  * @param {external.users.UserSummary} created_by User that created topic
  * @param {external.users.UserSummary} last_poster User that created last post
  * @param {Participant[]} participants Topic Top Participants
  * @param {TopicSummary[]} suggested_topics Suggested topics for this topic
  * @param {Link[]} links Links posted within the topic
  * @param {NotificationLevel} notification_level Topic notification level
- * @param {NotificationReason} notification_reason_id Reason for value of   notification_level`
+ * @param {NotificationReason} notification_reason_id Reason for value of `notification_level`
  * @param {boolean} can_edit Can current user edit topic title?
  * @param {boolean} can_invite_to Can current user issue invitations to topic?
  * @param {boolean} can_create_post Can current user reply to topic?
@@ -184,6 +184,6 @@ exports.TopicDetails = {};
  * @param {TopicDetails} details Details about this topic
  * @param {string|null} deleted_by Username of the deleting user
  * @param {external.posts.ActionSummary[]} actions_summary Summary of actions on Topic
- * @param {number} chunk_size Number of posts that belon in each chunk of postsx
+ * @param {number} chunk_size Number of posts that belong in each chunk of posts
  */
 exports.Topic = {};
