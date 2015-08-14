@@ -116,7 +116,7 @@ exports.start = function start() {
  */
 exports.updateSelf = function(callback) {
      //Fetch my stats
-    internals.browser.getUser(internals.username,function(myData) {
+    internals.browser.getUser(internals.username, function(myData) {
 
         //Discourse doesn't follow our linting rules:
         /*eslint-disable camelCase */
