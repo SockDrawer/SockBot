@@ -46,7 +46,7 @@ exports.UserActionType = {
     'new_private_message': 12,
     /** User received a new private message */
     'got_private_message': 13,
-    /** User queued a post */
+    /** User's post was put onto approvals queue (anti-spam measure) */
     'pending': 14
 };
 
