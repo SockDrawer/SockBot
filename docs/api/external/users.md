@@ -33,7 +33,7 @@ Discourse User Action Type Enum
 | edit | <code>11</code> | User edited a post |
 | new_private_message | <code>12</code> | User sent a new private message |
 | got_private_message | <code>13</code> | User received a new private message |
-| pending | <code>14</code> | User queued a post |
+| pending | <code>14</code> | User's post was put onto approvals queue (anti-spam measure) |
 
 <a name="external.module_users.UserSummary"></a>
 ### users.UserSummary : <code>object</code>
