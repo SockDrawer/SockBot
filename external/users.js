@@ -17,12 +17,44 @@
  */
 exports.UserSummary = {};
 
+/**
+ * Discourse User Action Type Enum
+ *
+ * @readonly
+ * @enum
+ */
+exports.UserActionType = {
+    /** User liked a post */
+    'like': 1,
+    /** user's post was liked */
+    'was_liked': 2,
+    /** User bookmarked a post */
+    'bookmark': 3,
+    /** User started a topic */
+    'new_topic': 4,
+    /** User replied to a post */
+    'reply': 5,
+    /** User's post was replied to */
+    'response': 6,
+    /** User was mentioned */
+    'mention': 7,
+    /** User was quoted */
+    'quote': 9,
+    /** User edited a post */
+    'edit': 11,
+    /** User sent a new private message */
+    'new_private_message': 12,
+    /** User received a new private message */
+    'got_private_message': 13,
+    /** User queued a post */
+    'pending': 14
+};
 
 /**
  * User Action Summary
  *
  * @typedef {object}
- * @param {external.posts.PostActionType} action_type  PostActionType being summarized
+ * @param {external.posts.UserActionType} action_type UserActionType being summarized
  * @param {number} count Number of times user has performed action
  * @param {*} id Unknown, appears to always be null
  */
