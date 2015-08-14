@@ -23,7 +23,7 @@ Discourse User Action Type Enum
 | Name | Default | Description |
 | --- | --- | --- |
 | like | <code>1</code> | User liked a post |
-| was_liked | <code>2</code> | user's post was liked |
+| was_liked | <code>2</code> | User's post was liked |
 | bookmark | <code>3</code> | User bookmarked a post |
 | new_topic | <code>4</code> | User started a topic |
 | reply | <code>5</code> | User replied to a post |
