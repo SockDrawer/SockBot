@@ -26,7 +26,7 @@ exports.UserSummary = {};
 exports.UserActionType = {
     /** User liked a post */
     'like': 1,
-    /** user's post was liked */
+    /** User's post was liked */
     'was_liked': 2,
     /** User bookmarked a post */
     'bookmark': 3,
