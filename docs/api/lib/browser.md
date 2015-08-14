@@ -22,6 +22,7 @@ Webbrowser abstraction for communicating with discourse
   * [~getTopics(eachTopic, complete)](#module_browser..getTopics)
   * [~postAction(action, postId, message, callback)](#module_browser..postAction)
   * [~getTopic(topicId, callback)](#module_browser..getTopic)
+  * [~getUser(username, callback)](#module_browser..getUser)
   * [~getCSRF(delay, queue, callback)](#module_browser..getCSRF)
   * [~doLogin(delay, queue, callback)](#module_browser..doLogin)
   * [~login(callback)](#module_browser..login)
@@ -249,6 +250,17 @@ Get topic details
 | Param | Type | Description |
 | --- | --- | --- |
 | topicId | <code>number</code> | Id of topic to retrieve |
+| callback | <code>topicCallback</code> | Completion callback |
+
+<a name="module_browser..getUser"></a>
+### browser~getUser(username, callback)
+Get username details
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| username | <code>number</code> | Username to get details of |
 | callback | <code>topicCallback</code> | Completion callback |
 
 <a name="module_browser..getCSRF"></a>
