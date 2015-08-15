@@ -13,6 +13,42 @@
 
 Sockbot - A sock puppet Robot worthy of TheDailyWTF that interfaces with what.thedailywtf.com. SO META!
 
+End Of Life Notice
+==================
+
+With the release of version 2.09 of SockBot on August 15, 2015, the 0.x series is now on life support. 
+Official support will continue for thirty days after the release of Sockbot 2.09, ending on September 15th, 2015.
+
+SockBot 0.x modules included as plugins in the initial release of SockBot 2.0 will be supported for thirty days after the release of Sockbot 2.0.
+
+Supported SockBot 0.x modules will be supported for thirty days after the release of the module as a NPM plugin for SockBot 2.0.
+
+Unsupported SockBot 0.x modules will be supported only on a best effort level.
+
+After the support period has ended support will continue on a best effort level
+
+**Supported Modules**
+
+Module Name   | Migration Status
+--------------|----------------
+Anonymize     | Included in 2.0 Release
+BadTranslator | Supported
+CardBox       | Supported
+Crypt         | Unsupported
+DiceMaster    | Supported
+Eliza         | Unsupported
+MobileEmoji   | Unsupported
+AutoLikes     | Included in 2.0 Release
+lojban        | Unsupported
+Markov        | Unsupported
+Math          | Unsupported
+Readify       | Included in 2.0 Release
+Spellar       | Unsupported
+StatsPorn     | Supported
+Summoner      | Included in 2.0 Release
+Todo          | Unsupported
+TrustCheck    | Supported
+TRWTF         | Unsupported.
 
 NOTA BENE
 =========

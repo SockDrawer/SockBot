@@ -6,7 +6,7 @@ var verspec = '$Format:%d|%h|%ae|%ct$';
 // ' (tag and branch names)|hash|author e-mail|commit timestamp'
 
 var codename = 'SockBot';
-var version = 'v0.16';
+var version = 'v0.99';
 
 var vernames = {
     'v0.16': 'Hazardous Hera',
@@ -16,7 +16,8 @@ var vernames = {
     'v0.13.0': 'Devious Daine',
     'v0.12.5': 'Guileful Ginny',
     'v0.12.0': 'Beguiling Beatrice',
-    'v0.11.1': 'Artful Alice'
+    'v0.11.1': 'Artful Alice',
+    'v0.99.0': 'Omega Olivia'
 };
 
 var offset = -1;
