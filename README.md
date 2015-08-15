@@ -1,10 +1,10 @@
-[![Build Status](https://travis-ci.org/SockDrawer/SockBot.svg?branch=es6-dev)](https://travis-ci.org/SockDrawer/SockBot)
-[![Coverage Status](https://coveralls.io/repos/SockDrawer/SockBot/badge.svg?branch=es6-dev)](https://coveralls.io/r/SockDrawer/SockBot?branch=es6-dev)
-[![Docs Status](https://readthedocs.org/projects/sockbot/badge/?version=es6-dev)](http://sockbot.readthedocs.org/)
+[![Build Status](https://travis-ci.org/SockDrawer/SockBot.svg?branch=master)](https://travis-ci.org/SockDrawer/SockBot)
+[![Coverage Status](https://coveralls.io/repos/SockDrawer/SockBot/badge.svg?branch=master)](https://coveralls.io/r/SockDrawer/SockBot?branch=master)
+[![Docs Status](https://readthedocs.org/projects/sockbot/badge/?version=latest)](http://sockbot.readthedocs.org/)
 
-[![Dependency Status](https://david-dm.org/SockDrawer/SockBot/es6-dev.svg)](https://david-dm.org/SockDrawer/SockBot/es6-dev)
-[![devDependency Status](https://david-dm.org/SockDrawer/SockBot/es6-dev/dev-status.svg)](https://david-dm.org/SockDrawer/SockBot/es6-dev#info=devDependencies)
-[![optionalDependency Status](https://david-dm.org/SockDrawer/SockBot/es6-dev/optional-status.svg)](https://david-dm.org/SockDrawer/SockBot/es6-dev#info=optionalDependencies)
+[![Dependency Status](https://david-dm.org/SockDrawer/SockBot/master.svg)](https://david-dm.org/SockDrawer/SockBot/master)
+[![devDependency Status](https://david-dm.org/SockDrawer/SockBot/master/dev-status.svg)](https://david-dm.org/SockDrawer/SockBot/master#info=devDependencies)
+[![optionalDependency Status](https://david-dm.org/SockDrawer/SockBot/master/optional-status.svg)](https://david-dm.org/SockDrawer/SockBot/master#info=optionalDependencies)
 
 [![Stories in Ready](https://badge.waffle.io/sockdrawer/sockbot.png?label=ready&title=Ready)](https://waffle.io/sockdrawer/sockbot)
 [![Stories in Progress](https://badge.waffle.io/sockdrawer/sockbot.png?label=in%20progress&title=In%20Progress)](https://waffle.io/sockdrawer/sockbot)
@@ -33,7 +33,8 @@ Special Thanks
 ==============
 For hosting the forum and allowing our bots to flourish:<br />
 [@apapadimoulis](http://what.thedailywtf.com/users/apapadimoulis)<br />
-[@PJH](http://what.thedailywtf.com/users/PJH)
+[@PJH](http://what.thedailywtf.com/users/PJH)<br />
+[@boomzilla](http://what.thedailywtf.com/users/boomzilla)
 
 For telling us that it couldn't be done:
 [@Codinghorror](http://what.thedailywtf.com/users/Codinghorror)
