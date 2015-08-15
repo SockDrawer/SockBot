@@ -24,21 +24,14 @@ build/Release
 # see https://npmjs.org/doc/faq.html#Should-I-check-my-node_modules-folder-into-git
 node_modules
 
-#"secret" conf override file
-*.json
-
-#scratch ideas file
+#scratch ideas files
 test.js
-
 test.txt
-
-#Docs. For grunt task.
-
-site/*
-
-
-#Sockbot admin Baskups downloads directory
-backups/
 
 #Cloud9 IDE
 .c9
+
+
+#test configuration files
+test.json
+test.yml

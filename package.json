@@ -1,54 +1,54 @@
 {
   "name": "sockbot",
-  "version": "0.99.0",
+  "version": "2.0.0",
+  "releaseName": "Angelic Angora",
   "description": "A sockpuppet bot to use on http://what.thedailywtf.com.",
-  "main": "SockBot.js",
   "repository": "https://github.com/SockDrawer/SockBot",
-  "author": "Accalia Elementia <Accalia.de.elementia>",
+  "license": "MIT",
+  "author": "Accalia Elementia <accalia@sockdrawer.io> (https://github.com/AccaliaDeElementia)",
   "contributors": [
-    "RaceProUK <RaceProUK> (https://github.com/RaceProUK)",
+    "RaceProUK <raceprouk@sockdrawer.io> (https://github.com/RaceProUK)",
     "Yamikuronue <yamikuronue> (https://github.com/yamikuronue)"
   ],
+  "bugs": {
+    "url": "https://github.com/SockDrawer/SockBot/issues",
+    "email": "support@sockdrawer.io"
+  },
+  "main": "./SockBot.js",
+  "bin": "./lib/cli.js",
+  "engines": {
+    "node": ">=0.11",
+    "iojs": ">=1.7"
+  },
   "dependencies": {
-    "async": "~0.2.8",
-    "boom": "^2.8.0",
-    "js-yaml": "^3.2.3",
-    "request": "^2.42.0",
-    "sync-exec": "^0.5.0",
-    "xregexp": "^2.0.0"
+    "async": "^1.4.0",
+    "coveralls": "^2.11.4",
+    "js-yaml": "^3.3.1",
+    "request": "^2.60.0",
+    "xregexp": "^2.0.0",
+    "yargs": "^3.18.0"
   },
   "devDependencies": {
-    "chai": "^2.3.0",
-    "coveralls": "^2.11.2",
-    "eslint": "^0.23.0",
+    "blns": "^2.0.0",
+    "chai": "^3.2.0",
+    "coveralls": "^2.11.3",
     "gulp": "^3.9.0",
-    "gulp-concat": "^2.5.2",
-    "gulp-eslint": "^0.14.0",
+    "gulp-eslint": "^1.0.0",
     "gulp-git": "^1.2.4",
     "gulp-istanbul": "^0.10.0",
     "gulp-jsdoc-to-markdown": "^1.1.1",
-    "gulp-mocha": "^2.1.1",
+    "gulp-mocha": "^2.1.3",
     "gulp-rename": "^1.2.2",
-    "gulp-util": "^3.0.5",
-    "istanbul": "^0.3.17",
-    "jsdoc-to-markdown": "^1.1.1",
-    "mocha": "^2.2.5",
-    "sinon": "^1.15.4"
-  },
-  "optionalDependencies": {
-    "mathjs": "^1.5.0",
-    "mkdirp": "^0.5.0",
-    "nodehun": "^2.0.4",
-    "nodehun-sentences": "^1.0.1",
-    "pg": "^4.1.1",
-    "plotly": "^0.2.15",
-    "request-debug": "^0.1.1",
-    "tingodb": "^0.3.4"
+    "istanbul-harmony": "^0.3.16",
+    "sinon": "^1.15.1",
+    "sinon-chai": "^2.8.0"
   },
   "scripts": {
-    "start": "node --harmony SockBot.js",
-    "lint": "gulp lint lintTests",
-    "test": "gulp test",
-    "gulp": "gulp"
+    "start": "node --harmony --harmony_arrow_functions lib/cli.js",
+    "lint": "node --harmony --harmony_arrow_functions node_modules/gulp/bin/gulp.js lint",
+    "test": "node --harmony --harmony_arrow_functions node_modules/gulp/bin/gulp.js test",
+    "gulp": "node --harmony --harmony_arrow_functions node_modules/gulp/bin/gulp.js",
+    "istanbul": "node --harmony --harmony_arrow_functions node_modules/istanbul-harmony/lib/cli.js cover node_modules/gulp-mocha/node_modules/mocha/bin/_mocha -- --recursive -R dot",
+    "mocha": "node --harmony --harmony_arrow_functions node_modules/gulp-mocha/node_modules/mocha/bin/_mocha --recursive -R spec"
   }
 }
