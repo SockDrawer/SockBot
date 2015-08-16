@@ -3,14 +3,14 @@
 SockBot is configured via a JSON or YAML configuration file. The configuration consists of two dictionaries, 
 one core configuration dictionary and one plugin configuration dictionary.
 
-Core configuration options are fixed and can be found described in the API codumentation for [defaultConfig]. 
+Core configuration options are fixed and can be found described in the API documentation for [defaultConfig]. 
 Plugin configuration options are determined by the individual plugins and will vary from plugin to plugin.
 
 [defaultConfig]: api/config/#defaultConfig
 
 ## Core Configuration
 Core configuration sets options for the entire bot, such as username/password to login as and what forum to 
-log in to. The following options are recognized by sockbot as core configuriation:
+log in to. The following options are recognized by sockbot as core configuration:
 
 | Option               | Type           | Required | Default                          |
 |----------------------|----------------|----------|----------------------------------|
@@ -26,12 +26,12 @@ log in to. The following options are recognized by sockbot as core configuriatio
 | `pollNotifications`  | True/False     | No       | `true`                           |
 
 ### username
-This option sets the username the bot will identify itself as. As the default value is blank it will need to 
-be specified in configuration.
+This option sets the username the bot will identify itself as. It needs to 
+be specified in the configuration.
 
 ### password
-This option sets the password the bot will use to authenticate istelf with. As the default value is blank it
-will need to be specified in configuration.
+This option sets the password the bot will use to authenticate itself with. It
+needs to be specified in the configuration.
 
 ### owner
 This option sets the username that the bot will consider its owner. The owner user will be considered ultimately
@@ -44,7 +44,7 @@ This option sets the url of the forum the bot will interact with. The default va
 
 ### ignoreUsers
 This option sets a set of usernames that the bot will ignore. Ignored users cannot interact with the bot and the bot
-will be prevented from interacting with the ignored users topics unless the interaction is initiated by forum staff
+will be prevented from interacting with the ignored users topics unless the interaction is initiated by forum staff.
 
 This option was added to prevent users from being able to hijack the bot to harass other users. 
 
@@ -61,7 +61,7 @@ By default the bot will ignore category `8`, Articles, and category `23`, The Lo
 other than [TheDailyWTF] will likely want to override this list to map onto their categories.
 
 ### cooldownPeriod
-This option sets the period of time in miliseconds that trust level 1 users will be prevented from interacing with
+This option sets the period of time in milliseconds that trust level 1 users will be prevented from interacting with
 the bot after an initial interaction. This limits possible bot abuse from low trust users. This cooldown can be 
 disabled by setting this value to `0` if desired.
 
@@ -75,7 +75,7 @@ This options controls whether the bot will poll the discourse message-bus. Most 
 as the bot will not get any messages from discourse unless a plugin manually polls for messages.
 
 ### pollNotifications
-This option controlls whether the bot will poll for notifications from discourse. This is useful to disable if one is
+This option controls whether the bot will poll for notifications from discourse. This is useful to disable if one is
 running a bot on an actual user account and wishes to still take care of their own notifications.
 
 ## Plugin Configuration
