@@ -28,7 +28,7 @@
     "no-mixed-spaces-and-tabs": 2,
     "no-shadow": 2,
     "no-sync": 2,
-    "no-trailing-spaces": 1,
+    "no-trailing-spaces": [1, { "skipBlankLines": true }],
     "no-use-before-define": [2, "nofunc"],
     "no-undef": 2,
     "no-unused-vars": 1,
