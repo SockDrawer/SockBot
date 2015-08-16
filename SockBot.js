@@ -1,121 +1,215 @@
-/*jslint node: true, indent: 4 */
-/* eslint-disable no-console */
+#!/usr/bin/env node --harmony
+
 'use strict';
+/**
+ * Main Module for SockBot2.0
+ * @module SockBot
+ * @author Accalia
+ * @license MIT
+ */
 
-var version = require('./version');
-console.log(version.bootString);
+const async = require('async');
+const EventEmitter = require('events').EventEmitter;
+const config = require('./lib/config'),
+    messages = require('./lib/messages'),
+    notifications = require('./lib/notifications'),
+    commands = require('./lib/commands'),
+    utils = require('./lib/utils'),
+    packageInfo = require('./package.json');
+const browser = require('./lib/browser')();
+const internals = {
+        plugins: [],
+        running: false
+    },
+    privateFns = {
+        doPluginRequire: doPluginRequire,
+        loadConfig: loadConfig,
+        loadPlugins: loadPlugins,
+        prepareEvents: prepareEvents
+    };
 
-var fs = require('fs'),
-    async = require('async'),
-    config = require('./configuration'),
-    admin = require('./admin'),
-    commands = require('./commands'),
-    database = require('./database');
-var browser,
-    messageBus,
-    sockModules = [];
+exports.version = packageInfo.version;
+exports.releaseName = packageInfo.releaseName;
 
-process.on('exit', function() {
-    console.log(version.bootString);
-});
+/**
+ * Prepared Callback
+ *
+ * @callback
+ * @name preparedCallback
+ * @param {string|Error} err Any Error encountered
+ * @param {external.events.SockEvents} events SockBot's internal event emitter with added helper functions
+ * @param {browser} pluginBrowser discourse communication class, will be logged into discourse once bot starts
+ */
 
-async.waterfall([
-    admin.load,
-    function (cb) {
-        fs.readdir('./sock_modules/', cb);
-    },
-    function (files, cb) {
-        files.filter(function (name) {
-            return name[0] !== '.' && /[.]js$/.test(name);
-        }).forEach(function (name) {
-            var module;
-            try {
-                module = require('./sock_modules/' + name);
-            } catch (e) {
-                console.log('Error in Module ' + name + ': ' + e.message);
-                return;
-            }
-            if (isNaN(module.priority)) {
-                module.priority = 50;
-            }
-            if (!module.configuration || module.configuration.enabled) {
-                console.warn('Ignoring module: `' + (module.name || name) +
-                    '` Does not default to disabled');
-            } else {
-                sockModules.push(module);
-                console.log('Loaded module: ' +
-                    module.name + ' v' + module.version);
-            }
-        });
-        sockModules.sort(function (a, b) {
-            return a.priority - b.priority;
-        });
-        cb();
-    },
-    function (cb) {
-        config = config.loadConfiguration(sockModules, admin,
-            process.argv[2]);
-        browser = require('./discourse');
-        messageBus = require('./messageBus');
-        sockModules = sockModules.filter(function (module) {
-            return config.modules[module.name].enabled;
-        });
-        sockModules.unshift(admin);
-        sockModules.unshift(commands);
-        commands.loadModules(sockModules);
-        admin.setModules(sockModules);
-        cb();
-    },
-    function (cb) {
-        var tries = 0;
-        var loggerIn = function () {
-            tries++;
-            browser.login(function () {
-                if (config.user && config.user.user
-                    || tries >= config.maxLoginAttempts) {
-                    if (config.verbose) {
-                        console.log('Login attempts: ' + tries);
-                    }
-                    cb();
-                } else {
-                    if (config.user) {
-                        if (typeof (config.user) === 'object') {
-                            config.user = JSON.stringify(config.user);
-                        }
-                        console.log('Login error: ' + config.user);
-                    }
-                    var delay = config.extendRetryLoginDelay
-                        ? tries * config.retryLoginDelay
-                        : config.retryLoginDelay;
-                    setTimeout(loggerIn, delay);
-                }
-            });
-        };
-        loggerIn();
-    },
-    function (cb) {
-        if (!config.user || !config.user.user) {
-            if (config.user) {
-                if (typeof (config.user) === 'object') {
-                    config.user = JSON.stringify(config.user);
-                }
-                console.log('Login error: ' + config.user);
-            }
-            console.log('Terminating bot due to failure to log in');
-            /* eslint-disable no-process-exit */
-            process.exit(0);
-            /* eslint-able no-process-exit */
+/**
+ * Completion Callback
+ *
+ * @callback
+ * @name completedCallback
+ * @param {string|Error} err Any Error encountered
+ */
+
+/**
+ * Prepare the bot for running
+ *
+ * @param {object|string} configuration Configuration to use. If string interpret as file path to read from
+ * @param {preparedCallback} callback Completion callback
+ */
+exports.prepare = function prepare(configuration, callback) {
+    async.waterfall([(next) => {
+        privateFns.loadConfig(configuration, next);
+    }, (_, next) => {
+        privateFns.prepareEvents(next);
+    }, (events, pluginBrowser, next) => {
+        try {
+            privateFns.loadPlugins();
+        } catch (e) {
+            callback(e);
         }
-        console.log('Logged in as: ' + config.user.user.username);
-        database.begin(browser, config);
-        sockModules.forEach(function (module) {
-            if (typeof module.begin !== 'function') {
-                return;
-            }
-            console.log('Starting module: ' + module.name);
-            module.begin(browser, config);
+        internals.plugins.forEach((plugin) => {
+            plugin.prepare(config.plugins[plugin.prepare.pluginName], config, events, pluginBrowser);
         });
-        messageBus.begin(sockModules, admin);
-        cb();
+        next(null, events, pluginBrowser);
+    }], callback);
+};
+
+/**
+ * Start the bot
+ *
+ * @param {completedCallback} callback Completion Callback
+ */
+exports.start = function (callback) {
+    utils.log('Starting SockBot ' + packageInfo.version + ' ' + packageInfo.releaseName);
+    browser.start();
+    browser.login((err, user) => {
+        if (err) {
+            utils.warn('Login Failed: ' + err);
+            return callback(err);
+        }
+        config.user = user;
+        commands.start();
+        internals.plugins.forEach((plugin) => plugin.start());
+        utils.log('SockBot `' + config.user.username + '` Started');
+        internals.running = true;
+        if (config.core.pollMessages) {
+            messages.start();
+            async.whilst(() => internals.running, (next) => {
+                messages.pollMessages(() => setTimeout(next, 3 * 1000));
+            });
+        }
+        if (config.core.pollNotifications) {
+            notifications.start();
+            async.whilst(() => internals.running, (next) => {
+                notifications.pollNotifications(() => setTimeout(next, 5 * 60 * 1000));
+            });
+        }
+        callback(null);
+    });
+};
+
+/**
+ * Stop the event loop and signal plugins to stop
+ *
+ * @param {function} callback Completion callback
+ */
+exports.stop = function (callback) {
+    utils.log('Stopping SockBot ' + packageInfo.version + ' ' + packageInfo.releaseName);
+    internals.running = false;
+    internals.plugins.forEach((plugin) => plugin.stop());
+    browser.stop();
+    if (callback) {
+        callback();
     }
-]);
+};
+
+
+/**
+ * Load module as plugin
+ *
+ * @param {string} module Module to require
+ * @param {function} requireIt nodejs core require function (for unti testing purposes is parameter)
+ * @returns {object} requested module
+ */
+function doPluginRequire(module, requireIt) {
+    try {
+        // Look in plugins first
+        return requireIt('./plugins/' + module);
+    } catch (e) {
+        // Error! check if it's ENOENT and try raw module
+        if (/^Cannot find module/.test(e.message)) {
+            return requireIt(module);
+        }
+        // Rethrow error if it wasn't ENOENT
+        throw e;
+    }
+}
+
+/**
+ * Prepare core EventEmitter as a SockEvents object
+ *
+ * @param {preparedCallback} callback Completion callback
+ */
+function prepareEvents(callback) {
+    const events = new EventEmitter(),
+        pluginBrowser = browser.setPlugins(),
+        clientid = utils.uuid();
+    async.series([
+        (next) => {
+            messages.prepare(events, clientid, next);
+        }, (next) => {
+            notifications.prepare(events, next);
+        }, (next) => {
+            commands.prepare(events, next);
+        }, (next) => {
+            browser.prepare(events, next);
+        }
+    ], (err) => {
+        if (err) {
+            return callback(err);
+        }
+        callback(null, events, pluginBrowser);
+    });
+}
+
+/**
+ * Load plugins based on current configuration.
+ */
+function loadPlugins() {
+    Object.keys(config.plugins).forEach((module) => {
+        const plugin = privateFns.doPluginRequire(module, require);
+        if (typeof plugin.prepare !== 'function') {
+            utils.error('Plugin `' + module + '` does not export `prepare()` function');
+        } else if (typeof plugin.start !== 'function') {
+            utils.error('Plugin `' + module + '` does not export `start()` function');
+        } else if (typeof plugin.stop !== 'function') {
+            utils.error('Plugin `' + module + '` does not export `stop()` function');
+        } else {
+            utils.log('Plugin `' + module + '` Loaded');
+            plugin.prepare.pluginName = module;
+            internals.plugins.push(plugin);
+        }
+    });
+}
+
+/**
+ * Load configuration
+ *
+ * @param {string|object} cfg Configuration to use, if string load as filepath to configuration
+ * @param {completedCallback} callback CompletionCallback
+ */
+function loadConfig(cfg, callback) {
+    if (typeof cfg === 'object' && typeof cfg.core === 'object' && typeof cfg.plugins === 'object') {
+        config.core = cfg.core;
+        config.plugins = cfg.plugins;
+        callback(null, null);
+    } else {
+        config.loadConfiguration(cfg, callback);
+    }
+}
+
+/* istanbul ignore else */
+if (typeof GLOBAL.describe === 'function') {
+    //test is running
+    exports.internals = internals;
+    exports.privateFns = privateFns;
+}
