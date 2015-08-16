@@ -44,7 +44,7 @@
     "sinon-chai": "^2.8.0"
   },
   "scripts": {
-    "start": "node app.js",
+    "start": "node lib/app.js",
     "lint": "node --harmony --harmony_arrow_functions node_modules/gulp/bin/gulp.js lint",
     "test": "node --harmony --harmony_arrow_functions node_modules/gulp/bin/gulp.js test",
     "gulp": "node --harmony --harmony_arrow_functions node_modules/gulp/bin/gulp.js",
