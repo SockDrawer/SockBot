@@ -22,7 +22,6 @@
   },
   "dependencies": {
     "async": "^1.4.0",
-    "harmonious": "^0.5.17",
     "js-yaml": "^3.3.1",
     "request": "^2.60.0",
     "xregexp": "^2.0.0",
