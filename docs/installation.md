@@ -63,7 +63,7 @@ that SockBot was installed to execute the following command.
 npm install
 ```
 
-Once this command completes all depenencies of SockBot have been installed.
+Once this command completes all dependencies of SockBot have been installed.
 
 If you wish you may execute the unit tests for SockBot by executing the following command.
 ```
@@ -76,7 +76,7 @@ Once installed SockBot will require a [Configuration File][config] to work prope
 formatted file, the full details of which can be found in the [configuration][config] documentation.
 
 Below is a sample configuration that sets the minimum core configuration and activates the echo module which
-replies to messages with the contents on the message recieved and is useful for testing.
+replies to messages with the contents on the message received and is useful for testing.
 
 ```
 ---
@@ -101,7 +101,7 @@ npm start config.yml
 ```
 
 SockBot can also be started directly from the command line without using npm. To start SockBot this way
-execute the apropriate command below in the folder that SockBot is installed to.
+execute the appropriate command below in the folder that SockBot is installed to.
 
 For Node.js
 ```
