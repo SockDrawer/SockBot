@@ -14,8 +14,8 @@ log in to. The following options are recognized by sockbot as core configuriatio
 
 | Option               | Type           | Required | Default                          |
 |----------------------|----------------|----------|----------------------------------|
-| `username`           | Text           | Yes      | `''`                             |
-| `password`           | Text           | Yes      | `''`                             |
+| `username`           | Text           | Yes      |                                  |
+| `password`           | Text           | Yes      |                                  |
 | `owner`              | Text           | No       | `'accalia'`                      |
 | `forum`              | Text           | No       | `'https://what.thedailywtf.com'` |
 | `ignoreUsers`        | List of Text   | No       | `['blakeyrat', 'PaulaBean']`     |
