@@ -19,7 +19,7 @@ after_script:
 branches:
   only:
   - master
-  - es6-dev
+  - integration
 notifications:
   slack:
     secure: Fycz8f/0HY/rgiMePSF4IhavbvSR0/B20gGX4sHHd83ql6WLOx8bf+Al348HhF8GobqD3uTUs1tQPmIGGHdPZ2l+0ZFythSSUNy766612WfyYOpCAqXeCALgcciKzrw7lkECtOLgBOm7vRWVSOfxHXle2NefZR3Q8eNPWpKlNP8=
