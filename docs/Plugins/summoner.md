@@ -7,7 +7,7 @@ implement celebrity personalities, such as [@zoidberg].
 
 ## Usage
 Once configured interaction is required to activate this plugin. The bot account must be summoned via an
-@mention. Upon being summoned the bot will reply with one of the preconfigured phrases, afterwhich the bot
+@mention. Upon being summoned the bot will reply with one of the preconfigured phrases, after which the bot
 will automatically place the topic on cooldown, to prevent abuse of the bot.
 
 ## Phrase Replacements
@@ -34,7 +34,7 @@ the value of the `username` key in the post, resulting in the reply text of:
 
 ### `cooldown`
 
-This sets the amount of time (in miliseconds) that topics will be on cooldown before the bot will respond to
+This sets the amount of time (in milliseconds) that topics will be on cooldown before the bot will respond to
 another summon from a topic that the bot has already been summoned to. The default value is one minute.
 
 ### `messages`
