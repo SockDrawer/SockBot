@@ -10,6 +10,7 @@
  */
 
 const utils = require('../lib/utils');
+const async = require('async');
 
 const internals = {
     browser: null,
@@ -49,27 +50,27 @@ const userActions = {
 exports.defaultConfig = {
     trustLevel: 2,
     requirements: {
-        tl1: {
-            topics: 5,
-            posts: 30,
+        1: {
+            topicsRead: 5,
+            postsRead: 30,
             time: 10,
             likesGiven: 0,
             likesReceived: 0,
             replies: 0,
             days: 0
         },
-        tl2: {
-            topics: 20,
-            posts: 100,
+        2: {
+            topicsRead: 20,
+            postsRead: 100,
             time: 60,
             likesGiven: 1,
             likesReceived: 1,
             replies: 3,
             days: 15
         },
-        tl3: {
-            topics: 10,
-            posts: 0,
+        3: {
+            topicsRead: 10,
+            postsRead: 0,
             postPercentage: 25,
             topicPercentage: 25,
             time: 60,
@@ -107,7 +108,59 @@ exports.prepare = function prepare(config, _, events, browser) {
  * Start the plugin after login
  */
 exports.start = function start() {
-   exports.updateSelf();
+   exports.updateSelf(function() {
+		if (internals.configuration.trustLevel < internals.me.trustLevel) {
+			exports.increaseTrustLevel();
+		}
+   });
+};
+
+exports.giveLikes = function(numLikes, callback) {
+	internals.browser.createPrivateMessage(internals.username,
+	'Spamming for likes, ignore me',
+	'Spamming for likes (' + Math.random() + ')',
+	function(err, response) {
+		if (err) {
+			callback(err);
+			return;
+		}
+		const postID = response.id;
+
+		internals.browser.postAction(2, postID, '', function() {
+			async.times(numLikes - 1, function(n, next) {
+				internals.browser.createPost(postID,
+							null,
+							'Spamming for likes (' + Math.random() + ')',
+				function(error, resp1) {
+					if (error) {
+						next(error);
+					}
+						internals.browser.postAction(2, resp1.id, '', next);
+				});
+			}, function(error) {
+				callback(error);
+			});
+		});
+	});
+};
+
+exports.increaseTrustLevel = function(callback) {
+	//Figure out why we're not high enough
+	const requirements = internals.configuration.requirements[exports.config.trustLevel];
+
+	//Guess easy shit first
+	if (internals.me.likesGiven < requirements.likesGiven) {
+		exports.giveLikes(requirements.likesGiven - internals.me.likesGiven, function() {
+			exports.updateSelf();
+		});
+	}
+
+	if (internals.me.likesReceived < requirements.likesReceived) {
+		exports.giveLikes(requirements.likesReceived - internals.me.likesReceived, function() {
+			exports.updateSelf();
+		});
+	}
+	callback();
 };
 
 /**

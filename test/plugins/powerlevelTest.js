@@ -14,7 +14,8 @@ const powerlevel = require('../../plugins/powerlevel'),
 
 describe('Powerlevel plugin', () => {
     describe('exports', () => {
-        const fns = ['prepare', 'start', 'stop', 'updateSelf'],
+        const fns = ['prepare', 'start', 'stop', 'updateSelf',
+		'giveLikes', 'increaseTrustLevel'],
             objs = ['internals', 'defaultConfig'];
         fns.forEach(fn => it('should export ' + fn + '()', () => {
             expect(powerlevel[fn]).to.be.a('function');
@@ -164,4 +165,76 @@ describe('Powerlevel plugin', () => {
             });
         });
     });
+
+	describe('giveLikes()', () => {
+		let sandbox;
+		const config = {
+                core: {
+                    username: 'yamikuronue'
+                }
+            };
+
+        beforeEach(() => {
+            sandbox = sinon.sandbox.create();
+            sandbox.stub(utils, 'mergeObjects');
+        });
+
+        afterEach(() => sandbox.restore());
+		
+		it('Should start a PM chain to like', () => {
+			const fakeBrowser = {
+				createPrivateMessage: sandbox.stub().yields(null, {id: 15}),
+				createPost: sandbox.stub().yields(null, {id: 16}),
+				postAction:sandbox.stub().yields()
+            };
+
+			powerlevel.prepare(null, config, {}, fakeBrowser);
+
+			powerlevel.giveLikes(1, function(err) {
+				expect(fakeBrowser.createPrivateMessage).to.have.been.calledOnce;//Create the PM
+				expect(fakeBrowser.postAction).to.have.been.calledWith(2, 15, ''); //Like on the post
+				expect(fakeBrowser.createPost).not.to.have.been.called; //reply: none needed
+				expect(err).to.be.falsey;
+			});
+		});
+		
+		it('Should reply to the same PM for the second like', (done) => {
+			const fakeBrowser = {
+				createPrivateMessage: sandbox.stub().yields(null, {id: 15}),
+				createPost: sandbox.stub().yields(null, {id: 16}),
+				postAction:sandbox.stub().yields()
+            };
+
+			powerlevel.prepare(null, config, {}, fakeBrowser);
+
+			powerlevel.giveLikes(2, function(err) {
+				expect(fakeBrowser.createPrivateMessage).to.have.been.calledOnce;
+				expect(fakeBrowser.createPost).to.have.been.calledOnce;
+				expect(fakeBrowser.createPost).to.have.been.calledWith(15);
+				expect(fakeBrowser.postAction).to.have.been.calledWith(2, 15, ''); //Like on the post
+				expect(fakeBrowser.postAction).to.have.been.calledWith(2, 16, ''); //Like on the rely
+				expect(err).to.be.falsey;
+				done();
+			});
+		});
+		
+		it('Should gather the correct amount of likes', (done) => {
+			const numLikes = Math.ceil(Math.random * 5 + 2);
+			const fakeBrowser = {
+				createPrivateMessage: sandbox.stub().yields(null, {id: 15}),
+				createPost: sandbox.stub().yields(null, {id: 16}),
+				postAction:sandbox.stub().yields()
+            };
+
+			powerlevel.prepare(null, config, {}, fakeBrowser);
+
+			powerlevel.giveLikes(numLikes, function(err) {
+				expect(err).to.be.falsey;
+				expect(fakeBrowser.createPrivateMessage).to.have.been.calledOnce;
+				expect(fakeBrowser.createPost).to.have.callCount(numLikes - 1);
+				expect(fakeBrowser.postAction).to.have.callCount(numLikes);
+				done();
+			});
+		});
+	});
 });
