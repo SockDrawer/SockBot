@@ -145,6 +145,33 @@ function doPluginRequire(module, requireIt) {
 }
 
 /**
+ * Log a message to console
+ *
+ * @param {*} message Message to log
+ */
+exports.logMessage = function logMessage(message) {
+    utils.log(message);
+};
+
+/**
+ * Log a warning to console
+ *
+ * @param {*} warning Message to log
+ */
+exports.logWarning = function logWarning(warning) {
+    utils.warn(warning);
+};
+
+/**
+ * Log an error to console
+ *
+ * @param {*} error Message to log
+ */
+exports.logError = function logError(error) {
+    utils.error(error);
+};
+
+/**
  * Prepare core EventEmitter as a SockEvents object
  *
  * @param {preparedCallback} callback Completion callback
@@ -155,6 +182,11 @@ function prepareEvents(callback) {
         clientid = utils.uuid();
     async.series([
         (next) => {
+            events.on('logMessage', exports.logMessage);
+            events.on('logWarning', exports.logWarning);
+            events.on('logError', exports.logError);
+            next();
+        }, (next) => {
             messages.prepare(events, clientid, next);
         }, (next) => {
             notifications.prepare(events, next);

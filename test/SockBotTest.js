@@ -22,7 +22,7 @@ const browser = browserPlugin();
 
 describe('SockBot', () => {
     describe('exports', () => {
-        const fns = ['start', 'stop', 'prepare'],
+        const fns = ['start', 'stop', 'prepare', 'logMessage', 'logWarning', 'logError'],
             objs = ['privateFns', 'internals'],
             vals = ['version', 'releaseName'];
         describe('should export expected functions:', () => {
@@ -120,6 +120,44 @@ describe('SockBot', () => {
             afterEach(() => {
                 sandbox.restore();
                 async.nextTick = tick;
+            });
+            describe('log Events', () => {
+                it('should set up `logMessage` event', () => {
+                    const spy = sinon.spy();
+                    messages.prepare.yields(null);
+                    notifications.prepare.yields(null);
+                    commands.prepare.yields(null);
+                    browser.prepare.yields(null);
+                    prepareEvents(spy);
+                    sandbox.clock.tick(0);
+                    spy.called.should.be.true;
+                    const events = spy.firstCall.args[1];
+                    events.listeners('logMessage').should.eql([SockBot.logMessage]);
+                });
+                it('should set up `logWarning` event', () => {
+                    const spy = sinon.spy();
+                    messages.prepare.yields(null);
+                    notifications.prepare.yields(null);
+                    commands.prepare.yields(null);
+                    browser.prepare.yields(null);
+                    prepareEvents(spy);
+                    sandbox.clock.tick(0);
+                    spy.called.should.be.true;
+                    const events = spy.firstCall.args[1];
+                    events.listeners('logWarning').should.eql([SockBot.logWarning]);
+                });
+                it('should set up `logError` event', () => {
+                    const spy = sinon.spy();
+                    messages.prepare.yields(null);
+                    notifications.prepare.yields(null);
+                    commands.prepare.yields(null);
+                    browser.prepare.yields(null);
+                    prepareEvents(spy);
+                    sandbox.clock.tick(0);
+                    spy.called.should.be.true;
+                    const events = spy.firstCall.args[1];
+                    events.listeners('logError').should.eql([SockBot.logError]);
+                });
             });
             describe('setup calls', () => {
                 describe('messages', () => {
@@ -828,6 +866,33 @@ describe('SockBot', () => {
         });
         afterEach(function () {
             sandbox.restore();
+        });
+    });
+    describe('logMessage()', () => {
+        beforeEach(() => sinon.stub(utils, 'log'));
+        afterEach(() => utils.log.restore());
+        it('should proxy utils.log()', () => {
+            const message = 'foobar' + Math.random();
+            SockBot.logMessage(message);
+            utils.log.calledWith(message).should.equal(true);
+        });
+    });
+    describe('logWarning()', () => {
+        beforeEach(() => sinon.stub(utils, 'warn'));
+        afterEach(() => utils.warn.restore());
+        it('should proxy utils.warn()', () => {
+            const message = 'foobar' + Math.random();
+            SockBot.logWarning(message);
+            utils.warn.calledWith(message).should.equal(true);
+        });
+    });
+    describe('logError()', () => {
+        beforeEach(() => sinon.stub(utils, 'error'));
+        afterEach(() => utils.error.restore());
+        it('should proxy utils.error()', () => {
+            const message = 'foobar' + Math.random();
+            SockBot.logError(message);
+            utils.error.calledWith(message).should.equal(true);
         });
     });
 });
