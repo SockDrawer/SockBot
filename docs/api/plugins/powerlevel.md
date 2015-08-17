@@ -9,7 +9,7 @@ Attempts to obtain and maintain a trust level
 
 * [powerlevel](#module_powerlevel)
   * [.defaultConfig](#module_powerlevel.defaultConfig)
-  * [.prepare(config, _, events, browser)](#module_powerlevel.prepare)
+  * [.prepare(plugConfig, config, events, browser)](#module_powerlevel.prepare)
   * [.start()](#module_powerlevel.start)
   * [.updateSelf(callback)](#module_powerlevel.updateSelf)
   * [.stop()](#module_powerlevel.stop)
@@ -20,15 +20,15 @@ Default plugin configuration
 
 **Kind**: static property of <code>[powerlevel](#module_powerlevel)</code>  
 <a name="module_powerlevel.prepare"></a>
-### powerlevel.prepare(config, _, events, browser)
+### powerlevel.prepare(plugConfig, config, events, browser)
 Prepare Plugin prior to login
 
 **Kind**: static method of <code>[powerlevel](#module_powerlevel)</code>  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| config | <code>\*</code> | Plugin specific configuration |
-| _ | <code>Config</code> | Overall Bot Configuration |
+| plugConfig | <code>\*</code> | Plugin specific configuration |
+| config | <code>Config</code> | Overall Bot Configuration |
 | events | <code>externals.events.SockEvents</code> | EventEmitter used for the bot |
 | browser | <code>Browser</code> | Web browser for communicating with discourse |
 
