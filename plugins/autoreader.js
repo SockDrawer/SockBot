@@ -52,7 +52,7 @@ const defaultConfig = {
 */
 exports.prepare = function (plugConfig, config, events, browser) {
     internals.browser = browser;
-    internals.config = utils.mergeObjects(true, defaultConfig, plugConfig);
+    internals.config = config.mergeObjects(true, defaultConfig, plugConfig);
 };
 
 /**

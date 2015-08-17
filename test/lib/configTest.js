@@ -14,7 +14,7 @@ const config = require('../../lib/config'),
 
 describe('config', () => {
     describe('exports', () => {
-        const fns = ['loadConfiguration'],
+        const fns = ['loadConfiguration', 'mergeObjects'],
             objs = ['internals', 'core', 'plugins', 'user'],
             vals = [];
         describe('should export expected functions:', () => {

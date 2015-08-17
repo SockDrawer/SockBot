@@ -9,8 +9,6 @@
  * @license MIT
  */
 
-const utils = require('../lib/utils');
-
 const internals = {
     browser: null,
     configuration: exports.defaultConfig,
@@ -84,22 +82,22 @@ exports.defaultConfig = {
 /**
  * Prepare Plugin prior to login
  *
- * @param {*} config Plugin specific configuration
- * @param {Config} _ Overall Bot Configuration
+ * @param {*} plugConfig Plugin specific configuration
+ * @param {Config} config Overall Bot Configuration
  * @param {externals.events.SockEvents} events EventEmitter used for the bot
  * @param {Browser} browser Web browser for communicating with discourse
  */
-exports.prepare = function prepare(config, _, events, browser) {
-    if (config === null) {
-        config = {};
+exports.prepare = function prepare(plugConfig, config, events, browser) {
+    if (plugConfig === null) {
+        plugConfig = {};
     }
     internals.browser = browser;
-    internals.configuration = utils.mergeObjects(exports.defaultConfig, config);
+    internals.configuration = config.mergeObjects(exports.defaultConfig, plugConfig);
 
-    if (_ === null) {
+    if (config === null) {
        throw new Error('Invalid config provided!');
     } else {
-        internals.username = _.core.username;
+        internals.username = config.core.username;
     }
 };
 
