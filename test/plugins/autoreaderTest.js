@@ -31,6 +31,10 @@ describe('autoreader', () => {
             autoreader.prepare(undefined, dummyCfg, undefined, undefined);
             autoreader.internals.config.minAge.should.equal(3 * 24 * 60 * 60 * 1000);
         });
+        it('should use default config if config is not object', () => {
+            autoreader.prepare(true, dummyCfg, undefined, undefined);
+            autoreader.internals.config.minAge.should.equal(3 * 24 * 60 * 60 * 1000);
+        });
         it('should override default config', () => {
             autoreader.prepare({
                     minAge: 1 * 24 * 60 * 60 * 1000
