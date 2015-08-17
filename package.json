@@ -1,6 +1,6 @@
 {
   "name": "sockbot",
-  "version": "2.09.1",
+  "version": "2.9.2",
   "releaseName": "Angelic Angora",
   "description": "A sockpuppet bot to use on http://what.thedailywtf.com.",
   "repository": "https://github.com/SockDrawer/SockBot",
@@ -15,7 +15,7 @@
     "email": "support@sockdrawer.io"
   },
   "main": "./SockBot.js",
-  "bin": "./lib/cli.js",
+  "bin": "./lib/app.js",
   "engines": {
     "node": ">=0.11",
     "iojs": ">=1.7"
@@ -43,7 +43,7 @@
     "sinon-chai": "^2.8.0"
   },
   "scripts": {
-    "start": "node --harmony --harmony_arrow_functions lib/cli.js",
+    "start": "node lib/app.js",
     "lint": "node --harmony --harmony_arrow_functions node_modules/gulp/bin/gulp.js lint",
     "test": "node --harmony --harmony_arrow_functions node_modules/gulp/bin/gulp.js test",
     "gulp": "node --harmony --harmony_arrow_functions node_modules/gulp/bin/gulp.js",
