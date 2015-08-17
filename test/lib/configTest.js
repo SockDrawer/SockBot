@@ -59,6 +59,12 @@ describe('config', () => {
             config.internals.should.have.all.keys(fns.concat(objs, vals));
         });
     });
+    describe('mergeObjects()', () => {
+        it('should proxy utils.mergeObjects', () => {
+            //Reference equality is what is required
+            config.mergeObjects.should.equal(utils.mergeObjects);
+        });
+    });
     describe('readFile()', () => {
         const readFile = config.internals.readFile;
 		let sandbox;
