@@ -6,7 +6,6 @@ const chai = require('chai'),
     sinon = require('sinon');
 chai.should();
 const spawner = require('child_process');
-const expect = chai.expect;
 
 // The thing we're testing
 const app = require('../../lib/app');

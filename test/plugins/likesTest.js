@@ -10,6 +10,7 @@ const expect = chai.expect;
 // The thing we're testing
 const likes = require('../../plugins/likes'),
     utils = require('../../lib/utils');
+const dummyCfg = {mergeObjects: utils.mergeObjects};
 
 describe('likes plugin', () => {
     describe('exports', () => {
@@ -25,13 +26,13 @@ describe('likes plugin', () => {
     describe('prepare()', () => {
         it('should set browser', () => {
             const browser = {};
-            likes.prepare({}, {}, {
+            likes.prepare({}, dummyCfg, {
                 onTopic: () => 0
             }, browser);
             likes.internals.browser.should.equal(browser);
         });
         it('should use default config if config is not object', () => {
-            likes.prepare(true, {}, {
+            likes.prepare(true, dummyCfg, {
                 onTopic: () => 0
             }, null);
             likes.internals.config.should.not.equal(likes.defaultConfig);
@@ -40,7 +41,7 @@ describe('likes plugin', () => {
         it('should merge configs if config is object', () => {
             likes.prepare({
                 a: 1
-            }, {}, {
+            }, dummyCfg, {
                 onTopic: () => 0
             }, null);
             const expected = {
@@ -57,7 +58,7 @@ describe('likes plugin', () => {
             const spy = sinon.spy();
             likes.prepare({
                 topics: [3, 5, 17]
-            }, {}, {
+            }, dummyCfg, {
                 onTopic: spy
             }, null);
             spy.calledWith(3, likes.messageHandler).should.be.true;
