@@ -9,7 +9,6 @@
  * @license MIT
  */
 const async = require('async');
-const utils = require('../lib/utils');
 
 /**
  * Default configuration settings
@@ -124,7 +123,8 @@ exports.messageHandler = function messageHandler(data, topic, post) {
     }
     const delay = Math.ceil(internals.config.delay + Math.random() * internals.config.scatter);
     setTimeout(() => {
-        utils.log('Liking Post /t/' + post.topic_id + '/' + post.post_number + ' by @' + post.username);
+        internals.events.emit('logMessage', 'Liking Post /t/' + post.topic_id + '/' +
+            post.post_number + ' by @' + post.username);
         internals.browser.postAction('like', post.id, '', () => 0);
     }, delay);
 };
@@ -134,10 +134,10 @@ exports.messageHandler = function messageHandler(data, topic, post) {
  */
 exports.binge = function binge() {
     internals.likeCount = 0;
-    utils.log('Beginning Like Binge');
+    internals.events.emit('logMessage', 'Beginning Like Binge');
     async.eachSeries(internals.config.topics, (topicId, next) => {
         internals.browser.getPosts(topicId, exports.handlePost, next);
-    }, (err) => utils.log('Like Binge Completed: ' + err));
+    }, (err) => internals.events.emit('logMessage', 'Like Binge Completed: ' + err));
 };
 
 /**

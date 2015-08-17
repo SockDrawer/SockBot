@@ -6,7 +6,6 @@
  * @author RaceProUK
  * @license MIT
  */
-const utils = require('../lib/utils');
 
 /**
  * Default configuration settings
@@ -49,7 +48,7 @@ const defaultConfig = {
  * @param {Config} config Overall Bot Configuration
  * @param {externals.events.SockEvents} events EventEmitter used for the bot
  * @param {Browser} browser Web browser for communicating with discourse
-*/
+ */
 exports.prepare = function (plugConfig, config, events, browser) {
     internals.browser = browser;
     if (typeof plugConfig !== 'object') {
@@ -82,7 +81,7 @@ exports.readify = function () {
         if (!topic) {
             return;
         }
-        utils.log('Reading topic `' + topic.slug + '`');
+        internals.events.emit('logMessage', 'Reading topic `' + topic.slug + '`');
         const now = new Date().getTime() - internals.config.minAge;
         const postIds = [];
         internals.browser.getPosts(topic.id, (post, nextPost) => {
@@ -91,7 +90,7 @@ exports.readify = function () {
             }
             nextPost();
         }, () => {
-            if (postIds.length > 0){
+            if (postIds.length > 0) {
                 internals.browser.readPosts(topic.id, postIds, () => 0);
             }
         });
