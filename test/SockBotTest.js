@@ -374,7 +374,8 @@ describe('SockBot', () => {
                     'missingno': true
                 };
                 loadPlugins();
-                events.emit.calledWith('logError', 'Plugin `missingno` does not export `prepare()` function').should.equal(true);
+                events.emit.calledWith('logError',
+                    'Plugin `missingno` does not export `prepare()` function').should.equal(true);
                 SockBot.internals.plugins.should.have.length(0);
             });
             it('should print error when start() function is missing', () => {
@@ -387,7 +388,8 @@ describe('SockBot', () => {
                     'missingno': true
                 };
                 loadPlugins();
-                events.emit.calledWith('logError', 'Plugin `missingno` does not export `start()` function').should.equal(true);
+                events.emit.calledWith('logError',
+                    'Plugin `missingno` does not export `start()` function').should.equal(true);
                 SockBot.internals.plugins.should.have.length(0);
             });
             it('should print error when stop() function is missing', () => {
@@ -400,7 +402,8 @@ describe('SockBot', () => {
                     'missingno': true
                 };
                 loadPlugins();
-                events.emit.calledWith('logError', 'Plugin `missingno` does not export `stop()` function').should.equal(true);
+                events.emit.calledWith('logError',
+                    'Plugin `missingno` does not export `stop()` function').should.equal(true);
                 SockBot.internals.plugins.should.have.length(0);
             });
             it('should add module to plugins list on success', () => {

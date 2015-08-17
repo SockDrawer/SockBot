@@ -9,7 +9,7 @@ const expect = chai.expect;
 
 // The thing we're testing
 const commands = require('../../lib/commands'),
-    config = require('../../lib/config');;
+    config = require('../../lib/config');
 const browser = require('../../lib/browser')();
 describe('commands', () => {
     describe('exports', () => {

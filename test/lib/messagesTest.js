@@ -214,7 +214,8 @@ describe('messages', () => {
             browser.messageBus.yields(null, msgs);
             messages.internals.events.emit.returns(false);
             messages.pollMessages(spy);
-            messages.internals.events.emit.calledWith('logWarning', 'Message 5432 for channel /__status/1234 was not handled!').should.be.true;
+            messages.internals.events.emit.calledWith('logWarning',
+                'Message 5432 for channel /__status/1234 was not handled!').should.be.true;
         });
         it('should not print warning when listeners registered for event', () => {
             const spy = sinon.spy(),
@@ -698,7 +699,8 @@ describe('messages', () => {
                     'message_id': 5432,
                     data: {}
                 });
-                messages.internals.events.emit.calledWith('logWarning', 'Message 5432 for channel /topic/1234 was not handled!').should.be.true;
+                messages.internals.events.emit.calledWith('logWarning',
+                    'Message 5432 for channel /topic/1234 was not handled!').should.be.true;
             });
             it('should not print warning when listeners registered for event', () => {
                 browser.getTopic.yields(null, {});
