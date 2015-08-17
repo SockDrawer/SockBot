@@ -183,7 +183,6 @@ describe('notifications', () => {
                 events.emit = sinon.stub();
                 sandbox = sinon.sandbox.create();
                 sandbox.stub(utils, 'filterIgnored');
-                sandbox.stub(utils, 'warn');
                 sandbox.stub(browser, 'getTopic');
                 sandbox.stub(browser, 'getPost');
                 sandbox.stub(commands, 'parseCommands');
@@ -376,9 +375,9 @@ describe('notifications', () => {
                 utils.filterIgnored.yields(null);
                 handleTopicNotification(notification);
                 sandbox.clock.tick(0);
-                utils.warn.called.should.be.true;
-                utils.warn.firstCall.args[0].should.equal('someNotification notification #' +
-                    notification.id + ' was not handled!');
+                const emit = notifications.internals.events.emit;
+                emit.calledWith('logWarning', 'someNotification notification #' +
+                    notification.id + ' was not handled!').should.be.true;
             });
             it('should not warn on handled notification', () => {
                 const topic = {},
@@ -390,7 +389,8 @@ describe('notifications', () => {
                 events.emit.returns(true);
                 handleTopicNotification(notification);
                 sandbox.clock.tick(0);
-                utils.warn.called.should.be.false;
+                const emit = notifications.internals.events.emit;
+                emit.calledWith('logWarning').should.be.false;
             });
         });
         describe('onNotification()', () => {
@@ -400,7 +400,8 @@ describe('notifications', () => {
                 sandbox = sinon.sandbox.create();
                 sandbox.stub(utils, 'warn');
                 notifications.internals.events = {
-                    on: sinon.spy()
+                    on: sinon.spy(),
+                    emit: sinon.spy()
                 };
             });
             afterEach(() => sandbox.restore());
@@ -408,13 +409,13 @@ describe('notifications', () => {
                 it('should print warning on unrecognized type', () => {
                     const type = '' + Math.random();
                     onNotification(type, () => 0);
-                    utils.warn.called.should.be.true;
-                    utils.warn.firstCall.args[0].should.equal('Notification type `' + type + '` is not recognized.');
+                    const emit = notifications.internals.events.emit;
+                    emit.calledWith('logWarning', 'Notification type `' + type + '` is not recognized.').should.be.true;
                 });
                 Object.keys(notifyTypeMap).map((t) => notifyTypeMap[t]).forEach((type) => {
                     it('should not print warning on recognized type: ' + type, () => {
                         onNotification(type, () => 0);
-                        utils.warn.called.should.be.false;
+                        notifications.internals.events.emit.calledWith('logWarning').should.be.false;
                     });
                 });
             });
@@ -456,8 +457,6 @@ describe('notifications', () => {
             sandbox = sinon.sandbox.create();
             sandbox.stub(browser, 'getNotifications');
             sandbox.stub(notifications.privateFns, 'handleTopicNotification');
-            sandbox.stub(utils, 'warn');
-            sandbox.stub(utils, 'log');
             notifications.internals.events = {
                 emit: sandbox.stub()
             };
@@ -474,7 +473,7 @@ describe('notifications', () => {
         it('should log notification', () => {
             const spy = sinon.spy();
             notifications.pollNotifications(spy);
-            utils.log.calledWith('Polling Notifications').should.be.true;
+            notifications.internals.events.emit.calledWith('logMessage', 'Polling Notifications').should.be.true;
         });
         it('should pass error to callback on failure', () => {
             browser.getNotifications.yields('i am error');
@@ -499,7 +498,7 @@ describe('notifications', () => {
                 }]
             });
             notifications.pollNotifications(() => 0);
-            notifications.internals.events.emit.called.should.be.false;
+            notifications.internals.events.emit.callCount.should.equal(1);
             notifications.privateFns.handleTopicNotification.called.should.be.false;
         });
         it('should emit expected message on non-topic notification', () => {
@@ -532,8 +531,8 @@ describe('notifications', () => {
                 notifications: [notify]
             });
             notifications.pollNotifications(() => 0);
-            utils.warn.called.should.be.true;
-            utils.warn.firstCall.args[0].should.equal('UNKNOWN notification #' + notify.id + ' was not handled!');
+            const emit = notifications.internals.events.emit;
+            emit.calledWith('logWarning', 'UNKNOWN notification #' + notify.id + ' was not handled!').should.be.true;
         });
         it('should not print warning on handled notification', () => {
             const notify = {
@@ -544,7 +543,7 @@ describe('notifications', () => {
                 notifications: [notify]
             });
             notifications.pollNotifications(() => 0);
-            utils.warn.called.should.be.false;
+            notifications.internals.events.emit.calledWith('logWarning').should.be.false;
         });
         describe('type mapping', () => {
             it('should map invalid notification_type to `UNKNOWN`', () => {
@@ -579,8 +578,8 @@ describe('notifications', () => {
                     notifications: [notify]
                 });
                 notifications.pollNotifications(() => 0);
-                const call = notifications.internals.events.emit.firstCall;
-                call.args[0].should.equal('notification#UNKNOWN');
+                const emit = notifications.internals.events.emit;
+                emit.calledWith('notification#UNKNOWN').should.equal(true);
             });
             Object.keys(notifyTypeMap).forEach((type) => {
                 it('should emit `notification#' + notifyTypeMap[type] + '` for type ' + type, () => {
@@ -591,8 +590,8 @@ describe('notifications', () => {
                         notifications: [notify]
                     });
                     notifications.pollNotifications(() => 0);
-                    const call = notifications.internals.events.emit.firstCall;
-                    call.args[0].should.equal('notification#' + notifyTypeMap[type]);
+                    const emit = notifications.internals.events.emit;
+                    emit.calledWith('notification#' + notifyTypeMap[type]).should.equal(true);
                 });
             });
         });
