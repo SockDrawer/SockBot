@@ -9,8 +9,6 @@
  * @license MIT
  */
 
-const utils = require('../lib/utils');
-
 const internals = {
     browser: null,
     configuration: exports.defaultConfig,
@@ -70,22 +68,22 @@ exports.mentionHandler = function mentionHandler(_, topic, post) {
 /**
  * Prepare Plugin prior to login
  *
- * @param {*} config Plugin specific configuration
- * @param {Config} _ Overall Bot Configuration (ignored)
+ * @param {*} plugConfig Plugin specific configuration
+ * @param {Config} config Overall Bot Configuration
  * @param {externals.events.SockEvents} events EventEmitter used for the bot
  * @param {Browser} browser Web browser for communicating with discourse
  */
-exports.prepare = function prepare(config, _, events, browser) {
-    if (Array.isArray(config)) {
-        config = {
-            messages: config
+exports.prepare = function prepare(plugConfig, config, events, browser) {
+    if (Array.isArray(plugConfig)) {
+        plugConfig = {
+            messages: plugConfig
         };
     }
-    if (config === null || typeof config !== 'object') {
-        config = {};
+    if (plugConfig === null || typeof plugConfig !== 'object') {
+        plugConfig = {};
     }
     internals.browser = browser;
-    internals.configuration = utils.mergeObjects(exports.defaultConfig, config);
+    internals.configuration = config.mergeObjects(exports.defaultConfig, plugConfig);
     events.onNotification('mentioned', exports.mentionHandler);
 };
 

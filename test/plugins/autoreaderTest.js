@@ -11,6 +11,7 @@ const autoreader = require('../../plugins/autoreader'),
     browserModule = require('../../lib/browser'),
     utils = require('../../lib/utils');
 const browser = browserModule();
+const dummyCfg = {mergeObjects: utils.mergeObjects};
 
 describe('autoreader', () => {
     it('should export prepare()', () => {
@@ -27,13 +28,17 @@ describe('autoreader', () => {
     });
     describe('prepare()', () => {
         it('should use default config', () => {
-            autoreader.prepare(undefined, undefined, undefined, undefined);
+            autoreader.prepare(undefined, dummyCfg, undefined, undefined);
+            autoreader.internals.config.minAge.should.equal(3 * 24 * 60 * 60 * 1000);
+        });
+        it('should use default config if config is not object', () => {
+            autoreader.prepare(true, dummyCfg, undefined, undefined);
             autoreader.internals.config.minAge.should.equal(3 * 24 * 60 * 60 * 1000);
         });
         it('should override default config', () => {
             autoreader.prepare({
                     minAge: 1 * 24 * 60 * 60 * 1000
-                }, undefined, undefined, undefined);
+                }, dummyCfg, undefined, undefined);
             autoreader.internals.config.minAge.should.equal(1 * 24 * 60 * 60 * 1000);
         });
     });
@@ -82,7 +87,7 @@ describe('autoreader', () => {
         it('should not read anything', () => {
             const spy = sandbox.stub(browser, 'getTopics');
             spy.callsArgWith(0, undefined);
-            autoreader.prepare(undefined, undefined, undefined, browser);
+            autoreader.prepare(undefined, dummyCfg, undefined, browser);
             autoreader.readify();
             utils.log.callCount.should.equal(0);
         });
@@ -90,7 +95,7 @@ describe('autoreader', () => {
             const topicSpy = sandbox.stub(browser, 'getTopics');
             topicSpy.callsArgWith(0, {id: 1, slug: 'Test'}, () => 0);
             sandbox.stub(browser, 'getPosts');
-            autoreader.prepare(undefined, undefined, undefined, browser);
+            autoreader.prepare(undefined, dummyCfg, undefined, browser);
             autoreader.readify();
             utils.log.calledOnce.should.be.true;
             utils.log.firstCall.calledWith('Reading topic `Test`').should.be.true;
@@ -103,7 +108,7 @@ describe('autoreader', () => {
             sandbox.stub(browser, 'getPosts', (_, each, complete) => {
                     each({id: 1, read: false, created_at: '2000-01-01 00:00'}, complete);
                 });
-            autoreader.prepare(undefined, undefined, undefined, browser);
+            autoreader.prepare(undefined, dummyCfg, undefined, browser);
             autoreader.readify();
             utils.log.calledOnce.should.be.true;
             utils.log.firstCall.calledWith('Reading topic `Test`').should.be.true;
@@ -118,7 +123,7 @@ describe('autoreader', () => {
             sandbox.stub(browser, 'getPosts', (_, each, complete) => {
                     each({id: 1, read: true, created_at: '2000-01-01 00:00'}, complete);
                 });
-            autoreader.prepare(undefined, undefined, undefined, browser);
+            autoreader.prepare(undefined, dummyCfg, undefined, browser);
             autoreader.readify();
             utils.log.calledOnce.should.be.true;
             utils.log.firstCall.calledWith('Reading topic `Test`').should.be.true;
@@ -131,7 +136,7 @@ describe('autoreader', () => {
             sandbox.stub(browser, 'getPosts', (_, each, complete) => {
                     each({id: 1, read: false, created_at: '2100-01-01 00:00'}, complete);
                 });
-            autoreader.prepare(undefined, undefined, undefined, browser);
+            autoreader.prepare(undefined, dummyCfg, undefined, browser);
             autoreader.readify();
             utils.log.calledOnce.should.be.true;
             utils.log.firstCall.calledWith('Reading topic `Test`').should.be.true;
@@ -145,7 +150,7 @@ describe('autoreader', () => {
             sandbox.stub(browser, 'getPosts', (_, each, complete) => {
                     each(undefined, complete);
                 });
-            autoreader.prepare(undefined, undefined, undefined, browser);
+            autoreader.prepare(undefined, dummyCfg, undefined, browser);
             autoreader.readify();
             utils.log.calledOnce.should.be.true;
             utils.log.firstCall.calledWith('Reading topic `Test`').should.be.true;

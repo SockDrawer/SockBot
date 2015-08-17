@@ -12,7 +12,7 @@ Watches for @mentions and replies with a canned response
     * [.cooldown](#module_summoner.defaultConfig.cooldown) : <code>Number</code>
     * [.messages](#module_summoner.defaultConfig.messages) : <code>Array.&lt;string&gt;</code>
   * [.mentionHandler(_, topic, post)](#module_summoner.mentionHandler)
-  * [.prepare(config, _, events, browser)](#module_summoner.prepare)
+  * [.prepare(plugConfig, config, events, browser)](#module_summoner.prepare)
   * [.start()](#module_summoner.start)
   * [.stop()](#module_summoner.stop)
 
@@ -50,15 +50,15 @@ Respond to @mentions
 | post | <code>external.posts.CleanedPost</code> | Post that triggered notification |
 
 <a name="module_summoner.prepare"></a>
-### summoner.prepare(config, _, events, browser)
+### summoner.prepare(plugConfig, config, events, browser)
 Prepare Plugin prior to login
 
 **Kind**: static method of <code>[summoner](#module_summoner)</code>  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| config | <code>\*</code> | Plugin specific configuration |
-| _ | <code>Config</code> | Overall Bot Configuration (ignored) |
+| plugConfig | <code>\*</code> | Plugin specific configuration |
+| config | <code>Config</code> | Overall Bot Configuration |
 | events | <code>externals.events.SockEvents</code> | EventEmitter used for the bot |
 | browser | <code>Browser</code> | Web browser for communicating with discourse |
 

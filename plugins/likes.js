@@ -89,7 +89,7 @@ exports.prepare = function prepare(plugConfig, config, events, browser) {
     if (typeof plugConfig !== 'object') {
         plugConfig = {};
     }
-    internals.config = utils.mergeObjects(defaultConfig, plugConfig);
+    internals.config = config.mergeObjects(defaultConfig, plugConfig);
     internals.config.topics.forEach((topic) => events.onTopic(topic, exports.messageHandler));
 };
 

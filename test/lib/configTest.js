@@ -14,7 +14,7 @@ const config = require('../../lib/config'),
 
 describe('config', () => {
     describe('exports', () => {
-        const fns = ['loadConfiguration'],
+        const fns = ['loadConfiguration', 'mergeObjects'],
             objs = ['internals', 'core', 'plugins', 'user'],
             vals = [];
         describe('should export expected functions:', () => {
@@ -57,6 +57,12 @@ describe('config', () => {
         });
         it('should include only expected keys', () => {
             config.internals.should.have.all.keys(fns.concat(objs, vals));
+        });
+    });
+    describe('mergeObjects()', () => {
+        it('should proxy utils.mergeObjects', () => {
+            //Reference equality is what is required
+            config.mergeObjects.should.equal(utils.mergeObjects);
         });
     });
     describe('readFile()', () => {
