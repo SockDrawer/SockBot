@@ -18,6 +18,7 @@ const config = require('./lib/config'),
     packageInfo = require('./package.json');
 const browser = require('./lib/browser')();
 const internals = {
+        events: null,
         plugins: [],
         running: false
     },
@@ -61,6 +62,7 @@ exports.prepare = function prepare(configuration, callback) {
     }, (_, next) => {
         privateFns.prepareEvents(next);
     }, (events, pluginBrowser, next) => {
+        internals.events = events;
         try {
             privateFns.loadPlugins();
         } catch (e) {
@@ -79,17 +81,17 @@ exports.prepare = function prepare(configuration, callback) {
  * @param {completedCallback} callback Completion Callback
  */
 exports.start = function (callback) {
-    utils.log('Starting SockBot ' + packageInfo.version + ' ' + packageInfo.releaseName);
+    internals.events.emit('logMessage', 'Starting SockBot ' + packageInfo.version + ' ' + packageInfo.releaseName);
     browser.start();
     browser.login((err, user) => {
         if (err) {
-            utils.warn('Login Failed: ' + err);
+            internals.events.emit('logWarning', 'Login Failed: ' + err);
             return callback(err);
         }
         config.user = user;
         commands.start();
         internals.plugins.forEach((plugin) => plugin.start());
-        utils.log('SockBot `' + config.user.username + '` Started');
+        internals.events.emit('logMessage', 'SockBot `' + config.user.username + '` Started');
         internals.running = true;
         if (config.core.pollMessages) {
             messages.start();
@@ -113,7 +115,7 @@ exports.start = function (callback) {
  * @param {function} callback Completion callback
  */
 exports.stop = function (callback) {
-    utils.log('Stopping SockBot ' + packageInfo.version + ' ' + packageInfo.releaseName);
+    internals.events.emit('logMessage', 'Stopping SockBot ' + packageInfo.version + ' ' + packageInfo.releaseName);
     internals.running = false;
     internals.plugins.forEach((plugin) => plugin.stop());
     browser.stop();
@@ -145,6 +147,33 @@ function doPluginRequire(module, requireIt) {
 }
 
 /**
+ * Log a message to console
+ *
+ * @param {*} message Message to log
+ */
+exports.logMessage = function logMessage(message) {
+    utils.log(message);
+};
+
+/**
+ * Log a warning to console
+ *
+ * @param {*} warning Message to log
+ */
+exports.logWarning = function logWarning(warning) {
+    utils.warn(warning);
+};
+
+/**
+ * Log an error to console
+ *
+ * @param {*} error Message to log
+ */
+exports.logError = function logError(error) {
+    utils.error(error);
+};
+
+/**
  * Prepare core EventEmitter as a SockEvents object
  *
  * @param {preparedCallback} callback Completion callback
@@ -155,6 +184,11 @@ function prepareEvents(callback) {
         clientid = utils.uuid();
     async.series([
         (next) => {
+            events.on('logMessage', exports.logMessage);
+            events.on('logWarning', exports.logWarning);
+            events.on('logError', exports.logError);
+            next();
+        }, (next) => {
             messages.prepare(events, clientid, next);
         }, (next) => {
             notifications.prepare(events, next);
@@ -178,13 +212,13 @@ function loadPlugins() {
     Object.keys(config.plugins).forEach((module) => {
         const plugin = privateFns.doPluginRequire(module, require);
         if (typeof plugin.prepare !== 'function') {
-            utils.error('Plugin `' + module + '` does not export `prepare()` function');
+            internals.events.emit('logError', 'Plugin `' + module + '` does not export `prepare()` function');
         } else if (typeof plugin.start !== 'function') {
-            utils.error('Plugin `' + module + '` does not export `start()` function');
+            internals.events.emit('logError', 'Plugin `' + module + '` does not export `start()` function');
         } else if (typeof plugin.stop !== 'function') {
-            utils.error('Plugin `' + module + '` does not export `stop()` function');
+            internals.events.emit('logError', 'Plugin `' + module + '` does not export `stop()` function');
         } else {
-            utils.log('Plugin `' + module + '` Loaded');
+            internals.events.emit('logMessage', 'Plugin `' + module + '` Loaded');
             plugin.prepare.pluginName = module;
             internals.plugins.push(plugin);
         }

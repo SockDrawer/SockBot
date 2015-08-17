@@ -9,7 +9,6 @@
  * @license MIT
  */
 const async = require('async');
-const utils = require('../lib/utils');
 
 /**
  * Default configuration settings
@@ -71,7 +70,12 @@ const defaultConfig = {
          * Count of likes handed out during latest binge
          * @type {number}
          */
-        likeCount: 0
+        likeCount: 0,
+        /**
+         * EventEmitter used for internal communication
+         * @type {externals.events.SockEvents}
+         */
+        events:null
     };
 exports.defaultConfig = defaultConfig;
 exports.internals = internals;
@@ -89,6 +93,7 @@ exports.prepare = function prepare(plugConfig, config, events, browser) {
     if (typeof plugConfig !== 'object') {
         plugConfig = {};
     }
+    internals.events = events;
     internals.config = config.mergeObjects(defaultConfig, plugConfig);
     internals.config.topics.forEach((topic) => events.onTopic(topic, exports.messageHandler));
 };
@@ -124,7 +129,8 @@ exports.messageHandler = function messageHandler(data, topic, post) {
     }
     const delay = Math.ceil(internals.config.delay + Math.random() * internals.config.scatter);
     setTimeout(() => {
-        utils.log('Liking Post /t/' + post.topic_id + '/' + post.post_number + ' by @' + post.username);
+        internals.events.emit('logMessage', 'Liking Post /t/' + post.topic_id + '/' +
+            post.post_number + ' by @' + post.username);
         internals.browser.postAction('like', post.id, '', () => 0);
     }, delay);
 };
@@ -134,10 +140,10 @@ exports.messageHandler = function messageHandler(data, topic, post) {
  */
 exports.binge = function binge() {
     internals.likeCount = 0;
-    utils.log('Beginning Like Binge');
+    internals.events.emit('logMessage', 'Beginning Like Binge');
     async.eachSeries(internals.config.topics, (topicId, next) => {
         internals.browser.getPosts(topicId, exports.handlePost, next);
-    }, (err) => utils.log('Like Binge Completed: ' + err));
+    }, (err) => internals.events.emit('logMessage', 'Like Binge Completed: ' + err));
 };
 
 /**

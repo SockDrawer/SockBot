@@ -9,8 +9,7 @@ const expect = chai.expect;
 
 // The thing we're testing
 const commands = require('../../lib/commands'),
-    config = require('../../lib/config'),
-    utils = require('../../lib/utils');
+    config = require('../../lib/config');
 const browser = require('../../lib/browser')();
 describe('commands', () => {
     describe('exports', () => {
@@ -96,24 +95,25 @@ describe('commands', () => {
     });
     describe('internals.cmdError', () => {
         const cmdError = commands.internals.cmdError;
-        let sandbox;
+        let sandbox, events;
         before(() => {
             commands.internals.commands = {};
         });
         beforeEach(() => {
             sandbox = sinon.sandbox.create();
-            sandbox.stub(utils, 'log');
+            events = {
+                on: sinon.spy(),
+                emit: sinon.spy()
+            };
+            commands.internals.events = events;
             sandbox.stub(browser, 'createPost');
         });
         afterEach(() => {
             sandbox.restore();
         });
         it('should be registered as `command#ERROR` event', (done) => {
-            const spy = sinon.spy();
-            commands.prepare({
-                on: spy
-            }, () => {
-                spy.calledWith('command#ERROR', cmdError).should.be.true;
+            commands.prepare(events, () => {
+                events.on.calledWith('command#ERROR', cmdError).should.be.true;
                 done();
             });
         });
@@ -150,14 +150,18 @@ describe('commands', () => {
     describe('internals.cmdHelp', () => {
         const cmdHelp = commands.internals.cmdHelp;
         let clock;
-        let sandbox;
+        let sandbox, events;
         before(() => {
             commands.internals.commands = {};
             clock = sinon.useFakeTimers();
         });
         beforeEach(() => {
             sandbox = sinon.sandbox.create();
-            sandbox.stub(utils, 'log');
+            events = {
+                on: sinon.spy(),
+                emit: sinon.spy()
+            };
+            commands.internals.events = events;
             sandbox.stub(browser, 'createPost');
         });
         afterEach(() => {
@@ -167,12 +171,9 @@ describe('commands', () => {
             clock.restore();
         });
         it('should be registered as `command#help` event', (done) => {
-            const spy = sinon.spy();
-            commands.prepare({
-                on: spy
-            }, () => {
+            commands.prepare(events, () => {
                 clock.tick(0);
-                spy.calledWith('command#help', cmdHelp).should.be.true;
+                events.on.calledWith('command#help', cmdHelp).should.be.true;
                 done();
             });
         });
@@ -269,19 +270,19 @@ describe('commands', () => {
         });
     });
     describe('internals.commandProtect()', () => {
-        const commandProtect = commands.internals.commandProtect,
-            events = {};
+        const commandProtect = commands.internals.commandProtect;
         let cmds;
-        let sandbox;
+        let sandbox, events;
         before(() => {
             commands.internals.commands = {};
-            events.removeListener = sinon.spy();
-            commands.internals.events = events;
         });
         beforeEach(() => {
             sandbox = sinon.sandbox.create();
-            sandbox.stub(console, 'log');
-            sandbox.stub(utils, 'warn');
+            events = {
+                emit: sinon.spy(),
+                removeListener: sinon.spy()
+            };
+            commands.internals.events = events;
             cmds = {};
             commands.internals.commands = cmds;
         });
@@ -301,14 +302,14 @@ describe('commands', () => {
             };
             commandProtect('command#cmd', func).should.be.true;
             events.removeListener.calledWith('cmd', func).should.be.false;
-            utils.warn.called.should.be.false;
+            events.emit.calledWith('logWarning').should.be.false;
         });
         it('should reject command that is not already registered', () => {
             const func = () => 0,
                 err = 'Invalid command (cmd) registered! must register commands with onCommand()';
             commandProtect('command#cmd', func);
             events.removeListener.calledWith('command#cmd', func).should.be.true;
-            utils.warn.lastCall.args[0].should.equal(err);
+            events.emit.calledWith('logWarning', err).should.be.true;
         });
         it('should reject command that is not properly registered', () => {
             const func = () => 0,
@@ -318,19 +319,20 @@ describe('commands', () => {
             };
             commandProtect('command#cmd1', func);
             events.removeListener.calledWith('command#cmd1', func).should.be.true;
-            utils.warn.calledWith(err).should.be.true;
+            events.emit.calledWith('logWarning', err).should.be.true;
         });
     });
     describe('internals.parseMentionCommand()', () => {
         const parseMentionCommand = commands.internals.parseMentionCommand;
+        let emit;
         before((done) => {
             config.core.username = 'foobar';
-            sinon.stub(utils, 'log');
+            emit = sinon.spy();
             commands.prepare({
-                on: () => 0
+                on: () => 0,
+                emit: emit
             }, () => {
                 commands.start();
-                utils.log.restore();
                 done();
             });
         });
@@ -416,17 +418,15 @@ describe('commands', () => {
     });
     describe('internals.registerCommand()', () => {
         const registerCommand = commands.internals.registerCommand,
-            events = {},
             spy = sinon.spy();
-        let sandbox;
-        before(() => {
-            events.on = sinon.spy();
-            commands.internals.events = events;
-        });
+        let sandbox, events;
         beforeEach(() => {
             sandbox = sinon.sandbox.create();
-            sandbox.stub(console, 'log');
-            sandbox.stub(utils, 'log');
+            events = {
+                on: sinon.spy(),
+                emit: sinon.spy()
+            };
+            commands.internals.events = events;
             commands.internals.commands = {};
         });
         afterEach(() => {
@@ -504,8 +504,7 @@ describe('commands', () => {
         });
         it('should log registration', () => {
             registerCommand('command', 'help', () => 0, spy);
-            utils.log.callCount.should.equal(1);
-            utils.log.calledWith('Command Registered: command: help').should.be.true;
+            events.emit.calledWith('logMessage', 'Command Registered: command: help').should.be.true;
         });
         describe('command conflict resolution', () => {
             it('should prefix conflicting command with underscore', () => {
@@ -529,12 +528,14 @@ describe('commands', () => {
         });
     });
     describe('start()', () => {
-        let sandbox;
+        let sandbox, events;
         beforeEach(() => {
             config.core.username = 'foo';
             sandbox = sinon.sandbox.create();
-            sandbox.stub(console, 'log');
-            sandbox.stub(utils, 'log');
+            events = {
+                emit: sinon.spy()
+            };
+            commands.internals.events = events;
         });
         afterEach(() => {
             sandbox.restore();
@@ -546,40 +547,35 @@ describe('commands', () => {
     });
     describe('prepareParser()', () => {
         const prepare = commands.prepare;
-        let sandbox;
+        let sandbox, events;
         before(() => {
             config.core.username = 'foo';
         });
         beforeEach(() => {
             sandbox = sinon.sandbox.create();
-            sandbox.stub(console, 'log');
-            sandbox.stub(utils, 'log');
+            events = {
+                on: sinon.spy(),
+                emit: sinon.spy()
+            };
+            commands.internals.events = events;
         });
         afterEach(() => {
             sandbox.restore();
         });
         it('should call callback on completion', () => {
             const spy = sinon.spy();
-            prepare({
-                on: () => 0
-            }, spy);
+            prepare(events, spy);
             spy.called.should.be.true;
             spy.lastCall.args.should.deep.equal([]);
         });
         it('should set events object', () => {
-            const spy = sinon.spy(),
-                events = {
-                    on: () => 0
-                };
+            const spy = sinon.spy();
             prepare(events, spy);
             commands.internals.events.should.equal(events);
         });
         it('should produce register commandPotect as newListener listener', () => {
-            const spy = sinon.spy();
-            prepare({
-                on: spy
-            }, () => 0);
-            spy.calledWith('newListener', commands.internals.commandProtect).should.be.true;
+            prepare(events, () => 0);
+            events.on.calledWith('newListener', commands.internals.commandProtect).should.be.true;
         });
     });
     describe('parseCommands()', () => {
