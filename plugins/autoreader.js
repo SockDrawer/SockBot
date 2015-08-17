@@ -38,7 +38,12 @@ const defaultConfig = {
          * Used to stop the autoreading when the plugin is stopped
          * @type {object}
          */
-        timer: undefined
+        timer: undefined,
+        /**
+         * EventEmitter used for internal communication
+         * @type {externals.events.SockEvents}
+         */
+        events: null
     };
 
 /**
@@ -54,6 +59,7 @@ exports.prepare = function (plugConfig, config, events, browser) {
     if (typeof plugConfig !== 'object') {
         plugConfig = {};
     }
+    internals.events = events;
     internals.config = config.mergeObjects(true, defaultConfig, plugConfig);
 };
 

@@ -43,6 +43,11 @@ describe('autoreader', () => {
             }, dummyCfg, undefined, undefined);
             autoreader.internals.config.minAge.should.equal(1 * 24 * 60 * 60 * 1000);
         });
+        it('should store events object in internals', () => {
+            const events = Math.random();
+            autoreader.prepare(undefined, dummyCfg, events, undefined);
+            autoreader.internals.events.should.equal(events);
+        });
     });
     describe('start()', () => {
         let sandbox;
@@ -92,7 +97,7 @@ describe('autoreader', () => {
         it('should not read anything', () => {
             const spy = sandbox.stub(browser, 'getTopics');
             spy.callsArgWith(0, undefined);
-            autoreader.prepare(undefined, dummyCfg, undefined, browser);
+            autoreader.prepare(undefined, dummyCfg, events, browser);
             autoreader.readify();
             events.emit.calledWith('logMessage').should.be.false;
         });
@@ -103,7 +108,7 @@ describe('autoreader', () => {
                 slug: 'Test'
             }, () => 0);
             sandbox.stub(browser, 'getPosts');
-            autoreader.prepare(undefined, dummyCfg, undefined, browser);
+            autoreader.prepare(undefined, dummyCfg, events, browser);
             autoreader.readify();
             events.emit.calledWith('logMessage', 'Reading topic `Test`').should.be.true;
         });
@@ -122,7 +127,7 @@ describe('autoreader', () => {
                     created_at: '2000-01-01 00:00'
                 }, complete);
             });
-            autoreader.prepare(undefined, dummyCfg, undefined, browser);
+            autoreader.prepare(undefined, dummyCfg, events, browser);
             autoreader.readify();
             events.emit.calledWith('logMessage', 'Reading topic `Test`').should.be.true;
             browser.readPosts.calledOnce.should.be.true;
@@ -143,7 +148,7 @@ describe('autoreader', () => {
                     created_at: '2000-01-01 00:00'
                 }, complete);
             });
-            autoreader.prepare(undefined, dummyCfg, undefined, browser);
+            autoreader.prepare(undefined, dummyCfg, events, browser);
             autoreader.readify();
             events.emit.calledWith('logMessage', 'Reading topic `Test`').should.be.true;
             browser.readPosts.callCount.should.equal(0);
@@ -162,7 +167,7 @@ describe('autoreader', () => {
                     created_at: '2100-01-01 00:00'
                 }, complete);
             });
-            autoreader.prepare(undefined, dummyCfg, undefined, browser);
+            autoreader.prepare(undefined, dummyCfg, events, browser);
             autoreader.readify();
             events.emit.calledWith('logMessage', 'Reading topic `Test`').should.be.true;
             browser.readPosts.callCount.should.equal(0);
@@ -178,7 +183,7 @@ describe('autoreader', () => {
             sandbox.stub(browser, 'getPosts', (_, each, complete) => {
                 each(undefined, complete);
             });
-            autoreader.prepare(undefined, dummyCfg, undefined, browser);
+            autoreader.prepare(undefined, dummyCfg, events, browser);
             autoreader.readify();
             events.emit.calledWith('logMessage', 'Reading topic `Test`').should.be.true;
             browser.readPosts.callCount.should.equal(0);

@@ -70,7 +70,12 @@ const defaultConfig = {
          * Count of likes handed out during latest binge
          * @type {number}
          */
-        likeCount: 0
+        likeCount: 0,
+        /**
+         * EventEmitter used for internal communication
+         * @type {externals.events.SockEvents}
+         */
+        events:null
     };
 exports.defaultConfig = defaultConfig;
 exports.internals = internals;
@@ -88,6 +93,7 @@ exports.prepare = function prepare(plugConfig, config, events, browser) {
     if (typeof plugConfig !== 'object') {
         plugConfig = {};
     }
+    internals.events = events;
     internals.config = config.mergeObjects(defaultConfig, plugConfig);
     internals.config.topics.forEach((topic) => events.onTopic(topic, exports.messageHandler));
 };

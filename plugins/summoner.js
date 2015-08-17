@@ -13,7 +13,8 @@ const internals = {
     browser: null,
     configuration: exports.defaultConfig,
     timeouts: {},
-    interval: null
+    interval: null,
+    events: null
 };
 exports.internals = internals;
 
@@ -82,6 +83,7 @@ exports.prepare = function prepare(plugConfig, config, events, browser) {
     if (plugConfig === null || typeof plugConfig !== 'object') {
         plugConfig = {};
     }
+    internals.events = events;
     internals.browser = browser;
     internals.configuration = config.mergeObjects(exports.defaultConfig, plugConfig);
     events.onNotification('mentioned', exports.mentionHandler);

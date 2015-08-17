@@ -67,6 +67,14 @@ describe('likes plugin', () => {
             spy.calledWith(5, likes.messageHandler).should.be.true;
             spy.calledWith(17, likes.messageHandler).should.be.true;
         });
+
+        it('should store events object in internals', () => {
+            const events = {
+                onTopic: () => 0
+            };
+            likes.prepare(true, dummyCfg, events, undefined);
+            likes.internals.events.should.equal(events);
+        });
     });
     describe('start()', () => {
         let sandbox;
