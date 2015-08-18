@@ -122,16 +122,16 @@ describe('browser', () => {
             it('should update useragent', () => {
                 config.core.username = 'bob';
                 config.core.owner = 'joe';
-                const expected = 'SockBot/' + packageInfo.version + ' (' + packageInfo.releaseName
-                    + '; owner:joe; user:bob)';
+                const expected = 'SockBot/' + packageInfo.version + ' (' +
+                    packageInfo.releaseName + '; owner:joe; user:bob)';
                 coreBrowser.start();
                 browserModule.internals.defaults.headers['User-Agent'].should.equal(expected);
             });
             it('should update signature', () => {
                 config.core.username = 'fred';
                 config.core.owner = 'billy';
-                const expected = '\n\n<!-- SockBot/' + packageInfo.version + ' (' + packageInfo.releaseName
-                    + '; owner:billy; user:fred) %NOW% -->';
+                const expected = '\n\n<!-- SockBot/' + packageInfo.version + ' (' +
+                    packageInfo.releaseName + '; owner:billy; user:fred) %NOW% -->';
                 coreBrowser.start();
                 browserModule.internals.signature.should.equal(expected);
             });
@@ -1409,22 +1409,23 @@ describe('browser', () => {
             });
             it('should pass result info to callback', () => {
                 const spy = sinon.spy(),
-                    info = {'badges': [
-                        {
-                          'id': 3,
-                          'name': 'Regular',
-                          'description': '',
-                          'grant_count': 90,
-                          'allow_title': true,
-                          'multiple_grant': false,
-                          'icon': 'fa-user',
-                          'image': 'fa-user',
-                          'listable': true,
-                          'enabled': true,
-                          'badge_grouping_id': 4,
-                          'system': true,
-                          'badge_type_id': 2
-                        }]};
+                    info = {
+                        'badges': [{
+                            'id': 3,
+                            'name': 'Regular',
+                            'description': '',
+                            'grant_count': 90,
+                            'allow_title': true,
+                            'multiple_grant': false,
+                            'icon': 'fa-user',
+                            'image': 'fa-user',
+                            'listable': true,
+                            'enabled': true,
+                            'badge_grouping_id': 4,
+                            'system': true,
+                            'badge_type_id': 2
+                        }]
+                    };
                 queue.push.yieldsTo('callback', null, info);
                 object.getUser(0, spy);
                 spy.lastCall.args.should.deep.equal([null, info]);
@@ -1600,8 +1601,166 @@ describe('browser', () => {
             const queueWorker = browserModule.privateFns.queueWorker,
                 request = browserModule.internals.request;
             let clock;
-            before(() => {
+            beforeEach(() => {
+                browserModule.internals.coreQueue.queue = {
+                    pause: sinon.stub(),
+                    resume: sinon.stub()
+                };
+                browserModule.internals.pluginQueue.queue = {
+                    pause: sinon.stub(),
+                    resume: sinon.stub()
+                };
                 clock = sinon.useFakeTimers();
+            });
+            afterEach(() => {
+                clock.restore();
+                browserModule.internals.request = request;
+            });
+            describe('error handling', () => {
+                it('should trigger cooldown on error', () => {
+                    browserModule.internals.request = (_, cb) => cb('ERROR', null, null);
+                    const queueSpy = sinon.spy(),
+                        callbackSpy = sinon.spy();
+                    queueWorker({
+                        callback: callbackSpy
+                    }, queueSpy);
+                    browserModule.internals.coreQueue.queue.pause.called.should.be.true;
+                });
+                it('should trigger cooldown on 404 response', () => {
+                    browserModule.internals.request = (_, cb) => cb(null, {
+                        statusCode: 404
+                    }, null);
+                    const queueSpy = sinon.spy(),
+                        callbackSpy = sinon.spy();
+                    queueWorker({
+                        callback: callbackSpy
+                    }, queueSpy);
+                    browserModule.internals.coreQueue.queue.pause.called.should.be.true;
+                });
+                it('should trigger cooldown on 502 response', () => {
+                    browserModule.internals.request = (_, cb) => cb(null, {
+                        statusCode: 502
+                    }, null);
+                    const queueSpy = sinon.spy(),
+                        callbackSpy = sinon.spy();
+                    queueWorker({
+                        callback: callbackSpy
+                    }, queueSpy);
+                    browserModule.internals.coreQueue.queue.pause.called.should.be.true;
+                });
+                it('should trigger cooldown on 500 response', () => {
+                    browserModule.internals.request = (_, cb) => cb(null, {
+                        statusCode: 500
+                    }, null);
+                    const queueSpy = sinon.spy(),
+                        callbackSpy = sinon.spy();
+                    queueWorker({
+                        callback: callbackSpy
+                    }, queueSpy);
+                    browserModule.internals.coreQueue.queue.pause.called.should.be.true;
+                });
+                it('should not trigger cooldown on 399 response', () => {
+                    browserModule.internals.request = (_, cb) => cb(null, {
+                        statusCode: 399
+                    }, null);
+                    const queueSpy = sinon.spy(),
+                        callbackSpy = sinon.spy();
+                    queueWorker({
+                        callback: callbackSpy
+                    }, queueSpy);
+                    browserModule.internals.coreQueue.queue.pause.called.should.be.false;
+                });
+                it('should not trigger cooldown on 204 response', () => {
+                    browserModule.internals.request = (_, cb) => cb(null, {
+                        statusCode: 204
+                    }, null);
+                    const queueSpy = sinon.spy(),
+                        callbackSpy = sinon.spy();
+                    queueWorker({
+                        callback: callbackSpy
+                    }, queueSpy);
+                    browserModule.internals.coreQueue.queue.pause.called.should.be.false;
+                });
+                it('should pass errors to task.callback', (done) => {
+                    browserModule.internals.request = (_, cb) => cb('ERROR', null, null);
+                    const queueSpy = sinon.spy(),
+                        callbackSpy = sinon.spy();
+                    queueWorker({
+                        callback: callbackSpy
+                    }, queueSpy);
+                    clock.tick(65 * 1000);
+                    callbackSpy.lastCall.args.should.eql(['ERROR', null]);
+                    queueSpy.called.should.be.true;
+                    done();
+                });
+                it('should add error throttle delay callback response', () => {
+                    browserModule.internals.request = (_, cb) => cb('ERROR', null, null);
+                    const queueSpy = sinon.spy(),
+                        callbackSpy = sinon.spy(),
+                        delay = Math.ceil(Math.random() * 15 * 1000);
+                    queueWorker({
+                        delay: delay,
+                        callback: callbackSpy
+                    }, queueSpy);
+                    clock.tick(0);
+                    callbackSpy.called.should.be.false;
+                    clock.tick(60 * 1000);
+                    callbackSpy.called.should.be.true;
+                });
+                it('should add error throttle delay to task delay', () => {
+                    browserModule.internals.request = (_, cb) => cb('ERROR', null, null);
+                    const queueSpy = sinon.spy(),
+                        callbackSpy = sinon.spy(),
+                        delay = Math.ceil(Math.random() * 15 * 1000);
+                    queueWorker({
+                        delay: delay,
+                        callback: callbackSpy
+                    }, queueSpy);
+                    clock.tick(delay);
+                    queueSpy.called.should.be.false;
+                    clock.tick(60 * 1000);
+                    queueSpy.called.should.be.true;
+                });
+                it('should pause coreQueue durring cooldown', () => {
+                    browserModule.internals.request = (_, cb) => cb('ERROR', null, null);
+                    const queueSpy = sinon.spy(),
+                        callbackSpy = sinon.spy();
+                    queueWorker({
+                        callback: callbackSpy
+                    }, queueSpy);
+                    browserModule.internals.coreQueue.queue.pause.called.should.be.true;
+                });
+                it('should pause coreQueue durring cooldown', () => {
+                    browserModule.internals.request = (_, cb) => cb('ERROR', null, null);
+                    const queueSpy = sinon.spy(),
+                        callbackSpy = sinon.spy();
+                    queueWorker({
+                        callback: callbackSpy
+                    }, queueSpy);
+                    browserModule.internals.coreQueue.queue.resume.called.should.be.false;
+                    clock.tick(60 * 1000);
+                    browserModule.internals.coreQueue.queue.resume.called.should.be.true;
+                });
+                it('should pause pluginQueue durring cooldown', () => {
+                    browserModule.internals.request = (_, cb) => cb('ERROR', null, null);
+                    const queueSpy = sinon.spy(),
+                        callbackSpy = sinon.spy();
+                    queueWorker({
+                        callback: callbackSpy
+                    }, queueSpy);
+                    browserModule.internals.pluginQueue.queue.pause.called.should.be.true;
+                });
+                it('should pause pluginQueue durring cooldown', () => {
+                    browserModule.internals.request = (_, cb) => cb('ERROR', null, null);
+                    const queueSpy = sinon.spy(),
+                        callbackSpy = sinon.spy();
+                    queueWorker({
+                        callback: callbackSpy
+                    }, queueSpy);
+                    browserModule.internals.pluginQueue.queue.resume.called.should.be.false;
+                    clock.tick(60 * 1000);
+                    browserModule.internals.pluginQueue.queue.resume.called.should.be.true;
+                });
             });
             it('should delay completion according to delay parameter to throttle requests', (done) => {
                 browserModule.internals.request = (_, cb) => cb(null, null, '"foobar"');
@@ -1636,22 +1795,6 @@ describe('browser', () => {
                 callbackSpy.lastCall.args.should.have.length(2);
                 expect(callbackSpy.lastCall.args[0]).to.be.null;
                 callbackSpy.lastCall.args[1].should.equal('"foobar');
-                done();
-            });
-            it('should pass errors to task.callback', (done) => {
-                browserModule.internals.request = (_, cb) => cb('ERROR', null, null);
-                const queueSpy = sinon.spy(),
-                    callbackSpy = sinon.spy();
-                queueWorker({
-                    callback: callbackSpy
-                }, queueSpy);
-                clock.tick(0);
-                callbackSpy.called.should.be.true;
-                callbackSpy.lastCall.args.should.have.length(2);
-                callbackSpy.lastCall.args[0].should.equal('ERROR');
-                expect(callbackSpy.lastCall.args[1]).to.be.null;
-                clock.tick(5000);
-                queueSpy.called.should.be.true;
                 done();
             });
             it('should use default method when omitted', (done) => {
@@ -1732,10 +1875,6 @@ describe('browser', () => {
                 queueSpy.called.should.be.true;
                 req.form.should.deep.equal(form);
                 done();
-            });
-            after(() => {
-                clock.restore();
-                browserModule.internals.request = request;
             });
         });
         describe('getCSRF()', () => {
@@ -2432,7 +2571,7 @@ describe('browser', () => {
                     const post = {
                         raw: badStr
                     };
-                    expect(()=> cleanPost(post)).to.not.throw();
+                    expect(() => cleanPost(post)).to.not.throw();
                     post.should.have.any.key('cleaned');
                 });
 
