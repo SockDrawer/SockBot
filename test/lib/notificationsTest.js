@@ -452,14 +452,15 @@ describe('notifications', () => {
         });
     });
     describe('pollNotifications()', () => {
-        let sandbox;
+        let sandbox, events;
         beforeEach(() => {
             sandbox = sinon.sandbox.create();
             sandbox.stub(browser, 'getNotifications');
             sandbox.stub(notifications.privateFns, 'handleTopicNotification');
-            notifications.internals.events = {
+            events = {
                 emit: sandbox.stub()
             };
+            notifications.internals.events = events;
         });
         afterEach(() => {
             sandbox.restore();
@@ -475,12 +476,26 @@ describe('notifications', () => {
             notifications.pollNotifications(spy);
             notifications.internals.events.emit.calledWith('logMessage', 'Polling Notifications').should.be.true;
         });
-        it('should pass error to callback on failure', () => {
-            browser.getNotifications.yields('i am error');
-            const spy = sinon.spy();
-            notifications.pollNotifications(spy);
-            spy.called.should.be.true;
-            spy.firstCall.args[0].should.equal('i am error');
+        describe('invalud discourse response robustness', () => {
+            it('should pass error to callback on failure', () => {
+                browser.getNotifications.yields('i am error');
+                const spy = sinon.spy();
+                notifications.pollNotifications(spy);
+                spy.called.should.be.true;
+                spy.firstCall.args[0].should.equal('i am error');
+            });
+            it('should emit warning on invalid notifications (null response)', () => {
+                browser.getNotifications.yields(null, null);
+                const spy = sinon.spy();
+                notifications.pollNotifications(spy);
+                events.emit.calledWith('logWarning', 'No notifications recieved from Discourse.').should.be.true;
+            });
+            it('should emit warning on invalid notifications (missing key response)', () => {
+                browser.getNotifications.yields(null, {});
+                const spy = sinon.spy();
+                notifications.pollNotifications(spy);
+                events.emit.calledWith('logWarning', 'No notifications recieved from Discourse.').should.be.true;
+            });
         });
         it('should signal success to callback on poll success', () => {
             browser.getNotifications.yields(null, {
