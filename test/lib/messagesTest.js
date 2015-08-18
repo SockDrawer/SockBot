@@ -145,23 +145,39 @@ describe('messages', () => {
             messages.pollMessages(spy);
             messages.internals.events.emit.calledWith('logMessage', 'Polling Messages').should.be.true;
         });
-        it('should log message on poll failure', () => {
-            const spy = sinon.spy();
-            browser.messageBus.yields('fake error');
-            messages.pollMessages(spy);
-            messages.internals.events.emit.calledWith('logWarning', 'Error in messageBus: "fake error"').should.be.true;
-        });
-        it('should reset positions on poll failure', () => {
-            const spy = sinon.spy();
-            browser.messageBus.yields('fake error');
-            messages.pollMessages(spy);
-            messages.privateFns.resetChannelPositions.called.should.be.true;
-        });
-        it('should pass error onto callback on poll failure', () => {
-            const spy = sinon.spy();
-            browser.messageBus.yields('fake error');
-            messages.pollMessages(spy);
-            spy.calledWith('fake error').should.be.true;
+        describe('discourse failure protection', () => {
+            it('should log message on poll failure', () => {
+                const spy = sinon.spy();
+                browser.messageBus.yields('fake error');
+                messages.pollMessages(spy);
+                messages.internals.events.emit.calledWith('logError',
+                    'Error in messageBus: "fake error"').should.be.true;
+            });
+            it('should reset positions on poll failure', () => {
+                const spy = sinon.spy();
+                browser.messageBus.yields('fake error');
+                messages.pollMessages(spy);
+                messages.privateFns.resetChannelPositions.called.should.be.true;
+            });
+            it('should pass error onto callback on poll failure', () => {
+                const spy = sinon.spy();
+                browser.messageBus.yields('fake error');
+                messages.pollMessages(spy);
+                spy.calledWith('fake error').should.be.true;
+            });
+            it('should emit warning on invalid reply', () => {
+                const spy = sinon.spy();
+                browser.messageBus.yields(null, null);
+                messages.pollMessages(spy);
+                messages.internals.events.emit.calledWith('logWarning',
+                    'Invalid Response from messageBus').should.be.true;
+            });
+            it('should reset positions on invalid reply', () => {
+                const spy = sinon.spy();
+                browser.messageBus.yields(null, null);
+                messages.pollMessages(spy);
+                messages.privateFns.resetChannelPositions.called.should.be.true;
+            });
         });
         it('should call updateChannelPositions() on poll success', () => {
             const spy = sinon.spy(),
