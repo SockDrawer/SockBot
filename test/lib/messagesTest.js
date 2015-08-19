@@ -192,14 +192,6 @@ describe('messages', () => {
                 sandbox.clock.tick(0);
                 spy.called.should.be.true;
             });
-            it('should have zero completion delay on zero messages', () => {
-                const spy = sinon.spy(),
-                    msgs = [];
-                browser.messageBus.yields(null, msgs);
-                messages.pollMessages(spy);
-                sandbox.clock.tick(0);
-                spy.called.should.be.true;
-            });
             it('should have half second completion delay on one message', () => {
                 const spy = sinon.spy(),
                     msgs = [{}];
