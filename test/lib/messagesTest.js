@@ -123,6 +123,9 @@ describe('messages', () => {
             sandbox.stub(messages.privateFns, 'resetChannelPositions');
             sandbox.stub(messages.privateFns, 'updateChannelPositions');
             sandbox.stub(messages.privateFns, 'processTopicMessage');
+            sandbox.useFakeTimers();
+            async.nextTick = (fn) => setTimeout(fn, 0);
+            async.setImmediate = (fn) => setTimeout(fn, 0);
             messages.internals.events = {
                 emit: sandbox.stub()
             };
@@ -163,6 +166,7 @@ describe('messages', () => {
                 const spy = sinon.spy();
                 browser.messageBus.yields('fake error');
                 messages.pollMessages(spy);
+                sandbox.clock.tick(0);
                 spy.calledWith('fake error').should.be.true;
             });
             it('should emit warning on invalid reply', () => {
@@ -179,6 +183,48 @@ describe('messages', () => {
                 messages.privateFns.resetChannelPositions.called.should.be.true;
             });
         });
+        describe('discourse flood prevention', () => {
+            it('should have zero completion delay on zero messages', () => {
+                const spy = sinon.spy(),
+                    msgs = [];
+                browser.messageBus.yields(null, msgs);
+                messages.pollMessages(spy);
+                sandbox.clock.tick(0);
+                spy.called.should.be.true;
+            });
+            it('should have half second completion delay on one message', () => {
+                const spy = sinon.spy(),
+                    msgs = [{}];
+                browser.messageBus.yields(null, msgs);
+                messages.pollMessages(spy);
+                sandbox.clock.tick(499);
+                spy.called.should.be.false;
+                sandbox.clock.tick(1);
+                spy.called.should.be.true;
+            });
+            it('should have one second completion delay on two message', () => {
+                const spy = sinon.spy(),
+                    msgs = [{}, {}];
+                browser.messageBus.yields(null, msgs);
+                messages.pollMessages(spy);
+                sandbox.clock.tick(999);
+                spy.called.should.be.false;
+                sandbox.clock.tick(1);
+                spy.called.should.be.true;
+            });
+            it('should have maximum thirty second completion delay on many messages', () => {
+                const spy = sinon.spy(),
+                    msgs = Array.apply(null, Array(1e3)).map(() => {
+                        return {};
+                    });
+                browser.messageBus.yields(null, msgs);
+                messages.pollMessages(spy);
+                sandbox.clock.tick(30 * 1000 - 1);
+                spy.called.should.be.false;
+                sandbox.clock.tick(1);
+                spy.called.should.be.true;
+            });
+        });
         it('should call updateChannelPositions() on poll success', () => {
             const spy = sinon.spy(),
                 msgs = [];
@@ -191,62 +237,69 @@ describe('messages', () => {
                 msgs = [];
             browser.messageBus.yields(null, msgs);
             messages.pollMessages(spy);
+            sandbox.clock.tick(0);
             spy.called.should.be.true;
-            spy.lastCall.args.should.deep.equal([null]);
+            spy.lastCall.args.should.deep.equal([]);
         });
-        it('should pass `/topic/*` messages to processTopicMessage()', () => {
-            const spy = sinon.spy(),
-                msg = {
-                    channel: '/topic/1234'
-                },
-                msgs = [msg];
-            browser.messageBus.yields(null, msgs);
-            messages.pollMessages(spy);
-            messages.privateFns.processTopicMessage.calledWith(msg).should.be.true;
-        });
-        it('should emit message directly for non `/topic/*` messages', () => {
-            const spy = sinon.spy(),
-                msg = {
-                    channel: '/__status/1234',
-                    data: {
-                        foobar: Math.random()
-                    }
-                },
-                msgs = [msg];
-            browser.messageBus.yields(null, msgs);
-            messages.pollMessages(spy);
-            messages.internals.events.emit.calledWith('message#' + msg.channel, msg.data).should.be.true;
-        });
-        it('should print warning when no listeners registered for event', () => {
-            const spy = sinon.spy(),
-                msg = {
-                    channel: '/__status/1234',
-                    'message_id': 5432,
-                    data: {
-                        foobar: Math.random()
-                    }
-                },
-                msgs = [msg];
-            browser.messageBus.yields(null, msgs);
-            messages.internals.events.emit.returns(false);
-            messages.pollMessages(spy);
-            messages.internals.events.emit.calledWith('logWarning',
-                'Message 5432 for channel /__status/1234 was not handled!').should.be.true;
-        });
-        it('should not print warning when listeners registered for event', () => {
-            const spy = sinon.spy(),
-                msg = {
-                    channel: '/__status/1234',
-                    'message_id': 5432,
-                    data: {
-                        foobar: Math.random()
-                    }
-                },
-                msgs = [msg];
-            browser.messageBus.yields(null, msgs);
-            messages.internals.events.emit.returns(true);
-            messages.pollMessages(spy);
-            messages.internals.events.emit.calledWith('logWarning').should.be.false;
+        describe('message processing', () => {
+            it('should pass `/topic/*` messages to processTopicMessage()', () => {
+                const spy = sinon.spy(),
+                    msg = {
+                        channel: '/topic/1234'
+                    },
+                    msgs = [msg];
+                browser.messageBus.yields(null, msgs);
+                messages.pollMessages(spy);
+                sandbox.clock.tick(0);
+                messages.privateFns.processTopicMessage.calledWith(msg).should.be.true;
+            });
+            it('should emit message directly for non `/topic/*` messages', () => {
+                const spy = sinon.spy(),
+                    msg = {
+                        channel: '/__status/1234',
+                        data: {
+                            foobar: Math.random()
+                        }
+                    },
+                    msgs = [msg];
+                browser.messageBus.yields(null, msgs);
+                messages.pollMessages(spy);
+                sandbox.clock.tick(0);
+                messages.internals.events.emit.calledWith('message#' + msg.channel, msg.data).should.be.true;
+            });
+            it('should print warning when no listeners registered for event', () => {
+                const spy = sinon.spy(),
+                    msg = {
+                        channel: '/__status/1234',
+                        'message_id': 5432,
+                        data: {
+                            foobar: Math.random()
+                        }
+                    },
+                    msgs = [msg];
+                browser.messageBus.yields(null, msgs);
+                messages.internals.events.emit.returns(false);
+                messages.pollMessages(spy);
+                sandbox.clock.tick(0);
+                messages.internals.events.emit.calledWith('logWarning',
+                    'Message 5432 for channel /__status/1234 was not handled!').should.be.true;
+            });
+            it('should not print warning when listeners registered for event', () => {
+                const spy = sinon.spy(),
+                    msg = {
+                        channel: '/__status/1234',
+                        'message_id': 5432,
+                        data: {
+                            foobar: Math.random()
+                        }
+                    },
+                    msgs = [msg];
+                browser.messageBus.yields(null, msgs);
+                messages.internals.events.emit.returns(true);
+                messages.pollMessages(spy);
+                sandbox.clock.tick(0);
+                messages.internals.events.emit.calledWith('logWarning').should.be.false;
+            });
         });
     });
     describe('start()', () => {
