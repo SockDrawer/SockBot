@@ -566,7 +566,7 @@ describe('browser', () => {
                         object.createPrivateMessage(['accalia', 'sockbot'], 100, '', () => 0);
                         const form = queue.push.lastCall.args[0].form;
                         form.should.have.any.key('target_usernames');
-                        form.target_usernames.should.deep.equal(['accalia', 'sockbot']);
+                        form.target_usernames.should.equal('accalia,sockbot');
                     });
                     it('should set `archetype`', () => {
                         object.createPrivateMessage('', 100, '', () => 0);
