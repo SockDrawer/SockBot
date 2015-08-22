@@ -306,7 +306,7 @@ describe('commands', () => {
                 it('should send PM to commanding user', () => {
                     const post = {
                         username: 'JohnnyGat',
-                        trust_level: 8
+                        'trust_level': 8
                     };
                     cmdShutUp({
                         post: post
@@ -317,7 +317,7 @@ describe('commands', () => {
                 it('should send PM to owning user', () => {
                     const post = {
                         username: 'JohnnyGat',
-                        trust_level: 8
+                        'trust_level': 8
                     };
                     config.core.owner = 'accalia';
                     cmdShutUp({
@@ -329,7 +329,7 @@ describe('commands', () => {
                 it('should set expected title', () => {
                     const post = {
                         username: 'JohnnyGat',
-                        trust_level: 8
+                        'trust_level': 8
                     };
                     cmdShutUp({
                         post: post
@@ -340,7 +340,7 @@ describe('commands', () => {
                 it('should set expected PM body', () => {
                     const post = {
                             username: 'JohnnyGat',
-                            trust_level: 8,
+                            'trust_level': 8,
                             url: Math.random(),
                             raw: Math.random()
                         },
@@ -353,7 +353,7 @@ describe('commands', () => {
                 });
                 it('should set internals.shotdown as completion callback', () => {
                     const post = {
-                        trust_level: 8
+                        'trust_level': 8
                     };
                     cmdShutUp({
                         post: post
@@ -384,11 +384,22 @@ describe('commands', () => {
                 shutdown();
                 emit.calledWith('logWarning', 'Shutting up by order!').should.equal(true);
             });
-            it('should emit warning after a year wait', () => {
+            it('should emit warning after waiting', () => {
                 SockBot.stop.yields(null);
                 shutdown();
-                sandbox.clock.tick(3.1104e11); //fast forward ten years
+                emit.calledWith('logWarning', 'that was a long wait....').should.equal(false);
+                sandbox.clock.tick(2.14e9); //fast forward ~24 days
                 emit.calledWith('logWarning', 'that was a long wait....').should.equal(true);
+            });
+            it('should emit start waiting again after waiting', () => {
+                SockBot.stop.yields(null);
+                shutdown();
+                sandbox.clock.tick(2.14e9); //fast forward ~24 days
+                emit.reset();
+                emit.calledWith('logWarning', 'that was a long wait....').should.equal(false);
+                sandbox.clock.tick(2.14e9); //fast forward ~24 days
+                emit.calledWith('logWarning', 'that was a long wait....').should.equal(true);
+
             });
         });
         describe('internals.parseShortCommand()', () => {
@@ -765,11 +776,9 @@ describe('commands', () => {
     });
     describe('parseCommands()', () => {
         let parseShortCommand, parseMentionCommand, events, callbackSpy, clocks, sandbox;
-        before(() => {
-            clocks = sinon.useFakeTimers();
-        });
         beforeEach(() => {
             sandbox = sinon.sandbox.create();
+            clocks = sandbox.useFakeTimers();
             sandbox.stub(commands.internals, 'parseShortCommand');
             sandbox.stub(commands.internals, 'parseMentionCommand');
             parseShortCommand = commands.internals.parseShortCommand;
@@ -782,122 +791,155 @@ describe('commands', () => {
         });
         afterEach(() => {
             sandbox.restore();
-        });
-        after(() => {
-            clocks.restore();
             commands.internals.events = null;
         });
-        it('should require callback', () => {
-            expect(() => commands.parseCommands({}, {}, null)).to.throw('callback must be supplied');
-            parseShortCommand.called.should.be.false;
-            parseMentionCommand.called.should.be.false;
-        });
-        it('should accept empty post', () => {
-            commands.parseCommands(null, null, callbackSpy);
-            callbackSpy.called.should.be.true;
-            callbackSpy.lastCall.args.should.deep.equal([null, []]);
-            parseShortCommand.called.should.be.false;
-            parseMentionCommand.called.should.be.false;
-        });
-        it('should accept blank post', () => {
-            commands.parseCommands({
-                raw: ''
-            }, null, callbackSpy);
-            callbackSpy.called.should.be.true;
-            callbackSpy.lastCall.args.should.deep.equal([null, []]);
-            parseShortCommand.called.should.be.false;
-            parseMentionCommand.called.should.be.false;
-        });
-        it('should not emit on non command post', () => {
-            commands.parseCommands({
-                raw: 'i am a little text short and stout'
-            }, null, callbackSpy);
-            callbackSpy.called.should.be.true;
-            callbackSpy.lastCall.args.should.deep.equal([null, []]);
-            parseShortCommand.called.should.be.false;
-            parseMentionCommand.called.should.be.true;
-            events.emit.called.should.be.false;
-        });
-        it('should not emit on non command post 2', () => {
-            commands.parseCommands({
-                raw: '!i am a little text short and stout'
-            }, null, callbackSpy);
-            callbackSpy.called.should.be.true;
-            callbackSpy.lastCall.args.should.deep.equal([null, []]);
-            parseShortCommand.called.should.be.true;
-            parseMentionCommand.called.should.be.false;
-            events.emit.called.should.be.false;
-        });
-        it('should emit on post containing command', () => {
-            const topic = Math.random();
-            parseShortCommand.returns({
-                command: 'foobar'
+        describe('validations', () => {
+            it('should require callback', () => {
+                expect(() => commands.parseCommands({}, {}, null)).to.throw('callback must be supplied');
+                parseShortCommand.called.should.be.false;
+                parseMentionCommand.called.should.be.false;
             });
-            events.emit.returns(true);
-            commands.parseCommands({
-                raw: '!i am a little text short and stout'
-            }, topic, callbackSpy);
-            clocks.tick(0);
-            events.emit.called.should.be.true;
-            events.emit.lastCall.args.should.deep.equal(['command#foobar', {
-                command: 'foobar',
-                post: {
+            it('should accept empty post', () => {
+                commands.parseCommands(null, null, callbackSpy);
+                callbackSpy.called.should.be.true;
+                callbackSpy.lastCall.args.should.deep.equal([null, []]);
+                parseShortCommand.called.should.be.false;
+                parseMentionCommand.called.should.be.false;
+            });
+            it('should accept blank post', () => {
+                commands.parseCommands({
+                    raw: ''
+                }, null, callbackSpy);
+                callbackSpy.called.should.be.true;
+                callbackSpy.lastCall.args.should.deep.equal([null, []]);
+                parseShortCommand.called.should.be.false;
+                parseMentionCommand.called.should.be.false;
+            });
+        });
+        describe('command logging', () => {
+            it('should emit logMessage on post containing command', () => {
+                const topic = Math.random();
+                parseShortCommand.returns({
+                    command: 'foobar'
+                });
+                events.emit.returns(true);
+                commands.parseCommands({
                     raw: '!i am a little text short and stout'
-                },
-                topic: topic
-            }]);
-        });
-        it('should multi emit on post containing multiple commands', () => {
-            parseShortCommand.returns({
-                command: 'foobar'
+                }, topic, callbackSpy);
+                clocks.tick(0);
+                events.emit.calledWith('logMessage', 'executing command: foobar').should.equal(true);
             });
-            events.emit.returns(true);
-            commands.parseCommands({
-                raw: '!i am a little\ntext short\n!and stout'
-            }, null, callbackSpy);
-            clocks.tick(0);
-            events.emit.called.should.be.true;
-            events.emit.callCount.should.equal(2);
-            events.emit.alwaysCalledWith('command#foobar');
-        });
-        it('should not emit error on uhandled command from mention', () => {
-            parseShortCommand.returns({
-                command: 'foobar',
-                mention: true
+            it('should emit logMessage for each command on post containing multiple commands', () => {
+                parseShortCommand.onCall(0).returns({
+                    command: 'foobar'
+                });
+                parseShortCommand.returns({
+                    command: 'barbaz'
+                });
+                events.emit.returns(true);
+                commands.parseCommands({
+                    raw: '!i am a little\ntext short\n!and stout'
+                }, null, callbackSpy);
+                clocks.tick(0);
+                events.emit.calledWith('logMessage', 'executing command: foobar').should.equal(true);
+                events.emit.calledWith('logMessage', 'executing command: barbaz').should.equal(true);
             });
-            events.emit.returns(false);
-            commands.parseCommands({
-                raw: '!i am a little text short and stout'
-            }, null, callbackSpy);
-            clocks.tick(0);
-            events.emit.calledWith('command#ERROR').should.be.false;
         });
-        it('should emit error on uhandled command', () => {
-            parseShortCommand.returns({
-                command: 'foobar'
+        describe('command event emitting', () => {
+            it('should not emit on non command post', () => {
+                commands.parseCommands({
+                    raw: 'i am a little text short and stout'
+                }, null, callbackSpy);
+                callbackSpy.called.should.be.true;
+                callbackSpy.lastCall.args.should.deep.equal([null, []]);
+                parseShortCommand.called.should.be.false;
+                parseMentionCommand.called.should.be.true;
+                events.emit.called.should.be.false;
             });
-            events.emit.onFirstCall().returns(false)
-                .onSecondCall().returns(true);
-            commands.parseCommands({
-                raw: '!i am a little text short and stout'
-            }, null, callbackSpy);
-            clocks.tick(0);
-            events.emit.callCount.should.equal(2);
-            events.emit.calledWith('command#ERROR').should.be.true;
-            events.emit.calledWith('error').should.be.false;
+            it('should not emit on non command post 2', () => {
+                commands.parseCommands({
+                    raw: '!i am a little text short and stout'
+                }, null, callbackSpy);
+                callbackSpy.called.should.be.true;
+                callbackSpy.lastCall.args.should.deep.equal([null, []]);
+                parseShortCommand.called.should.be.true;
+                parseMentionCommand.called.should.be.false;
+                events.emit.called.should.be.false;
+            });
+            it('should emit on post containing command', () => {
+                const topic = Math.random();
+                parseShortCommand.returns({
+                    command: 'foobar'
+                });
+                events.emit.returns(true);
+                commands.parseCommands({
+                    raw: '!i am a little text short and stout'
+                }, topic, callbackSpy);
+                clocks.tick(0);
+                events.emit.called.should.be.true;
+                events.emit.lastCall.args.should.deep.equal(['command#foobar', {
+                    command: 'foobar',
+                    post: {
+                        raw: '!i am a little text short and stout'
+                    },
+                    topic: topic
+                }]);
+            });
+            it('should multi emit on post containing multiple commands', () => {
+                parseShortCommand.onCall(0).returns({
+                    command: 'foobar'
+                });
+                parseShortCommand.returns({
+                    command: 'barbaz'
+                });
+                events.emit.returns(true);
+                commands.parseCommands({
+                    raw: '!i am a little\ntext short\n!and stout'
+                }, null, callbackSpy);
+                clocks.tick(0);
+                events.emit.calledWith('command#foobar').should.be.true;
+                events.emit.calledWith('command#barbaz').should.be.true;
+            });
         });
-        it('should emit global error on uhandled command error', () => {
-            parseShortCommand.returns({
-                command: 'foobar'
+        describe('unhandled commands', () => {
+            it('should not emit error on uhandled command from mention', () => {
+                parseShortCommand.returns({
+                    command: 'foobar',
+                    mention: true
+                });
+                events.emit.returns(false);
+                commands.parseCommands({
+                    raw: '!i am a little text short and stout'
+                }, null, callbackSpy);
+                clocks.tick(0);
+                events.emit.calledWith('command#ERROR').should.be.false;
             });
-            events.emit.returns(false);
-            commands.parseCommands({
-                raw: '!i am a little text short and stout'
-            }, null, callbackSpy);
-            clocks.tick(0);
-            events.emit.callCount.should.equal(3);
-            events.emit.calledWith('command#ERROR').should.be.true;
-            events.emit.calledWith('error').should.be.true;
+            it('should emit error on uhandled command', () => {
+                parseShortCommand.returns({
+                    command: 'foobar'
+                });
+                events.emit.returns(true)
+                    .onSecondCall().returns(false);
+
+                commands.parseCommands({
+                    raw: '!i am a little text short and stout'
+                }, null, callbackSpy);
+                clocks.tick(0);
+                events.emit.calledWith('command#ERROR').should.equal(true);
+                events.emit.calledWith('error').should.equal(false);
+            });
+            it('should emit global error on uhandled command error', () => {
+                parseShortCommand.returns({
+                    command: 'foobar'
+                });
+                events.emit.returns(false);
+                commands.parseCommands({
+                    raw: '!i am a little text short and stout'
+                }, null, callbackSpy);
+                clocks.tick(0);
+                events.emit.calledWith('command#ERROR').should.equal(true);
+                events.emit.calledWith('error').should.equal(true);
+            });
         });
     });
 });
