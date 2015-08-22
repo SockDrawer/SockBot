@@ -1693,7 +1693,7 @@ describe('browser', () => {
                         browserModule.internals.pauseTime.should.equal(0);
                     });
                 });
-                [400, 701, 403, 404, 405, 414, 418, 500, 502, 504, 666, 718].forEach(statusCode => {
+                [400, 401, 403, 404, 405, 414, 418, 500, 502, 504, 666, 718].forEach(statusCode => {
                     it('should set initial backoff delay of 60 seconds on http status ' + statusCode, () => {
                         throttleQueues(null, {
                             statusCode: statusCode
@@ -1701,7 +1701,7 @@ describe('browser', () => {
                         browserModule.internals.pauseTime.should.equal(6e4);
                     });
                 });
-                [400, 701, 403, 404, 405, 414, 418, 500, 502, 504, 666, 718].forEach(statusCode => {
+                [400, 401, 403, 404, 405, 414, 418, 500, 502, 504, 666, 718].forEach(statusCode => {
                     it('should set minimum backoff delay of 60 seconds on http status ' + statusCode, () => {
                         browserModule.internals.pauseTime = 1e3;
                         throttleQueues(null, {
@@ -1710,7 +1710,7 @@ describe('browser', () => {
                         browserModule.internals.pauseTime.should.equal(6e4);
                     });
                 });
-                [400, 701, 403, 404, 405, 414, 418, 500, 502, 504, 666, 718].forEach(statusCode => {
+                [400, 401, 403, 404, 405, 414, 418, 500, 502, 504, 666, 718].forEach(statusCode => {
                     it('should double existing backoff delay on http status ' + statusCode, () => {
                         browserModule.internals.pauseTime = 7e4;
                         throttleQueues(null, {
