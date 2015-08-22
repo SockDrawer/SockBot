@@ -37,7 +37,8 @@ describe('commands', () => {
     });
     describe('internals', () => {
         const fns = ['parseMentionCommand', 'parseShortCommand', 'registerCommand',
-                'commandProtect', 'getCommandHelps', 'cmdError', 'cmdHelp'
+                'commandProtect', 'getCommandHelps', 'cmdError', 'cmdHelp', 'cmdShutUp',
+                'shutdown'
             ],
             objs = ['mention', 'events', 'commands'],
             vals = [];
@@ -91,7 +92,7 @@ describe('commands', () => {
                 result = getCommandHelps();
             result.should.equal(expected);
         });
-        after(() => commands.internals.commands = {});
+        afterEach(() => commands.internals.commands = {});
     });
     describe('internals.cmdError', () => {
         const cmdError = commands.internals.cmdError;
@@ -123,7 +124,7 @@ describe('commands', () => {
         });
         it('should post expected text', () => {
             const expected = 'Command `foobar` is not recognized\n\nRegistered commands:\n' +
-                'help: print command help listing';
+                'help: print command help listing\nshutup: tell me to shutup';
             cmdError({
                 command: 'foobar',
                 post: {
@@ -151,12 +152,10 @@ describe('commands', () => {
         const cmdHelp = commands.internals.cmdHelp;
         let clock;
         let sandbox, events;
-        before(() => {
-            commands.internals.commands = {};
-            clock = sinon.useFakeTimers();
-        });
         beforeEach(() => {
+            commands.internals.commands = {};
             sandbox = sinon.sandbox.create();
+            clock = sandbox.useFakeTimers();
             events = {
                 on: sinon.spy(),
                 emit: sinon.spy()
@@ -166,9 +165,6 @@ describe('commands', () => {
         });
         afterEach(() => {
             sandbox.restore();
-        });
-        after(() => {
-            clock.restore();
         });
         it('should be registered as `command#help` event', (done) => {
             commands.prepare(events, () => {
@@ -182,8 +178,9 @@ describe('commands', () => {
             browser.createPost.called.should.be.false;
         });
         it('should post expected text', () => {
-            const expected = 'Registered commands:\nhelp: print command help listing\n\n' +
-                'More details may be available by passing `help` as the first parameter to a command';
+            const expected = 'Registered commands:\nhelp: print command help listing\n' +
+                'shutup: tell me to shutup\n\nMore details may be available by passing'+
+                ' `help` as the first parameter to a command';
             cmdHelp({
                 command: 'foobar',
                 post: {
