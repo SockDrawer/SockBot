@@ -1,7 +1,7 @@
 {
   "name": "sockbot",
-  "version": "2.9.4",
-  "releaseName": "Angelic Angora",
+  "version": "2.10.0",
+  "releaseName": "Bewitching Burlap",
   "description": "A sockpuppet bot to use on http://what.thedailywtf.com.",
   "repository": "https://github.com/SockDrawer/SockBot",
   "license": "MIT",
