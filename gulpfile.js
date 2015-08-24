@@ -14,7 +14,9 @@ const sockFiles = ['*.js', '!./gulpfile.js', '**/lib/**/*.js', '**/classes/**/*.
     sockTests = ['test/**/*.js'];
 
 const JobNumber = process.env.TRAVIS_JOB_NUMBER,
-    runDocs = !JobNumber || /[.]1$/.test(JobNumber);
+    PullRequestFlag = process.env.TRAVIS_PULL_REQUEST,
+    PullRequest = PullRequestFlag && PullRequestFlag !== 'false',
+    runDocs = !PullRequest && (!JobNumber || /[.]1$/.test(JobNumber));
 
 /**
  * Pull git branch locally (solves detached head issue in CI)
