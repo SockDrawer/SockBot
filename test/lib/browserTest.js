@@ -1140,9 +1140,7 @@ describe('browser', () => {
                     queue.push.onFirstCall().yieldsTo('callback', null, topic);
                     queue.push.onSecondCall().yieldsTo('callback', null, posts);
                     object.getPosts(314159, eachSpy, spy);
-                    sandbox.clock.tick(0);
-                    sandbox.clock.tick(0);
-                    sandbox.clock.tick(0);
+                    sandbox.clock.tick(10);
                     eachSpy.callCount.should.equal(3);
                     spy.lastCall.args.should.deep.equal([null]);
                 });
@@ -1163,7 +1161,7 @@ describe('browser', () => {
                     queue.push.onFirstCall().yieldsTo('callback', null, topic);
                     queue.push.onSecondCall().yieldsTo('callback', null, posts);
                     object.getPosts(314159, eachSpy, spy);
-                    sandbox.clock.tick(0);
+                    sandbox.clock.tick();
                     eachSpy.lastCall.args[0].should.deep.equal({
                         cleaned: '',
                         'reply_to': 'https://what.thedailywtf.com/t/undefined/undefined/',
@@ -1367,7 +1365,7 @@ describe('browser', () => {
                 object.getTopics(spy, () => 0);
                 const each = queue.push.firstCall.args[0].callback;
                 each(null, list);
-                sandbox.clock.tick(0);
+                sandbox.clock.tick(10);
                 spy.callCount.should.equal(3);
                 spy.calledWith(1).should.be.true;
                 spy.calledWith(2).should.be.true;
