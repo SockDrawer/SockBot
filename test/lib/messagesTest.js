@@ -214,7 +214,7 @@ describe('messages', () => {
             });
             it('should have maximum thirty second completion delay on many messages', () => {
                 const spy = sinon.spy(),
-                    msgs = Array.apply(null, Array(1e3)).map(() => {
+                    msgs = Array.apply(null, Array(61)).map(() => {
                         return {};
                     });
                 browser.messageBus.yields(null, msgs);
