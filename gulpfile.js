@@ -19,7 +19,7 @@ const JobNumber = process.env.TRAVIS_JOB_NUMBER,
     CI = process.env.CI === 'true',
     runDocs = !PullRequest && (!JobNumber || /[.]1$/.test(JobNumber));
 
-const testReporter = CI ? 'spec': 'nyan';
+const testReporter = CI ? 'spec': 'dot';
 
 /**
  * Pull git branch locally (solves detached head issue in CI)
