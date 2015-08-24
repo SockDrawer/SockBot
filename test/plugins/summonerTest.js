@@ -57,8 +57,9 @@ describe('summoner plugin', () => {
         it('should use provided object config', () => {
             const config = {};
             summoner.prepare(config, dummyCfg, events, undefined);
-            dummyCfg.mergeObjects.firstCall.args[0].should.equal(summoner.defaultConfig);
-            dummyCfg.mergeObjects.firstCall.args[1].should.equal(config);
+            dummyCfg.mergeObjects.firstCall.args[0].should.be.true;
+            dummyCfg.mergeObjects.firstCall.args[1].should.equal(summoner.defaultConfig);
+            dummyCfg.mergeObjects.firstCall.args[2].should.equal(config);
         });
         it('should accept array config', () => {
             const config = ['this is a config'],
@@ -66,8 +67,9 @@ describe('summoner plugin', () => {
                     messages: config
                 };
             summoner.prepare(config, dummyCfg, events, undefined);
-            dummyCfg.mergeObjects.firstCall.args[0].should.equal(summoner.defaultConfig);
-            dummyCfg.mergeObjects.firstCall.args[1].should.deep.equal(expected);
+            dummyCfg.mergeObjects.firstCall.args[0].should.be.true;
+            dummyCfg.mergeObjects.firstCall.args[1].should.equal(summoner.defaultConfig);
+            dummyCfg.mergeObjects.firstCall.args[2].should.deep.equal(expected);
         });
         it('should accept full config', () => {
             const config = {
@@ -79,15 +81,17 @@ describe('summoner plugin', () => {
                     messages: ['this is a config']
                 };
             summoner.prepare(config, dummyCfg, events, undefined);
-            dummyCfg.mergeObjects.firstCall.args[0].should.equal(summoner.defaultConfig);
-            dummyCfg.mergeObjects.firstCall.args[1].should.deep.equal(expected);
+            dummyCfg.mergeObjects.firstCall.args[0].should.be.true;
+            dummyCfg.mergeObjects.firstCall.args[1].should.equal(summoner.defaultConfig);
+            dummyCfg.mergeObjects.firstCall.args[2].should.deep.equal(expected);
         });
         describe('non object configuration', () => {
             [null, undefined, 0, 3.14, true, false, 'string', () => 0].forEach((config) => {
                 it('should use default config for: ' + config, () => {
                     summoner.prepare(config, dummyCfg, events, undefined);
-                    dummyCfg.mergeObjects.firstCall.args[0].should.equal(summoner.defaultConfig);
-                    dummyCfg.mergeObjects.firstCall.args[1].should.deep.equal({});
+                    dummyCfg.mergeObjects.firstCall.args[0].should.be.true;
+                    dummyCfg.mergeObjects.firstCall.args[1].should.equal(summoner.defaultConfig);
+                    dummyCfg.mergeObjects.firstCall.args[2].should.deep.equal({});
                 });
             });
         });
