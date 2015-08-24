@@ -535,20 +535,17 @@ describe('SockBot', () => {
         });
     });
     describe('prepare()', () => {
-        let sandbox, tick;
+        let sandbox;
         beforeEach(() => {
-            tick = async.setImmediate;
             sandbox = sinon.sandbox.create();
             sandbox.stub(SockBot.privateFns, 'loadConfig');
             sandbox.stub(SockBot.privateFns, 'prepareEvents');
             sandbox.stub(SockBot.privateFns, 'loadPlugins');
             sandbox.useFakeTimers();
-            async.setImmediate = (fn) => setTimeout(fn, 0);
             SockBot.internals.plugins = [];
         });
         afterEach(() => {
             sandbox.restore();
-            async.setImmediate = tick;
         });
         it('should call privateFns.loadConfig()', () => {
             SockBot.privateFns.loadConfig.yields(null, null);

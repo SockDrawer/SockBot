@@ -1141,6 +1141,8 @@ describe('browser', () => {
                     queue.push.onSecondCall().yieldsTo('callback', null, posts);
                     object.getPosts(314159, eachSpy, spy);
                     sandbox.clock.tick(0);
+                    sandbox.clock.tick(0);
+                    sandbox.clock.tick(0);
                     eachSpy.callCount.should.equal(3);
                     spy.lastCall.args.should.deep.equal([null]);
                 });
