@@ -107,7 +107,7 @@ describe('summoner plugin', () => {
                 id: 314
             };
             post = {
-                id: 456
+                number: 456
             };
             summoner.internals.timeouts = {};
         });
@@ -119,16 +119,16 @@ describe('summoner plugin', () => {
             browser.createPost.calledWith(topicid).should.be.true;
         });
         it('should reply to triggering post', () => {
-            const postid = Math.random();
-            post.id = postid;
+            const postnumber = Math.random();
+            post.number = postnumber;
             summoner.mentionHandler(undefined, topic, post);
-            browser.createPost.calledWith(topic.id, postid).should.be.true;
+            browser.createPost.calledWith(topic.id, postnumber).should.be.true;
         });
         it('should reply with expected text', () => {
             const text = 'foo';
             summoner.internals.configuration.messages = [text];
             summoner.mentionHandler(undefined, topic, post);
-            browser.createPost.calledWith(topic.id, post.id, text).should.be.true;
+            browser.createPost.calledWith(topic.id, post.number, text).should.be.true;
         });
         it('should reply with callback', () => {
             summoner.mentionHandler(undefined, topic, post);
