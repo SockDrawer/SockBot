@@ -94,7 +94,7 @@ exports.prepare = function prepare(plugConfig, config, events, browser) {
     internals.browser = browser;
     internals.configuration = config.mergeObjects(exports.defaultConfig, plugConfig);
 
-    if (config === null) {
+    if (!config || !config.core || !config.core.username) {
        throw new Error('Invalid config provided!');
     } else {
         internals.username = config.core.username;
