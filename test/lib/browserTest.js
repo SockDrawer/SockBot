@@ -18,7 +18,15 @@ const coreBrowser = browserModule.internals.core,
     pluginBrowser = browserModule.internals.plugins;
 
 describe('browser', () => {
-    beforeEach(() => browserModule.internals.current = coreBrowser);
+    beforeEach(() => {
+        sinon.stub(async, 'nextTick', (fn) => fn());//setTimeout(fn, 0));
+        sinon.stub(async, 'setImmediate', (fn) => fn());//setTimeout(fn, 0));
+        browserModule.internals.current = coreBrowser;
+    });
+    afterEach(() => {
+        async.nextTick.restore();
+        async.setImmediate.restore();
+    });
     describe('exports', () => {
         const objs = ['internals', 'externals', 'privateFns'];
         describe('should export expected objects', () => {
@@ -966,8 +974,6 @@ describe('browser', () => {
             beforeEach(() => {
                 sandbox = sinon.sandbox.create();
                 sandbox.useFakeTimers();
-                async.setImmediate = (fn) => setTimeout(fn, 0);
-                async.nextTick = (fn) => setTimeout(fn, 0);
                 object = {
                     delay: 0,
                     queue: {

@@ -16,6 +16,14 @@ const notifications = require('../../lib/notifications'),
 const browser = require('../../lib/browser')();
 
 describe('notifications', () => {
+    beforeEach(() => {
+        sinon.stub(async, 'nextTick', (fn) => fn());//setTimeout(fn, 0));
+        sinon.stub(async, 'setImmediate', (fn) => fn());//setTimeout(fn, 0));
+    });
+    afterEach(() => {
+        async.nextTick.restore();
+        async.setImmediate.restore();
+    });
     const notifyTypeMap = {
         1: 'mentioned',
         2: 'replied',
@@ -187,8 +195,6 @@ describe('notifications', () => {
                 sandbox.stub(browser, 'getPost');
                 sandbox.stub(commands, 'parseCommands');
                 sandbox.useFakeTimers();
-                async.nextTick = (fn) => setTimeout(fn, 0);
-                async.setImmediate = (fn) => setTimeout(fn, 0);
             });
             afterEach(() => sandbox.restore());
             describe('getTopic/getPost subtasks', () => {
@@ -255,7 +261,7 @@ describe('notifications', () => {
                 sandbox.clock.tick(0);
                 events.emit.called.should.be.false;
             });
-            it('should not emit event on ignored', () => {
+            it('should emit event on non ignored', () => {
                 browser.getTopic.yields(null);
                 browser.getPost.yields(null);
                 commands.parseCommands.yields(null);
@@ -562,6 +568,17 @@ describe('notifications', () => {
                 });
                 notifications.pollNotifications(() => 0);
                 notifications.privateFns.handleTopicNotification.called.should.be.true;
+            });
+            it('should filter read notifications with invalid created_at date', () => {
+                browser.getNotifications.yields(null, {
+                    notifications: [{
+                        read: true,
+                        'created_at': 'a',
+                        'topic_id': 1
+                    }]
+                });
+                notifications.pollNotifications(() => 0);
+                notifications.privateFns.handleTopicNotification.called.should.be.false;
             });
         });
         it('should emit expected message on non-topic notification', () => {
