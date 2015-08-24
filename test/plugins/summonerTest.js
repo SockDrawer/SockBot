@@ -69,6 +69,19 @@ describe('summoner plugin', () => {
             dummyCfg.mergeObjects.firstCall.args[0].should.equal(summoner.defaultConfig);
             dummyCfg.mergeObjects.firstCall.args[1].should.deep.equal(expected);
         });
+        it('should accept full config', () => {
+            const config = {
+                    cooldown: 1000,
+                    messages: ['this is a config']
+                },
+                expected = {
+                    cooldown: 1000,
+                    messages: ['this is a config']
+                };
+            summoner.prepare(config, dummyCfg, events, undefined);
+            dummyCfg.mergeObjects.firstCall.args[0].should.equal(summoner.defaultConfig);
+            dummyCfg.mergeObjects.firstCall.args[1].should.deep.equal(expected);
+        });
         describe('non object configuration', () => {
             [null, undefined, 0, 3.14, true, false, 'string', () => 0].forEach((config) => {
                 it('should use default config for: ' + config, () => {
