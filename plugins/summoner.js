@@ -85,7 +85,7 @@ exports.prepare = function prepare(plugConfig, config, events, browser) {
     }
     internals.events = events;
     internals.browser = browser;
-    internals.configuration = config.mergeObjects(exports.defaultConfig, plugConfig);
+    internals.configuration = config.mergeObjects(true, exports.defaultConfig, plugConfig);
     events.onNotification('mentioned', exports.mentionHandler);
 };
 
