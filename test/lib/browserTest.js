@@ -18,7 +18,15 @@ const coreBrowser = browserModule.internals.core,
     pluginBrowser = browserModule.internals.plugins;
 
 describe('browser', () => {
-    beforeEach(() => browserModule.internals.current = coreBrowser);
+    beforeEach(() => {
+        sinon.stub(async, 'nextTick', (fn) => fn());//setTimeout(fn, 0));
+        sinon.stub(async, 'setImmediate', (fn) => fn());//setTimeout(fn, 0));
+        browserModule.internals.current = coreBrowser;
+    });
+    afterEach(() => {
+        async.nextTick.restore();
+        async.setImmediate.restore();
+    });
     describe('exports', () => {
         const objs = ['internals', 'externals', 'privateFns'];
         describe('should export expected objects', () => {
@@ -966,8 +974,6 @@ describe('browser', () => {
             beforeEach(() => {
                 sandbox = sinon.sandbox.create();
                 sandbox.useFakeTimers();
-                async.setImmediate = (fn) => setTimeout(fn, 0);
-                async.nextTick = (fn) => setTimeout(fn, 0);
                 object = {
                     delay: 0,
                     queue: {
@@ -1134,7 +1140,7 @@ describe('browser', () => {
                     queue.push.onFirstCall().yieldsTo('callback', null, topic);
                     queue.push.onSecondCall().yieldsTo('callback', null, posts);
                     object.getPosts(314159, eachSpy, spy);
-                    sandbox.clock.tick(0);
+                    sandbox.clock.tick(10);
                     eachSpy.callCount.should.equal(3);
                     spy.lastCall.args.should.deep.equal([null]);
                 });
@@ -1155,7 +1161,7 @@ describe('browser', () => {
                     queue.push.onFirstCall().yieldsTo('callback', null, topic);
                     queue.push.onSecondCall().yieldsTo('callback', null, posts);
                     object.getPosts(314159, eachSpy, spy);
-                    sandbox.clock.tick(0);
+                    sandbox.clock.tick();
                     eachSpy.lastCall.args[0].should.deep.equal({
                         cleaned: '',
                         'reply_to': 'https://what.thedailywtf.com/t/undefined/undefined/',
@@ -1359,7 +1365,7 @@ describe('browser', () => {
                 object.getTopics(spy, () => 0);
                 const each = queue.push.firstCall.args[0].callback;
                 each(null, list);
-                sandbox.clock.tick(0);
+                sandbox.clock.tick(10);
                 spy.callCount.should.equal(3);
                 spy.calledWith(1).should.be.true;
                 spy.calledWith(2).should.be.true;

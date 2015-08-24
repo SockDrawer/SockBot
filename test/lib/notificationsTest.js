@@ -16,6 +16,14 @@ const notifications = require('../../lib/notifications'),
 const browser = require('../../lib/browser')();
 
 describe('notifications', () => {
+    beforeEach(() => {
+        sinon.stub(async, 'nextTick', (fn) => fn());//setTimeout(fn, 0));
+        sinon.stub(async, 'setImmediate', (fn) => fn());//setTimeout(fn, 0));
+    });
+    afterEach(() => {
+        async.nextTick.restore();
+        async.setImmediate.restore();
+    });
     const notifyTypeMap = {
         1: 'mentioned',
         2: 'replied',
@@ -48,7 +56,7 @@ describe('notifications', () => {
         });
         describe('should export expected values', () => {
             vals.forEach((val) => {
-                it(val, () => notifications.should.have.key(val));
+                it(val, () => notifications.should.have.any.key(val));
             });
         });
         it('should export only expected keys', () => {
@@ -58,7 +66,7 @@ describe('notifications', () => {
     describe('internals', () => {
         const fns = [],
             objs = ['events', 'notifyTypes'],
-            vals = [];
+            vals = ['startTime'];
         describe('should export expected functions:', () => {
             fns.forEach((fn) => {
                 it(fn + '()', () => expect(notifications.internals[fn]).to.be.a('function'));
@@ -71,7 +79,7 @@ describe('notifications', () => {
         });
         describe('should export expected values', () => {
             vals.forEach((val) => {
-                it(val, () => notifications.internals.should.have.key(val));
+                it(val, () => notifications.internals.should.have.any.key(val));
             });
         });
         it('should export only expected keys', () => {
@@ -187,8 +195,6 @@ describe('notifications', () => {
                 sandbox.stub(browser, 'getPost');
                 sandbox.stub(commands, 'parseCommands');
                 sandbox.useFakeTimers();
-                async.nextTick = (fn) => setTimeout(fn, 0);
-                async.setImmediate = (fn) => setTimeout(fn, 0);
             });
             afterEach(() => sandbox.restore());
             describe('getTopic/getPost subtasks', () => {
@@ -255,7 +261,7 @@ describe('notifications', () => {
                 sandbox.clock.tick(0);
                 events.emit.called.should.be.false;
             });
-            it('should not emit event on ignored', () => {
+            it('should emit event on non ignored', () => {
                 browser.getTopic.yields(null);
                 browser.getPost.yields(null);
                 commands.parseCommands.yields(null);
@@ -476,7 +482,7 @@ describe('notifications', () => {
             notifications.pollNotifications(spy);
             notifications.internals.events.emit.calledWith('logMessage', 'Polling Notifications').should.be.true;
         });
-        describe('invalud discourse response robustness', () => {
+        describe('invalid discourse response robustness', () => {
             it('should pass error to callback on failure', () => {
                 browser.getNotifications.yields('i am error');
                 const spy = sinon.spy();
@@ -506,15 +512,74 @@ describe('notifications', () => {
             spy.called.should.be.true;
             expect(spy.firstCall.args[0]).to.equal(null);
         });
-        it('should filter read notifications', () => {
-            browser.getNotifications.yields(null, {
-                notifications: [{
-                    read: true
-                }]
+        describe('notification filtering', () => {
+            beforeEach(() => notifications.internals.startTime = Date.parse('2015-01-01'));
+            it('should filter read notifications from after bot start', () => {
+                browser.getNotifications.yields(null, {
+                    notifications: [{
+                        read: true,
+                        'created_at': '2016-01-01',
+                        'topic_id': 1
+                    }]
+                });
+                notifications.pollNotifications(() => 0);
+                notifications.privateFns.handleTopicNotification.called.should.be.false;
             });
-            notifications.pollNotifications(() => 0);
-            notifications.internals.events.emit.callCount.should.equal(1);
-            notifications.privateFns.handleTopicNotification.called.should.be.false;
+            it('should accept unread notifications from after bot start', () => {
+                browser.getNotifications.yields(null, {
+                    notifications: [{
+                        read: false,
+                        'created_at': '2016-01-01',
+                        'topic_id': 1
+                    }]
+                });
+                notifications.pollNotifications(() => 0);
+                notifications.privateFns.handleTopicNotification.called.should.be.true;
+            });
+            it('should filter unread notifications from before bot start', () => {
+                browser.getNotifications.yields(null, {
+                    notifications: [{
+                        read: false,
+                        'created_at': '2014-01-01',
+                        'topic_id': 1
+                    }]
+                });
+                notifications.pollNotifications(() => 0);
+                notifications.privateFns.handleTopicNotification.called.should.be.false;
+            });
+            it('should filter read notifications from before bot start', () => {
+                browser.getNotifications.yields(null, {
+                    notifications: [{
+                        read: true,
+                        'created_at': '2014-01-01',
+                        'topic_id': 1
+                    }]
+                });
+                notifications.pollNotifications(() => 0);
+                notifications.privateFns.handleTopicNotification.called.should.be.false;
+            });
+            it('should accept unread notifications with invalid created_at date', () => {
+                browser.getNotifications.yields(null, {
+                    notifications: [{
+                        read: false,
+                        'created_at': 'a',
+                        'topic_id': 1
+                    }]
+                });
+                notifications.pollNotifications(() => 0);
+                notifications.privateFns.handleTopicNotification.called.should.be.true;
+            });
+            it('should filter read notifications with invalid created_at date', () => {
+                browser.getNotifications.yields(null, {
+                    notifications: [{
+                        read: true,
+                        'created_at': 'a',
+                        'topic_id': 1
+                    }]
+                });
+                notifications.pollNotifications(() => 0);
+                notifications.privateFns.handleTopicNotification.called.should.be.false;
+            });
         });
         it('should emit expected message on non-topic notification', () => {
             const notify = {

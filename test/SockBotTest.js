@@ -22,6 +22,14 @@ const SockBot = require('../SockBot'),
 const browser = browserPlugin();
 
 describe('SockBot', () => {
+        beforeEach(() => {
+        sinon.stub(async, 'nextTick', (fn) => fn());//setTimeout(fn, 0));
+        sinon.stub(async, 'setImmediate', (fn) => fn());//setTimeout(fn, 0));
+    });
+    afterEach(() => {
+        async.nextTick.restore();
+        async.setImmediate.restore();
+    });
     describe('exports', () => {
         const fns = ['start', 'stop', 'prepare', 'logMessage', 'logWarning', 'logError'],
             objs = ['privateFns', 'internals'],
@@ -105,9 +113,8 @@ describe('SockBot', () => {
         });
         describe('prepareEvents()', () => {
             const prepareEvents = SockBot.privateFns.prepareEvents;
-            let sandbox, tick;
+            let sandbox;
             beforeEach(() => {
-                tick = async.nextTick;
                 sandbox = sinon.sandbox.create();
                 sandbox.stub(browser, 'setPlugins');
                 sandbox.stub(utils, 'uuid');
@@ -116,11 +123,9 @@ describe('SockBot', () => {
                 sandbox.stub(commands, 'prepare');
                 sandbox.stub(browser, 'prepare');
                 sandbox.useFakeTimers();
-                async.nextTick = (fn) => setTimeout(fn, 0);
             });
             afterEach(() => {
                 sandbox.restore();
-                async.nextTick = tick;
             });
             describe('log Events', () => {
                 it('should set up `logMessage` event', () => {
@@ -530,20 +535,17 @@ describe('SockBot', () => {
         });
     });
     describe('prepare()', () => {
-        let sandbox, tick;
+        let sandbox;
         beforeEach(() => {
-            tick = async.setImmediate;
             sandbox = sinon.sandbox.create();
             sandbox.stub(SockBot.privateFns, 'loadConfig');
             sandbox.stub(SockBot.privateFns, 'prepareEvents');
             sandbox.stub(SockBot.privateFns, 'loadPlugins');
             sandbox.useFakeTimers();
-            async.setImmediate = (fn) => setTimeout(fn, 0);
             SockBot.internals.plugins = [];
         });
         afterEach(() => {
             sandbox.restore();
-            async.setImmediate = tick;
         });
         it('should call privateFns.loadConfig()', () => {
             SockBot.privateFns.loadConfig.yields(null, null);
