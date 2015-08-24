@@ -107,7 +107,7 @@ describe('summoner plugin', () => {
                 id: 314
             };
             post = {
-                number: 456
+                post_number: 456 //eslint-disable-line camelcase
             };
             summoner.internals.timeouts = {};
         });
@@ -120,7 +120,7 @@ describe('summoner plugin', () => {
         });
         it('should reply to triggering post', () => {
             const postnumber = Math.random();
-            post.number = postnumber;
+            post.post_number = postnumber; //eslint-disable-line camelcase
             summoner.mentionHandler(undefined, topic, post);
             browser.createPost.calledWith(topic.id, postnumber).should.be.true;
         });
@@ -128,7 +128,7 @@ describe('summoner plugin', () => {
             const text = 'foo';
             summoner.internals.configuration.messages = [text];
             summoner.mentionHandler(undefined, topic, post);
-            browser.createPost.calledWith(topic.id, post.number, text).should.be.true;
+            browser.createPost.calledWith(topic.id, post.post_number, text).should.be.true;
         });
         it('should reply with callback', () => {
             summoner.mentionHandler(undefined, topic, post);
