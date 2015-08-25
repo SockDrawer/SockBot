@@ -212,18 +212,21 @@ describe('messages', () => {
                 sandbox.clock.tick(1);
                 spy.called.should.be.true;
             });
-            // it('should have maximum thirty second completion delay on many messages', () => {
-            //     const spy = sinon.spy(),
-            //         msgs = Array.apply(null, Array(1e3)).map(() => {
-            //             return {};
-            //         });
-            //     browser.messageBus.yields(null, msgs);
-            //     messages.pollMessages(spy);
-            //     sandbox.clock.tick(30 * 1000 - 1);
-            //     spy.called.should.be.false;
-            //     sandbox.clock.tick(1);
-            //     spy.called.should.be.true;
-            // });
+            it('should have maximum thirty second completion delay on many messages', () => {
+                const spy = sinon.spy();
+                let msgs = [{}, {}, {}, {}, {}],
+                    i;
+                for (i = 0; i < 4; i += 1) {
+                    msgs = msgs.concat(msgs); // expand to 80
+                }
+                msgs.length.should.equal(80);
+                browser.messageBus.yields(null, msgs);
+                messages.pollMessages(spy);
+                sandbox.clock.tick(30 * 1000 - 1);
+                spy.called.should.be.false;
+                sandbox.clock.tick(1);
+                spy.called.should.be.true;
+            });
         });
         it('should call updateChannelPositions() on poll success', () => {
             const spy = sinon.spy(),
