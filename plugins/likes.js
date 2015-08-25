@@ -8,7 +8,8 @@
  * @author Accalia
  * @license MIT
  */
-const async = require('async');
+const async = require('async'),
+    later = require('later');
 
 /**
  * Default configuration settings
@@ -27,6 +28,18 @@ const defaultConfig = {
          * @default
          */
         bingeCap: 500,
+        /**
+         * The hour of the day to go on a like binge (0-23)
+         * @default
+         * @type {number}
+         */
+        bingeHour: 0,
+        /**
+         * The minute of the hour to go on a like binge (0-59)
+         * @default
+         * @type {number}
+         */
+        bingeMinute: 0,
         /**
          * Topics to hand out likes in
          * @type {number[]}
@@ -103,7 +116,11 @@ exports.prepare = function prepare(plugConfig, config, events, browser) {
  */
 exports.start = function start() {
     if (internals.config.binge) {
-        internals.bingeInterval = setInterval(exports.binge, 24 * 60 * 60 * 1000);
+        //Daily at the specified time
+        const sched = later.parse.recur()
+            .on(internals.config.hour).hour()
+            .on(internals.config.minute).minute();
+        internals.bingeInterval = later.setInterval(exports.binge, sched);
     }
 };
 
@@ -112,8 +129,9 @@ exports.start = function start() {
  */
 exports.stop = function stop() {
     if (internals.bingeInterval) {
-        clearInterval(internals.bingeInterval);
+        internals.bingeInterval.clear();
     }
+    internals.bingeInterval = undefined;
 };
 
 /**

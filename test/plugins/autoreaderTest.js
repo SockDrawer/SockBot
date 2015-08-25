@@ -50,32 +50,22 @@ describe('autoreader', () => {
         });
     });
     describe('start()', () => {
-        let sandbox;
-        beforeEach(() => {
-            sandbox = sinon.sandbox.create();
-            sandbox.useFakeTimers();
-        });
-        afterEach(() => {
-            sandbox.restore();
-        });
         it('should start timer', () => {
-            autoreader.internals.timer = 0;
+            autoreader.internals.timer = undefined;
             autoreader.start();
             expect(autoreader.internals.timer).to.not.be.undefined;
         });
     });
     describe('stop()', () => {
-        let sandbox;
-        beforeEach(() => {
-            sandbox = sinon.sandbox.create();
-            sandbox.useFakeTimers();
-        });
-        afterEach(() => {
-            sandbox.restore();
-        });
         it('should stop timer', () => {
-            autoreader.internals.timer = 1;
+            autoreader.internals.timer = {clear: () => 0};
             autoreader.stop();
+            expect(autoreader.internals.timer).to.be.undefined;
+        });
+        it('should not throw on undefined timer', () => {
+            autoreader.internals.timer = undefined;
+            autoreader.stop();
+            autoreader.stop.should.not.throw;
             expect(autoreader.internals.timer).to.be.undefined;
         });
     });

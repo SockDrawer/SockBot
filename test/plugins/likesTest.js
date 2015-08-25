@@ -50,6 +50,8 @@ describe('likes plugin', () => {
                 a: 1,
                 binge: false,
                 bingeCap: 500,
+                bingeHour: 0,
+                bingeMinute: 0,
                 topics: [1000],
                 delay: 15000,
                 scatter: 5000
@@ -77,55 +79,30 @@ describe('likes plugin', () => {
         });
     });
     describe('start()', () => {
-        let sandbox;
-        beforeEach(() => {
-            sandbox = sinon.sandbox.create();
-            sandbox.stub(global, 'setInterval');
-        });
-        afterEach(() => sandbox.restore());
         it('should set interval for binge if config binge selected', () => {
             likes.internals.config.binge = true;
+            likes.internals.bingeInterval = undefined;
             likes.start();
-            setInterval.calledWith(likes.binge, 24 * 60 * 60 * 1000).should.be.true;
+            expect(likes.internals.bingeInterval).to.not.be.undefined;
         });
         it('should not set interval for binge if config binge unselected', () => {
             likes.internals.config.binge = false;
+            likes.internals.bingeInterval = undefined;
             likes.start();
-            setInterval.calledWith(likes.binge, 24 * 60 * 60 * 1000).should.be.false;
-        });
-        it('should save interval token for later if config binge selected', () => {
-            const token = Math.random();
-            setInterval.returns(token);
-            likes.internals.config.binge = true;
-            likes.start();
-            likes.internals.bingeInterval.should.equal(token);
-        });
-        it('should save interval token for later if config binge unselected', () => {
-            const token = Math.random();
-            setInterval.returns(null);
-            likes.internals.bingeInterval = token;
-            likes.internals.config.binge = false;
-            likes.start();
-            likes.internals.bingeInterval.should.equal(token);
+            expect(likes.internals.bingeInterval).to.be.undefined;
         });
     });
     describe('stop()', () => {
-        let sandbox;
-        beforeEach(() => {
-            sandbox = sinon.sandbox.create();
-            sandbox.stub(global, 'clearInterval');
-        });
-        afterEach(() => sandbox.restore());
-        it('should remove interval if saved interval exists', () => {
-            const token = Math.random();
-            likes.internals.bingeInterval = token;
+        it('should stop binging', () => {
+            likes.internals.bingeInterval = {clear: () => 0};
             likes.stop();
-            clearInterval.calledWith(token).should.be.true;
+            expect(likes.internals.bingeInterval).to.be.undefined;
         });
-        it('should not remove interval if no saved interval exists', () => {
-            likes.internals.bingeInterval = null;
+        it('should not throw if not binging', () => {
+            likes.internals.bingeInterval = undefined;
             likes.stop();
-            clearInterval.called.should.be.false;
+            likes.stop.should.not.throw;
+            expect(likes.internals.bingeInterval).to.be.undefined;
         });
     });
     describe('messageHandler()', () => {
