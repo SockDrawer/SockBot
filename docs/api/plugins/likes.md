@@ -27,6 +27,7 @@ Watches threads for new posts and likes them, includes "binge" functionality to 
       * [.config](#module_likes..internals.config) : <code>object</code>
       * [.bingeInterval](#module_likes..internals.bingeInterval) : <code>\*</code>
       * [.likeCount](#module_likes..internals.likeCount) : <code>number</code>
+      * [.events](#module_likes..internals.events) : <code>externals.events.SockEvents</code>
     * [~completionCallback](#module_likes..completionCallback)
 
 <a name="module_likes.prepare"></a>
@@ -132,6 +133,7 @@ Internal status store
     * [.config](#module_likes..internals.config) : <code>object</code>
     * [.bingeInterval](#module_likes..internals.bingeInterval) : <code>\*</code>
     * [.likeCount](#module_likes..internals.likeCount) : <code>number</code>
+    * [.events](#module_likes..internals.events) : <code>externals.events.SockEvents</code>
 
 <a name="module_likes..internals.browser"></a>
 #### internals.browser : <code>Browser</code>
@@ -151,6 +153,11 @@ Interval token for like binges
 <a name="module_likes..internals.likeCount"></a>
 #### internals.likeCount : <code>number</code>
 Count of likes handed out during latest binge
+
+**Kind**: static property of <code>[internals](#module_likes..internals)</code>  
+<a name="module_likes..internals.events"></a>
+#### internals.events : <code>externals.events.SockEvents</code>
+EventEmitter used for internal communication
 
 **Kind**: static property of <code>[internals](#module_likes..internals)</code>  
 <a name="module_likes..completionCallback"></a>

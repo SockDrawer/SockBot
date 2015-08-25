@@ -14,7 +14,12 @@ const sockFiles = ['*.js', '!./gulpfile.js', '**/lib/**/*.js', '**/classes/**/*.
     sockTests = ['test/**/*.js'];
 
 const JobNumber = process.env.TRAVIS_JOB_NUMBER,
-    runDocs = !JobNumber || /[.]1$/.test(JobNumber);
+    PullRequestFlag = process.env.TRAVIS_PULL_REQUEST,
+    PullRequest = PullRequestFlag && PullRequestFlag !== 'false',
+    CI = process.env.CI === 'true',
+    runDocs = !PullRequest && (!JobNumber || /[.]1$/.test(JobNumber));
+
+const testReporter = CI ? 'spec': 'dot';
 
 /**
  * Pull git branch locally (solves detached head issue in CI)
@@ -156,7 +161,7 @@ gulp.task('test', ['lintCore', 'lintTests'], (done) => {
             // Run all tests
             gulp.src(sockTests)
                 .pipe(mocha({
-                    reporter: 'dot'
+                    reporter: testReporter
                 }))
                 .on('error', done)
                 // Write code coverage reports
