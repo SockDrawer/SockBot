@@ -63,7 +63,7 @@ exports.mentionHandler = function mentionHandler(_, topic, post) {
             return value;
         }).replace(/(^|\s)@(\w+)\b/g, '$1<a class="mention">@&zwj;$2</a>');
     internals.timeouts[topic.id] = now + internals.configuration.cooldown;
-    internals.browser.createPost(topic.id, post.id, reply, () => 0);
+    internals.browser.createPost(topic.id, post.post_number, reply, () => 0);
 };
 
 /**
@@ -85,7 +85,7 @@ exports.prepare = function prepare(plugConfig, config, events, browser) {
     }
     internals.events = events;
     internals.browser = browser;
-    internals.configuration = config.mergeObjects(exports.defaultConfig, plugConfig);
+    internals.configuration = config.mergeObjects(true, exports.defaultConfig, plugConfig);
     events.onNotification('mentioned', exports.mentionHandler);
 };
 
