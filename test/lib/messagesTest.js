@@ -184,12 +184,12 @@ describe('messages', () => {
             });
         });
         describe('discourse flood prevention', () => {
-            it('should have zero completion delay on zero messages', () => {
+            it('should have minimum completion delay on zero messages', () => {
                 const spy = sinon.spy(),
                     msgs = [];
                 browser.messageBus.yields(null, msgs);
                 messages.pollMessages(spy);
-                sandbox.clock.tick(0);
+                sandbox.clock.tick(500);
                 spy.called.should.be.true;
             });
             it('should have half second completion delay on one message', () => {
@@ -240,7 +240,7 @@ describe('messages', () => {
                 msgs = [];
             browser.messageBus.yields(null, msgs);
             messages.pollMessages(spy);
-            sandbox.clock.tick(0);
+            sandbox.clock.tick(500);
             spy.called.should.be.true;
             spy.lastCall.args.should.deep.equal([]);
         });
