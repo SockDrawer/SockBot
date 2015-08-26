@@ -19,8 +19,8 @@ const coreBrowser = browserModule.internals.core,
 
 describe('browser', () => {
     beforeEach(() => {
-        sinon.stub(async, 'nextTick', (fn) => fn());//setTimeout(fn, 0));
-        sinon.stub(async, 'setImmediate', (fn) => fn());//setTimeout(fn, 0));
+        sinon.stub(async, 'nextTick', (fn) => fn()); //setTimeout(fn, 0));
+        sinon.stub(async, 'setImmediate', (fn) => fn()); //setTimeout(fn, 0));
         browserModule.internals.current = coreBrowser;
     });
     afterEach(() => {
@@ -1692,32 +1692,62 @@ describe('browser', () => {
             });
             describe('http status codes', () => {
                 [100, 200, 204, 302, 304, 399].forEach(statusCode => {
-                    it('should not trigger backoff delay on http status ' + statusCode, () => {
+                    it('should not trigger backoff delay on OK http status ' + statusCode, () => {
                         throttleQueues(null, {
                             statusCode: statusCode
                         });
                         browserModule.internals.pauseTime.should.equal(0);
                     });
                 });
-                [400, 401, 403, 404, 405, 414, 418, 500, 502, 504, 666, 718].forEach(statusCode => {
-                    it('should set initial backoff delay of 60 seconds on http status ' + statusCode, () => {
+                [400, 401, 403, 404, 405, 414, 418, 499].forEach(statusCode => {
+                    it('should set initial backoff delay of 3 seconds on client error http status ' +
+                        statusCode, () => {
+                            throttleQueues(null, {
+                                statusCode: statusCode
+                            });
+                            browserModule.internals.pauseTime.should.equal(3e3);
+                        });
+                });
+                [500, 502, 504, 666, 718].forEach(statusCode => {
+                    it('should set initial backoff delay of 60 seconds on server error http status ' +
+                        statusCode, () => {
+                            throttleQueues(null, {
+                                statusCode: statusCode
+                            });
+                            browserModule.internals.pauseTime.should.equal(6e4);
+                        });
+                });
+                [400, 401, 403, 404, 405, 414, 418, 499].forEach(statusCode => {
+                    it('should set minimum backoff delay of 3 seconds on client error http status ' +
+                        statusCode, () => {
+                            browserModule.internals.pauseTime = 1e3;
+                            throttleQueues(null, {
+                                statusCode: statusCode
+                            });
+                            browserModule.internals.pauseTime.should.equal(3e3);
+                        });
+                });
+                [500, 502, 504, 666, 718].forEach(statusCode => {
+                    it('should set minimum backoff delay of 60 seconds on server error http status ' +
+                        statusCode, () => {
+                            browserModule.internals.pauseTime = 1e3;
+                            throttleQueues(null, {
+                                statusCode: statusCode
+                            });
+                            browserModule.internals.pauseTime.should.equal(6e4);
+                        });
+                });
+                [400, 401, 403, 404, 405, 414, 418, 499].forEach(statusCode => {
+                    it('should double existing backoff delay on client error http status ' + statusCode, () => {
+                        browserModule.internals.pauseTime = 7e4;
                         throttleQueues(null, {
                             statusCode: statusCode
                         });
-                        browserModule.internals.pauseTime.should.equal(6e4);
+                        browserModule.internals.pauseTime.should.equal(14e4);
                     });
                 });
-                [400, 401, 403, 404, 405, 414, 418, 500, 502, 504, 666, 718].forEach(statusCode => {
-                    it('should set minimum backoff delay of 60 seconds on http status ' + statusCode, () => {
-                        browserModule.internals.pauseTime = 1e3;
-                        throttleQueues(null, {
-                            statusCode: statusCode
-                        });
-                        browserModule.internals.pauseTime.should.equal(6e4);
-                    });
-                });
-                [400, 401, 403, 404, 405, 414, 418, 500, 502, 504, 666, 718].forEach(statusCode => {
-                    it('should double existing backoff delay on http status ' + statusCode, () => {
+                [500, 502, 504, 666, 718].forEach(statusCode => {
+                    it('should double existing backoff delay on server error http status ' + statusCode, () => {
                         browserModule.internals.pauseTime = 7e4;
                         throttleQueues(null, {
                             statusCode: statusCode
@@ -1762,9 +1792,9 @@ describe('browser', () => {
                 throttleQueues(new Error(), null, 5000);
                 browserModule.internals.pauseTime.should.equal(6e4);
             });
-            it('should http status above long wait time', () => {
+            it('should weight http status above long wait time', () => {
                 throttleQueues(null, {
-                    statusCode: 404
+                    statusCode: 502
                 }, 5000);
                 browserModule.internals.pauseTime.should.equal(6e4);
             });
