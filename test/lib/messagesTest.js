@@ -786,9 +786,9 @@ describe('messages', () => {
                 });
                 messages.internals.events.emit.calledWith('logWarning').should.be.false;
             });
-            describe('processActed', () => {
-                it('should not process acted message when processActed is false', () => {
-                    config.core.processActed = false;
+            describe('handleActedMessage', () => {
+                it('should not process acted message when handleActedMessage is false', () => {
+                    config.core.handleActedMessage = false;
                     processTopicMessage({
                         channel: '/topic/1234',
                         'message_id': 5432,
@@ -798,8 +798,8 @@ describe('messages', () => {
                     });
                     async.parallel.called.should.be.false;
                 });
-                it('should process nonacted message when processActed is false', () => {
-                    config.core.processActed = false;
+                it('should process nonacted message when handleActedMessage is false', () => {
+                    config.core.handleActedMessage = false;
                     processTopicMessage({
                         channel: '/topic/1234',
                         'message_id': 5432,
@@ -809,8 +809,8 @@ describe('messages', () => {
                     });
                     async.parallel.called.should.be.true;
                 });
-                it('should process acted message when processActed is true', () => {
-                    config.core.processActed = true;
+                it('should process acted message when handleActedMessage is true', () => {
+                    config.core.handleActedMessage = true;
                     processTopicMessage({
                         channel: '/topic/1234',
                         'message_id': 5432,
@@ -820,8 +820,8 @@ describe('messages', () => {
                     });
                     async.parallel.called.should.be.true;
                 });
-                it('should process nonacted message when processActed is true', () => {
-                    config.core.processActed = true;
+                it('should process nonacted message when handleActedMessage is true', () => {
+                    config.core.handleActedMessage = true;
                     processTopicMessage({
                         channel: '/topic/1234',
                         'message_id': 5432,
