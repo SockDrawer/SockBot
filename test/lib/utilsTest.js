@@ -409,7 +409,7 @@ describe('utils', () => {
                             'trust_level': 0
                         },
                         spy = sinon.spy();
-                    filterIgnoredOnPost(post, {}, spy);
+                    filterIgnoredOnPost(post, spy);
                     spy.called.should.be.false;
                     timers.tick(0);
                     spy.calledWith('ignore', 'Poster is TL0').should.be.true;
@@ -422,7 +422,7 @@ describe('utils', () => {
                                 username: user
                             },
                             spy = sinon.spy();
-                        filterIgnoredOnPost(post, {}, spy);
+                        filterIgnoredOnPost(post, spy);
                         spy.called.should.be.false;
                         timers.tick(0);
                         spy.calledWith(null, 'POST OK').should.be.true;
@@ -434,7 +434,7 @@ describe('utils', () => {
                             'trust_level': level
                         },
                         spy = sinon.spy();
-                    filterIgnoredOnPost(post, {}, spy);
+                    filterIgnoredOnPost(post, spy);
                     spy.called.should.be.false;
                     timers.tick(0);
                     spy.calledWith(null, 'Poster is TL4+').should.be.true;
@@ -449,7 +449,7 @@ describe('utils', () => {
                         },
                         spy = sinon.spy();
                     config.core.ignoreUsers.push(user);
-                    filterIgnoredOnPost(post, {}, spy);
+                    filterIgnoredOnPost(post, spy);
                     config.core.ignoreUsers.pop();
                     spy.called.should.be.false;
                     timers.tick(0);
@@ -464,7 +464,7 @@ describe('utils', () => {
                             },
                             spy = sinon.spy();
                         config.core.ignoreUsers.push(user);
-                        filterIgnoredOnPost(post, {}, spy);
+                        filterIgnoredOnPost(post, spy);
                         config.core.ignoreUsers.pop();
                         spy.called.should.be.false;
                         timers.tick(0);
@@ -481,7 +481,7 @@ describe('utils', () => {
                         },
                         target = Date.now() + config.core.cooldownPeriod,
                         spy = sinon.spy();
-                    filterIgnoredOnPost(post, {}, spy);
+                    filterIgnoredOnPost(post, spy);
                     utils.internals.cooldownTimers[user].should.equal(target);
                     spy.called.should.be.false;
                     timers.tick(0);
@@ -495,7 +495,7 @@ describe('utils', () => {
                         },
                         spy = sinon.spy();
                     utils.internals.cooldownTimers[user] = Number.MAX_SAFE_INTEGER;
-                    filterIgnoredOnPost(post, {}, spy);
+                    filterIgnoredOnPost(post, spy);
                     spy.called.should.be.false;
                     timers.tick(0);
                     spy.calledWith('ignore', 'Poster is TL1 on Cooldown').should.be.true;
@@ -509,7 +509,7 @@ describe('utils', () => {
                         now = Date.now() + 1 * 60 * 1000,
                         spy = sinon.spy();
                     utils.internals.cooldownTimers[user] = now;
-                    filterIgnoredOnPost(post, {}, spy);
+                    filterIgnoredOnPost(post, spy);
                     utils.internals.cooldownTimers[user].should.equal(now);
                     spy.called.should.be.false;
                     timers.tick(0);
@@ -523,7 +523,7 @@ describe('utils', () => {
                             'primary_group_name': 'bots'
                         },
                         spy = sinon.spy();
-                    filterIgnoredOnPost(post, {}, spy);
+                    filterIgnoredOnPost(post, spy);
                     spy.called.should.be.false;
                     timers.tick(0);
                     spy.calledWith('ignore', 'Poster is a Bot').should.be.true;
@@ -534,7 +534,7 @@ describe('utils', () => {
                             'primary_group_name': 'bots'
                         },
                         spy = sinon.spy();
-                    filterIgnoredOnPost(post, {}, spy);
+                    filterIgnoredOnPost(post, spy);
                     spy.called.should.be.false;
                     timers.tick(0);
                     spy.calledWith(null, 'Poster is TL4+').should.be.true;
@@ -546,149 +546,58 @@ describe('utils', () => {
             let timers;
             before(() => timers = sinon.useFakeTimers());
             after(() => timers.restore());
-            describe('Basic trust levels', () => {
-                [0, 1, 2, 3, 4].forEach((level) =>
-                    it('should accept TL' + level + ' user', () => {
-                        const post = {
-                                'trust_level': level
-                            },
-                            topic = {
-                                details: {
-                                    'created_by': {
-                                        username: 'none'
-                                    }
-                                }
-                            },
-                            spy = sinon.spy();
-                        filterIgnoredOnTopic(post, topic, spy);
-                        spy.called.should.be.false;
-                        timers.tick(0);
-                        spy.calledWith(null, 'TOPIC OK').should.be.true;
-                    }));
-                [5, 6, 7, 8, 9].forEach((level) => it('should accept TL' + level + ' user', () => {
-                    const post = {
-                            'trust_level': level
-                        },
-                        topic = {
-                            details: {
-                                'created_by': {
-                                    username: 'none'
-                                }
-                            }
-                        },
-                        spy = sinon.spy();
-                    filterIgnoredOnTopic(post, topic, spy);
-                    spy.called.should.be.false;
-                    timers.tick(0);
-                    spy.calledWith(null, 'Poster is Staff').should.be.true;
-                }));
+            it('should accept empty topic', () => {
+                const topic = {},
+                    spy = sinon.spy();
+                filterIgnoredOnTopic(topic, spy);
+                spy.called.should.be.false;
+                timers.tick(0);
+                spy.calledWith(null, 'TOPIC OK').should.be.true;
             });
-            describe('category ignore', () => {
-                it('should ignore post in ignoredCategory', () => {
-                    const category = Math.ceil(5000 + Math.random() * 5000),
-                        post = {},
-                        topic = {
-                            'category_id': category
-                        },
-                        spy = sinon.spy();
-                    config.core.ignoreCategories.push(category);
-                    filterIgnoredOnTopic(post, topic, spy);
-                    config.core.ignoreCategories.pop();
-                    spy.called.should.be.false;
-                    timers.tick(0);
-                    spy.calledWith('ignore', 'Topic Category Ignored').should.be.true;
-                });
-                [5, 6, 7, 8, 9].forEach((level) => {
-                    it('should accept TL' + level + ' user in ignoredCategory', () => {
-                        const category = Math.ceil(5000 + Math.random() * 5000),
-                            post = {
-                                'trust_level': level
-                            },
-                            topic = {
-                                'category_id': category
-                            },
-                            spy = sinon.spy();
-                        config.core.ignoreCategories.push(category);
-                        filterIgnoredOnTopic(post, topic, spy);
-                        config.core.ignoreCategories.pop();
-                        spy.called.should.be.false;
-                        timers.tick(0);
-                        spy.calledWith(null, 'Poster is Staff').should.be.true;
-                    });
-                });
+            it('should ignore post in ignoredCategory', () => {
+                const category = Math.ceil(5000 + Math.random() * 5000),
+                    topic = {
+                        'category_id': category
+                    },
+                    spy = sinon.spy();
+                config.core.ignoreCategories.push(category);
+                filterIgnoredOnTopic(topic, spy);
+                config.core.ignoreCategories.pop();
+                spy.called.should.be.false;
+                timers.tick(0);
+                spy.calledWith('ignore', 'Topic Category Ignored').should.be.true;
             });
-            describe('muted topic ignore', () => {
-                it('should ignore post in muted topic', () => {
-                    const post = {},
-                        topic = {
-                            details: {
-                                'notification_level': 0,
-                                'created_by': {
-                                    username: 'none'
-                                }
+            it('should ignore post in muted topic', () => {
+                const topic = {
+                        details: {
+                            'notification_level': 0,
+                            'created_by': {
+                                username: 'none'
                             }
-                        },
-                        spy = sinon.spy();
-                    filterIgnoredOnTopic(post, topic, spy);
-                    spy.called.should.be.false;
-                    timers.tick(0);
-                    spy.calledWith('ignore', 'Topic Was Muted').should.be.true;
-                });
-                [5, 6, 7, 8, 9].forEach((level) => it('should accept TL' + level + ' user in muted topic', () => {
-                    const post = {
-                            'trust_level': level
-                        },
-                        topic = {
-                            details: {
-                                'notification_level': 0
-                            }
-                        },
-                        spy = sinon.spy();
-                    filterIgnoredOnTopic(post, topic, spy);
-                    spy.called.should.be.false;
-                    timers.tick(0);
-                    spy.calledWith(null, 'Poster is Staff').should.be.true;
-                }));
+                        }
+                    },
+                    spy = sinon.spy();
+                filterIgnoredOnTopic(topic, spy);
+                spy.called.should.be.false;
+                timers.tick(0);
+                spy.calledWith('ignore', 'Topic Was Muted').should.be.true;
             });
-            describe('muted topic owner ignore', () => {
-                it('should ignore post in restricted topic', () => {
-                    const username = 'USER' + Math.random(),
-                        post = {},
-                        topic = {
-                            details: {
-                                'created_by': {
-                                    username: username
-                                }
+            it('should ignore post in restricted topic', () => {
+                const username = 'USER' + Math.random(),
+                    topic = {
+                        details: {
+                            'created_by': {
+                                username: username
                             }
-                        },
-                        spy = sinon.spy();
-                    config.core.ignoreUsers.push(username);
-                    filterIgnoredOnTopic(post, topic, spy);
-                    config.core.ignoreUsers.pop();
-                    spy.called.should.be.false;
-                    timers.tick(0);
-                    spy.calledWith('ignore', 'Topic Creator Ignored').should.be.true;
-                });
-                [5, 6, 7, 8, 9].forEach((level) => it('should accept TL' + level + ' user in muted topic', () => {
-                    const username = 'USER' + Math.random(),
-                        post = {
-                            'trust_level': level
-                        },
-                        topic = {
-                            details: {
-                                'created_by': {
-                                    username: username
-                                }
-                            }
-                        },
-                        spy = sinon.spy();
-                    config.core.ignoreUsers.push(username);
-                    filterIgnoredOnTopic(post, topic, spy);
-                    config.core.ignoreUsers.pop();
-                    spy.called.should.be.false;
-                    timers.tick(0);
-                    spy.calledWith(null, 'Poster is Staff').should.be.true;
-                }));
+                        }
+                    },
+                    spy = sinon.spy();
+                config.core.ignoreUsers.push(username);
+                filterIgnoredOnTopic(topic, spy);
+                config.core.ignoreUsers.pop();
+                spy.called.should.be.false;
+                timers.tick(0);
+                spy.calledWith('ignore', 'Topic Creator Ignored').should.be.true;
             });
         });
         describe('filterIgnored()', () => {

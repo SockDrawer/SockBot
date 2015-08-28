@@ -68,7 +68,7 @@ disabled by setting this value to `0` if desired.
 ### handleActedMessage
 This option determines whether the bot will respond to any acted messages. These messages are created when any post 
 is interacted with and are rarely of interest to any plugin. Therefore by default these messages are ignored to 
-reduce the load the pot puts on the host forum.
+reduce the load the bot puts on the host forum.
 
 ### pollMessages
 This options controls whether the bot will poll the discourse message-bus. Most bots will want to leave this active

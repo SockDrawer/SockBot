@@ -96,7 +96,7 @@ exports.start = function (callback) {
         if (config.core.pollMessages) {
             messages.start();
             async.whilst(() => internals.running, (next) => {
-                messages.pollMessages(() => setTimeout(next, 3 * 1000));
+                messages.pollMessages(() => next());
             });
         }
         if (config.core.pollNotifications) {
