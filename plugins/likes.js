@@ -29,13 +29,13 @@ const defaultConfig = {
          */
         bingeCap: 500,
         /**
-         * The hour of the day to go on a like binge (0-23)
+         * The hour of the day to go on a like binge in UTC (0-23)
          * @default
          * @type {number}
          */
         bingeHour: 0,
         /**
-         * The minute of the hour to go on a like binge (0-59)
+         * The minute of the hour to go on a like binge in UTC (0-59)
          * @default
          * @type {number}
          */

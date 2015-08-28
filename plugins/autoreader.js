@@ -21,13 +21,13 @@ const defaultConfig = {
          */
         minAge: 3 * 24 * 60 * 60 * 1000,
         /**
-         * The hour of the day to run the autoreader (0-23)
+         * The hour of the day to run the autoreader in UTC (0-23)
          * @default
          * @type {number}
          */
         hour: 0,
         /**
-         * The minute of the hour to run the autoreader (0-59)
+         * The minute of the hour to run the autoreader in UTC (0-59)
          * @default
          * @type {number}
          */
