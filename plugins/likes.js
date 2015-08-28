@@ -118,8 +118,8 @@ exports.start = function start() {
     if (internals.config.binge) {
         //Daily at the specified time
         const sched = later.parse.recur()
-            .on(internals.config.hour).hour()
-            .on(internals.config.minute).minute();
+            .on(internals.config.bingeHour).hour()
+            .on(internals.config.bingeMinute).minute();
         internals.bingeInterval = later.setInterval(exports.binge, sched);
     }
 };
