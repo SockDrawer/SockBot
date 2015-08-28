@@ -16,8 +16,8 @@ Core Utilities for Sockbot
   * _inner_
     * [~addTimestamp(message)](#module_utils..addTimestamp) ⇒ <code>string</code>
     * [~mergeInner(base, mixin, [mergeArrays])](#module_utils..mergeInner)
-    * [~filterIgnoredOnPost(post, topic, callback)](#module_utils..filterIgnoredOnPost) ⇒ <code>null</code>
-    * [~filterIgnoredOnTopic(post, topic, callback)](#module_utils..filterIgnoredOnTopic) ⇒ <code>null</code>
+    * [~filterIgnoredOnPost(post, callback)](#module_utils..filterIgnoredOnPost) ⇒ <code>null</code>
+    * [~filterIgnoredOnTopic(topic, callback)](#module_utils..filterIgnoredOnTopic) ⇒ <code>null</code>
 
 <a name="module_utils.uuid"></a>
 ### utils.uuid() ⇒ <code>string</code>
@@ -118,7 +118,7 @@ Recursively merge objects
 | [mergeArrays] | <code>boolean</code> | Merge arrays instead of concatenating them |
 
 <a name="module_utils..filterIgnoredOnPost"></a>
-### utils~filterIgnoredOnPost(post, topic, callback) ⇒ <code>null</code>
+### utils~filterIgnoredOnPost(post, callback) ⇒ <code>null</code>
 Proccess post for ignore contitions
 
 **Kind**: inner method of <code>[utils](#module_utils)</code>  
@@ -127,11 +127,10 @@ Proccess post for ignore contitions
 | Param | Type | Description |
 | --- | --- | --- |
 | post | <code>externals.posts.CleanedPost</code> | Post to filter |
-| topic | <code>externals.topics.Topic</code> | Topic `post` belongs to |
 | callback | <code>filterCallback</code> | Completion Callback |
 
 <a name="module_utils..filterIgnoredOnTopic"></a>
-### utils~filterIgnoredOnTopic(post, topic, callback) ⇒ <code>null</code>
+### utils~filterIgnoredOnTopic(topic, callback) ⇒ <code>null</code>
 Proccess topic for ignore contitions
 
 **Kind**: inner method of <code>[utils](#module_utils)</code>  
@@ -139,7 +138,6 @@ Proccess topic for ignore contitions
 
 | Param | Type | Description |
 | --- | --- | --- |
-| post | <code>externals.posts.CleanedPost</code> | Triggering post |
 | topic | <code>externals.topics.Topic</code> | Topic to filter |
 | callback | <code>filterCallback</code> | Completion Callback |
 
