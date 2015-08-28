@@ -567,6 +567,19 @@ describe('utils', () => {
                 timers.tick(0);
                 spy.calledWith('ignore', 'Topic Category Ignored').should.be.true;
             });
+            it('should accept post not in ignoredCategory', () => {
+                const category = Math.ceil(5000 + Math.random() * 5000),
+                    topic = {
+                        'category_id': category + 2
+                    },
+                    spy = sinon.spy();
+                config.core.ignoreCategories.push(category);
+                filterIgnoredOnTopic(topic, spy);
+                config.core.ignoreCategories.pop();
+                spy.called.should.be.false;
+                timers.tick(0);
+                spy.calledWith(null, 'TOPIC OK').should.be.true;
+            });
             it('should ignore post in muted topic', () => {
                 const topic = {
                         details: {
@@ -581,6 +594,21 @@ describe('utils', () => {
                 spy.called.should.be.false;
                 timers.tick(0);
                 spy.calledWith('ignore', 'Topic Was Muted').should.be.true;
+            });
+            it('should accept post in regular topic', () => {
+                const topic = {
+                        details: {
+                            'notification_level': 1,
+                            'created_by': {
+                                username: 'none'
+                            }
+                        }
+                    },
+                    spy = sinon.spy();
+                filterIgnoredOnTopic(topic, spy);
+                spy.called.should.be.false;
+                timers.tick(0);
+                spy.calledWith(null, 'TOPIC OK').should.be.true;
             });
             it('should ignore post in restricted topic', () => {
                 const username = 'USER' + Math.random(),
