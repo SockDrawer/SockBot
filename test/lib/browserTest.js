@@ -1272,6 +1272,13 @@ describe('browser', () => {
                 object.getTopic(0, spy);
                 topic.url.should.equal(expected);
             });
+            it('should catch exception in processing', () => {
+                const spy = sinon.spy();
+                queue.push.yieldsTo('callback', null, null);
+                object.getTopic(0, spy);
+                spy.called.should.equal(true);
+                spy.firstCall.args[0].should.be.an.instanceof(Error);
+            });
         });
         describe('getTopics()', () => {
             let object, queue, sandbox;
