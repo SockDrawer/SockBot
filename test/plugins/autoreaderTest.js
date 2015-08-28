@@ -7,6 +7,7 @@ const chai = require('chai'),
 chai.should();
 const expect = chai.expect;
 
+const later = require('later');
 const autoreader = require('../../plugins/autoreader'),
     browserModule = require('../../lib/browser'),
     utils = require('../../lib/utils');
@@ -50,6 +51,16 @@ describe('autoreader', () => {
         });
     });
     describe('start()', () => {
+        let sandbox;
+        beforeEach(() => {
+            sandbox = sinon.sandbox.create();
+            sandbox.stub(later, 'setInterval', () => {
+                return {};
+            });
+        });
+        afterEach(() => {
+            sandbox.restore();
+        });
         it('should start timer', () => {
             autoreader.internals.timer = undefined;
             autoreader.start();

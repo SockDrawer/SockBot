@@ -7,7 +7,7 @@ const chai = require('chai'),
 chai.should();
 const expect = chai.expect;
 
-// The thing we're testing
+const later = require('later');
 const likes = require('../../plugins/likes'),
     utils = require('../../lib/utils');
 const dummyCfg = {
@@ -79,6 +79,16 @@ describe('likes plugin', () => {
         });
     });
     describe('start()', () => {
+        let sandbox;
+        beforeEach(() => {
+            sandbox = sinon.sandbox.create();
+            sandbox.stub(later, 'setInterval', () => {
+                return {};
+            });
+        });
+        afterEach(() => {
+            sandbox.restore();
+        });
         it('should set interval for binge if config binge selected', () => {
             likes.internals.config.binge = true;
             likes.internals.bingeInterval = undefined;
