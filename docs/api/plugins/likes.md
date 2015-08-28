@@ -19,6 +19,8 @@ Watches threads for new posts and likes them, includes "binge" functionality to 
     * [~defaultConfig](#module_likes..defaultConfig) : <code>object</code>
       * [.binge](#module_likes..defaultConfig.binge) : <code>boolean</code>
       * [.bingeCap](#module_likes..defaultConfig.bingeCap) : <code>number</code>
+      * [.bingeHour](#module_likes..defaultConfig.bingeHour) : <code>number</code>
+      * [.bingeMinute](#module_likes..defaultConfig.bingeMinute) : <code>number</code>
       * [.topics](#module_likes..defaultConfig.topics) : <code>Array.&lt;number&gt;</code>
       * [.delay](#module_likes..defaultConfig.delay) : <code>number</code>
       * [.scatter](#module_likes..defaultConfig.scatter) : <code>number</code>
@@ -90,6 +92,8 @@ Default configuration settings
   * [~defaultConfig](#module_likes..defaultConfig) : <code>object</code>
     * [.binge](#module_likes..defaultConfig.binge) : <code>boolean</code>
     * [.bingeCap](#module_likes..defaultConfig.bingeCap) : <code>number</code>
+    * [.bingeHour](#module_likes..defaultConfig.bingeHour) : <code>number</code>
+    * [.bingeMinute](#module_likes..defaultConfig.bingeMinute) : <code>number</code>
     * [.topics](#module_likes..defaultConfig.topics) : <code>Array.&lt;number&gt;</code>
     * [.delay](#module_likes..defaultConfig.delay) : <code>number</code>
     * [.scatter](#module_likes..defaultConfig.scatter) : <code>number</code>
@@ -106,6 +110,18 @@ Maximum number of likes to hand out as part of a like binge
 
 **Kind**: static property of <code>[defaultConfig](#module_likes..defaultConfig)</code>  
 **Default**: <code>500</code>  
+<a name="module_likes..defaultConfig.bingeHour"></a>
+#### defaultConfig.bingeHour : <code>number</code>
+The hour of the day to go on a like binge in UTC (0-23)
+
+**Kind**: static property of <code>[defaultConfig](#module_likes..defaultConfig)</code>  
+**Default**: <code>0</code>  
+<a name="module_likes..defaultConfig.bingeMinute"></a>
+#### defaultConfig.bingeMinute : <code>number</code>
+The minute of the hour to go on a like binge in UTC (0-59)
+
+**Kind**: static property of <code>[defaultConfig](#module_likes..defaultConfig)</code>  
+**Default**: <code>0</code>  
 <a name="module_likes..defaultConfig.topics"></a>
 #### defaultConfig.topics : <code>Array.&lt;number&gt;</code>
 Topics to hand out likes in

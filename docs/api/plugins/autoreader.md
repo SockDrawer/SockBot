@@ -14,6 +14,8 @@ Automatically read posts older than the configured interval.
   * _inner_
     * [~defaultConfig](#module_autoreader..defaultConfig) : <code>object</code>
       * [.minAge](#module_autoreader..defaultConfig.minAge) : <code>number</code>
+      * [.hour](#module_autoreader..defaultConfig.hour) : <code>number</code>
+      * [.minute](#module_autoreader..defaultConfig.minute) : <code>number</code>
     * [~internals](#module_autoreader..internals) : <code>object</code>
       * [.browser](#module_autoreader..internals.browser) : <code>Browser</code>
       * [.config](#module_autoreader..internals.config) : <code>object</code>
@@ -54,11 +56,29 @@ reading any unread posts it finds that are older than the configured interval.
 Default configuration settings
 
 **Kind**: inner typedef of <code>[autoreader](#module_autoreader)</code>  
+
+  * [~defaultConfig](#module_autoreader..defaultConfig) : <code>object</code>
+    * [.minAge](#module_autoreader..defaultConfig.minAge) : <code>number</code>
+    * [.hour](#module_autoreader..defaultConfig.hour) : <code>number</code>
+    * [.minute](#module_autoreader..defaultConfig.minute) : <code>number</code>
+
 <a name="module_autoreader..defaultConfig.minAge"></a>
 #### defaultConfig.minAge : <code>number</code>
 How old a post must be to be auro-read
 
 **Kind**: static property of <code>[defaultConfig](#module_autoreader..defaultConfig)</code>  
+<a name="module_autoreader..defaultConfig.hour"></a>
+#### defaultConfig.hour : <code>number</code>
+The hour of the day to run the autoreader in UTC (0-23)
+
+**Kind**: static property of <code>[defaultConfig](#module_autoreader..defaultConfig)</code>  
+**Default**: <code>0</code>  
+<a name="module_autoreader..defaultConfig.minute"></a>
+#### defaultConfig.minute : <code>number</code>
+The minute of the hour to run the autoreader in UTC (0-59)
+
+**Kind**: static property of <code>[defaultConfig](#module_autoreader..defaultConfig)</code>  
+**Default**: <code>0</code>  
 <a name="module_autoreader..internals"></a>
 ### autoreader~internals : <code>object</code>
 Internal status store
