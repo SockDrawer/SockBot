@@ -766,7 +766,7 @@ describe('SockBot', () => {
                 test(spy);
                 messages.pollMessages.called.should.be.true;
             });
-            it('should schedule next message poll for three sedonds from now', () => {
+            it('should schedule next message poll for now', () => {
                 SockBot.internals.running = undefined;
                 config.core.pollMessages = true;
                 browser.login.yields(null, {});
@@ -775,10 +775,7 @@ describe('SockBot', () => {
                     spy = sinon.spy();
                 messages.pollMessages.yields(null);
                 test(spy);
-                sandbox.clock.tick(2999);
-                spy.called.should.be.false;
-                sandbox.clock.tick(1);
-                spy.called.should.be.true;
+                spy.called.should.equal(true);
             });
         });
         describe('notifications', () => {
