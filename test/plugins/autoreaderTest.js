@@ -44,6 +44,13 @@ describe('autoreader', () => {
             }, dummyCfg, undefined, undefined);
             autoreader.internals.config.minAge.should.equal(1 * 24 * 60 * 60 * 1000);
         });
+        it('should not randomize reader start', () => {
+            autoreader.prepare({
+                randomize: false
+            }, dummyCfg, undefined, undefined);
+            autoreader.internals.config.hour.should.equal(0);
+            autoreader.internals.config.minute.should.equal(0);
+        });
         it('should store events object in internals', () => {
             const events = Math.random();
             autoreader.prepare(undefined, dummyCfg, events, undefined);

@@ -41,6 +41,12 @@ const defaultConfig = {
          */
         bingeMinute: 0,
         /**
+         * Randomise the time of day the likes binge starts (if set, overrides `bingeHour` and `bingeMinute`)
+         * @default
+         * @type {boolean}
+         */
+        bingeRandomize: true,
+        /**
          * Topics to hand out likes in
          * @type {number[]}
          * @default
@@ -109,6 +115,10 @@ exports.prepare = function prepare(plugConfig, config, events, browser) {
     internals.events = events;
     internals.config = config.mergeObjects(defaultConfig, plugConfig);
     internals.config.topics.forEach((topic) => events.onTopic(topic, exports.messageHandler));
+    if (internals.config.bingeRandomize) {
+        internals.config.bingeHour = Math.floor(Math.random() * 24);
+        internals.config.bingeMinute = Math.floor(Math.random() * 60);
+    }
 };
 
 /**

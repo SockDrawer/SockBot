@@ -13,6 +13,9 @@ const likes = require('../../plugins/likes'),
 const dummyCfg = {
     mergeObjects: utils.mergeObjects
 };
+const dummyEvents = {
+    onTopic: () => 0
+};
 
 describe('likes plugin', () => {
     describe('exports', () => {
@@ -26,37 +29,32 @@ describe('likes plugin', () => {
         it('should export internals()', () => expect(likes.internals).to.be.an('object'));
     });
     describe('prepare()', () => {
+        let sandbox;
+        beforeEach(() => {
+            sandbox = sinon.sandbox.create();
+        });
+        afterEach(() => {
+            sandbox.restore();
+        });
         it('should set browser', () => {
             const browser = {};
-            likes.prepare({}, dummyCfg, {
-                onTopic: () => 0
-            }, browser);
+            likes.prepare({}, dummyCfg, dummyEvents, browser);
             likes.internals.browser.should.equal(browser);
         });
         it('should use default config if config is not object', () => {
-            likes.prepare(true, dummyCfg, {
-                onTopic: () => 0
-            }, null);
+            sandbox.stub(Math, 'random', () => {
+                return 0;
+            });
+            likes.prepare(true, dummyCfg, dummyEvents, null);
             likes.internals.config.should.not.equal(likes.defaultConfig);
             likes.internals.config.should.deep.equal(likes.defaultConfig);
         });
         it('should merge configs if config is object', () => {
             likes.prepare({
                 a: 1
-            }, dummyCfg, {
-                onTopic: () => 0
-            }, null);
-            const expected = {
-                a: 1,
-                binge: false,
-                bingeCap: 500,
-                bingeHour: 0,
-                bingeMinute: 0,
-                topics: [1000],
-                delay: 15000,
-                scatter: 5000
-            };
-            likes.internals.config.should.deep.equal(expected);
+            }, dummyCfg, dummyEvents, null);
+            likes.internals.config.should.not.equal(likes.defaultConfig);
+            expect(likes.internals.config.a).to.not.be.undefined;
         });
         it('should register for messages from topics', () => {
             const spy = sinon.spy();
@@ -69,13 +67,16 @@ describe('likes plugin', () => {
             spy.calledWith(5, likes.messageHandler).should.be.true;
             spy.calledWith(17, likes.messageHandler).should.be.true;
         });
-
         it('should store events object in internals', () => {
-            const events = {
-                onTopic: () => 0
-            };
-            likes.prepare(true, dummyCfg, events, undefined);
-            likes.internals.events.should.equal(events);
+            likes.prepare(true, dummyCfg, dummyEvents, undefined);
+            likes.internals.events.should.equal(dummyEvents);
+        });
+        it('should not randomize like binge start', () => {
+            likes.prepare({
+                bingeRandomize: false
+            }, dummyCfg, dummyEvents, undefined);
+            likes.internals.config.bingeHour.should.equal(0);
+            likes.internals.config.bingeMinute.should.equal(0);
         });
     });
     describe('start()', () => {
@@ -180,7 +181,6 @@ describe('likes plugin', () => {
             likes.internals.browser = {
                 getPosts: browserSpy
             };
-
             events = {
                 emit: sinon.spy()
             };
