@@ -25,13 +25,16 @@
 const xRegExp = require('xregexp').XRegExp;
 const rQuote = xRegExp('\\[quote.*post:(?<postNumber>\\d+).*topic:(?<topicId>\\d+)'),
     postSuccess = 'Anonymizied reply sent. Thank you for using Anonymizer, a SockDrawer application.',
-    parseError = 'Anonymizied reply **not** sent; quote must specify both topic and post.',
-    postError = 'Anonymizied reply **not** sent; Discourse error while posting.';
+    errorStub = 'Anonymizied reply **not** sent; ',
+    parseError = errorStub + 'quote must specify both topic and post.',
+    topicError = errorStub + 'you cannot anonymously reply into the same topic you issued the request in.',
+    postError = errorStub + 'Discourse error while posting.';
 let mBrowser, siteUrl;
 
 const internals = {
     postSuccess: postSuccess,
     parseError: parseError,
+    topicError: topicError,
     postError: postError
 };
 
@@ -69,8 +72,12 @@ exports.stop = function () {};
 exports.handler = function handler(notification, topic, post) {
     const match = rQuote.xexec(post.raw);
     //match.topicId is a string, so coerce topic.id type to match
-    if (!match || topic.id.toString() === match.topicId) {
+    if (!match) {
         mBrowser.createPost(topic.id, post.post_number, parseError, () => 0);
+        return;
+    }
+    if (topic.id.toString() === match.topicId) {
+        mBrowser.createPost(topic.id, post.post_number, topicError, () => 0);
         return;
     }
     mBrowser.createPost(match.topicId, match.postNumber, post.raw, (err, aPost) => {
