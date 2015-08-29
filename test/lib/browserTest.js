@@ -1335,7 +1335,7 @@ describe('browser', () => {
                 const spy = sinon.spy(),
                     list = {
                         'topic_list': {
-                            'more_topics_url': 3.1415926,
+                            'more_topics_url': 'test',
                             topics: []
                         }
                     };
@@ -1343,13 +1343,52 @@ describe('browser', () => {
                 object.getTopics(() => 0, () => 0);
                 const each = queue.push.firstCall.args[0].callback;
                 each(null, list);
-                async.whilst.firstCall.args[0]().should.equal(3.1415926);
+                async.whilst.firstCall.args[0]().should.equal('test');
+            });
+            it('should correct next url if it\'s missing \'.json\'', () => {
+                const spy = sinon.spy(),
+                    list = {
+                        'topic_list': {
+                            'more_topics_url': 'test?params=values',
+                            topics: []
+                        }
+                    };
+                async.whilst.callsArgWith(1, spy);
+                object.getTopics(() => 0, () => 0);
+                const each = queue.push.firstCall.args[0].callback;
+                each(null, list);
+                async.whilst.firstCall.args[0]().should.equal('test.json?params=values');
+            });
+            it('should not correct next url if it includes \'.json\'', () => {
+                const spy = sinon.spy(),
+                    list = {
+                        'topic_list': {
+                            'more_topics_url': 'test.json?params=values',
+                            topics: []
+                        }
+                    };
+                async.whilst.callsArgWith(1, spy);
+                object.getTopics(() => 0, () => 0);
+                const each = queue.push.firstCall.args[0].callback;
+                each(null, list);
+                async.whilst.firstCall.args[0]().should.equal('test.json?params=values');
+            });
+            it('should gracefully handle missing topic_list', () => {
+                const spy = sinon.spy(),
+                    list = {
+                        'topic_list': undefined
+                    };
+                async.whilst.callsArgWith(1, spy);
+                object.getTopics(() => 0, () => 0);
+                const each = queue.push.firstCall.args[0].callback;
+                each(null, list);
+                expect(spy.args[0]).to.be.Error;
             });
             it('should not call eachTopic on no results', () => {
                 const spy = sinon.spy(),
                     list = {
                         'topic_list': {
-                            'more_topics_url': 3.1415926,
+                            'more_topics_url': 'test',
                             topics: []
                         }
                     };
@@ -1359,11 +1398,11 @@ describe('browser', () => {
                 each(null, list);
                 spy.called.should.be.false;
             });
-            it('should call eachTopic fore each result', () => {
+            it('should call eachTopic for each result', () => {
                 const spy = sinon.stub(),
                     list = {
                         'topic_list': {
-                            'more_topics_url': 3.1415926,
+                            'more_topics_url': 'test',
                             topics: [1, 2, 3]
                         }
                     };
