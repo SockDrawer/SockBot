@@ -16,7 +16,7 @@ log in to. The following options are recognized by sockbot as core configuration
 |----------------------|----------------|----------|----------------------------------|
 | `username`           | Text           | Yes      |                                  |
 | `password`           | Text           | Yes      |                                  |
-| `owner`              | Text           | No       | `'accalia'`                      |
+| `owner`              | Text           | Yes      |                                  |
 | `forum`              | Text           | No       | `'https://what.thedailywtf.com'` |
 | `ignoreUsers`        | List of Text   | No       | `['blakeyrat', 'PaulaBean']`     |
 | `ignoreCategories`   | List of Number | No       | `[8, 23]`                        |
@@ -35,7 +35,7 @@ needs to be specified in the configuration.
 
 ### owner
 This option sets the username that the bot will consider its owner. The owner user will be considered ultimately
-privileged by the bot. The default owner is "accalia"
+privileged by the bot. It needs to be specified in the configuration.
 
 ### forum
 This option sets the url of the forum the bot will interact with. The default value connects the bot to [TheDailyWTF]

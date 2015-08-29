@@ -210,17 +210,21 @@ function prepareEvents(callback) {
  */
 function loadPlugins() {
     Object.keys(config.plugins).forEach((module) => {
-        const plugin = privateFns.doPluginRequire(module, require);
-        if (typeof plugin.prepare !== 'function') {
-            internals.events.emit('logError', 'Plugin `' + module + '` does not export `prepare()` function');
-        } else if (typeof plugin.start !== 'function') {
-            internals.events.emit('logError', 'Plugin `' + module + '` does not export `start()` function');
-        } else if (typeof plugin.stop !== 'function') {
-            internals.events.emit('logError', 'Plugin `' + module + '` does not export `stop()` function');
-        } else {
-            internals.events.emit('logMessage', 'Plugin `' + module + '` Loaded');
-            plugin.prepare.pluginName = module;
-            internals.plugins.push(plugin);
+        try {
+            const plugin = privateFns.doPluginRequire(module, require);
+            if (typeof plugin.prepare !== 'function') {
+                internals.events.emit('logError', 'Plugin `' + module + '` does not export `prepare()` function');
+            } else if (typeof plugin.start !== 'function') {
+                internals.events.emit('logError', 'Plugin `' + module + '` does not export `start()` function');
+            } else if (typeof plugin.stop !== 'function') {
+                internals.events.emit('logError', 'Plugin `' + module + '` does not export `stop()` function');
+            } else {
+                internals.events.emit('logMessage', 'Plugin `' + module + '` Loaded');
+                plugin.prepare.pluginName = module;
+                internals.plugins.push(plugin);
+            }
+        } catch (e) {
+            internals.events.emit('logError', e.message);
         }
     });
 }
