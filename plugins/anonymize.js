@@ -27,7 +27,7 @@ const rQuote = xRegExp('\\[quote.*post:(?<postNumber>\\d+).*topic:(?<topicId>\\d
     postSuccess = 'Anonymizied reply sent. Thank you for using Anonymizer, a SockDrawer application.',
     parseError = 'Anonymizied reply **not** sent; quote must specify both topic and post.',
     postError = 'Anonymizied reply **not** sent; Discourse error while posting.';
-let mBrowser;
+let mBrowser, siteUrl;
 
 const internals = {
     postSuccess: postSuccess,
@@ -45,6 +45,7 @@ const internals = {
 */
 exports.prepare = function (plugConfig, config, events, browser) {
     mBrowser = browser;
+    siteUrl = config.core.forum;
     events.onNotification('private_message', exports.handler);
 };
 
@@ -69,14 +70,25 @@ exports.handler = function handler(notification, topic, post) {
     const match = rQuote.xexec(post.raw);
     //match.topicId is a string, so coerce topic.id type to match
     if (!match || topic.id.toString() === match.topicId) {
-        mBrowser.createPost(topic.id, post.id, parseError, () => 0);
+        mBrowser.createPost(topic.id, post.post_number, parseError, () => 0);
         return;
     }
-    mBrowser.createPost(match.topicId, match.postNumber, post.raw, (err) => {
+    mBrowser.createPost(match.topicId, match.postNumber, post.raw, (err, aPost) => {
         if (err) {
-            mBrowser.createPost(topic.id, post.id, postError, () => 0);
+            mBrowser.createPost(topic.id, post.post_number, postError, () => 0);
         } else {
-            mBrowser.createPost(topic.id, post.id, postSuccess, () => 0);
+            const postUrl = [
+                    siteUrl,
+                    't',
+                    aPost.topic_id,
+                    aPost.post_number
+                ].join('/');
+            const message = [
+                    postSuccess,
+                    'Post is here:',
+                    postUrl
+                ].join('\n');
+            mBrowser.createPost(topic.id, post.post_number, message, () => 0);
         }
     });
 };
