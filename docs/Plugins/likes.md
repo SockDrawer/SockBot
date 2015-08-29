@@ -10,15 +10,16 @@ in the watched threads and if configured perform the catchup runs as well.
 
 ## Configuration Options
 
-| Option        | Type           | Default  |
-|---------------|----------------|----------|
-| `binge`       | True/False     | `false`  |
-| `bingeHour`   | Number         | `0`      | 
-| `bingeMinute` | Number         | `0`      | 
-| `bingeCap`    | Number         | `500`    | 
-| `topics`      | List of Number | `[1000]` | 
-| `delay`       | Number         | `15000`  | 
-| `scatter`     | Number         | `5000`   | 
+| Option           | Type           | Default  |
+|------------------|----------------|----------|
+| `binge`          | True/False     | `false`  |
+| `bingeHour`      | Number         | `0`      | 
+| `bingeMinute`    | Number         | `0`      | 
+| `bingeRandomize` | Boolean        | `true`   | 
+| `bingeCap`       | Number         | `500`    | 
+| `topics`         | List of Number | `[1000]` | 
+| `delay`          | Number         | `15000`  | 
+| `scatter`        | Number         | `5000`   | 
 
 ## `binge`
 This switch activates or deactivates catchup mode. If set to true the bot will automatically look for unliked
@@ -34,6 +35,10 @@ Note: The time is in UTC.
 This sets the minute in the hour at which to begin a like binge.
 Use this setting to schedule a binge during a quiet time of day.
 Note: The time is in UTC.
+
+## `bingeRandomize`
+This randomizes the time of day the likes binge starts.
+If set, this setting overrides both `bingeHour` and `bingeMinute`.
 
 ## `bingeCap`
 This sets the maximum number of posts to like in any one catchup binge. This is useful if starting the plugin
@@ -68,6 +73,7 @@ plugins:
     binge: true
     bingeHour: 2
     bingeMinute: 30
+    randomize: false
     bingeCap: 500
     topics:
       - 1000
@@ -87,6 +93,7 @@ plugins:
       "binge": true,
       "bingeHour": 2,
       "bingeMinute": 30,
+      "randomize": false,
       "bingeCap": 500,
       "topics": [1000],
       "delay": 15000,

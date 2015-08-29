@@ -31,7 +31,13 @@ const defaultConfig = {
          * @default
          * @type {number}
          */
-        minute: 0
+        minute: 0,
+        /**
+         * Randomise the time of day the autoreader runs (if set, overrides `hour` and `minute`)
+         * @default
+         * @type {boolean}
+         */
+        randomize: true
     },
     /**
      * Internal status store
@@ -75,6 +81,10 @@ exports.prepare = function (plugConfig, config, events, browser) {
     }
     internals.events = events;
     internals.config = config.mergeObjects(true, defaultConfig, plugConfig);
+    if (internals.config.randomize) {
+        internals.config.hour = Math.floor(Math.random() * 24);
+        internals.config.minute = Math.floor(Math.random() * 60);
+    }
 };
 
 /**
