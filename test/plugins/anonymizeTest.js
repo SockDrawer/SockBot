@@ -85,7 +85,7 @@ describe('anonymize', () => {
                 raw: '[quote="SockBot, post:2, topic:1"]This should be ignored![/quote]This should be ignored!'
             });
             spy.calledOnce.should.be.true;
-            spy.calledWith(1, 2, anonymize.internals.parseError).should.be.true;
+            spy.calledWith(1, 2, anonymize.internals.topicError).should.be.true;
         });
         it('should not create post when no post is specified in the quote', () => {
             const spy = sandbox.stub(browser, 'createPost'),
