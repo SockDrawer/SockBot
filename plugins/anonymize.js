@@ -69,14 +69,14 @@ exports.handler = function handler(notification, topic, post) {
     const match = rQuote.xexec(post.raw);
     //match.topicId is a string, so coerce topic.id type to match
     if (!match || topic.id.toString() === match.topicId) {
-        mBrowser.createPost(topic.id, post.id, parseError, () => 0);
+        mBrowser.createPost(topic.id, post.post_number, parseError, () => 0);
         return;
     }
-    mBrowser.createPost(match.topicId, match.postNumber, post.raw, (err) => {
+    mBrowser.createPost(match.topicId, match.postNumber, post.raw, (err, post) => {
         if (err) {
-            mBrowser.createPost(topic.id, post.id, postError, () => 0);
+            mBrowser.createPost(topic.id, post.post_number, postError, () => 0);
         } else {
-            mBrowser.createPost(topic.id, post.id, postSuccess, () => 0);
+            mBrowser.createPost(topic.id, post.post_number, postSuccess, () => 0);
         }
     });
 };
