@@ -47,14 +47,15 @@ describe('likes plugin', () => {
             });
             likes.prepare(true, dummyCfg, dummyEvents, null);
             likes.internals.config.should.not.equal(likes.defaultConfig);
-            likes.internals.config.should.deep.equal(likes.defaultConfig);
+            expect(likes.internals.config).to.have.all.keys(likes.defaultConfig);
         });
         it('should merge configs if config is object', () => {
             likes.prepare({
                 a: 1
             }, dummyCfg, dummyEvents, null);
             likes.internals.config.should.not.equal(likes.defaultConfig);
-            expect(likes.internals.config.a).to.not.be.undefined;
+            expect(likes.internals.config).to.contain.all.keys(likes.defaultConfig);
+            expect(likes.internals.config).to.contain.key('a');
         });
         it('should register for messages from topics', () => {
             const spy = sinon.spy();
