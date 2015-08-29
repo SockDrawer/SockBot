@@ -12,7 +12,9 @@ const anonymize = require('../../plugins/anonymize'),
 const browser = browserModule();
 
 const dummyCfg = {
-        forum: 'forumUrl'
+        core: {
+            forum: 'forumUrl'
+        }
     };
 
 describe('anonymize', () => {
