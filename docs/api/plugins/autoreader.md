@@ -16,6 +16,7 @@ Automatically read posts older than the configured interval.
       * [.minAge](#module_autoreader..defaultConfig.minAge) : <code>number</code>
       * [.hour](#module_autoreader..defaultConfig.hour) : <code>number</code>
       * [.minute](#module_autoreader..defaultConfig.minute) : <code>number</code>
+      * [.randomize](#module_autoreader..defaultConfig.randomize) : <code>boolean</code>
     * [~internals](#module_autoreader..internals) : <code>object</code>
       * [.browser](#module_autoreader..internals.browser) : <code>Browser</code>
       * [.config](#module_autoreader..internals.config) : <code>object</code>
@@ -61,6 +62,7 @@ Default configuration settings
     * [.minAge](#module_autoreader..defaultConfig.minAge) : <code>number</code>
     * [.hour](#module_autoreader..defaultConfig.hour) : <code>number</code>
     * [.minute](#module_autoreader..defaultConfig.minute) : <code>number</code>
+    * [.randomize](#module_autoreader..defaultConfig.randomize) : <code>boolean</code>
 
 <a name="module_autoreader..defaultConfig.minAge"></a>
 #### defaultConfig.minAge : <code>number</code>
@@ -79,6 +81,12 @@ The minute of the hour to run the autoreader in UTC (0-59)
 
 **Kind**: static property of <code>[defaultConfig](#module_autoreader..defaultConfig)</code>  
 **Default**: <code>0</code>  
+<a name="module_autoreader..defaultConfig.randomize"></a>
+#### defaultConfig.randomize : <code>boolean</code>
+Randomise the time of day the autoreader runs (if set, overrides `hour` and `minute`)
+
+**Kind**: static property of <code>[defaultConfig](#module_autoreader..defaultConfig)</code>  
+**Default**: <code>true</code>  
 <a name="module_autoreader..internals"></a>
 ### autoreader~internals : <code>object</code>
 Internal status store
