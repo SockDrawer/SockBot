@@ -122,7 +122,7 @@ describe('messages', () => {
             sandbox.stub(browser, 'messageBus');
             sandbox.stub(messages.privateFns, 'resetChannelPositions');
             sandbox.stub(messages.privateFns, 'updateChannelPositions');
-            sandbox.stub(messages.privateFns, 'processTopicMessage');
+            sandbox.stub(messages.privateFns, 'handleMessages');
             sandbox.useFakeTimers();
             async.nextTick = (fn) => setTimeout(fn, 0);
             async.setImmediate = (fn) => setTimeout(fn, 0);
@@ -244,65 +244,16 @@ describe('messages', () => {
             spy.called.should.be.true;
             spy.lastCall.args.should.deep.equal([]);
         });
-        describe('message processing', () => {
-            it('should pass `/topic/*` messages to processTopicMessage()', () => {
-                const spy = sinon.spy(),
-                    msg = {
-                        channel: '/topic/1234'
-                    },
-                    msgs = [msg];
-                browser.messageBus.yields(null, msgs);
-                messages.pollMessages(spy);
-                sandbox.clock.tick(0);
-                messages.privateFns.processTopicMessage.calledWith(msg).should.be.true;
-            });
-            it('should emit message directly for non `/topic/*` messages', () => {
-                const spy = sinon.spy(),
-                    msg = {
-                        channel: '/__status/1234',
-                        data: {
-                            foobar: Math.random()
-                        }
-                    },
-                    msgs = [msg];
-                browser.messageBus.yields(null, msgs);
-                messages.pollMessages(spy);
-                sandbox.clock.tick(0);
-                messages.internals.events.emit.calledWith('message#' + msg.channel, msg.data).should.be.true;
-            });
-            it('should print warning when no listeners registered for event', () => {
-                const spy = sinon.spy(),
-                    msg = {
-                        channel: '/__status/1234',
-                        'message_id': 5432,
-                        data: {
-                            foobar: Math.random()
-                        }
-                    },
-                    msgs = [msg];
-                browser.messageBus.yields(null, msgs);
-                messages.internals.events.emit.returns(false);
-                messages.pollMessages(spy);
-                sandbox.clock.tick(0);
-                messages.internals.events.emit.calledWith('logWarning',
-                    'Message 5432 for channel /__status/1234 was not handled!').should.be.true;
-            });
-            it('should not print warning when listeners registered for event', () => {
-                const spy = sinon.spy(),
-                    msg = {
-                        channel: '/__status/1234',
-                        'message_id': 5432,
-                        data: {
-                            foobar: Math.random()
-                        }
-                    },
-                    msgs = [msg];
-                browser.messageBus.yields(null, msgs);
-                messages.internals.events.emit.returns(true);
-                messages.pollMessages(spy);
-                sandbox.clock.tick(0);
-                messages.internals.events.emit.calledWith('logWarning').should.be.false;
-            });
+        it('should pass messages to handleMessages', () => {
+            const spy = sinon.spy(),
+                msg = {
+                    channel: '/topic/1234'
+                },
+                msgs = [msg];
+            browser.messageBus.yields(null, msgs);
+            messages.pollMessages(spy);
+            sandbox.clock.tick(0);
+            messages.privateFns.handleMessages.calledWith(msgs).should.be.true;
         });
     });
     describe('start()', () => {
@@ -310,7 +261,8 @@ describe('messages', () => {
     });
     describe('privateFns', () => {
         const fns = ['onMessageAdd', 'onMessageRemove', 'onChannel', 'onTopic', 'removeChannel', 'removeTopic',
-            'statusChannelHandler', 'updateChannelPositions', 'resetChannelPositions', 'processTopicMessage'
+            'statusChannelHandler', 'updateChannelPositions', 'resetChannelPositions', 'processTopicMessage',
+            'broadcastMessages', 'processTopics', 'processPosts'
         ];
         describe('should include expected functions:', () => {
             fns.forEach((fn) => {
@@ -821,7 +773,7 @@ describe('messages', () => {
                     async.parallel.called.should.be.true;
                 });
                 it('should process nonacted message when handleActedMessage is true', () => {
-                    config.core.handleActedMessage = true;
+                    config.core.processActed = true;
                     processTopicMessage({
                         channel: '/topic/1234',
                         'message_id': 5432,
@@ -830,6 +782,437 @@ describe('messages', () => {
                         }
                     });
                     async.parallel.called.should.be.true;
+                });
+            });
+        });
+        describe('broadcastMessages()', () => {
+            const broadcastMessages = messages.privateFns.broadcastMessages;
+            let sandbox, emit;
+            beforeEach(() => {
+                sandbox = sinon.sandbox.create();
+                sandbox.useFakeTimers();
+                emit = sinon.stub();
+                messages.internals.events = {
+                    emit: emit
+                };
+            });
+            afterEach(() => sandbox.restore());
+            it('should delay callback via setImmediate', () => {
+                const spy = sinon.spy();
+                broadcastMessages([], spy);
+                spy.called.should.equal(false);
+                sandbox.clock.tick(0);
+                spy.called.should.equal(true);
+            });
+            it('should not emit message on topic message', () => {
+                const message = {
+                    channel: '/topic/1000'
+                };
+                broadcastMessages([message], () => 0);
+                emit.called.should.equal(false);
+            });
+            it('should emit message on non-topic message', () => {
+                emit.returns(true);
+                const message = {
+                    channel: '/site/read-only',
+                    data: Math.random()
+                };
+                broadcastMessages([message], () => 0);
+                emit.calledWith('message#/site/read-only', message.data).should.equal(true);
+            });
+            it('should emit message for multiple non-topic messages', () => {
+                emit.returns(true);
+                const someMessages = [{
+                    channel: '/site/read-only'
+                }, {
+                    channel: '/global/asset-version'
+                }];
+                broadcastMessages(someMessages, () => 0);
+                emit.calledWith('message#/site/read-only').should.equal(true);
+                emit.calledWith('message#/global/asset-version').should.equal(true);
+            });
+            it('should emit message only on non-topic message', () => {
+                emit.returns(true);
+                const someMessages = [{
+                    channel: '/site/read-only'
+                }, {
+                    channel: '/topic/100'
+                }];
+                broadcastMessages(someMessages, () => 0);
+                emit.calledWith('message#/site/read-only').should.equal(true);
+                emit.calledWith('message#/topic/100').should.equal(false);
+            });
+            it('should emit warning on unhandled non-topic message', () => {
+                emit.returns(false);
+                const message = {
+                    channel: '/site/read-only',
+                    'message_id': 42
+                };
+                broadcastMessages([message], () => 0);
+                emit.calledWith('logWarning',
+                    'Message 42 for channel /site/read-only was not handled!').should.equal(true);
+            });
+            it('should remove non-topic message from callback parameters', () => {
+                const spy = sinon.spy();
+                const someMessages = [{
+                    channel: '/site/read-only'
+                }];
+                broadcastMessages(someMessages, spy);
+                sandbox.clock.tick(0);
+                spy.calledWith(null, []).should.equal(true);
+            });
+            it('should retain topic message in callback parameters', () => {
+                const spy = sinon.spy();
+                const someMessages = [{
+                        channel: '/topic/123'
+                    }],
+                    expected = [{
+                        channel: '/topic/123'
+                    }];
+                broadcastMessages(someMessages, spy);
+                sandbox.clock.tick(0);
+                spy.calledWith(null, expected).should.equal(true);
+            });
+            it('should retain topic message in mixed message set', () => {
+                const spy = sinon.spy();
+                const someMessages = [{
+                    channel: '/topic/123'
+                }, {
+                    channel: '/site/read-only'
+                }, {
+                    channel: '/topic/456'
+                }];
+                broadcastMessages(someMessages, spy);
+                sandbox.clock.tick(0);
+                spy.calledWith(null, [{
+                    channel: '/topic/123'
+                }, {
+                    channel: '/topic/456'
+                }]).should.equal(true);
+            });
+        });
+        describe('processTopics()', () => {
+            const processTopics = messages.privateFns.processTopics;
+            let sandbox, emit;
+            beforeEach(() => {
+                sandbox = sinon.sandbox.create();
+                sandbox.stub(browser, 'getTopic');
+                sandbox.stub(utils, 'filterIgnoredOnTopic');
+                emit = sinon.stub();
+                messages.internals.events = {
+                    emit: emit
+                };
+            });
+            afterEach(() => sandbox.restore());
+            it('should gracefully handle zero messages', () => {
+                const spy = sinon.spy();
+                processTopics([], spy);
+                browser.getTopic.called.should.equal(false);
+                spy.calledWith(null, []).should.equal(true);
+            });
+            it('should process each topic only once', () => {
+                const spy = sinon.spy();
+                browser.getTopic.yields(null, {});
+                processTopics([{
+                    channel: '/topic/10'
+                }, {
+                    channel: '/topic/10'
+                }], spy);
+                browser.getTopic.calledWith('10').should.equal(true);
+                browser.getTopic.callCount = 1;
+            });
+            it('should process multiple topics', () => {
+                const spy = sinon.spy();
+                browser.getTopic.yields(null, null);
+                processTopics([{
+                    channel: '/topic/12'
+                }, {
+                    channel: '/topic/10'
+                }], spy);
+                browser.getTopic.calledWith('10').should.equal(true);
+                browser.getTopic.calledWith('12').should.equal(true);
+                browser.getTopic.callCount = 2;
+            });
+            it('should remove message from callback args when filterIgnoredOnTopic yields error', () => {
+                utils.filterIgnoredOnTopic.yields('IGNORE');
+                browser.getTopic.yields(null, {});
+                const spy = sinon.spy();
+                processTopics([{
+                    channel: '/topic/10'
+                }], spy);
+                spy.calledWith(null, []).should.equal(true);
+            });
+            it('should remove message from callback args when filterIgnoredOnTopic yields pass', () => {
+                utils.filterIgnoredOnTopic.yields(null);
+                browser.getTopic.yields(null, {});
+                const spy = sinon.spy(),
+                    message = {
+                        channel: '/topic/10'
+                    };
+                processTopics([message], spy);
+                spy.calledWith(null, [message]).should.equal(true);
+            });
+            describe('set message.topic', () => {
+                it('should not set message.topic on browser error', () => {
+                    const spy = sinon.spy(),
+                        message = {
+                            channel: '/topic/12'
+                        };
+                    browser.getTopic.yields('error! error!', null);
+                    processTopics([message], spy);
+                    message.should.not.have.key('topic');
+                });
+                it('should not set message.topic on browser empty response', () => {
+                    const spy = sinon.spy(),
+                        message = {
+                            channel: '/topic/12'
+                        };
+                    browser.getTopic.yields(null, '');
+                    processTopics([message], spy);
+                    message.should.not.have.key('topic');
+                });
+                it('should not set message.topic on browser null response', () => {
+                    const spy = sinon.spy(),
+                        message = {
+                            channel: '/topic/12'
+                        };
+                    browser.getTopic.yields(null, null);
+                    processTopics([message], spy);
+                    message.should.not.have.key('topic');
+                });
+            });
+            describe('browser errors', () => {
+                it('should emit warning when no topic retrieved', () => {
+                    const spy = sinon.spy();
+                    browser.getTopic.yields(null, null);
+                    processTopics([{
+                        channel: '/topic/12'
+                    }], spy);
+                    emit.calledWith('logWarning', 'Error Retrieving topic 12: NO TOPIC RECEIVED').should.equal(true);
+                });
+                it('should emit warning when blank topic retrieved', () => {
+                    const spy = sinon.spy();
+                    browser.getTopic.yields(null, '');
+                    processTopics([{
+                        channel: '/topic/13'
+                    }], spy);
+                    emit.calledWith('logWarning', 'Error Retrieving topic 13: NO TOPIC RECEIVED').should.equal(true);
+                });
+                it('should emit warning when error retrieved', () => {
+                    const spy = sinon.spy();
+                    browser.getTopic.yields('error! error!', null);
+                    processTopics([{
+                        channel: '/topic/12'
+                    }], spy);
+                    emit.calledWith('logWarning', 'Error Retrieving topic 12: error! error!').should.equal(true);
+                });
+            });
+        });
+        describe('processPosts()', () => {
+            const processPosts = messages.privateFns.processPosts;
+            let sandbox, emit;
+            beforeEach(() => {
+                sandbox = sinon.sandbox.create();
+                sandbox.stub(browser, 'getPost');
+                sandbox.stub(utils, 'filterIgnoredOnPost');
+                emit = sinon.stub();
+                messages.internals.events = {
+                    emit: emit
+                };
+            });
+            afterEach(() => sandbox.restore());
+            describe('getPost call coalescing', () => {
+                it('should gracefully handle zero messages', () => {
+                    const spy = sinon.spy();
+                    processPosts([], spy);
+                    browser.getPost.called.should.equal(false);
+                    spy.calledWith(null, []).should.equal(true);
+                });
+                it('should process each post only once', () => {
+                    const spy = sinon.spy();
+                    browser.getPost.yields(null, {});
+                    processPosts([{
+                        data: {
+                            id: 10
+                        }
+                    }, {
+                        data: {
+                            id: 10
+                        }
+                    }], spy);
+                    browser.getPost.calledWith('10').should.equal(true);
+                    browser.getPost.callCount = 1;
+                });
+                it('should process multiple posts', () => {
+                    const spy = sinon.spy();
+                    browser.getPost.yields(null, null);
+                    processPosts([{
+                        data: {
+                            id: 12
+                        }
+                    }, {
+                        data: {
+                            id: 10
+                        }
+                    }], spy);
+                    browser.getPost.calledWith('10').should.equal(true);
+                    browser.getPost.calledWith('12').should.equal(true);
+                    browser.getPost.callCount = 2;
+                });
+            });
+            describe('post filtering', () => {
+                it('should remove message from callback args when filterIgnoredOnPost yields error', () => {
+                    utils.filterIgnoredOnPost.yields('IGNORE');
+                    browser.getPost.yields(null, {
+                        'topic_id': 4
+                    });
+                    const spy = sinon.spy();
+                    processPosts([{
+                        data: {
+                            id: 10
+                        }
+                    }], spy);
+                    spy.calledWith(null, []).should.equal(true);
+                });
+                it('should remove message from callback args when getPost yields error', () => {
+                    utils.filterIgnoredOnPost.yields(null);
+                    browser.getPost.yields('ERROR');
+                    const spy = sinon.spy();
+                    processPosts([{
+                        data: {
+                            id: 10
+                        }
+                    }], spy);
+                    spy.calledWith(null, []).should.equal(true);
+                });
+                it('should remove message from callback args when getPost yields no post', () => {
+                    utils.filterIgnoredOnPost.yields(null);
+                    browser.getPost.yields(null, null);
+                    const spy = sinon.spy();
+                    processPosts([{
+                        data: {
+                            id: 10
+                        }
+                    }], spy);
+                    spy.calledWith(null, []).should.equal(true);
+                });
+                it('should remove message from callback args when getPost yields invalid post', () => {
+                    utils.filterIgnoredOnPost.yields(null);
+                    browser.getPost.yields(null, {});
+                    const spy = sinon.spy();
+                    processPosts([{
+                        data: {
+                            id: 10
+                        }
+                    }], spy);
+                    spy.calledWith(null, []).should.equal(true);
+                });
+                it('should remove message from callback args when filterIgnoredOnPost yields pass', () => {
+                    utils.filterIgnoredOnPost.yields(null);
+                    browser.getPost.yields(null, {
+                        'topic_id': 4
+                    });
+                    const spy = sinon.spy(),
+                        message = {
+                            data: {
+                                id: 10
+                            }
+                        };
+                    processPosts([message], spy);
+                    spy.calledWith(null, [message]).should.equal(true);
+                });
+            });
+            describe('set message.post', () => {
+                it('should not set message.post on browser error', () => {
+                    const spy = sinon.spy(),
+                        message = {
+                            data: {
+                                id: 4
+                            }
+                        };
+                    browser.getPost.yields('error! error!', null);
+                    processPosts([message], spy);
+                    message.should.not.have.key('post');
+                });
+                it('should not set message.post on browser empty response', () => {
+                    const spy = sinon.spy(),
+                        message = {
+                            data: {
+                                id: 4
+                            }
+                        };
+                    browser.getPost.yields(null, '');
+                    processPosts([message], spy);
+                    message.should.not.have.key('post');
+                });
+                it('should not set message.post on browser null response', () => {
+                    const spy = sinon.spy(),
+                        message = {
+                            data: {
+                                id: 4
+                            }
+                        };
+                    browser.getPost.yields(null, null);
+                    processPosts([message], spy);
+                    message.should.not.have.key('post');
+                });
+                it('should not set message.post on browser invalid response', () => {
+                    const spy = sinon.spy(),
+                        message = {
+                            data: {
+                                id: 4
+                            }
+                        };
+                    browser.getPost.yields(null, {});
+                    processPosts([message], spy);
+                    message.should.not.have.key('post');
+                });
+                it('should set message.post on browser valid response', () => {
+                    const spy = sinon.spy(),
+                        message = {
+                            data: {
+                                id: 4
+                            }
+                        };
+                    browser.getPost.yields(null, {
+                        'topic_id': 4
+                    });
+                    processPosts([message], spy);
+                    message.should.have.any.key('post');
+                });
+            });
+            describe('browser errors', () => {
+                it('should emit warning when no topic retrieved', () => {
+                    const spy = sinon.spy();
+                    browser.getPost.yields(null, null);
+                    processPosts([{
+                        data:{id:5}
+                    }], spy);
+                    emit.calledWith('logWarning', 'Invalid post 5 retrieved: null').should.equal(true);
+                });
+                it('should emit warning when blank topic retrieved', () => {
+                    const spy = sinon.spy();
+                    browser.getPost.yields(null, '');
+                    processPosts([{
+                        data:{id:5}
+                    }], spy);
+                    emit.calledWith('logWarning', 'Invalid post 5 retrieved: ""').should.equal(true);
+                });
+                it('should emit warning when invalid topic retrieved', () => {
+                    const spy = sinon.spy();
+                    browser.getPost.yields(null, {});
+                    processPosts([{
+                        data:{id:5}
+                    }], spy);
+                    emit.calledWith('logWarning', 'Invalid post 5 retrieved: {}').should.equal(true);
+                });
+                it('should emit warning when error retrieved', () => {
+                    const spy = sinon.spy();
+                    browser.getPost.yields('error! error!', null);
+                    processPosts([{
+                        data:{id:5}
+                    }], spy);
+                    emit.calledWith('logWarning', 'Error retrieving post 5: error! error!').should.equal(true);
                 });
             });
         });
