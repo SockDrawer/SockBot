@@ -262,7 +262,7 @@ describe('messages', () => {
     describe('privateFns', () => {
         const fns = ['onMessageAdd', 'onMessageRemove', 'onChannel', 'onTopic', 'removeChannel', 'removeTopic',
             'statusChannelHandler', 'updateChannelPositions', 'resetChannelPositions', 'processTopicMessage',
-            'broadcastMessages', 'processTopics', 'processPosts'
+            'broadcastMessages', 'processTopics', 'processPosts', 'handleMessages'
         ];
         describe('should include expected functions:', () => {
             fns.forEach((fn) => {
@@ -1186,7 +1186,9 @@ describe('messages', () => {
                     const spy = sinon.spy();
                     browser.getPost.yields(null, null);
                     processPosts([{
-                        data:{id:5}
+                        data: {
+                            id: 5
+                        }
                     }], spy);
                     emit.calledWith('logWarning', 'Invalid post 5 retrieved: null').should.equal(true);
                 });
@@ -1194,7 +1196,9 @@ describe('messages', () => {
                     const spy = sinon.spy();
                     browser.getPost.yields(null, '');
                     processPosts([{
-                        data:{id:5}
+                        data: {
+                            id: 5
+                        }
                     }], spy);
                     emit.calledWith('logWarning', 'Invalid post 5 retrieved: ""').should.equal(true);
                 });
@@ -1202,7 +1206,9 @@ describe('messages', () => {
                     const spy = sinon.spy();
                     browser.getPost.yields(null, {});
                     processPosts([{
-                        data:{id:5}
+                        data: {
+                            id: 5
+                        }
                     }], spy);
                     emit.calledWith('logWarning', 'Invalid post 5 retrieved: {}').should.equal(true);
                 });
@@ -1210,9 +1216,177 @@ describe('messages', () => {
                     const spy = sinon.spy();
                     browser.getPost.yields('error! error!', null);
                     processPosts([{
-                        data:{id:5}
+                        data: {
+                            id: 5
+                        }
                     }], spy);
                     emit.calledWith('logWarning', 'Error retrieving post 5: error! error!').should.equal(true);
+                });
+            });
+        });
+        describe('handleMessages()', () => {
+            const handleMessages = messages.privateFns.handleMessages;
+            let sandbox, emit;
+            beforeEach(() => {
+                sandbox = sinon.sandbox.create();
+                sandbox.stub(async, 'waterfall');
+                sandbox.stub(messages.privateFns, 'broadcastMessages');
+                sandbox.stub(messages.privateFns, 'processTopics');
+                sandbox.stub(messages.privateFns, 'processPosts');
+                emit = sinon.stub();
+                messages.internals.events = {
+                    emit: emit
+                };
+            });
+            afterEach(() => sandbox.restore());
+            describe('processing order', () => {
+                it('should use async.waterfall to process messages', () => {
+                    handleMessages([]);
+                    async.waterfall.called.should.equal(true);
+                });
+                it('should broadcastMessages() first', () => {
+                    const message = {
+                        data: 'foobar'
+                    };
+                    handleMessages([message]);
+                    const fn = async.waterfall.firstCall.args[0][0];
+                    fn(() => 0);
+                    messages.privateFns.broadcastMessages.called.should.equal(true);
+                });
+                it('should pass input messages to broadcastMessages', () => {
+                    const message = {
+                        data: 'foobar'
+                    };
+                    handleMessages([message]);
+                    const fn = async.waterfall.firstCall.args[0][0];
+                    fn(() => 0);
+                    messages.privateFns.broadcastMessages.calledWith([message]).should.equal(true);
+                });
+                it('should processTopics() second', () => {
+                    const message = {
+                        data: 'foobar'
+                    };
+                    handleMessages([message]);
+                    const fn = async.waterfall.firstCall.args[0][1];
+                    fn([], () => 0);
+                    messages.privateFns.processTopics.called.should.equal(true);
+                });
+                it('should processPosts() third', () => {
+                    const message = {
+                        data: 'foobar'
+                    };
+                    handleMessages([message]);
+                    const fn = async.waterfall.firstCall.args[0][2];
+                    fn([], () => 0);
+                    messages.privateFns.processPosts.called.should.equal(true);
+                });
+            });
+            describe('message filtering', () => {
+                const applyFilter = (msgs) => {
+                    handleMessages(msgs);
+                    async.waterfall.firstCall.args[0][0]();
+                    return messages.privateFns.broadcastMessages.firstCall.args[0];
+                };
+                it('should accept acted message when `handleActedMessage` is set', () => {
+                    const message = {
+                        data: {
+                            type: 'acted'
+                        }
+                    };
+                    config.core.handleActedMessage = true;
+                    const result = applyFilter([message]);
+                    result.should.eql([message]);
+                });
+                it('should accept created message when `handleActedMessage` is set', () => {
+                    const message = {
+                        data: {
+                            type: 'created'
+                        }
+                    };
+                    config.core.handleActedMessage = true;
+                    const result = applyFilter([message]);
+                    result.should.eql([message]);
+                });
+                it('should discard acted message when `handleActedMessage` is not set', () => {
+                    const message = {
+                        data: {
+                            type: 'acted'
+                        }
+                    };
+                    config.core.handleActedMessage = false;
+                    const result = applyFilter([message]);
+                    result.should.eql([]);
+                });
+                it('should accept edited message when `handleActedMessage` is not set', () => {
+                    const message = {
+                        data: {
+                            type: 'edited'
+                        }
+                    };
+                    config.core.handleActedMessage = false;
+                    const result = applyFilter([message]);
+                    result.should.eql([message]);
+                });
+
+                it('should filter with multiple message types present', () => {
+                    const message1 = {
+                            data: {
+                                type: 'edited'
+                            }
+                        },
+                        message2 = {
+                            data: {
+                                type: 'acted'
+                            }
+                        },
+                        message3 = {
+                            data: {
+                                type: 'created'
+                            }
+                        },
+                        message4 = {
+                            data: {
+                                type: 'acted'
+                            }
+                        },
+                        message5 = {
+                            data: {
+                                type: 'foobar'
+                            }
+                        };
+                    config.core.handleActedMessage = false;
+                    const result = applyFilter([message1, message2, message3, message4, message5]);
+                    result.should.eql([message1, message3, message5]);
+                });
+            });
+            describe('topic message broadcasts', () => {
+                let finalStep;
+                beforeEach(() => {
+                    handleMessages([]);
+                    finalStep = async.waterfall.firstCall.args[1];
+                });
+                it('should emit message', () => {
+                    const message = {
+                        post: Math.random(),
+                        topic: {
+                            'topic_id': Math.random()
+                        },
+                        data: Math.random()
+                    };
+                    emit.returns(true);
+                    finalStep(null, [message]);
+                    emit.calledWith('topic#' + message.topic.topic_id,
+                        message.data, message.topic, message.post).should.equal(true);
+                });
+                it('should emit warning for unhandled message', () => {
+                    const message = {
+                        topic: {},
+                        'message_id': 4,
+                        channel: 'foobar'
+                    };
+                    emit.returns(false);
+                    finalStep(null, [message]);
+                    emit.calledWith('logWarning', 'Message 4 for channel foobar was not handled!').should.equal(true);
                 });
             });
         });
