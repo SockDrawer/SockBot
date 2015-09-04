@@ -234,6 +234,34 @@ describe('utils', () => {
                 mergeInner(base, mixin, true);
                 base.should.deep.equal(expected);
             });
+            it('should not overwrite array', () => {
+                const base = {
+                        a: [1]
+                    },
+                    mixin = {
+                        b: [2]
+                    },
+                    expected = {
+                        a: [1],
+                        b: [2]
+                    };
+                mergeInner(base, mixin);
+                base.should.deep.equal(expected);
+            });
+            it('should not overwrite array', () => {
+                const base = {
+                        a: [1]
+                    },
+                    mixin = {
+                        b: [2]
+                    },
+                    expected = {
+                        a: [1],
+                        b: [2]
+                    };
+                mergeInner(base, mixin, true);
+                base.should.deep.equal(expected);
+            });
             it('should concatenate arrays recursively', () => {
                 const base = {
                         a: [1],
@@ -274,6 +302,54 @@ describe('utils', () => {
                         b: {
                             c: [2]
                         }
+                    };
+                mergeInner(base, mixin, true);
+                base.should.deep.equal(expected);
+            });
+            it('should not overwrite arrays recursively', () => {
+                const base = {
+                        a: [1],
+                        b: {
+                            c: [1]
+                        }
+                    },
+                    mixin = {
+                        d: [2],
+                        b: {
+                            e: [2]
+                        }
+                    },
+                    expected = {
+                        a: [1],
+                        b: {
+                            c: [1],
+                            e: [2]
+                        },
+                        d: [2]
+                    };
+                mergeInner(base, mixin);
+                base.should.deep.equal(expected);
+            });
+            it('should not overwrite arrays recursively', () => {
+                const base = {
+                        a: [1],
+                        b: {
+                            c: [1]
+                        }
+                    },
+                    mixin = {
+                        d: [2],
+                        b: {
+                            e: [2]
+                        }
+                    },
+                    expected = {
+                        a: [1],
+                        b: {
+                            c: [1],
+                            e: [2]
+                        },
+                        d: [2]
                     };
                 mergeInner(base, mixin, true);
                 base.should.deep.equal(expected);

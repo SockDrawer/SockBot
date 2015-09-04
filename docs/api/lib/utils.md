@@ -12,7 +12,7 @@ Core Utilities for Sockbot
     * [.error(message)](#module_utils.error)
     * [.cloneData(original)](#module_utils.cloneData) ⇒ <code>\*</code>
     * [.mergeObjects([mergeArrays], ...mixin)](#module_utils.mergeObjects) ⇒ <code>object</code>
-    * [.filterIgnored(post, topic, callback)](#module_utils.filterIgnored)
+    * [.filterIgnored(topic, post, callback)](#module_utils.filterIgnored)
   * _inner_
     * [~addTimestamp(message)](#module_utils..addTimestamp) ⇒ <code>string</code>
     * [~mergeInner(base, mixin, [mergeArrays])](#module_utils..mergeInner)
@@ -83,15 +83,15 @@ Later objects override earlier objects
 | ...mixin | <code>object</code> | Objects to merge |
 
 <a name="module_utils.filterIgnored"></a>
-### utils.filterIgnored(post, topic, callback)
+### utils.filterIgnored(topic, post, callback)
 Filter post/topic for ignore conditions
 
 **Kind**: static method of <code>[utils](#module_utils)</code>  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| post | <code>externals.posts.CleanedPost</code> | Post to filter |
 | topic | <code>externals.topics.Topic</code> | Topic to filter |
+| post | <code>externals.posts.CleanedPost</code> | Post to filter |
 | callback | <code>completionCallback</code> | Completion Callback |
 
 <a name="module_utils..addTimestamp"></a>
