@@ -14,9 +14,9 @@ const utils = require('../../lib/utils'),
 describe('utils', () => {
     describe('exports', () => {
         const fns = ['uuid', 'log', 'warn', 'error', 'addTimestamp', 'mergeObjects', 'mergeInner', 'cloneData',
-                'filterIgnored'
+                'filterIgnored', 'filterIgnoredOnPost', 'filterIgnoredOnTopic'
             ],
-            objs = ['internals', 'privateFns'],
+            objs = ['internals'],
             vals = [];
         describe('should export expected functions:', () => {
             fns.forEach((fn) => {
@@ -474,7 +474,7 @@ describe('utils', () => {
     });
     describe('message filters', () => {
         describe('filterIgnoredOnPost()', () => {
-            const filterIgnoredOnPost = utils.privateFns.filterIgnoredOnPost;
+            const filterIgnoredOnPost = utils.filterIgnoredOnPost;
             let timers;
             before(() => timers = sinon.useFakeTimers());
             afterEach(() => utils.internals.cooldownTimers = {});
@@ -618,7 +618,7 @@ describe('utils', () => {
             });
         });
         describe('filterIgnoredOnTopic()', () => {
-            const filterIgnoredOnTopic = utils.privateFns.filterIgnoredOnTopic;
+            const filterIgnoredOnTopic = utils.filterIgnoredOnTopic;
             let timers;
             before(() => timers = sinon.useFakeTimers());
             after(() => timers.restore());
@@ -709,35 +709,35 @@ describe('utils', () => {
             let sandbox;
             beforeEach(() => {
                 sandbox = sinon.sandbox.create();
-                sandbox.stub(utils.privateFns, 'filterIgnoredOnPost');
-                sandbox.stub(utils.privateFns, 'filterIgnoredOnTopic');
+                sandbox.stub(utils, 'filterIgnoredOnPost');
+                sandbox.stub(utils, 'filterIgnoredOnTopic');
                 sandbox.stub(utils, 'warn');
             });
             afterEach(() => {
                 sandbox.restore();
             });
             it('should filter using filterIgnoredOnPost', () => {
-                utils.privateFns.filterIgnoredOnPost.yields(null);
-                utils.privateFns.filterIgnoredOnTopic.yields(null);
+                utils.filterIgnoredOnPost.yields(null);
+                utils.filterIgnoredOnTopic.yields(null);
                 filterIgnored({}, {}, () => {});
-                utils.privateFns.filterIgnoredOnPost.called.should.be.true;
+                utils.filterIgnoredOnPost.called.should.be.true;
             });
             it('should filter using filterIgnoredOnTopic', () => {
-                utils.privateFns.filterIgnoredOnPost.yields(null);
-                utils.privateFns.filterIgnoredOnTopic.yields(null);
+                utils.filterIgnoredOnPost.yields(null);
+                utils.filterIgnoredOnTopic.yields(null);
                 filterIgnored({}, {}, () => {});
-                utils.privateFns.filterIgnoredOnTopic.called.should.be.true;
+                utils.filterIgnoredOnTopic.called.should.be.true;
             });
             it('should accept when filters yield no errror', () => {
-                utils.privateFns.filterIgnoredOnPost.yields(null, 'POST OK');
-                utils.privateFns.filterIgnoredOnTopic.yields(null, 'TOPIC OK');
+                utils.filterIgnoredOnPost.yields(null, 'POST OK');
+                utils.filterIgnoredOnTopic.yields(null, 'TOPIC OK');
                 const spy = sinon.spy();
                 filterIgnored({}, {}, spy);
                 spy.lastCall.args.should.deep.equal([null]);
             });
             it('should accept when post filter yields error', () => {
-                utils.privateFns.filterIgnoredOnPost.yields('ignore', 'POST NOT OK');
-                utils.privateFns.filterIgnoredOnTopic.yields(null, 'TOPIC OK');
+                utils.filterIgnoredOnPost.yields('ignore', 'POST NOT OK');
+                utils.filterIgnoredOnTopic.yields(null, 'TOPIC OK');
                 const spy = sinon.spy();
                 filterIgnored({}, {}, spy);
                 spy.lastCall.args.should.deep.equal(['ignore']);
@@ -745,8 +745,8 @@ describe('utils', () => {
                 utils.warn.lastCall.args.should.deep.equal(['Post #undefined Ignored: POST NOT OK']);
             });
             it('should accept when topic filter yields error', () => {
-                utils.privateFns.filterIgnoredOnPost.yields(null, 'POST OK');
-                utils.privateFns.filterIgnoredOnTopic.yields('ignore', 'TOPIC NOT OK');
+                utils.filterIgnoredOnPost.yields(null, 'POST OK');
+                utils.filterIgnoredOnTopic.yields('ignore', 'TOPIC NOT OK');
                 const spy = sinon.spy();
                 filterIgnored({}, {}, spy);
                 spy.lastCall.args.should.deep.equal(['ignore']);
