@@ -113,7 +113,7 @@ exports.prepare = function prepare(plugConfig, config, events, browser) {
         plugConfig = {};
     }
     internals.events = events;
-    internals.config = config.mergeObjects(defaultConfig, plugConfig);
+    internals.config = config.mergeObjects(true, defaultConfig, plugConfig);
     internals.config.topics.forEach((topic) => events.onTopic(topic, exports.messageHandler));
     if (internals.config.bingeRandomize) {
         internals.config.bingeHour = Math.floor(Math.random() * 24);
