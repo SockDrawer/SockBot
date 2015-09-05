@@ -58,7 +58,14 @@ Stop the plugin prior to exit or reload
 **Kind**: static method of <code>[likes](#module_likes)</code>  
 <a name="module_likes.messageHandler"></a>
 ### likes.messageHandler(data, topic, post)
-Handle topic message
+Like the new post.
+
+In the event of Discourse returning an HTTP 5xx status code,
+the like attempt will be retried up to a maximum of three attempts;
+if after three attempts Discourse is still returning 5xx codes,
+it is safe to assume that it is in the middle of a cooties storm,
+and there is therefore no point in continuing to retry the like action
+and placing unnecessary extra load on the server.
 
 **Kind**: static method of <code>[likes](#module_likes)</code>  
 
