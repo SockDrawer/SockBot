@@ -22,19 +22,19 @@
   },
   "dependencies": {
     "async": "^1.4.0",
-    "js-yaml": "^3.3.1",
-    "later": "^1.1.6",
+    "js-yaml": "^3.4.1",
+    "later": "^1.1.9",
     "request": "^2.60.0",
     "xregexp": "^2.0.0",
-    "yargs": "^3.23.0"
+    "yargs": "^3.24.0"
   },
   "devDependencies": {
-    "blns": "^2.0.0",
+    "blns": "^2.0.1",
     "chai": "^3.2.0",
     "coveralls": "^2.11.4",
     "gulp": "^3.9.0",
     "gulp-eslint": "^1.0.0",
-    "gulp-git": "^1.2.4",
+    "gulp-git": "^1.4.0",
     "gulp-istanbul": "^0.10.0",
     "gulp-jsdoc-to-markdown": "^1.1.1",
     "gulp-mocha": "^2.1.3",
