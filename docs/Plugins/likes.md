@@ -8,6 +8,11 @@ posts as they are made.
 Once configured no interaction is required to use this plugin. The plugin will automatically like new posts
 in the watched threads and if configured perform the catchup runs as well.
 
+The plugin will make a maximum of three attempts to like new posts as they are made, but only if the host
+forum is returning server errors; if three successive server errors occur, then the plugin aborts further
+attempts in order to reduce load on the host forum. Note that this only applies to new posts; if a
+server error occurs during a catchup run, the run is aborted immediately.
+
 ## Configuration Options
 
 | Option           | Type           | Default  |

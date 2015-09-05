@@ -171,6 +171,73 @@ describe('likes plugin', () => {
             });
             events.emit.calledWith('logMessage', 'Liking Post /t/314/159 by @quux').should.be.true;
         });
+        it('should retry on server error', () => {
+            const id = Math.random(),
+                spy = sinon.stub();
+            spy.onCall(0).yields({statusCode: 500});
+            spy.onCall(1).yields(null);
+            setTimeout.callsArg(0);
+            likes.internals.browser = {
+                postAction: spy
+            };
+            likes.messageHandler({
+                type: 'created'
+            }, undefined, {
+                id: id
+            });
+            spy.calledTwice.should.be.true;
+            spy.calledWith('like', id, '').should.always.be.true;
+        });
+        it('should not retry on other error', () => {
+            const id = Math.random(),
+                spy = sinon.stub();
+            spy.onCall(0).yields({statusCode: 499});
+            spy.onCall(1).yields(null);
+            setTimeout.callsArg(0);
+            likes.internals.browser = {
+                postAction: spy
+            };
+            likes.messageHandler({
+                type: 'created'
+            }, undefined, {
+                id: id
+            });
+            spy.calledOnce.should.be.true;
+            spy.calledWith('like', id, '').should.always.be.true;
+        });
+        it('should not retry on success', () => {
+            const id = Math.random(),
+                spy = sinon.stub();
+            spy.onCall(0).yields(null);
+            spy.onCall(1).yields(null);
+            setTimeout.callsArg(0);
+            likes.internals.browser = {
+                postAction: spy
+            };
+            likes.messageHandler({
+                type: 'created'
+            }, undefined, {
+                id: id
+            });
+            spy.calledOnce.should.be.true;
+            spy.calledWith('like', id, '').should.always.be.true;
+        });
+        it('should not make more than three attempts', () => {
+            const id = Math.random(),
+                spy = sinon.stub();
+            spy.yields({statusCode: 500});
+            setTimeout.callsArg(0);
+            likes.internals.browser = {
+                postAction: spy
+            };
+            likes.messageHandler({
+                type: 'created'
+            }, undefined, {
+                id: id
+            });
+            spy.calledThrice.should.be.true;
+            spy.calledWith('like', id, '').should.always.be.true;
+        });
     });
     describe('binge()', () => {
         let sandbox, browserSpy, events;
