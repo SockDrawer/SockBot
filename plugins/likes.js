@@ -145,7 +145,14 @@ exports.stop = function stop() {
 };
 
 /**
- * Handle topic message
+ * Like the new post.
+ *
+ * In the event of Discourse returning an HTTP 5xx status code,
+ * the like attempt will be retried up to a maximum of three attempts;
+ * if after three attempts Discourse is still returning 5xx codes,
+ * it is safe to assume that it is in the middle of a cooties storm,
+ * and there is therefore no point in continuing to retry the like action
+ * and placing unnecessary extra load on the server.
  *
  * @param {external.notifications.notification} data Notification data
  * @param {external.topics.Topic} topic Topic containing post generating notification
@@ -159,7 +166,16 @@ exports.messageHandler = function messageHandler(data, topic, post) {
     setTimeout(() => {
         internals.events.emit('logMessage', 'Liking Post /t/' + post.topic_id + '/' +
             post.post_number + ' by @' + post.username);
-        internals.browser.postAction('like', post.id, '', () => 0);
+        let attempt = 1; //Limit to three tries
+        const liker = err => {
+            attempt++;
+            if (attempt > 3 || !err || err.statusCode < 500) {
+                return;
+            }
+            //Server error; wait 15 seconds and try again
+            setTimeout(() => internals.browser.postAction('like', post.id, '', liker), 15000);
+        };
+        internals.browser.postAction('like', post.id, '', liker);
     }, delay);
 };
 
