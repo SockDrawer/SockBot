@@ -31,7 +31,7 @@ function PostBuffer(delay, callback) {
  * @param {string} content Post Contents to post
  * @param {postedCallback} callback Completion callback
  */
-PostBuffer.prototype.add = (topicId, replyTo, content, callback) => {
+PostBuffer.prototype.add = function add(topicId, replyTo, content, callback) {
     const ctx = this;
     const key = {topicId: topicId, replyTo: replyTo};
     const keyString = 'T' + topicId + 'P' + replyTo; //Required for bucket labelling
