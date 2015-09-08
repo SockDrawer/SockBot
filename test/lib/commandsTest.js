@@ -5,6 +5,7 @@
 const chai = require('chai'),
     sinon = require('sinon');
 chai.should();
+chai.use(require('chai-string'));
 const expect = chai.expect;
 
 // The thing we're testing
@@ -134,7 +135,7 @@ describe('commands', () => {
                 });
                 browser.createPost.callCount.should.equal(1);
                 browser.createPost.calledWith(1, 5).should.be.true;
-                browser.createPost.lastCall.args[2].should.equal(expected);
+                browser.createPost.lastCall.args[2].should.startWith(expected);
             });
             it('should pass callback to createPost', () => {
                 cmdError({
