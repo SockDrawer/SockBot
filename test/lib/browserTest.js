@@ -200,7 +200,8 @@ describe('browser', () => {
     });
     describe('externals', () => {
         const fns = ['createPost', 'createPrivateMessage', 'editPost', 'login', 'messageBus', 'getPost', 'getTopic',
-                'getUser', 'getNotifications', 'postAction', 'getPosts', 'getTopics', 'readPosts'
+                'getUser', 'getNotifications', 'postAction', 'getPosts', 'getTopics', 'readPosts', 'getData',
+                'postData'
             ],
             objs = ['trustLevels', 'postActions'];
         describe('should include expected functions:', () => {
@@ -1636,6 +1637,121 @@ describe('browser', () => {
                 const spy = sinon.spy();
                 object.postAction('like', 0, '', spy);
                 queue.push.firstCall.args[0].callback.should.equal(spy);
+            });
+        });
+        describe('get/post data', () => {
+            describe('getData()', () => {
+                let object, queue;
+                beforeEach(() => {
+                    object = {
+                        delay: 0,
+                        queue: {
+                            push: sinon.stub()
+                        },
+                        getData: browserModule.externals.getData
+                    };
+                    queue = object.queue;
+                });
+                it('should set HTTP method', () => {
+                    object.getData('/some/url', () => 0);
+                    queue.push.firstCall.args[0].method.should.equal('GET');
+                });
+                it('should set URL', () => {
+                    object.getData('/some/url', () => 0);
+                    queue.push.firstCall.args[0].url.should.equal('/some/url');
+                });
+                it('should set delay', () => {
+                    const delay = Math.random() * 5e4;
+                    object.delay = delay;
+                    object.getData('/some/url', () => 0);
+                    queue.push.firstCall.args[0].delay.should.equal(delay);
+                });
+                it('should not set form', () => {
+                    object.getData('/some/url', () => 0);
+                    expect(queue.push.firstCall.args[0].form).to.be.undefined;
+                });
+                it('should set callback', () => {
+                    object.getData('/some/url', () => 0);
+                    queue.push.firstCall.args[0].callback.should.be.a('function');
+                });
+                describe('callback', () => {
+                    let callback, spy;
+                    beforeEach(() => {
+                        spy = sinon.spy();
+                        object.getData('/some/url', spy);
+                        callback = queue.push.firstCall.args[0].callback;
+                    });
+                    it('should be a function', () => {
+                        expect(callback).to.be.a('function');
+                    });
+                    it('should call callback with err', () => {
+                        const err = Math.random();
+                        callback(err, Math.random());
+                        spy.firstCall.args.should.eql([err]);
+                    });
+                    it('should call callback with data', () => {
+                        const data = Math.random();
+                        callback(null, data);
+                        spy.firstCall.args.should.eql([null, data]);
+                    });
+                });
+            });
+            describe('postData()', () => {
+                let object, queue;
+                beforeEach(() => {
+                    object = {
+                        delay: 0,
+                        queue: {
+                            push: sinon.stub()
+                        },
+                        postData: browserModule.externals.postData
+                    };
+                    queue = object.queue;
+                });
+                it('should set HTTP method', () => {
+                    object.postData('/some/url', '', () => 0);
+                    queue.push.firstCall.args[0].method.should.equal('POST');
+                });
+                it('should set URL', () => {
+                    object.postData('/some/url', '', () => 0);
+                    queue.push.firstCall.args[0].url.should.equal('/some/url');
+                });
+                it('should set delay', () => {
+                    const delay = Math.random() * 5e4;
+                    object.delay = delay;
+                    object.postData('/some/url', '', () => 0);
+                    queue.push.firstCall.args[0].delay.should.equal(delay);
+                });
+                it('should set form', () => {
+                    const form = Math.random();
+                    object.postData('/some/url', form, () => 0);
+                    queue.push.firstCall.args[0].form.should.equal(form);
+                });
+                it('should set callback', () => {
+                    object.postData('/some/url', '', () => 0);
+                    queue.push.firstCall.args[0].callback.should.be.a('function');
+                });
+                describe('callback', () => {
+                    let callback, spy;
+                    beforeEach(() => {
+                        spy = sinon.spy();
+                        object.postData('/some/url', '', spy);
+                        callback = queue.push.firstCall.args[0].callback;
+                    });
+                    it('should be a function', () => {
+                        expect(callback).to.be.a('function');
+                    });
+                    it('should call callback with err', () => {
+                        const err = Math.random();
+                        callback(err, Math.random());
+                        spy.firstCall.args.should.eql([err]);
+                    });
+                    it('should call callback with data', () => {
+                        const data = Math.random();
+                        callback(null, data);
+                        spy.firstCall.args.should.eql([null, data]);
+                    });
+                });
             });
         });
     });
