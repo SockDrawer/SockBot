@@ -23,6 +23,7 @@ Webbrowser abstraction for communicating with discourse
   * [~readPosts(topicId, postIds, callback)](#module_browser..readPosts)
   * [~getPost(postId, callback)](#module_browser..getPost)
   * [~getPosts(topicId, eachPost, complete)](#module_browser..getPosts)
+  * [~getLastPosts(topicId, eachPost, complete)](#module_browser..getLastPosts)
   * [~getTopics(eachTopic, complete)](#module_browser..getTopics)
   * [~postAction(action, postId, message, callback)](#module_browser..postAction)
   * [~getTopic(topicId, callback)](#module_browser..getTopic)
@@ -257,6 +258,18 @@ Get post details
 <a name="module_browser..getPosts"></a>
 ### browser~getPosts(topicId, eachPost, complete)
 Get all posts from a topic
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| topicId | <code>number</code> | Topic to get posts from |
+| eachPost | <code>eachPostCallback</code> | Callback to process individual posts |
+| complete | <code>completionCallback</code> | Completion callback |
+
+<a name="module_browser..getLastPosts"></a>
+### browser~getLastPosts(topicId, eachPost, complete)
+Get latest posts from a topic
 
 **Kind**: inner method of <code>[browser](#module_browser)</code>  
 
