@@ -185,7 +185,8 @@ describe('config', () => {
             const input = {
                     core: {
                         username: 'harold',
-                        password: 'crayon'
+                        password: 'crayon',
+                        owner: 'johnson'
                     }
                 },
                 expected = utils.mergeObjects(true, config.internals.defaultConfig, input);
@@ -201,6 +202,9 @@ describe('config', () => {
         it('should remove ignored users', () => {
             const input = {
                     core: {
+                        username: 'harold',
+                        password: 'crayon',
+                        owner: 'johnson',
                         ignoreUsers: []
                     }
                 },
@@ -231,6 +235,51 @@ describe('config', () => {
             spy.called.should.be.true;
             spy.lastCall.args.should.have.length(1);
             expect(spy.lastCall.args[0]).to.be.instanceOf(Error);
+        });
+        it('should validate username', () => {
+            const input = {
+                    core: {
+                        password: 'crayon',
+                        owner: 'johnson'
+                    }
+                };
+            fs.readFile.reset();
+            fs.readFile.yields(null, JSON.stringify(input));
+            const spy = sinon.spy();
+            loadConfiguration('config.js', spy);
+            spy.called.should.be.true;
+            spy.lastCall.args.should.have.length(1);
+            expect(spy.lastCall.args[0]).to.be.Error;
+        });
+        it('should validate password', () => {
+            const input = {
+                    core: {
+                        username: 'harold',
+                        owner: 'johnson'
+                    }
+                };
+            fs.readFile.reset();
+            fs.readFile.yields(null, JSON.stringify(input));
+            const spy = sinon.spy();
+            loadConfiguration('config.js', spy);
+            spy.called.should.be.true;
+            spy.lastCall.args.should.have.length(1);
+            expect(spy.lastCall.args[0]).to.be.Error;
+        });
+        it('should validate owner', () => {
+            const input = {
+                    core: {
+                        username: 'harold',
+                        password: 'crayon'
+                    }
+                };
+            fs.readFile.reset();
+            fs.readFile.yields(null, JSON.stringify(input));
+            const spy = sinon.spy();
+            loadConfiguration('config.js', spy);
+            spy.called.should.be.true;
+            spy.lastCall.args.should.have.length(1);
+            expect(spy.lastCall.args[0]).to.be.Error;
         });
     });
 });

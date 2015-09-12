@@ -7,6 +7,8 @@
  * @license MIT
  */
 
+const later = require('later');
+
 /**
  * Default configuration settings
  * @typedef {object}
@@ -17,7 +19,25 @@ const defaultConfig = {
          * @default
          * @type {number}
          */
-        minAge: 3 * 24 * 60 * 60 * 1000
+        minAge: 3 * 24 * 60 * 60 * 1000,
+        /**
+         * The hour of the day to run the autoreader in UTC (0-23)
+         * @default
+         * @type {number}
+         */
+        hour: 0,
+        /**
+         * The minute of the hour to run the autoreader in UTC (0-59)
+         * @default
+         * @type {number}
+         */
+        minute: 0,
+        /**
+         * Randomise the time of day the autoreader runs (if set, overrides `hour` and `minute`)
+         * @default
+         * @type {boolean}
+         */
+        randomize: true
     },
     /**
      * Internal status store
@@ -61,20 +81,30 @@ exports.prepare = function (plugConfig, config, events, browser) {
     }
     internals.events = events;
     internals.config = config.mergeObjects(true, defaultConfig, plugConfig);
+    if (internals.config.randomize) {
+        internals.config.hour = Math.floor(Math.random() * 24);
+        internals.config.minute = Math.floor(Math.random() * 60);
+    }
 };
 
 /**
  * Start the plugin after login
  */
 exports.start = function () {
-    internals.timer = setInterval(exports.readify, 24 * 60 * 60 * 1000); //Daily
+    //Daily at the specified time
+    const sched = later.parse.recur()
+        .on(internals.config.hour).hour()
+        .on(internals.config.minute).minute();
+    internals.timer = later.setInterval(exports.readify, sched);
 };
 
 /**
  * Stop the plugin prior to exit or reload
  */
 exports.stop = function () {
-    clearInterval(internals.timer);
+    if (internals.timer) {
+        internals.timer.clear();
+    }
     internals.timer = undefined;
 };
 

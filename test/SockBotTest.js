@@ -361,13 +361,15 @@ describe('SockBot', () => {
                 SockBot.internals.events = events;
             });
             afterEach(() => sandbox.restore());
-            it('should throw when doPluginRequire throws', () => {
+            it('should log error when doPluginRequire throws', () => {
                 const err = new Error('who am i?');
                 doPluginRequire.throws(err);
                 config.plugins = {
                     'erroring': true
                 };
-                expect(loadPlugins).to.throw(err);
+                loadPlugins();
+                expect(loadPlugins).to.not.throw;
+                events.emit.calledWith('logError', err.message).should.be.true;
             });
             it('should print error when prepare() function is missing', () => {
                 const module = {
@@ -380,7 +382,7 @@ describe('SockBot', () => {
                 };
                 loadPlugins();
                 events.emit.calledWith('logError',
-                    'Plugin `missingno` does not export `prepare()` function').should.equal(true);
+                    'Plugin `missingno` does not export `prepare()` function').should.be.true;
                 SockBot.internals.plugins.should.have.length(0);
             });
             it('should print error when start() function is missing', () => {
@@ -394,7 +396,7 @@ describe('SockBot', () => {
                 };
                 loadPlugins();
                 events.emit.calledWith('logError',
-                    'Plugin `missingno` does not export `start()` function').should.equal(true);
+                    'Plugin `missingno` does not export `start()` function').should.be.true;
                 SockBot.internals.plugins.should.have.length(0);
             });
             it('should print error when stop() function is missing', () => {
@@ -408,7 +410,7 @@ describe('SockBot', () => {
                 };
                 loadPlugins();
                 events.emit.calledWith('logError',
-                    'Plugin `missingno` does not export `stop()` function').should.equal(true);
+                    'Plugin `missingno` does not export `stop()` function').should.be.true;
                 SockBot.internals.plugins.should.have.length(0);
             });
             it('should add module to plugins list on success', () => {
@@ -422,7 +424,7 @@ describe('SockBot', () => {
                     'myModule': true
                 };
                 loadPlugins();
-                events.emit.calledWith('logError').should.equal(false);
+                events.emit.calledWith('logError').should.be.false;
                 SockBot.internals.plugins.should.deep.equal([module]);
                 module.prepare.pluginName.should.equal('myModule');
             });
@@ -766,7 +768,7 @@ describe('SockBot', () => {
                 test(spy);
                 messages.pollMessages.called.should.be.true;
             });
-            it('should schedule next message poll for three sedonds from now', () => {
+            it('should schedule next message poll for now', () => {
                 SockBot.internals.running = undefined;
                 config.core.pollMessages = true;
                 browser.login.yields(null, {});
@@ -775,10 +777,7 @@ describe('SockBot', () => {
                     spy = sinon.spy();
                 messages.pollMessages.yields(null);
                 test(spy);
-                sandbox.clock.tick(2999);
-                spy.called.should.be.false;
-                sandbox.clock.tick(1);
-                spy.called.should.be.true;
+                spy.called.should.equal(true);
             });
         });
         describe('notifications', () => {

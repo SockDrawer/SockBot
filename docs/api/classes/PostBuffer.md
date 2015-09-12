@@ -6,7 +6,7 @@ Data structure to manage post merging to prevent spamming
 
 * [PostBuffer](#classes.module_PostBuffer)
   * [~PostBuffer(delay, callback)](#classes.module_PostBuffer..PostBuffer)
-    * [.add](#classes.module_PostBuffer..PostBuffer+add)
+    * [.add(topicId, [replyTo], content, callback)](#classes.module_PostBuffer..PostBuffer+add)
   * [~postBufferCallback](#classes.module_PostBuffer..postBufferCallback)
 
 <a name="classes.module_PostBuffer..PostBuffer"></a>
@@ -21,10 +21,10 @@ Create a new PostBuffer
 | callback | <code>postBufferCallback</code> | Buffer delay expiry callback |
 
 <a name="classes.module_PostBuffer..PostBuffer+add"></a>
-#### postBuffer.add
+#### postBuffer.add(topicId, [replyTo], content, callback)
 Add details of a post to buffer
 
-**Kind**: instance property of <code>[PostBuffer](#classes.module_PostBuffer..PostBuffer)</code>  
+**Kind**: instance method of <code>[PostBuffer](#classes.module_PostBuffer..PostBuffer)</code>  
 
 | Param | Type | Description |
 | --- | --- | --- |

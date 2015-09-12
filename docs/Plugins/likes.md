@@ -8,20 +8,42 @@ posts as they are made.
 Once configured no interaction is required to use this plugin. The plugin will automatically like new posts
 in the watched threads and if configured perform the catchup runs as well.
 
+The plugin will make a maximum of three attempts to like new posts as they are made, but only if the host
+forum is returning server errors; if three successive server errors occur, then the plugin aborts further
+attempts in order to reduce load on the host forum. Note that this only applies to new posts; if a
+server error occurs during a catchup run, the run is aborted immediately.
+
 ## Configuration Options
 
-| Option     | Type           | Default  |
-|------------|----------------|----------|
-| `binge`    | True/False     | `false`  |
-| `bingeCap` | Number         | `500`    | 
-| `topics`   | List of Number | `[1000]` | 
-| `delay`    | Number         | `15000`  | 
-| `scatter`  | Number         | `5000`   | 
+| Option           | Type           | Default  |
+|------------------|----------------|----------|
+| `binge`          | True/False     | `false`  |
+| `bingeHour`      | Number         | `0`      | 
+| `bingeMinute`    | Number         | `0`      | 
+| `bingeRandomize` | Boolean        | `true`   | 
+| `bingeCap`       | Number         | `500`    | 
+| `topics`         | List of Number | `[1000]` | 
+| `delay`          | Number         | `15000`  | 
+| `scatter`        | Number         | `5000`   | 
 
 ## `binge`
 This switch activates or deactivates catchup mode. If set to true the bot will automatically look for unliked
 posts in the target threads and like them, up to a maximum daily limit or until an error is received from 
 the host forum.
+
+## `bingeHour`
+This sets the hour of the day in which to begin a like binge.
+Use this setting to schedule a binge during a quiet time of day.
+Note: The time is in UTC.
+
+## `bingeMinute`
+This sets the minute in the hour at which to begin a like binge.
+Use this setting to schedule a binge during a quiet time of day.
+Note: The time is in UTC.
+
+## `bingeRandomize`
+This randomizes the time of day the likes binge starts.
+If set, this setting overrides both `bingeHour` and `bingeMinute`.
 
 ## `bingeCap`
 This sets the maximum number of posts to like in any one catchup binge. This is useful if starting the plugin
@@ -53,7 +75,10 @@ core:
   password: someBotPassword
 plugins:
   likes: 
-    binge: false
+    binge: true
+    bingeHour: 2
+    bingeMinute: 30
+    randomize: false
     bingeCap: 500
     topics:
       - 1000
@@ -70,7 +95,10 @@ plugins:
   },
   "plugins": {
     "likes": {
-      "binge": false,
+      "binge": true,
+      "bingeHour": 2,
+      "bingeMinute": 30,
+      "randomize": false,
       "bingeCap": 500,
       "topics": [1000],
       "delay": 15000,
