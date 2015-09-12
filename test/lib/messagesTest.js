@@ -1369,13 +1369,13 @@ describe('messages', () => {
                     const message = {
                         post: Math.random(),
                         topic: {
-                            'topic_id': Math.random()
+                            id: Math.random()
                         },
                         data: Math.random()
                     };
                     emit.returns(true);
                     finalStep(null, [message]);
-                    emit.calledWith('topic#' + message.topic.topic_id,
+                    emit.calledWith('topic#' + message.topic.id,
                         message.data, message.topic, message.post).should.equal(true);
                 });
                 it('should emit warning for unhandled message', () => {
