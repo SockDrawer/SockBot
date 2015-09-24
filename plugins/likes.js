@@ -8,7 +8,8 @@
  * @author Accalia
  * @license MIT
  */
-const async = require('async');
+const async = require('async'),
+    later = require('later');
 
 /**
  * Default configuration settings
@@ -27,6 +28,24 @@ const defaultConfig = {
          * @default
          */
         bingeCap: 500,
+        /**
+         * The hour of the day to go on a like binge in UTC (0-23)
+         * @default
+         * @type {number}
+         */
+        bingeHour: 0,
+        /**
+         * The minute of the hour to go on a like binge in UTC (0-59)
+         * @default
+         * @type {number}
+         */
+        bingeMinute: 0,
+        /**
+         * Randomise the time of day the likes binge starts (if set, overrides `bingeHour` and `bingeMinute`)
+         * @default
+         * @type {boolean}
+         */
+        bingeRandomize: true,
         /**
          * Topics to hand out likes in
          * @type {number[]}
@@ -94,8 +113,12 @@ exports.prepare = function prepare(plugConfig, config, events, browser) {
         plugConfig = {};
     }
     internals.events = events;
-    internals.config = config.mergeObjects(defaultConfig, plugConfig);
+    internals.config = config.mergeObjects(true, defaultConfig, plugConfig);
     internals.config.topics.forEach((topic) => events.onTopic(topic, exports.messageHandler));
+    if (internals.config.bingeRandomize) {
+        internals.config.bingeHour = Math.floor(Math.random() * 24);
+        internals.config.bingeMinute = Math.floor(Math.random() * 60);
+    }
 };
 
 /**
@@ -103,7 +126,11 @@ exports.prepare = function prepare(plugConfig, config, events, browser) {
  */
 exports.start = function start() {
     if (internals.config.binge) {
-        internals.bingeInterval = setInterval(exports.binge, 24 * 60 * 60 * 1000);
+        //Daily at the specified time
+        const sched = later.parse.recur()
+            .on(internals.config.bingeHour).hour()
+            .on(internals.config.bingeMinute).minute();
+        internals.bingeInterval = later.setInterval(exports.binge, sched);
     }
 };
 
@@ -112,12 +139,20 @@ exports.start = function start() {
  */
 exports.stop = function stop() {
     if (internals.bingeInterval) {
-        clearInterval(internals.bingeInterval);
+        internals.bingeInterval.clear();
     }
+    internals.bingeInterval = undefined;
 };
 
 /**
- * Handle topic message
+ * Like the new post.
+ *
+ * In the event of Discourse returning an HTTP 5xx status code,
+ * the like attempt will be retried up to a maximum of three attempts;
+ * if after three attempts Discourse is still returning 5xx codes,
+ * it is safe to assume that it is in the middle of a cooties storm,
+ * and there is therefore no point in continuing to retry the like action
+ * and placing unnecessary extra load on the server.
  *
  * @param {external.notifications.notification} data Notification data
  * @param {external.topics.Topic} topic Topic containing post generating notification
@@ -131,7 +166,16 @@ exports.messageHandler = function messageHandler(data, topic, post) {
     setTimeout(() => {
         internals.events.emit('logMessage', 'Liking Post /t/' + post.topic_id + '/' +
             post.post_number + ' by @' + post.username);
-        internals.browser.postAction('like', post.id, '', () => 0);
+        let attempt = 1; //Limit to three tries
+        const liker = err => {
+            attempt++;
+            if (attempt > 3 || !err || err.statusCode < 500) {
+                return;
+            }
+            //Server error; wait 15 seconds and try again
+            setTimeout(() => internals.browser.postAction('like', post.id, '', liker), 15000);
+        };
+        internals.browser.postAction('like', post.id, '', liker);
     }, delay);
 };
 

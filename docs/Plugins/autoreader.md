@@ -10,12 +10,28 @@ The plugin will, once a day, automatically read posts older than the configured 
 
 ## Configuration Options
 
-| Option   | Type   | Default                                |
-|----------|--------|----------------------------------------|
+| Option   | Type   | Default                  |
+|----------|--------|--------------------------|
 | `minAge` | Number | `259200000` (three days) |
+| `hour`   | Number | `0`                      |
+| `minute` | Number | `0`                      |
 
 ## `minAge`
 How old a post must be to be automatically read; value is in milliseconds.
+
+## `hour`
+This sets the hour of the day in which to begin reading posts.
+Use this setting to schedule the autoreader during a quiet time of day.
+Note: The time is in UTC.
+
+## `minute`
+This sets the minute in the hour at which to begin reading posts.
+Use this setting to schedule the autoreader during a quiet time of day.
+Note: The time is in UTC.
+
+## `randomize`
+This randomizes the time of day to start reading posts.
+If set, this setting overrides both `hour` and `minute`.
 
 ## Example Configuration
 *YAML*
@@ -27,6 +43,9 @@ core:
 plugins:
   autoreader: 
     minAge: 259200000
+    hour: 2
+    minute: 30
+    randomize: false
 ```
 
 *JSON*
@@ -38,7 +57,10 @@ plugins:
   },
   "plugins": {
     "autoreader": {
-      "minAge": 259200000
+      "minAge": 259200000,
+      "hour": 2,
+      "minute": 30,
+      "randomize": false
     }
   }
 }

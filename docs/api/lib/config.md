@@ -6,7 +6,7 @@
 </dd>
 <dt><a href="#plugins">plugins</a></dt>
 <dd><p>Current plugin configuration</p>
-<p>Set by ineternals. Do not edit</p>
+<p>Set by internals. Do not edit</p>
 </dd>
 <dt><a href="#mergeObjects">mergeObjects</a> ⇒ <code>object</code></dt>
 <dd><p>Merge multiple objects into one object</p>
@@ -52,7 +52,7 @@ Set by internals. Do not edit
 ## plugins
 Current plugin configuration
 
-Set by ineternals. Do not edit
+Set by internals. Do not edit
 
 **Kind**: global variable  
 **Read only**: true  
@@ -139,7 +139,7 @@ User the bot will consider owner
 Owner promotes the user to virtual trust level 9 (above forum admins)
 
 **Kind**: static property of <code>[core](#defaultConfig.core)</code>  
-**Default**: <code>&quot;accalia&quot;</code>  
+**Default**: <code>&quot;&quot;</code>  
 <a name="defaultConfig.core.forum"></a>
 #### core.forum : <code>string</code>
 Base URL for the discourse instance to log into

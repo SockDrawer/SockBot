@@ -7,6 +7,7 @@ const chai = require('chai'),
 chai.should();
 const expect = chai.expect;
 
+const later = require('later');
 const autoreader = require('../../plugins/autoreader'),
     browserModule = require('../../lib/browser'),
     utils = require('../../lib/utils');
@@ -43,6 +44,13 @@ describe('autoreader', () => {
             }, dummyCfg, undefined, undefined);
             autoreader.internals.config.minAge.should.equal(1 * 24 * 60 * 60 * 1000);
         });
+        it('should not randomize reader start', () => {
+            autoreader.prepare({
+                randomize: false
+            }, dummyCfg, undefined, undefined);
+            autoreader.internals.config.hour.should.equal(0);
+            autoreader.internals.config.minute.should.equal(0);
+        });
         it('should store events object in internals', () => {
             const events = Math.random();
             autoreader.prepare(undefined, dummyCfg, events, undefined);
@@ -53,29 +61,29 @@ describe('autoreader', () => {
         let sandbox;
         beforeEach(() => {
             sandbox = sinon.sandbox.create();
-            sandbox.useFakeTimers();
+            sandbox.stub(later, 'setInterval', () => {
+                return {};
+            });
         });
         afterEach(() => {
             sandbox.restore();
         });
         it('should start timer', () => {
-            autoreader.internals.timer = 0;
+            autoreader.internals.timer = undefined;
             autoreader.start();
             expect(autoreader.internals.timer).to.not.be.undefined;
         });
     });
     describe('stop()', () => {
-        let sandbox;
-        beforeEach(() => {
-            sandbox = sinon.sandbox.create();
-            sandbox.useFakeTimers();
-        });
-        afterEach(() => {
-            sandbox.restore();
-        });
         it('should stop timer', () => {
-            autoreader.internals.timer = 1;
+            autoreader.internals.timer = {clear: () => 0};
             autoreader.stop();
+            expect(autoreader.internals.timer).to.be.undefined;
+        });
+        it('should not throw on undefined timer', () => {
+            autoreader.internals.timer = undefined;
+            autoreader.stop();
+            autoreader.stop.should.not.throw;
             expect(autoreader.internals.timer).to.be.undefined;
         });
     });

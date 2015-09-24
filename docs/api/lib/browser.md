@@ -15,12 +15,15 @@ Webbrowser abstraction for communicating with discourse
   * [~pauseQueues(duration)](#module_browser..pauseQueues)
   * [~throttleQueues(err, resp, waitTime)](#module_browser..throttleQueues)
   * [~queueWorker(task, callback)](#module_browser..queueWorker)
+  * [~getData(url, callback)](#module_browser..getData)
+  * [~postData(url, data, callback)](#module_browser..postData)
   * [~createPost(topicId, [replyTo], content, callback)](#module_browser..createPost)
   * [~createPrivateMessage(to, title, content, callback)](#module_browser..createPrivateMessage)
   * [~editPost(postId, content, [editReason], callback)](#module_browser..editPost)
   * [~readPosts(topicId, postIds, callback)](#module_browser..readPosts)
   * [~getPost(postId, callback)](#module_browser..getPost)
   * [~getPosts(topicId, eachPost, complete)](#module_browser..getPosts)
+  * [~getLastPosts(topicId, eachPost, complete)](#module_browser..getLastPosts)
   * [~getTopics(eachTopic, complete)](#module_browser..getTopics)
   * [~postAction(action, postId, message, callback)](#module_browser..postAction)
   * [~getTopic(topicId, callback)](#module_browser..getTopic)
@@ -167,6 +170,29 @@ Process browser tasks with rate limiting
 | [task.delay] | <code>Number</code> | <code>0</code> | Seconds to delay callback after request for additional rate limiting |
 | callback | <code>function</code> |  | Queue task complete callback |
 
+<a name="module_browser..getData"></a>
+### browser~getData(url, callback)
+Get data from a URL
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| url | <code>string</code> | URL to issue GET request to |
+| callback | <code>requestComplete</code> | Completion callback |
+
+<a name="module_browser..postData"></a>
+### browser~postData(url, data, callback)
+Post data to a URL
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| url | <code>string</code> | URL to issue POST request to |
+| data | <code>object</code> | Data to POST |
+| callback | <code>requestComplete</code> | Completion callback |
+
 <a name="module_browser..createPost"></a>
 ### browser~createPost(topicId, [replyTo], content, callback)
 Post content to an existing topic
@@ -232,6 +258,18 @@ Get post details
 <a name="module_browser..getPosts"></a>
 ### browser~getPosts(topicId, eachPost, complete)
 Get all posts from a topic
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| topicId | <code>number</code> | Topic to get posts from |
+| eachPost | <code>eachPostCallback</code> | Callback to process individual posts |
+| complete | <code>completionCallback</code> | Completion callback |
+
+<a name="module_browser..getLastPosts"></a>
+### browser~getLastPosts(topicId, eachPost, complete)
+Get latest posts from a topic
 
 **Kind**: inner method of <code>[browser](#module_browser)</code>  
 

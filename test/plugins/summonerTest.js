@@ -9,7 +9,9 @@ const expect = chai.expect;
 // The thing we're testing
 const summoner = require('../../plugins/summoner'),
     utils = require('../../lib/utils');
-const dummyCfg = {mergeObjects: utils.mergeObjects};
+const dummyCfg = {
+    mergeObjects: utils.mergeObjects
+};
 
 describe('summoner plugin', () => {
     describe('exports', () => {
@@ -208,6 +210,41 @@ describe('summoner plugin', () => {
             it('should prevent @mention embedded in input text', () => {
                 const expected = 'foo is <a class="mention">@&zwj;mention</a> is foo';
                 summoner.internals.configuration.messages = ['foo is @mention is foo'];
+                summoner.mentionHandler(undefined, topic, post);
+                const text = browser.createPost.firstCall.args[2];
+                text.should.equal(expected);
+            });
+            it('should prevent quoted @mention', () => {
+                const expected = 'foo is \'<a class="mention">@&zwj;mention</a>\' is foo';
+                summoner.internals.configuration.messages = ['foo is \'@mention\' is foo'];
+                summoner.mentionHandler(undefined, topic, post);
+                const text = browser.createPost.firstCall.args[2];
+                text.should.equal(expected);
+            });
+            it('should prevent double quoted @mention', () => {
+                const expected = 'foo is "<a class="mention">@&zwj;mention</a>" is foo';
+                summoner.internals.configuration.messages = ['foo is "@mention" is foo'];
+                summoner.mentionHandler(undefined, topic, post);
+                const text = browser.createPost.firstCall.args[2];
+                text.should.equal(expected);
+            });
+            it('should prevent @mention at end of sentence', () => {
+                const expected = 'foo is <a class="mention">@&zwj;mention</a>. is foo';
+                summoner.internals.configuration.messages = ['foo is @mention. is foo'];
+                summoner.mentionHandler(undefined, topic, post);
+                const text = browser.createPost.firstCall.args[2];
+                text.should.equal(expected);
+            });
+            it('should prevent @mention with punctuation', () => {
+                const expected = 'foo is <a class="mention">@&zwj;mention</a>, is foo';
+                summoner.internals.configuration.messages = ['foo is @mention, is foo'];
+                summoner.mentionHandler(undefined, topic, post);
+                const text = browser.createPost.firstCall.args[2];
+                text.should.equal(expected);
+            });
+            it('should not munge email address', () => {
+                const expected = 'foo is foo@example.com';
+                summoner.internals.configuration.messages = ['foo is foo@example.com'];
                 summoner.mentionHandler(undefined, topic, post);
                 const text = browser.createPost.firstCall.args[2];
                 text.should.equal(expected);

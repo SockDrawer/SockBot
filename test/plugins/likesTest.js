@@ -9,14 +9,16 @@ chai.should();
 chai.use(sinonChai);
 const expect = chai.expect;
 
-const 
-
+const later = require('later');
 
 // The thing we're testing
 const likes = require('../../plugins/likes'),
     utils = require('../../lib/utils');
 const dummyCfg = {
     mergeObjects: utils.mergeObjects
+};
+const dummyEvents = {
+    onTopic: () => 0
 };
 
 describe('likes plugin', () => {
@@ -31,35 +33,33 @@ describe('likes plugin', () => {
         it('should export internals()', () => expect(likes.internals).to.be.an('object'));
     });
     describe('prepare()', () => {
+        let sandbox;
+        beforeEach(() => {
+            sandbox = sinon.sandbox.create();
+        });
+        afterEach(() => {
+            sandbox.restore();
+        });
         it('should set browser', () => {
             const browser = {};
-            likes.prepare({}, dummyCfg, {
-                onTopic: () => 0
-            }, browser);
+            likes.prepare({}, dummyCfg, dummyEvents, browser);
             likes.internals.browser.should.equal(browser);
         });
         it('should use default config if config is not object', () => {
-            likes.prepare(true, dummyCfg, {
-                onTopic: () => 0
-            }, null);
+            sandbox.stub(Math, 'random', () => {
+                return 0;
+            });
+            likes.prepare(true, dummyCfg, dummyEvents, null);
             likes.internals.config.should.not.equal(likes.defaultConfig);
-            likes.internals.config.should.deep.equal(likes.defaultConfig);
+            expect(likes.internals.config).to.have.all.keys(likes.defaultConfig);
         });
         it('should merge configs if config is object', () => {
             likes.prepare({
                 a: 1
-            }, dummyCfg, {
-                onTopic: () => 0
-            }, null);
-            const expected = {
-                a: 1,
-                binge: false,
-                bingeCap: 500,
-                topics: [1000],
-                delay: 15000,
-                scatter: 5000
-            };
-            likes.internals.config.should.deep.equal(expected);
+            }, dummyCfg, dummyEvents, null);
+            likes.internals.config.should.not.equal(likes.defaultConfig);
+            expect(likes.internals.config).to.contain.all.keys(likes.defaultConfig);
+            expect(likes.internals.config).to.contain.key('a');
         });
         it('should register for messages from topics', () => {
             const spy = sinon.spy();
@@ -72,65 +72,53 @@ describe('likes plugin', () => {
             spy.calledWith(5, likes.messageHandler).should.be.true;
             spy.calledWith(17, likes.messageHandler).should.be.true;
         });
-
         it('should store events object in internals', () => {
-            const events = {
-                onTopic: () => 0
-            };
-            likes.prepare(true, dummyCfg, events, undefined);
-            likes.internals.events.should.equal(events);
+            likes.prepare(true, dummyCfg, dummyEvents, undefined);
+            likes.internals.events.should.equal(dummyEvents);
+        });
+        it('should not randomize like binge start', () => {
+            likes.prepare({
+                bingeRandomize: false
+            }, dummyCfg, dummyEvents, undefined);
+            likes.internals.config.bingeHour.should.equal(0);
+            likes.internals.config.bingeMinute.should.equal(0);
         });
     });
     describe('start()', () => {
         let sandbox;
         beforeEach(() => {
             sandbox = sinon.sandbox.create();
-            sandbox.stub(global, 'setInterval');
+            sandbox.stub(later, 'setInterval', () => {
+                return {};
+            });
         });
-        afterEach(() => sandbox.restore());
+        afterEach(() => {
+            sandbox.restore();
+        });
         it('should set interval for binge if config binge selected', () => {
             likes.internals.config.binge = true;
+            likes.internals.bingeInterval = undefined;
             likes.start();
-            setInterval.calledWith(likes.binge, 24 * 60 * 60 * 1000).should.be.true;
+            expect(likes.internals.bingeInterval).to.not.be.undefined;
         });
         it('should not set interval for binge if config binge unselected', () => {
             likes.internals.config.binge = false;
+            likes.internals.bingeInterval = undefined;
             likes.start();
-            setInterval.calledWith(likes.binge, 24 * 60 * 60 * 1000).should.be.false;
-        });
-        it('should save interval token for later if config binge selected', () => {
-            const token = Math.random();
-            setInterval.returns(token);
-            likes.internals.config.binge = true;
-            likes.start();
-            likes.internals.bingeInterval.should.equal(token);
-        });
-        it('should save interval token for later if config binge unselected', () => {
-            const token = Math.random();
-            setInterval.returns(null);
-            likes.internals.bingeInterval = token;
-            likes.internals.config.binge = false;
-            likes.start();
-            likes.internals.bingeInterval.should.equal(token);
+            expect(likes.internals.bingeInterval).to.be.undefined;
         });
     });
     describe('stop()', () => {
-        let sandbox;
-        beforeEach(() => {
-            sandbox = sinon.sandbox.create();
-            sandbox.stub(global, 'clearInterval');
-        });
-        afterEach(() => sandbox.restore());
-        it('should remove interval if saved interval exists', () => {
-            const token = Math.random();
-            likes.internals.bingeInterval = token;
+        it('should stop binging', () => {
+            likes.internals.bingeInterval = {clear: () => 0};
             likes.stop();
-            clearInterval.calledWith(token).should.be.true;
+            expect(likes.internals.bingeInterval).to.be.undefined;
         });
-        it('should not remove interval if no saved interval exists', () => {
-            likes.internals.bingeInterval = null;
+        it('should not throw if not binging', () => {
+            likes.internals.bingeInterval = undefined;
             likes.stop();
-            clearInterval.called.should.be.false;
+            likes.stop.should.not.throw;
+            expect(likes.internals.bingeInterval).to.be.undefined;
         });
     });
     describe('messageHandler()', () => {
@@ -187,6 +175,73 @@ describe('likes plugin', () => {
             });
             events.emit.calledWith('logMessage', 'Liking Post /t/314/159 by @quux').should.be.true;
         });
+        it('should retry on server error', () => {
+            const id = Math.random(),
+                spy = sinon.stub();
+            spy.onCall(0).yields({statusCode: 500});
+            spy.onCall(1).yields(null);
+            setTimeout.callsArg(0);
+            likes.internals.browser = {
+                postAction: spy
+            };
+            likes.messageHandler({
+                type: 'created'
+            }, undefined, {
+                id: id
+            });
+            spy.calledTwice.should.be.true;
+            spy.calledWith('like', id, '').should.always.be.true;
+        });
+        it('should not retry on other error', () => {
+            const id = Math.random(),
+                spy = sinon.stub();
+            spy.onCall(0).yields({statusCode: 499});
+            spy.onCall(1).yields(null);
+            setTimeout.callsArg(0);
+            likes.internals.browser = {
+                postAction: spy
+            };
+            likes.messageHandler({
+                type: 'created'
+            }, undefined, {
+                id: id
+            });
+            spy.calledOnce.should.be.true;
+            spy.calledWith('like', id, '').should.always.be.true;
+        });
+        it('should not retry on success', () => {
+            const id = Math.random(),
+                spy = sinon.stub();
+            spy.onCall(0).yields(null);
+            spy.onCall(1).yields(null);
+            setTimeout.callsArg(0);
+            likes.internals.browser = {
+                postAction: spy
+            };
+            likes.messageHandler({
+                type: 'created'
+            }, undefined, {
+                id: id
+            });
+            spy.calledOnce.should.be.true;
+            spy.calledWith('like', id, '').should.always.be.true;
+        });
+        it('should not make more than three attempts', () => {
+            const id = Math.random(),
+                spy = sinon.stub();
+            spy.yields({statusCode: 500});
+            setTimeout.callsArg(0);
+            likes.internals.browser = {
+                postAction: spy
+            };
+            likes.messageHandler({
+                type: 'created'
+            }, undefined, {
+                id: id
+            });
+            spy.calledThrice.should.be.true;
+            spy.calledWith('like', id, '').should.always.be.true;
+        });
     });
     describe('binge()', () => {
         let sandbox, browserSpy, events;
@@ -198,7 +253,6 @@ describe('likes plugin', () => {
             likes.internals.browser = {
                 getPosts: browserSpy
             };
-
             events = {
                 emit: sinon.spy()
             };

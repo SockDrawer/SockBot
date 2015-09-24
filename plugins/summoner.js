@@ -61,7 +61,7 @@ exports.mentionHandler = function mentionHandler(_, topic, post) {
                 value = JSON.stringify(value);
             }
             return value;
-        }).replace(/(^|\s)@(\w+)\b/g, '$1<a class="mention">@&zwj;$2</a>');
+        }).replace(/(^|\W)@(\w+)\b/g, '$1<a class="mention">@&zwj;$2</a>');
     internals.timeouts[topic.id] = now + internals.configuration.cooldown;
     internals.browser.createPost(topic.id, post.post_number, reply, () => 0);
 };
