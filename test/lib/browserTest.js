@@ -18,7 +18,15 @@ const coreBrowser = browserModule.internals.core,
     pluginBrowser = browserModule.internals.plugins;
 
 describe('browser', () => {
-    beforeEach(() => browserModule.internals.current = coreBrowser);
+    beforeEach(() => {
+        sinon.stub(async, 'nextTick', (fn) => fn());//setTimeout(fn, 0));
+        sinon.stub(async, 'setImmediate', (fn) => fn());//setTimeout(fn, 0));
+        browserModule.internals.current = coreBrowser;
+    });
+    afterEach(() => {
+        async.nextTick.restore();
+        async.setImmediate.restore();
+    });
     describe('exports', () => {
         const objs = ['internals', 'externals', 'privateFns'];
         describe('should export expected objects', () => {
@@ -40,7 +48,7 @@ describe('browser', () => {
     describe('internals', () => {
         const fns = ['request'],
             objs = ['core', 'plugins', 'current', 'defaults', 'coreQueue', 'pluginQueue'],
-            vals = ['signature', 'postBufferDelay', 'postSeparator'],
+            vals = ['signature', 'postBufferDelay', 'postSeparator', 'pauseTime'],
             nulls = ['postBuffer'];
         describe('should include expected functions:', () => {
             fns.forEach((fn) => {
@@ -122,16 +130,16 @@ describe('browser', () => {
             it('should update useragent', () => {
                 config.core.username = 'bob';
                 config.core.owner = 'joe';
-                const expected = 'SockBot/' + packageInfo.version + ' (' + packageInfo.releaseName
-                    + '; owner:joe; user:bob)';
+                const expected = 'SockBot/' + packageInfo.version + ' (' +
+                    packageInfo.releaseName + '; owner:joe; user:bob)';
                 coreBrowser.start();
                 browserModule.internals.defaults.headers['User-Agent'].should.equal(expected);
             });
             it('should update signature', () => {
                 config.core.username = 'fred';
                 config.core.owner = 'billy';
-                const expected = '\n\n<!-- SockBot/' + packageInfo.version + ' (' + packageInfo.releaseName
-                    + '; owner:billy; user:fred) %NOW% -->';
+                const expected = '\n\n<!-- SockBot/' + packageInfo.version + ' (' +
+                    packageInfo.releaseName + '; owner:billy; user:fred) %NOW% -->';
                 coreBrowser.start();
                 browserModule.internals.signature.should.equal(expected);
             });
@@ -566,7 +574,7 @@ describe('browser', () => {
                         object.createPrivateMessage(['accalia', 'sockbot'], 100, '', () => 0);
                         const form = queue.push.lastCall.args[0].form;
                         form.should.have.any.key('target_usernames');
-                        form.target_usernames.should.deep.equal(['accalia', 'sockbot']);
+                        form.target_usernames.should.equal('accalia,sockbot');
                     });
                     it('should set `archetype`', () => {
                         object.createPrivateMessage('', 100, '', () => 0);
@@ -966,8 +974,6 @@ describe('browser', () => {
             beforeEach(() => {
                 sandbox = sinon.sandbox.create();
                 sandbox.useFakeTimers();
-                async.setImmediate = (fn) => setTimeout(fn, 0);
-                async.nextTick = (fn) => setTimeout(fn, 0);
                 object = {
                     delay: 0,
                     queue: {
@@ -1134,7 +1140,7 @@ describe('browser', () => {
                     queue.push.onFirstCall().yieldsTo('callback', null, topic);
                     queue.push.onSecondCall().yieldsTo('callback', null, posts);
                     object.getPosts(314159, eachSpy, spy);
-                    sandbox.clock.tick(0);
+                    sandbox.clock.tick(10);
                     eachSpy.callCount.should.equal(3);
                     spy.lastCall.args.should.deep.equal([null]);
                 });
@@ -1155,7 +1161,7 @@ describe('browser', () => {
                     queue.push.onFirstCall().yieldsTo('callback', null, topic);
                     queue.push.onSecondCall().yieldsTo('callback', null, posts);
                     object.getPosts(314159, eachSpy, spy);
-                    sandbox.clock.tick(0);
+                    sandbox.clock.tick();
                     eachSpy.lastCall.args[0].should.deep.equal({
                         cleaned: '',
                         'reply_to': 'https://what.thedailywtf.com/t/undefined/undefined/',
@@ -1359,7 +1365,7 @@ describe('browser', () => {
                 object.getTopics(spy, () => 0);
                 const each = queue.push.firstCall.args[0].callback;
                 each(null, list);
-                sandbox.clock.tick(0);
+                sandbox.clock.tick(10);
                 spy.callCount.should.equal(3);
                 spy.calledWith(1).should.be.true;
                 spy.calledWith(2).should.be.true;
@@ -1409,22 +1415,23 @@ describe('browser', () => {
             });
             it('should pass result info to callback', () => {
                 const spy = sinon.spy(),
-                    info = {'badges': [
-                        {
-                          'id': 3,
-                          'name': 'Regular',
-                          'description': '',
-                          'grant_count': 90,
-                          'allow_title': true,
-                          'multiple_grant': false,
-                          'icon': 'fa-user',
-                          'image': 'fa-user',
-                          'listable': true,
-                          'enabled': true,
-                          'badge_grouping_id': 4,
-                          'system': true,
-                          'badge_type_id': 2
-                        }]};
+                    info = {
+                        'badges': [{
+                            'id': 3,
+                            'name': 'Regular',
+                            'description': '',
+                            'grant_count': 90,
+                            'allow_title': true,
+                            'multiple_grant': false,
+                            'icon': 'fa-user',
+                            'image': 'fa-user',
+                            'listable': true,
+                            'enabled': true,
+                            'badge_grouping_id': 4,
+                            'system': true,
+                            'badge_type_id': 2
+                        }]
+                    };
                 queue.push.yieldsTo('callback', null, info);
                 object.getUser(0, spy);
                 spy.lastCall.args.should.deep.equal([null, info]);
@@ -1587,7 +1594,9 @@ describe('browser', () => {
         });
     });
     describe('privateFns', () => {
-        const fns = ['queueWorker', 'setTrustLevel', 'setPostUrl', 'cleanPostRaw', 'cleanPost', 'getCSRF', 'doLogin'];
+        const fns = ['queueWorker', 'setTrustLevel', 'setPostUrl', 'cleanPostRaw', 'cleanPost', 'getCSRF',
+            'doLogin', 'pauseQueues', 'throttleQueues'
+        ];
         describe('should include expected functions:', () => {
             fns.forEach((fn) => {
                 it('should have: ' + fn + '()', () => expect(browserModule.privateFns[fn]).to.be.a('function'));
@@ -1596,14 +1605,257 @@ describe('browser', () => {
         it('should include only expected keys', () => {
             browserModule.privateFns.should.have.all.keys(fns);
         });
+        describe('pauseQueues()', () => {
+            const pauseQueues = browserModule.privateFns.pauseQueues;
+            let sandbox, coreQueue, pluginQueue;
+            beforeEach(() => {
+                sandbox = sinon.sandbox.create();
+                sandbox.useFakeTimers();
+                coreQueue = {
+                    pause: sinon.stub(),
+                    resume: sinon.stub()
+                };
+                browserModule.internals.coreQueue.queue = coreQueue;
+                pluginQueue = {
+                    pause: sinon.stub(),
+                    resume: sinon.stub()
+                };
+                browserModule.internals.pluginQueue.queue = pluginQueue;
+            });
+            afterEach(() => sandbox.restore());
+            it('should pause coreQueue', () => {
+                pauseQueues(0);
+                coreQueue.pause.called.should.equal(true);
+            });
+            it('should pause pluginQueue', () => {
+                pauseQueues(0);
+                pluginQueue.pause.called.should.equal(true);
+            });
+            it('should unpause coreQueue after duration time', () => {
+                const time = Math.ceil(Math.random() * 1e5) + 1000;
+                pauseQueues(time);
+                sandbox.clock.tick(time - 1);
+                coreQueue.resume.called.should.equal(false);
+                sandbox.clock.tick(1);
+                coreQueue.resume.called.should.equal(true);
+            });
+            it('should unpause pluginQueue after duration time', () => {
+                const time = Math.ceil(Math.random() * 1e5) + 1000;
+                pauseQueues(time);
+                sandbox.clock.tick(time - 1);
+                pluginQueue.resume.called.should.equal(false);
+                sandbox.clock.tick(1);
+                pluginQueue.resume.called.should.equal(true);
+            });
+        });
+        describe('throttleQueues()', () => {
+            const throttleQueues = browserModule.privateFns.throttleQueues;
+            let sandbox, pauseQueues;
+            beforeEach(() => {
+                sandbox = sinon.sandbox.create();
+                sandbox.stub(browserModule.privateFns, 'pauseQueues');
+                pauseQueues = browserModule.privateFns.pauseQueues;
+                browserModule.internals.pauseTime = 0;
+            });
+            afterEach(() => sandbox.restore());
+            describe('pauseTime interaction', () => {
+                it('should call pauseQueues when pauseTime is positive', () => {
+                    throttleQueues(new Error());
+                    pauseQueues.calledWith(6e4).should.equal(true);
+                });
+                it('should call set maximum pauseTime of ten minutes', () => {
+                    browserModule.internals.pauseTime = 1.2e6;
+                    throttleQueues(new Error());
+                    pauseQueues.calledWith(6e5).should.equal(true);
+                });
+                it('should not call pauseQueues when no anomaly', () => {
+                    browserModule.internals.pauseTime = 42;
+                    throttleQueues();
+                    pauseQueues.called.should.equal(false);
+                });
+            });
+            describe('exceptions', () => {
+                it('should set initial backoff delay of 60 seconds on exception', () => {
+                    throttleQueues(new Error());
+                    browserModule.internals.pauseTime.should.equal(6e4);
+                });
+                it('should set minimum backoff delay of 60 seconds on exception', () => {
+                    browserModule.internals.pauseTime = 1e3;
+                    throttleQueues(new Error());
+                    browserModule.internals.pauseTime.should.equal(6e4);
+                });
+                it('should double existing backoff delay exception', () => {
+                    browserModule.internals.pauseTime = 7e4;
+                    throttleQueues(new Error());
+                    browserModule.internals.pauseTime.should.equal(14e4);
+                });
+            });
+            describe('http status codes', () => {
+                [100, 200, 204, 302, 304, 399].forEach(statusCode => {
+                    it('should not trigger backoff delay on http status ' + statusCode, () => {
+                        throttleQueues(null, {
+                            statusCode: statusCode
+                        });
+                        browserModule.internals.pauseTime.should.equal(0);
+                    });
+                });
+                [400, 401, 403, 404, 405, 414, 418, 500, 502, 504, 666, 718].forEach(statusCode => {
+                    it('should set initial backoff delay of 60 seconds on http status ' + statusCode, () => {
+                        throttleQueues(null, {
+                            statusCode: statusCode
+                        });
+                        browserModule.internals.pauseTime.should.equal(6e4);
+                    });
+                });
+                [400, 401, 403, 404, 405, 414, 418, 500, 502, 504, 666, 718].forEach(statusCode => {
+                    it('should set minimum backoff delay of 60 seconds on http status ' + statusCode, () => {
+                        browserModule.internals.pauseTime = 1e3;
+                        throttleQueues(null, {
+                            statusCode: statusCode
+                        });
+                        browserModule.internals.pauseTime.should.equal(6e4);
+                    });
+                });
+                [400, 401, 403, 404, 405, 414, 418, 500, 502, 504, 666, 718].forEach(statusCode => {
+                    it('should double existing backoff delay on http status ' + statusCode, () => {
+                        browserModule.internals.pauseTime = 7e4;
+                        throttleQueues(null, {
+                            statusCode: statusCode
+                        });
+                        browserModule.internals.pauseTime.should.equal(14e4);
+                    });
+                });
+            });
+            describe('long wait time', () => {
+                it('should not set pauseTime for zero wait time', () => {
+                    throttleQueues(null, null, 0);
+                    browserModule.internals.pauseTime.should.equal(0);
+                });
+                it('should not set pauseTime for short wait time', () => {
+                    throttleQueues(null, null, 500);
+                    browserModule.internals.pauseTime.should.equal(0);
+                });
+                it('should not set pauseTime for below threshold wait time', () => {
+                    throttleQueues(null, null, 2999);
+                    browserModule.internals.pauseTime.should.equal(0);
+                });
+                it('should set three second pause on at threshold wait time', () => {
+                    throttleQueues(null, null, 3000);
+                    browserModule.internals.pauseTime.should.equal(3000);
+                });
+                it('should set three second pause on above threshold wait time', () => {
+                    throttleQueues(null, null, 5000);
+                    browserModule.internals.pauseTime.should.equal(3000);
+                });
+                it('should double existing pause time on over threshold wait time', () => {
+                    browserModule.internals.pauseTime = 5000;
+                    throttleQueues(null, null, 5e3);
+                    browserModule.internals.pauseTime.should.equal(1e4);
+                });
+                it('should set minimum pause time of three seconds on over threshold wait time', () => {
+                    browserModule.internals.pauseTime = 1000;
+                    throttleQueues(null, null, 5000);
+                    browserModule.internals.pauseTime.should.equal(3e3);
+                });
+            });
+            it('should weight exception above long wait time', () => {
+                throttleQueues(new Error(), null, 5000);
+                browserModule.internals.pauseTime.should.equal(6e4);
+            });
+            it('should http status above long wait time', () => {
+                throttleQueues(null, {
+                    statusCode: 404
+                }, 5000);
+                browserModule.internals.pauseTime.should.equal(6e4);
+            });
+        });
         describe('queueWorker()', () => {
             const queueWorker = browserModule.privateFns.queueWorker,
                 request = browserModule.internals.request;
-            let clock;
-            before(() => {
-                clock = sinon.useFakeTimers();
+            let sandbox, clock;
+            beforeEach(() => {
+                sandbox = sinon.sandbox.create();
+                clock = sandbox.useFakeTimers();
+                sandbox.stub(browserModule.privateFns, 'throttleQueues');
+                browserModule.internals.pauseTime = 0;
             });
-            it('should delay completion according to delay parameter to throttle requests', (done) => {
+            afterEach(() => {
+                sandbox.restore();
+                browserModule.internals.request = request;
+            });
+            describe('throttleQueues interaction', () => {
+                it('should pass error to throttleQueues', () => {
+                    const stub = sinon.stub(),
+                        error = new Error('hello!');
+                    stub.yields(error, null);
+                    browserModule.internals.request = stub;
+                    queueWorker({}, () => 0);
+                    browserModule.privateFns.throttleQueues.calledWith(error, null);
+                });
+                it('should pass response to throttleQueues', () => {
+                    const stub = sinon.stub(),
+                        resp = Math.random();
+                    stub.yields(null, resp);
+                    browserModule.internals.request = stub;
+                    queueWorker({}, () => 0);
+                    browserModule.privateFns.throttleQueues.calledWith(null, resp);
+                });
+                it('should pass wait time to throttleQueues', () => {
+                    const time = Math.ceil(Math.random() * 5e6) + 5000,
+                        stub = (_, cb) => {
+                            clock.tick(time);
+                            cb(null, null);
+                        };
+                    browserModule.internals.request = stub;
+                    queueWorker({}, () => 0);
+                    browserModule.privateFns.throttleQueues.calledWith(null, null, time);
+                });
+            });
+            describe('error handling', () => {
+                it('should pass errors to task.callback', (done) => {
+                    browserModule.internals.request = (_, cb) => cb('ERROR', null, null);
+                    const queueSpy = sinon.spy(),
+                        callbackSpy = sinon.spy();
+                    queueWorker({
+                        callback: callbackSpy
+                    }, queueSpy);
+                    clock.tick(65 * 1000);
+                    callbackSpy.lastCall.args.should.eql(['ERROR', null]);
+                    queueSpy.called.should.be.true;
+                    done();
+                });
+                it('should add pauseTime to callback response delay', () => {
+                    browserModule.internals.request = (_, cb) => cb();
+                    const queueSpy = sinon.spy(),
+                        callbackSpy = sinon.spy(),
+                        delay = Math.ceil(Math.random() * 15 * 1000);
+                    browserModule.internals.pauseTime = 6e4;
+                    queueWorker({
+                        delay: delay,
+                        callback: callbackSpy
+                    }, queueSpy);
+                    clock.tick(0);
+                    callbackSpy.called.should.be.false;
+                    clock.tick(6e4);
+                    callbackSpy.called.should.be.true;
+                });
+                it('should add pauseTime delay to task delay', () => {
+                    browserModule.internals.request = (_, cb) => cb();
+                    const queueSpy = sinon.spy(),
+                        callbackSpy = sinon.spy(),
+                        delay = Math.ceil(Math.random() * 15 * 1000);
+                    browserModule.internals.pauseTime = 6e4;
+                    queueWorker({
+                        delay: delay,
+                        callback: callbackSpy
+                    }, queueSpy);
+                    clock.tick(delay);
+                    queueSpy.called.should.be.false;
+                    clock.tick(60 * 1000);
+                    queueSpy.called.should.be.true;
+                });
+            });
+            it('should delay completion according to delay parameter to throttle requests', () => {
                 browserModule.internals.request = (_, cb) => cb(null, null, '"foobar"');
                 const spy = sinon.spy(),
                     delay = Math.ceil(1500 + Math.random() * 5000);
@@ -1611,10 +1863,9 @@ describe('browser', () => {
                     delay: delay
                 }, spy);
                 clock.tick(delay - 1);
-                spy.called.should.be.false;
+                spy.called.should.equal(false);
                 clock.tick(2);
-                spy.called.should.be.true;
-                done();
+                spy.called.should.equal(true);
             });
             it('should not delay completion if delay parameter omitted', (done) => {
                 browserModule.internals.request = (_, cb) => cb(null, null, '"foobar"');
@@ -1624,7 +1875,7 @@ describe('browser', () => {
                 spy.called.should.be.true;
                 done();
             });
-            it('should accept invalid JSON', (done) => {
+            it('should accept invalid JSON', () => {
                 browserModule.internals.request = (_, cb) => cb(null, null, '"foobar');
                 const queueSpy = sinon.spy(),
                     callbackSpy = sinon.spy();
@@ -1636,23 +1887,6 @@ describe('browser', () => {
                 callbackSpy.lastCall.args.should.have.length(2);
                 expect(callbackSpy.lastCall.args[0]).to.be.null;
                 callbackSpy.lastCall.args[1].should.equal('"foobar');
-                done();
-            });
-            it('should pass errors to task.callback', (done) => {
-                browserModule.internals.request = (_, cb) => cb('ERROR', null, null);
-                const queueSpy = sinon.spy(),
-                    callbackSpy = sinon.spy();
-                queueWorker({
-                    callback: callbackSpy
-                }, queueSpy);
-                clock.tick(0);
-                callbackSpy.called.should.be.true;
-                callbackSpy.lastCall.args.should.have.length(2);
-                callbackSpy.lastCall.args[0].should.equal('ERROR');
-                expect(callbackSpy.lastCall.args[1]).to.be.null;
-                clock.tick(5000);
-                queueSpy.called.should.be.true;
-                done();
             });
             it('should use default method when omitted', (done) => {
                 let req;
@@ -1732,10 +1966,6 @@ describe('browser', () => {
                 queueSpy.called.should.be.true;
                 req.form.should.deep.equal(form);
                 done();
-            });
-            after(() => {
-                clock.restore();
-                browserModule.internals.request = request;
             });
         });
         describe('getCSRF()', () => {
@@ -2432,7 +2662,7 @@ describe('browser', () => {
                     const post = {
                         raw: badStr
                     };
-                    expect(()=> cleanPost(post)).to.not.throw();
+                    expect(() => cleanPost(post)).to.not.throw();
                     post.should.have.any.key('cleaned');
                 });
 

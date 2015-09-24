@@ -11,6 +11,7 @@ chai.use(sinonChai);
 // The thing we're testing
 const powerlevel = require('../../plugins/powerlevel'),
     utils = require('../../lib/utils');
+const dummyCfg = {mergeObjects: utils.mergeObjects};
 
 describe('Powerlevel plugin', () => {
     describe('exports', () => {
@@ -60,7 +61,8 @@ describe('Powerlevel plugin', () => {
             const config = {
                 core: {
                     username: 'foo'
-                }
+                },
+                mergeObjects: utils.mergeObjects
             };
             powerlevel.prepare(null, config, events, browser);
             expect(powerlevel.internals.browser).to.equal(browser);
@@ -68,7 +70,7 @@ describe('Powerlevel plugin', () => {
         it('should reject a lack of config', () => {
             const browser = {};
             expect(() => {
-                powerlevel.prepare(null, null, events, browser);
+                powerlevel.prepare(null, dummyCfg, events, browser);
             }).to.throw(Error);
         });
          it('should accept plugin config', () => {
@@ -76,7 +78,8 @@ describe('Powerlevel plugin', () => {
             const config = {
                 core: {
                     username: 'foo'
-                }
+                },
+                mergeObjects: utils.mergeObjects
             };
             powerlevel.prepare({}, config, events, browser);
             expect(powerlevel.internals.browser).to.equal(browser);
@@ -98,7 +101,8 @@ describe('Powerlevel plugin', () => {
              const config = {
                 core: {
                     username: 'foo'
-                }
+                },
+                mergeObjects: utils.mergeObjects
             };
 
             powerlevel.prepare(null, config, {}, fakeBrowser);
@@ -151,7 +155,8 @@ describe('Powerlevel plugin', () => {
              const config = {
                 core: {
                     username: 'yamikuronue'
-                }
+                },
+                mergeObjects: utils.mergeObjects
             };
 
             powerlevel.prepare(null, config, {}, fakeBrowser);

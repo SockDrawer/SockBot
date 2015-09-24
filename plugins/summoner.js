@@ -9,13 +9,12 @@
  * @license MIT
  */
 
-const utils = require('../lib/utils');
-
 const internals = {
     browser: null,
     configuration: exports.defaultConfig,
     timeouts: {},
-    interval: null
+    interval: null,
+    events: null
 };
 exports.internals = internals;
 
@@ -64,28 +63,29 @@ exports.mentionHandler = function mentionHandler(_, topic, post) {
             return value;
         }).replace(/(^|\s)@(\w+)\b/g, '$1<a class="mention">@&zwj;$2</a>');
     internals.timeouts[topic.id] = now + internals.configuration.cooldown;
-    internals.browser.createPost(topic.id, post.id, reply, () => 0);
+    internals.browser.createPost(topic.id, post.post_number, reply, () => 0);
 };
 
 /**
  * Prepare Plugin prior to login
  *
- * @param {*} config Plugin specific configuration
- * @param {Config} _ Overall Bot Configuration (ignored)
+ * @param {*} plugConfig Plugin specific configuration
+ * @param {Config} config Overall Bot Configuration
  * @param {externals.events.SockEvents} events EventEmitter used for the bot
  * @param {Browser} browser Web browser for communicating with discourse
  */
-exports.prepare = function prepare(config, _, events, browser) {
-    if (Array.isArray(config)) {
-        config = {
-            messages: config
+exports.prepare = function prepare(plugConfig, config, events, browser) {
+    if (Array.isArray(plugConfig)) {
+        plugConfig = {
+            messages: plugConfig
         };
     }
-    if (config === null || typeof config !== 'object') {
-        config = {};
+    if (plugConfig === null || typeof plugConfig !== 'object') {
+        plugConfig = {};
     }
+    internals.events = events;
     internals.browser = browser;
-    internals.configuration = utils.mergeObjects(exports.defaultConfig, config);
+    internals.configuration = config.mergeObjects(true, exports.defaultConfig, plugConfig);
     events.onNotification('mentioned', exports.mentionHandler);
 };
 

@@ -9,6 +9,7 @@ const expect = chai.expect;
 // The thing we're testing
 const summoner = require('../../plugins/summoner'),
     utils = require('../../lib/utils');
+const dummyCfg = {mergeObjects: utils.mergeObjects};
 
 describe('summoner plugin', () => {
     describe('exports', () => {
@@ -38,7 +39,7 @@ describe('summoner plugin', () => {
         let sandbox, events;
         beforeEach(() => {
             sandbox = sinon.sandbox.create();
-            sandbox.stub(utils, 'mergeObjects');
+            sandbox.stub(dummyCfg, 'mergeObjects');
             events = {
                 onNotification: sinon.spy()
             };
@@ -46,34 +47,51 @@ describe('summoner plugin', () => {
         afterEach(() => sandbox.restore());
         it('should set browser', () => {
             const browser = {};
-            summoner.prepare(null, null, events, browser);
+            summoner.prepare(null, dummyCfg, events, browser);
             expect(summoner.internals.browser).to.equal(browser);
         });
         it('should register for mentioned notification', () => {
-            summoner.prepare(null, null, events, null);
+            summoner.prepare(null, dummyCfg, events, null);
             events.onNotification.calledWith('mentioned', summoner.mentionHandler).should.be.true;
         });
         it('should use provided object config', () => {
             const config = {};
-            summoner.prepare(config, undefined, events, undefined);
-            utils.mergeObjects.firstCall.args[0].should.equal(summoner.defaultConfig);
-            utils.mergeObjects.firstCall.args[1].should.equal(config);
+            summoner.prepare(config, dummyCfg, events, undefined);
+            dummyCfg.mergeObjects.firstCall.args[0].should.be.true;
+            dummyCfg.mergeObjects.firstCall.args[1].should.equal(summoner.defaultConfig);
+            dummyCfg.mergeObjects.firstCall.args[2].should.equal(config);
         });
         it('should accept array config', () => {
             const config = ['this is a config'],
                 expected = {
                     messages: config
                 };
-            summoner.prepare(config, undefined, events, undefined);
-            utils.mergeObjects.firstCall.args[0].should.equal(summoner.defaultConfig);
-            utils.mergeObjects.firstCall.args[1].should.deep.equal(expected);
+            summoner.prepare(config, dummyCfg, events, undefined);
+            dummyCfg.mergeObjects.firstCall.args[0].should.be.true;
+            dummyCfg.mergeObjects.firstCall.args[1].should.equal(summoner.defaultConfig);
+            dummyCfg.mergeObjects.firstCall.args[2].should.deep.equal(expected);
+        });
+        it('should accept full config', () => {
+            const config = {
+                    cooldown: 1000,
+                    messages: ['this is a config']
+                },
+                expected = {
+                    cooldown: 1000,
+                    messages: ['this is a config']
+                };
+            summoner.prepare(config, dummyCfg, events, undefined);
+            dummyCfg.mergeObjects.firstCall.args[0].should.be.true;
+            dummyCfg.mergeObjects.firstCall.args[1].should.equal(summoner.defaultConfig);
+            dummyCfg.mergeObjects.firstCall.args[2].should.deep.equal(expected);
         });
         describe('non object configuration', () => {
             [null, undefined, 0, 3.14, true, false, 'string', () => 0].forEach((config) => {
                 it('should use default config for: ' + config, () => {
-                    summoner.prepare(config, undefined, events, undefined);
-                    utils.mergeObjects.firstCall.args[0].should.equal(summoner.defaultConfig);
-                    utils.mergeObjects.firstCall.args[1].should.deep.equal({});
+                    summoner.prepare(config, dummyCfg, events, undefined);
+                    dummyCfg.mergeObjects.firstCall.args[0].should.be.true;
+                    dummyCfg.mergeObjects.firstCall.args[1].should.equal(summoner.defaultConfig);
+                    dummyCfg.mergeObjects.firstCall.args[2].should.deep.equal({});
                 });
             });
         });
@@ -93,7 +111,7 @@ describe('summoner plugin', () => {
                 id: 314
             };
             post = {
-                id: 456
+                post_number: 456 //eslint-disable-line camelcase
             };
             summoner.internals.timeouts = {};
         });
@@ -105,16 +123,16 @@ describe('summoner plugin', () => {
             browser.createPost.calledWith(topicid).should.be.true;
         });
         it('should reply to triggering post', () => {
-            const postid = Math.random();
-            post.id = postid;
+            const postnumber = Math.random();
+            post.post_number = postnumber; //eslint-disable-line camelcase
             summoner.mentionHandler(undefined, topic, post);
-            browser.createPost.calledWith(topic.id, postid).should.be.true;
+            browser.createPost.calledWith(topic.id, postnumber).should.be.true;
         });
         it('should reply with expected text', () => {
             const text = 'foo';
             summoner.internals.configuration.messages = [text];
             summoner.mentionHandler(undefined, topic, post);
-            browser.createPost.calledWith(topic.id, post.id, text).should.be.true;
+            browser.createPost.calledWith(topic.id, post.post_number, text).should.be.true;
         });
         it('should reply with callback', () => {
             summoner.mentionHandler(undefined, topic, post);

@@ -15,6 +15,8 @@ Command Parser for SockBot2.0
     * [~parseMentionCommand(line)](#module_commands..parseMentionCommand) ⇒ <code>command</code>
     * [~getCommandHelps()](#module_commands..getCommandHelps) ⇒ <code>string</code>
     * [~cmdError(command)](#module_commands..cmdError)
+    * [~shutdown()](#module_commands..shutdown)
+    * [~cmdShutUp(command)](#module_commands..cmdShutUp)
     * [~cmdHelp(command)](#module_commands..cmdHelp)
     * [~registerCommand(command, helpstring, handler, callback)](#module_commands..registerCommand) ⇒ <code>undefined</code>
     * [~commandProtect(event, handler)](#module_commands..commandProtect) ⇒ <code>boolean</code>
@@ -90,6 +92,21 @@ Replies on unhandled command with helptext
 | Param | Type | Description |
 | --- | --- | --- |
 | command | <code>command</code> | Unhandled command |
+
+<a name="module_commands..shutdown"></a>
+### commands~shutdown()
+Actually perform the bot termination. Do not terminate process, just bot.
+
+**Kind**: inner method of <code>[commands](#module_commands)</code>  
+<a name="module_commands..cmdShutUp"></a>
+### commands~cmdShutUp(command)
+Shut the bot up until manually restarted
+
+**Kind**: inner method of <code>[commands](#module_commands)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| command | <code>command</code> | the shut up command |
 
 <a name="module_commands..cmdHelp"></a>
 ### commands~cmdHelp(command)

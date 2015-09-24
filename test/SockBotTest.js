@@ -17,12 +17,21 @@ const SockBot = require('../SockBot'),
     messages = require('../lib/messages'),
     notifications = require('../lib/notifications'),
     config = require('../lib/config'),
-    utils = require('../lib/utils');
+    utils = require('../lib/utils'),
+    packageInfo = require('../package.json');
 const browser = browserPlugin();
 
 describe('SockBot', () => {
+        beforeEach(() => {
+        sinon.stub(async, 'nextTick', (fn) => fn());//setTimeout(fn, 0));
+        sinon.stub(async, 'setImmediate', (fn) => fn());//setTimeout(fn, 0));
+    });
+    afterEach(() => {
+        async.nextTick.restore();
+        async.setImmediate.restore();
+    });
     describe('exports', () => {
-        const fns = ['start', 'stop', 'prepare'],
+        const fns = ['start', 'stop', 'prepare', 'logMessage', 'logWarning', 'logError'],
             objs = ['privateFns', 'internals'],
             vals = ['version', 'releaseName'];
         describe('should export expected functions:', () => {
@@ -104,9 +113,8 @@ describe('SockBot', () => {
         });
         describe('prepareEvents()', () => {
             const prepareEvents = SockBot.privateFns.prepareEvents;
-            let sandbox, tick;
+            let sandbox;
             beforeEach(() => {
-                tick = async.nextTick;
                 sandbox = sinon.sandbox.create();
                 sandbox.stub(browser, 'setPlugins');
                 sandbox.stub(utils, 'uuid');
@@ -115,11 +123,47 @@ describe('SockBot', () => {
                 sandbox.stub(commands, 'prepare');
                 sandbox.stub(browser, 'prepare');
                 sandbox.useFakeTimers();
-                async.nextTick = (fn) => setTimeout(fn, 0);
             });
             afterEach(() => {
                 sandbox.restore();
-                async.nextTick = tick;
+            });
+            describe('log Events', () => {
+                it('should set up `logMessage` event', () => {
+                    const spy = sinon.spy();
+                    messages.prepare.yields(null);
+                    notifications.prepare.yields(null);
+                    commands.prepare.yields(null);
+                    browser.prepare.yields(null);
+                    prepareEvents(spy);
+                    sandbox.clock.tick(0);
+                    spy.called.should.be.true;
+                    const events = spy.firstCall.args[1];
+                    events.listeners('logMessage').should.eql([SockBot.logMessage]);
+                });
+                it('should set up `logWarning` event', () => {
+                    const spy = sinon.spy();
+                    messages.prepare.yields(null);
+                    notifications.prepare.yields(null);
+                    commands.prepare.yields(null);
+                    browser.prepare.yields(null);
+                    prepareEvents(spy);
+                    sandbox.clock.tick(0);
+                    spy.called.should.be.true;
+                    const events = spy.firstCall.args[1];
+                    events.listeners('logWarning').should.eql([SockBot.logWarning]);
+                });
+                it('should set up `logError` event', () => {
+                    const spy = sinon.spy();
+                    messages.prepare.yields(null);
+                    notifications.prepare.yields(null);
+                    commands.prepare.yields(null);
+                    browser.prepare.yields(null);
+                    prepareEvents(spy);
+                    sandbox.clock.tick(0);
+                    spy.called.should.be.true;
+                    const events = spy.firstCall.args[1];
+                    events.listeners('logError').should.eql([SockBot.logError]);
+                });
             });
             describe('setup calls', () => {
                 describe('messages', () => {
@@ -306,13 +350,15 @@ describe('SockBot', () => {
         });
         describe('loadPlugins()', () => {
             const loadPlugins = SockBot.privateFns.loadPlugins;
-            let sandbox, doPluginRequire;
+            let sandbox, doPluginRequire, events;
             beforeEach(() => {
                 sandbox = sinon.sandbox.create();
                 doPluginRequire = sandbox.stub(SockBot.privateFns, 'doPluginRequire');
-                sandbox.stub(utils, 'error');
-                sandbox.stub(utils, 'log');
                 SockBot.internals.plugins = [];
+                events = {
+                    emit: sinon.spy()
+                };
+                SockBot.internals.events = events;
             });
             afterEach(() => sandbox.restore());
             it('should throw when doPluginRequire throws', () => {
@@ -333,7 +379,8 @@ describe('SockBot', () => {
                     'missingno': true
                 };
                 loadPlugins();
-                utils.error.calledWith('Plugin `missingno` does not export `prepare()` function').should.equal(true);
+                events.emit.calledWith('logError',
+                    'Plugin `missingno` does not export `prepare()` function').should.equal(true);
                 SockBot.internals.plugins.should.have.length(0);
             });
             it('should print error when start() function is missing', () => {
@@ -346,7 +393,8 @@ describe('SockBot', () => {
                     'missingno': true
                 };
                 loadPlugins();
-                utils.error.calledWith('Plugin `missingno` does not export `start()` function').should.equal(true);
+                events.emit.calledWith('logError',
+                    'Plugin `missingno` does not export `start()` function').should.equal(true);
                 SockBot.internals.plugins.should.have.length(0);
             });
             it('should print error when stop() function is missing', () => {
@@ -359,7 +407,8 @@ describe('SockBot', () => {
                     'missingno': true
                 };
                 loadPlugins();
-                utils.error.calledWith('Plugin `missingno` does not export `stop()` function').should.equal(true);
+                events.emit.calledWith('logError',
+                    'Plugin `missingno` does not export `stop()` function').should.equal(true);
                 SockBot.internals.plugins.should.have.length(0);
             });
             it('should add module to plugins list on success', () => {
@@ -373,7 +422,7 @@ describe('SockBot', () => {
                     'myModule': true
                 };
                 loadPlugins();
-                utils.error.called.should.equal(false);
+                events.emit.calledWith('logError').should.equal(false);
                 SockBot.internals.plugins.should.deep.equal([module]);
                 module.prepare.pluginName.should.equal('myModule');
             });
@@ -388,7 +437,7 @@ describe('SockBot', () => {
                     'myModule': true
                 };
                 loadPlugins();
-                utils.log.calledWith('Plugin `myModule` Loaded').should.be.true;
+                events.emit.calledWith('logMessage', 'Plugin `myModule` Loaded').should.be.true;
             });
             it('should support multiple plugins', () => {
                 const module1 = {
@@ -486,20 +535,17 @@ describe('SockBot', () => {
         });
     });
     describe('prepare()', () => {
-        let sandbox, tick;
+        let sandbox;
         beforeEach(() => {
-            tick = async.setImmediate;
             sandbox = sinon.sandbox.create();
             sandbox.stub(SockBot.privateFns, 'loadConfig');
             sandbox.stub(SockBot.privateFns, 'prepareEvents');
             sandbox.stub(SockBot.privateFns, 'loadPlugins');
             sandbox.useFakeTimers();
-            async.setImmediate = (fn) => setTimeout(fn, 0);
             SockBot.internals.plugins = [];
         });
         afterEach(() => {
             sandbox.restore();
-            async.setImmediate = tick;
         });
         it('should call privateFns.loadConfig()', () => {
             SockBot.privateFns.loadConfig.yields(null, null);
@@ -597,12 +643,10 @@ describe('SockBot', () => {
         });
     });
     describe('start()', () => {
-        let sandbox;
+        let sandbox, events;
         const ievents = notifications.internals;
         beforeEach(function () {
             sandbox = sinon.sandbox.create();
-            sandbox.stub(utils, 'log');
-            sandbox.stub(utils, 'warn');
             sandbox.stub(browser, 'login');
             sandbox.stub(async, 'whilst');
             sandbox.stub(messages, 'pollMessages');
@@ -612,6 +656,10 @@ describe('SockBot', () => {
             sandbox.stub(commands, 'start');
             sandbox.stub(browser, 'start');
             sandbox.useFakeTimers();
+            events = {
+                emit: sinon.spy()
+            };
+            SockBot.internals.events = events;
             notifications.internals.events = {
                 onChannel: () => 0
             };
@@ -637,7 +685,7 @@ describe('SockBot', () => {
             const err = new Error('i am a scary error! wooo!');
             browser.login.yields(err);
             SockBot.start(() => 0);
-            utils.warn.calledWith('Login Failed: Error: i am a scary error! wooo!').should.be.true;
+            events.emit.calledWith('logWarning', 'Login Failed: Error: i am a scary error! wooo!').should.be.true;
         });
         it('should set config.user', () => {
             const user = {};
@@ -651,7 +699,7 @@ describe('SockBot', () => {
             };
             browser.login.yields(null, user);
             SockBot.start(() => 0);
-            utils.log.calledWith('SockBot `' + user.username + '` Started');
+            events.emit.calledWith('logMessage', 'SockBot `' + user.username + '` Started');
         });
         it('should set run flag', () => {
             SockBot.internals.running = undefined;
@@ -793,11 +841,24 @@ describe('SockBot', () => {
         });
     });
     describe('stop()', () => {
-        let sandbox;
+        let sandbox, emit;
         beforeEach(function () {
             sandbox = sinon.sandbox.create();
-            sandbox.stub(utils, 'log');
             sandbox.stub(browser, 'stop');
+            emit = sinon.stub();
+            SockBot.internals.events = {
+                emit: emit
+            };
+            SockBot.internals.plugins = [];
+        });
+        afterEach(function () {
+            sandbox.restore();
+        });
+        it('should log stop event', () => {
+            SockBot.stop();
+            emit.firstCall.args.should.eql([
+                'logMessage', 'Stopping SockBot ' + packageInfo.version + ' ' + packageInfo.releaseName
+            ]);
         });
         it('should stop plugins', () => {
             const plugin1 = {
@@ -826,8 +887,32 @@ describe('SockBot', () => {
             SockBot.stop(spy);
             spy.called.should.be.true;
         });
-        afterEach(function () {
-            sandbox.restore();
+    });
+    describe('logMessage()', () => {
+        beforeEach(() => sinon.stub(utils, 'log'));
+        afterEach(() => utils.log.restore());
+        it('should proxy utils.log()', () => {
+            const message = 'foobar' + Math.random();
+            SockBot.logMessage(message);
+            utils.log.calledWith(message).should.equal(true);
+        });
+    });
+    describe('logWarning()', () => {
+        beforeEach(() => sinon.stub(utils, 'warn'));
+        afterEach(() => utils.warn.restore());
+        it('should proxy utils.warn()', () => {
+            const message = 'foobar' + Math.random();
+            SockBot.logWarning(message);
+            utils.warn.calledWith(message).should.equal(true);
+        });
+    });
+    describe('logError()', () => {
+        beforeEach(() => sinon.stub(utils, 'error'));
+        afterEach(() => utils.error.restore());
+        it('should proxy utils.error()', () => {
+            const message = 'foobar' + Math.random();
+            SockBot.logError(message);
+            utils.error.calledWith(message).should.equal(true);
         });
     });
 });

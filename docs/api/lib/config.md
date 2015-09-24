@@ -8,6 +8,12 @@
 <dd><p>Current plugin configuration</p>
 <p>Set by ineternals. Do not edit</p>
 </dd>
+<dt><a href="#mergeObjects">mergeObjects</a> ⇒ <code>object</code></dt>
+<dd><p>Merge multiple objects into one object</p>
+<p>Later objects override earlier objects</p>
+<p>This is simply a reference to the function of the same name in <code>utils</code>,
+exposed to allow plugins to call it without <code>require</code>ing <code>utils</code> itself</p>
+</dd>
 <dt><a href="#user">user</a></dt>
 <dd><p>Current logged in user</p>
 <p>Set by internals. Do not edit</p>
@@ -50,6 +56,23 @@ Set by ineternals. Do not edit
 
 **Kind**: global variable  
 **Read only**: true  
+<a name="mergeObjects"></a>
+## mergeObjects ⇒ <code>object</code>
+Merge multiple objects into one object
+
+Later objects override earlier objects
+
+This is simply a reference to the function of the same name in `utils`,
+exposed to allow plugins to call it without `require`ing `utils` itself
+
+**Kind**: global variable  
+**Returns**: <code>object</code> - object constructed by merging `mixin`s from left to right  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| [mergeArrays] | <code>boolean</code> | Merge arrays instead of concatenating them |
+| ...mixin | <code>object</code> | Objects to merge |
+
 <a name="user"></a>
 ## user
 Current logged in user

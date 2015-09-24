@@ -6,7 +6,6 @@
  * @author RaceProUK
  * @license MIT
  */
-const utils = require('../lib/utils');
 
 /**
  * Default configuration settings
@@ -39,7 +38,12 @@ const defaultConfig = {
          * Used to stop the autoreading when the plugin is stopped
          * @type {object}
          */
-        timer: undefined
+        timer: undefined,
+        /**
+         * EventEmitter used for internal communication
+         * @type {externals.events.SockEvents}
+         */
+        events: null
     };
 
 /**
@@ -49,10 +53,14 @@ const defaultConfig = {
  * @param {Config} config Overall Bot Configuration
  * @param {externals.events.SockEvents} events EventEmitter used for the bot
  * @param {Browser} browser Web browser for communicating with discourse
-*/
+ */
 exports.prepare = function (plugConfig, config, events, browser) {
     internals.browser = browser;
-    internals.config = utils.mergeObjects(true, defaultConfig, plugConfig);
+    if (typeof plugConfig !== 'object') {
+        plugConfig = {};
+    }
+    internals.events = events;
+    internals.config = config.mergeObjects(true, defaultConfig, plugConfig);
 };
 
 /**
@@ -79,7 +87,7 @@ exports.readify = function () {
         if (!topic) {
             return;
         }
-        utils.log('Reading topic `' + topic.slug + '`');
+        internals.events.emit('logMessage', 'Reading topic `' + topic.slug + '`');
         const now = new Date().getTime() - internals.config.minAge;
         const postIds = [];
         internals.browser.getPosts(topic.id, (post, nextPost) => {
@@ -88,7 +96,7 @@ exports.readify = function () {
             }
             nextPost();
         }, () => {
-            if (postIds.length > 0){
+            if (postIds.length > 0) {
                 internals.browser.readPosts(topic.id, postIds, () => 0);
             }
         });

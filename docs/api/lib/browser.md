@@ -12,6 +12,8 @@ Webbrowser abstraction for communicating with discourse
   * [~prepare(events, callback)](#module_browser..prepare)
   * [~stop()](#module_browser..stop)
   * [~start()](#module_browser..start)
+  * [~pauseQueues(duration)](#module_browser..pauseQueues)
+  * [~throttleQueues(err, resp, waitTime)](#module_browser..throttleQueues)
   * [~queueWorker(task, callback)](#module_browser..queueWorker)
   * [~createPost(topicId, [replyTo], content, callback)](#module_browser..createPost)
   * [~createPrivateMessage(to, title, content, callback)](#module_browser..createPrivateMessage)
@@ -127,6 +129,28 @@ Start the browser module
 Set the request User-Agent based on configuration, set post signature, create core and plugin request queues
 
 **Kind**: inner method of <code>[browser](#module_browser)</code>  
+<a name="module_browser..pauseQueues"></a>
+### browser~pauseQueues(duration)
+Pause all discourse communication for a given period of time
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| duration | <code>number</code> | length of time to pause in milliseconds |
+
+<a name="module_browser..throttleQueues"></a>
+### browser~throttleQueues(err, resp, waitTime)
+Calculate and apply throttling to the queues based on current discourse performance
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| err | <code>Error</code> | Error encountered in request |
+| resp | <code>request.Response</code> | response  object |
+| waitTime | <code>number</code> | Miliseconds elapsed between start and end of request |
+
 <a name="module_browser..queueWorker"></a>
 ### browser~queueWorker(task, callback)
 Process browser tasks with rate limiting

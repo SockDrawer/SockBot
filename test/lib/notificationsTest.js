@@ -16,6 +16,14 @@ const notifications = require('../../lib/notifications'),
 const browser = require('../../lib/browser')();
 
 describe('notifications', () => {
+    beforeEach(() => {
+        sinon.stub(async, 'nextTick', (fn) => fn());//setTimeout(fn, 0));
+        sinon.stub(async, 'setImmediate', (fn) => fn());//setTimeout(fn, 0));
+    });
+    afterEach(() => {
+        async.nextTick.restore();
+        async.setImmediate.restore();
+    });
     const notifyTypeMap = {
         1: 'mentioned',
         2: 'replied',
@@ -48,7 +56,7 @@ describe('notifications', () => {
         });
         describe('should export expected values', () => {
             vals.forEach((val) => {
-                it(val, () => notifications.should.have.key(val));
+                it(val, () => notifications.should.have.any.key(val));
             });
         });
         it('should export only expected keys', () => {
@@ -58,7 +66,7 @@ describe('notifications', () => {
     describe('internals', () => {
         const fns = [],
             objs = ['events', 'notifyTypes'],
-            vals = [];
+            vals = ['startTime'];
         describe('should export expected functions:', () => {
             fns.forEach((fn) => {
                 it(fn + '()', () => expect(notifications.internals[fn]).to.be.a('function'));
@@ -71,7 +79,7 @@ describe('notifications', () => {
         });
         describe('should export expected values', () => {
             vals.forEach((val) => {
-                it(val, () => notifications.internals.should.have.key(val));
+                it(val, () => notifications.internals.should.have.any.key(val));
             });
         });
         it('should export only expected keys', () => {
@@ -183,13 +191,10 @@ describe('notifications', () => {
                 events.emit = sinon.stub();
                 sandbox = sinon.sandbox.create();
                 sandbox.stub(utils, 'filterIgnored');
-                sandbox.stub(utils, 'warn');
                 sandbox.stub(browser, 'getTopic');
                 sandbox.stub(browser, 'getPost');
                 sandbox.stub(commands, 'parseCommands');
                 sandbox.useFakeTimers();
-                async.nextTick = (fn) => setTimeout(fn, 0);
-                async.setImmediate = (fn) => setTimeout(fn, 0);
             });
             afterEach(() => sandbox.restore());
             describe('getTopic/getPost subtasks', () => {
@@ -256,7 +261,7 @@ describe('notifications', () => {
                 sandbox.clock.tick(0);
                 events.emit.called.should.be.false;
             });
-            it('should not emit event on ignored', () => {
+            it('should emit event on non ignored', () => {
                 browser.getTopic.yields(null);
                 browser.getPost.yields(null);
                 commands.parseCommands.yields(null);
@@ -376,9 +381,9 @@ describe('notifications', () => {
                 utils.filterIgnored.yields(null);
                 handleTopicNotification(notification);
                 sandbox.clock.tick(0);
-                utils.warn.called.should.be.true;
-                utils.warn.firstCall.args[0].should.equal('someNotification notification #' +
-                    notification.id + ' was not handled!');
+                const emit = notifications.internals.events.emit;
+                emit.calledWith('logWarning', 'someNotification notification #' +
+                    notification.id + ' was not handled!').should.be.true;
             });
             it('should not warn on handled notification', () => {
                 const topic = {},
@@ -390,7 +395,8 @@ describe('notifications', () => {
                 events.emit.returns(true);
                 handleTopicNotification(notification);
                 sandbox.clock.tick(0);
-                utils.warn.called.should.be.false;
+                const emit = notifications.internals.events.emit;
+                emit.calledWith('logWarning').should.be.false;
             });
         });
         describe('onNotification()', () => {
@@ -400,7 +406,8 @@ describe('notifications', () => {
                 sandbox = sinon.sandbox.create();
                 sandbox.stub(utils, 'warn');
                 notifications.internals.events = {
-                    on: sinon.spy()
+                    on: sinon.spy(),
+                    emit: sinon.spy()
                 };
             });
             afterEach(() => sandbox.restore());
@@ -408,13 +415,13 @@ describe('notifications', () => {
                 it('should print warning on unrecognized type', () => {
                     const type = '' + Math.random();
                     onNotification(type, () => 0);
-                    utils.warn.called.should.be.true;
-                    utils.warn.firstCall.args[0].should.equal('Notification type `' + type + '` is not recognized.');
+                    const emit = notifications.internals.events.emit;
+                    emit.calledWith('logWarning', 'Notification type `' + type + '` is not recognized.').should.be.true;
                 });
                 Object.keys(notifyTypeMap).map((t) => notifyTypeMap[t]).forEach((type) => {
                     it('should not print warning on recognized type: ' + type, () => {
                         onNotification(type, () => 0);
-                        utils.warn.called.should.be.false;
+                        notifications.internals.events.emit.calledWith('logWarning').should.be.false;
                     });
                 });
             });
@@ -451,16 +458,15 @@ describe('notifications', () => {
         });
     });
     describe('pollNotifications()', () => {
-        let sandbox;
+        let sandbox, events;
         beforeEach(() => {
             sandbox = sinon.sandbox.create();
             sandbox.stub(browser, 'getNotifications');
             sandbox.stub(notifications.privateFns, 'handleTopicNotification');
-            sandbox.stub(utils, 'warn');
-            sandbox.stub(utils, 'log');
-            notifications.internals.events = {
+            events = {
                 emit: sandbox.stub()
             };
+            notifications.internals.events = events;
         });
         afterEach(() => {
             sandbox.restore();
@@ -474,14 +480,28 @@ describe('notifications', () => {
         it('should log notification', () => {
             const spy = sinon.spy();
             notifications.pollNotifications(spy);
-            utils.log.calledWith('Polling Notifications').should.be.true;
+            notifications.internals.events.emit.calledWith('logMessage', 'Polling Notifications').should.be.true;
         });
-        it('should pass error to callback on failure', () => {
-            browser.getNotifications.yields('i am error');
-            const spy = sinon.spy();
-            notifications.pollNotifications(spy);
-            spy.called.should.be.true;
-            spy.firstCall.args[0].should.equal('i am error');
+        describe('invalid discourse response robustness', () => {
+            it('should pass error to callback on failure', () => {
+                browser.getNotifications.yields('i am error');
+                const spy = sinon.spy();
+                notifications.pollNotifications(spy);
+                spy.called.should.be.true;
+                spy.firstCall.args[0].should.equal('i am error');
+            });
+            it('should emit warning on invalid notifications (null response)', () => {
+                browser.getNotifications.yields(null, null);
+                const spy = sinon.spy();
+                notifications.pollNotifications(spy);
+                events.emit.calledWith('logWarning', 'No notifications recieved from Discourse.').should.be.true;
+            });
+            it('should emit warning on invalid notifications (missing key response)', () => {
+                browser.getNotifications.yields(null, {});
+                const spy = sinon.spy();
+                notifications.pollNotifications(spy);
+                events.emit.calledWith('logWarning', 'No notifications recieved from Discourse.').should.be.true;
+            });
         });
         it('should signal success to callback on poll success', () => {
             browser.getNotifications.yields(null, {
@@ -492,15 +512,74 @@ describe('notifications', () => {
             spy.called.should.be.true;
             expect(spy.firstCall.args[0]).to.equal(null);
         });
-        it('should filter read notifications', () => {
-            browser.getNotifications.yields(null, {
-                notifications: [{
-                    read: true
-                }]
+        describe('notification filtering', () => {
+            beforeEach(() => notifications.internals.startTime = Date.parse('2015-01-01'));
+            it('should filter read notifications from after bot start', () => {
+                browser.getNotifications.yields(null, {
+                    notifications: [{
+                        read: true,
+                        'created_at': '2016-01-01',
+                        'topic_id': 1
+                    }]
+                });
+                notifications.pollNotifications(() => 0);
+                notifications.privateFns.handleTopicNotification.called.should.be.false;
             });
-            notifications.pollNotifications(() => 0);
-            notifications.internals.events.emit.called.should.be.false;
-            notifications.privateFns.handleTopicNotification.called.should.be.false;
+            it('should accept unread notifications from after bot start', () => {
+                browser.getNotifications.yields(null, {
+                    notifications: [{
+                        read: false,
+                        'created_at': '2016-01-01',
+                        'topic_id': 1
+                    }]
+                });
+                notifications.pollNotifications(() => 0);
+                notifications.privateFns.handleTopicNotification.called.should.be.true;
+            });
+            it('should filter unread notifications from before bot start', () => {
+                browser.getNotifications.yields(null, {
+                    notifications: [{
+                        read: false,
+                        'created_at': '2014-01-01',
+                        'topic_id': 1
+                    }]
+                });
+                notifications.pollNotifications(() => 0);
+                notifications.privateFns.handleTopicNotification.called.should.be.false;
+            });
+            it('should filter read notifications from before bot start', () => {
+                browser.getNotifications.yields(null, {
+                    notifications: [{
+                        read: true,
+                        'created_at': '2014-01-01',
+                        'topic_id': 1
+                    }]
+                });
+                notifications.pollNotifications(() => 0);
+                notifications.privateFns.handleTopicNotification.called.should.be.false;
+            });
+            it('should accept unread notifications with invalid created_at date', () => {
+                browser.getNotifications.yields(null, {
+                    notifications: [{
+                        read: false,
+                        'created_at': 'a',
+                        'topic_id': 1
+                    }]
+                });
+                notifications.pollNotifications(() => 0);
+                notifications.privateFns.handleTopicNotification.called.should.be.true;
+            });
+            it('should filter read notifications with invalid created_at date', () => {
+                browser.getNotifications.yields(null, {
+                    notifications: [{
+                        read: true,
+                        'created_at': 'a',
+                        'topic_id': 1
+                    }]
+                });
+                notifications.pollNotifications(() => 0);
+                notifications.privateFns.handleTopicNotification.called.should.be.false;
+            });
         });
         it('should emit expected message on non-topic notification', () => {
             const notify = {
@@ -532,8 +611,8 @@ describe('notifications', () => {
                 notifications: [notify]
             });
             notifications.pollNotifications(() => 0);
-            utils.warn.called.should.be.true;
-            utils.warn.firstCall.args[0].should.equal('UNKNOWN notification #' + notify.id + ' was not handled!');
+            const emit = notifications.internals.events.emit;
+            emit.calledWith('logWarning', 'UNKNOWN notification #' + notify.id + ' was not handled!').should.be.true;
         });
         it('should not print warning on handled notification', () => {
             const notify = {
@@ -544,7 +623,7 @@ describe('notifications', () => {
                 notifications: [notify]
             });
             notifications.pollNotifications(() => 0);
-            utils.warn.called.should.be.false;
+            notifications.internals.events.emit.calledWith('logWarning').should.be.false;
         });
         describe('type mapping', () => {
             it('should map invalid notification_type to `UNKNOWN`', () => {
@@ -579,8 +658,8 @@ describe('notifications', () => {
                     notifications: [notify]
                 });
                 notifications.pollNotifications(() => 0);
-                const call = notifications.internals.events.emit.firstCall;
-                call.args[0].should.equal('notification#UNKNOWN');
+                const emit = notifications.internals.events.emit;
+                emit.calledWith('notification#UNKNOWN').should.equal(true);
             });
             Object.keys(notifyTypeMap).forEach((type) => {
                 it('should emit `notification#' + notifyTypeMap[type] + '` for type ' + type, () => {
@@ -591,8 +670,8 @@ describe('notifications', () => {
                         notifications: [notify]
                     });
                     notifications.pollNotifications(() => 0);
-                    const call = notifications.internals.events.emit.firstCall;
-                    call.args[0].should.equal('notification#' + notifyTypeMap[type]);
+                    const emit = notifications.internals.events.emit;
+                    emit.calledWith('notification#' + notifyTypeMap[type]).should.equal(true);
                 });
             });
         });

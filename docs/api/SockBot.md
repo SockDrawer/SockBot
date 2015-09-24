@@ -10,6 +10,9 @@ Main Module for SockBot2.0
     * [.prepare(configuration, callback)](#module_SockBot.prepare)
     * [.start(callback)](#module_SockBot.start)
     * [.stop(callback)](#module_SockBot.stop)
+    * [.logMessage(message)](#module_SockBot.logMessage)
+    * [.logWarning(warning)](#module_SockBot.logWarning)
+    * [.logError(error)](#module_SockBot.logError)
   * _inner_
     * [~doPluginRequire(module, requireIt)](#module_SockBot..doPluginRequire) ⇒ <code>object</code>
     * [~prepareEvents(callback)](#module_SockBot..prepareEvents)
@@ -48,6 +51,36 @@ Stop the event loop and signal plugins to stop
 | Param | Type | Description |
 | --- | --- | --- |
 | callback | <code>function</code> | Completion callback |
+
+<a name="module_SockBot.logMessage"></a>
+### SockBot.logMessage(message)
+Log a message to console
+
+**Kind**: static method of <code>[SockBot](#module_SockBot)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| message | <code>\*</code> | Message to log |
+
+<a name="module_SockBot.logWarning"></a>
+### SockBot.logWarning(warning)
+Log a warning to console
+
+**Kind**: static method of <code>[SockBot](#module_SockBot)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| warning | <code>\*</code> | Message to log |
+
+<a name="module_SockBot.logError"></a>
+### SockBot.logError(error)
+Log an error to console
+
+**Kind**: static method of <code>[SockBot](#module_SockBot)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| error | <code>\*</code> | Message to log |
 
 <a name="module_SockBot..doPluginRequire"></a>
 ### SockBot~doPluginRequire(module, requireIt) ⇒ <code>object</code>

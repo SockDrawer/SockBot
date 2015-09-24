@@ -10,6 +10,9 @@ const expect = chai.expect;
 // The thing we're testing
 const likes = require('../../plugins/likes'),
     utils = require('../../lib/utils');
+const dummyCfg = {
+    mergeObjects: utils.mergeObjects
+};
 
 describe('likes plugin', () => {
     describe('exports', () => {
@@ -25,13 +28,13 @@ describe('likes plugin', () => {
     describe('prepare()', () => {
         it('should set browser', () => {
             const browser = {};
-            likes.prepare({}, {}, {
+            likes.prepare({}, dummyCfg, {
                 onTopic: () => 0
             }, browser);
             likes.internals.browser.should.equal(browser);
         });
         it('should use default config if config is not object', () => {
-            likes.prepare(true, {}, {
+            likes.prepare(true, dummyCfg, {
                 onTopic: () => 0
             }, null);
             likes.internals.config.should.not.equal(likes.defaultConfig);
@@ -40,7 +43,7 @@ describe('likes plugin', () => {
         it('should merge configs if config is object', () => {
             likes.prepare({
                 a: 1
-            }, {}, {
+            }, dummyCfg, {
                 onTopic: () => 0
             }, null);
             const expected = {
@@ -57,12 +60,20 @@ describe('likes plugin', () => {
             const spy = sinon.spy();
             likes.prepare({
                 topics: [3, 5, 17]
-            }, {}, {
+            }, dummyCfg, {
                 onTopic: spy
             }, null);
             spy.calledWith(3, likes.messageHandler).should.be.true;
             spy.calledWith(5, likes.messageHandler).should.be.true;
             spy.calledWith(17, likes.messageHandler).should.be.true;
+        });
+
+        it('should store events object in internals', () => {
+            const events = {
+                onTopic: () => 0
+            };
+            likes.prepare(true, dummyCfg, events, undefined);
+            likes.internals.events.should.equal(events);
         });
     });
     describe('start()', () => {
@@ -118,12 +129,15 @@ describe('likes plugin', () => {
         });
     });
     describe('messageHandler()', () => {
-        let sandbox;
+        let sandbox, events;
         beforeEach(() => {
+            events = {
+                emit: sinon.spy()
+            };
             sandbox = sinon.sandbox.create();
             sandbox.spy(Math, 'random');
-            sandbox.stub(utils, 'log');
             sandbox.stub(global, 'setTimeout');
+            likes.internals.events = events;
         });
         afterEach(() => sandbox.restore());
         it('should abort if message is not a create message', () => {
@@ -166,11 +180,11 @@ describe('likes plugin', () => {
                 'post_number': 159,
                 username: 'quux'
             });
-            utils.log.calledWith('Liking Post /t/314/159 by @quux').should.be.true;
+            events.emit.calledWith('logMessage', 'Liking Post /t/314/159 by @quux').should.be.true;
         });
     });
     describe('binge()', () => {
-        let sandbox, browserSpy;
+        let sandbox, browserSpy, events;
         beforeEach(() => {
             browserSpy = sinon.spy();
             sandbox = sinon.sandbox.create();
@@ -179,6 +193,11 @@ describe('likes plugin', () => {
             likes.internals.browser = {
                 getPosts: browserSpy
             };
+
+            events = {
+                emit: sinon.spy()
+            };
+            likes.internals.events = events;
         });
         afterEach(() => sandbox.restore());
         it('should reset likeCount', () => {
@@ -188,7 +207,7 @@ describe('likes plugin', () => {
         });
         it('should log binge begin', () => {
             likes.binge();
-            utils.log.calledWith('Beginning Like Binge').should.be.true;
+            events.emit.calledWith('logMessage', 'Beginning Like Binge').should.be.true;
         });
         it('should call async.eachSeries with topic list', () => {
             likes.internals.config.topics = [1, 2, 3];
@@ -198,7 +217,7 @@ describe('likes plugin', () => {
         it('async.eachSeries completed callback should log completion', () => {
             async.eachSeries.callsArgWith(2, 'this is the message');
             likes.binge();
-            utils.log.calledWith('Like Binge Completed: this is the message').should.be.true;
+            events.emit.calledWith('logMessage', 'Like Binge Completed: this is the message').should.be.true;
         });
         it('async.eachSeries eachCallback should call browser.getPosts', () => {
             const topicId = Math.random(),
