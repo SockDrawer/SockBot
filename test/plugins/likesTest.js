@@ -3,11 +3,15 @@
 
 const chai = require('chai'),
     sinon = require('sinon'),
-    async = require('async');
+    async = require('async'),
+    sinonChai = require('sinon-chai');
 chai.should();
+chai.use(sinonChai);
 const expect = chai.expect;
 
 const later = require('later');
+
+// The thing we're testing
 const likes = require('../../plugins/likes'),
     utils = require('../../lib/utils');
 const dummyCfg = {
