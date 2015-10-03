@@ -1258,6 +1258,40 @@ describe('browser', () => {
                         });
                         spy.lastCall.args.should.deep.equal([null]);
                     });
+                    it('should gracefully handle null post_stream', () => {
+                        const spy = sinon.spy(),
+                            eachSpy = sinon.stub(),
+                            topic = {
+                                'post_stream': {
+                                    stream: [2]
+                                }
+                            },
+                            posts = {};
+                        eachSpy.yields(null);
+                        queue.push.onFirstCall().yieldsTo('callback', null, topic);
+                        queue.push.onSecondCall().yieldsTo('callback', null, posts);
+                        object.getPosts(314159, eachSpy, spy);
+                        sandbox.clock.tick();
+                        //No assertions needed
+                    });
+                    it('should gracefully handle invalid post_stream', () => {
+                        const spy = sinon.spy(),
+                            eachSpy = sinon.stub(),
+                            topic = {
+                                'post_stream': {
+                                    stream: [2]
+                                }
+                            },
+                            posts = {
+                                'post_stream': {}
+                            };
+                        eachSpy.yields(null);
+                        queue.push.onFirstCall().yieldsTo('callback', null, topic);
+                        queue.push.onSecondCall().yieldsTo('callback', null, posts);
+                        object.getPosts(314159, eachSpy, spy);
+                        sandbox.clock.tick();
+                        //No assertions needed
+                    });
                 });
             });
         });
