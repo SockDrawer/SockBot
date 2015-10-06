@@ -4,7 +4,8 @@ SockBot is configured via a JSON or YAML configuration file. The configuration c
 one core configuration dictionary and one plugin configuration dictionary.
 
 Core configuration options are fixed and can be found described in the API documentation for [defaultConfig]. 
-Plugin configuration options are determined by the individual plugins and will vary from plugin to plugin.
+Plugin configuration options are determined by the individual plugins and will vary from plugin to plugin;
+consult each plugins' documentation for more details.
 
 [defaultConfig]: api/config/#defaultConfig
 
