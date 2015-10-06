@@ -119,15 +119,15 @@ exports.readify = function () {
         }
         internals.events.emit('logMessage', 'Reading topic `' + topic.slug + '`');
         const now = new Date().getTime() - internals.config.minAge;
-        const postIds = [];
+        const postNumbers = [];
         internals.browser.getPosts(topic.id, (post, nextPost) => {
             if (post && !post.read && Date.parse(post.created_at) < now) {
-                postIds.push(post.id);
+                postNumbers.push(post.post_number);
             }
             nextPost();
         }, () => {
-            if (postIds.length > 0) {
-                internals.browser.readPosts(topic.id, postIds, () => 0);
+            if (postNumbers.length > 0) {
+                internals.browser.readPosts(topic.id, postNumbers, () => 0);
             }
         });
         nextTopic();

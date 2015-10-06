@@ -130,7 +130,7 @@ describe('autoreader', () => {
             });
             sandbox.stub(browser, 'getPosts', (_, each, complete) => {
                 each({
-                    id: 1,
+                    post_number: 1,
                     read: false,
                     created_at: '2000-01-01 00:00'
                 }, complete);
@@ -151,7 +151,7 @@ describe('autoreader', () => {
             });
             sandbox.stub(browser, 'getPosts', (_, each, complete) => {
                 each({
-                    id: 1,
+                    post_number: 1,
                     read: true,
                     created_at: '2000-01-01 00:00'
                 }, complete);
@@ -170,7 +170,7 @@ describe('autoreader', () => {
             });
             sandbox.stub(browser, 'getPosts', (_, each, complete) => {
                 each({
-                    id: 1,
+                    post_number: 1,
                     read: false,
                     created_at: '2100-01-01 00:00'
                 }, complete);
