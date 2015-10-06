@@ -20,7 +20,7 @@ Webbrowser abstraction for communicating with discourse
   * [~createPost(topicId, [replyTo], content, callback)](#module_browser..createPost)
   * [~createPrivateMessage(to, title, content, callback)](#module_browser..createPrivateMessage)
   * [~editPost(postId, content, [editReason], callback)](#module_browser..editPost)
-  * [~readPosts(topicId, postIds, callback)](#module_browser..readPosts)
+  * [~readPosts(topicId, postNumbers, callback)](#module_browser..readPosts)
   * [~getPost(postId, callback)](#module_browser..getPost)
   * [~getPosts(topicId, eachPost, complete)](#module_browser..getPosts)
   * [~getLastPosts(topicId, eachPost, complete)](#module_browser..getLastPosts)
@@ -233,7 +233,7 @@ Edit an existing post.
 | callback | <code>postedCallback</code> | Completion callback |
 
 <a name="module_browser..readPosts"></a>
-### browser~readPosts(topicId, postIds, callback)
+### browser~readPosts(topicId, postNumbers, callback)
 Read post
 
 **Kind**: inner method of <code>[browser](#module_browser)</code>  
@@ -241,7 +241,7 @@ Read post
 | Param | Type | Description |
 | --- | --- | --- |
 | topicId | <code>number</code> | Id of topic to read |
-| postIds | <code>Array.&lt;number&gt;</code> | Ids of posts to read |
+| postNumbers | <code>Array.&lt;number&gt;</code> | Numbers of posts to read |
 | callback | <code>postedCallback</code> | Completion callback |
 
 <a name="module_browser..getPost"></a>
