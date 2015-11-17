@@ -809,7 +809,7 @@ describe('commands', () => {
             });
             it('should accept blank post', () => {
                 commands.parseCommands({
-                    raw: ''
+                    cleaned: ''
                 }, null, callbackSpy);
                 callbackSpy.called.should.be.true;
                 callbackSpy.lastCall.args.should.deep.equal([null, []]);
@@ -825,7 +825,7 @@ describe('commands', () => {
                 });
                 events.emit.returns(true);
                 commands.parseCommands({
-                    raw: '!i am a little text short and stout'
+                    cleaned: '!i am a little text short and stout'
                 }, topic, callbackSpy);
                 clocks.tick(0);
                 events.emit.calledWith('logMessage', 'executing command: foobar').should.equal(true);
@@ -839,7 +839,7 @@ describe('commands', () => {
                 });
                 events.emit.returns(true);
                 commands.parseCommands({
-                    raw: '!i am a little\ntext short\n!and stout'
+                    cleaned: '!i am a little\ntext short\n!and stout'
                 }, null, callbackSpy);
                 clocks.tick(0);
                 events.emit.calledWith('logMessage', 'executing command: foobar').should.equal(true);
@@ -849,7 +849,7 @@ describe('commands', () => {
         describe('command event emitting', () => {
             it('should not emit on non command post', () => {
                 commands.parseCommands({
-                    raw: 'i am a little text short and stout'
+                    cleaned: 'i am a little text short and stout'
                 }, null, callbackSpy);
                 callbackSpy.called.should.be.true;
                 callbackSpy.lastCall.args.should.deep.equal([null, []]);
@@ -859,7 +859,7 @@ describe('commands', () => {
             });
             it('should not emit on non command post 2', () => {
                 commands.parseCommands({
-                    raw: '!i am a little text short and stout'
+                    cleaned: '!i am a little text short and stout'
                 }, null, callbackSpy);
                 callbackSpy.called.should.be.true;
                 callbackSpy.lastCall.args.should.deep.equal([null, []]);
@@ -874,14 +874,14 @@ describe('commands', () => {
                 });
                 events.emit.returns(true);
                 commands.parseCommands({
-                    raw: '!i am a little text short and stout'
+                    cleaned: '!i am a little text short and stout'
                 }, topic, callbackSpy);
                 clocks.tick(0);
                 events.emit.called.should.be.true;
                 events.emit.lastCall.args.should.deep.equal(['command#foobar', {
                     command: 'foobar',
                     post: {
-                        raw: '!i am a little text short and stout'
+                        cleaned: '!i am a little text short and stout'
                     },
                     topic: topic
                 }]);
@@ -895,7 +895,7 @@ describe('commands', () => {
                 });
                 events.emit.returns(true);
                 commands.parseCommands({
-                    raw: '!i am a little\ntext short\n!and stout'
+                    cleaned: '!i am a little\ntext short\n!and stout'
                 }, null, callbackSpy);
                 clocks.tick(0);
                 events.emit.calledWith('command#foobar').should.be.true;
@@ -910,7 +910,7 @@ describe('commands', () => {
                 });
                 events.emit.returns(false);
                 commands.parseCommands({
-                    raw: '!i am a little text short and stout'
+                    cleaned: '!i am a little text short and stout'
                 }, null, callbackSpy);
                 clocks.tick(0);
                 events.emit.calledWith('command#ERROR').should.be.false;
@@ -923,7 +923,7 @@ describe('commands', () => {
                     .onSecondCall().returns(false);
 
                 commands.parseCommands({
-                    raw: '!i am a little text short and stout'
+                    cleaned: '!i am a little text short and stout'
                 }, null, callbackSpy);
                 clocks.tick(0);
                 events.emit.calledWith('command#ERROR').should.equal(true);
@@ -935,7 +935,7 @@ describe('commands', () => {
                 });
                 events.emit.returns(false);
                 commands.parseCommands({
-                    raw: '!i am a little text short and stout'
+                    cleaned: '!i am a little text short and stout'
                 }, null, callbackSpy);
                 clocks.tick(0);
                 events.emit.calledWith('command#ERROR').should.equal(true);
