@@ -17,7 +17,7 @@ plugins:
     minAge: 8.64E7
   summoner:
     messages: 
-      - '@%__username__% has summoned me, and so I appear.'
-      - 'Yes master %__name__%, I shall appear as summoned.'
-      - 'Yes mistress %__name__%, I shall appear as summoned.'
+      - '@%username% has summoned me, and so I appear.'
+      - 'Yes master %name%, I shall appear as summoned.'
+      - 'Yes mistress %name%, I shall appear as summoned.'
   './odd/path': true
