@@ -87,7 +87,7 @@ plugins:
   echo: true
 ```
 
-[config]: ./configuration/
+[config]: ./configuration.md
 
 ## Running the bot
 
