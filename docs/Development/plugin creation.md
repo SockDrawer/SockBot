@@ -51,9 +51,9 @@ notifications and other events.
 This parameter will be a [browser] that is set up to communicate with Discourse. At the time of the 
 prepare() call the browser will not have yet authenticated with discourse.
 
-[EventEmitter]: ../api/external/events#module_SockEvents
-[browser]: ../api/lib/browser#module_browser
-[configuration]: ../api/lib/config
+[EventEmitter]: ../api/external/events.md#module_SockEvents
+[browser]: ../api/lib/browser.md#module_browser
+[configuration]: ../api/lib/config.md
 
 ### Function `start()`
 
