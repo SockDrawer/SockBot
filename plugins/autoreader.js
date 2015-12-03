@@ -113,15 +113,22 @@ exports.stop = function () {
  * reading any unread posts it finds that are older than the configured interval.
  */
 exports.readify = function () {
+    const minAge = new Date().getTime() - internals.config.minAge;
+    const additional = Math.max(internals.config.minAge / 2, 25 * 60 * 60 * 1000);
+    const readCutoff = minAge - additional;
     internals.browser.getTopics((topic, nextTopic) => {
         if (!topic) {
-            return;
+            return nextTopic();
         }
+        const lastPost = Date.parse(topic.last_posted_at);
+        if (lastPost < readCutoff) {
+            return nextTopic();
+        }
+
         internals.events.emit('logMessage', 'Reading topic `' + topic.slug + '`');
-        const now = new Date().getTime() - internals.config.minAge;
         const postNumbers = [];
         internals.browser.getPosts(topic.id, (post, nextPost) => {
-            if (post && !post.read && Date.parse(post.created_at) < now) {
+            if (post && !post.read && Date.parse(post.created_at) < minAge) {
                 postNumbers.push(post.post_number);
             }
             nextPost();
@@ -129,8 +136,8 @@ exports.readify = function () {
             if (postNumbers.length > 0) {
                 internals.browser.readPosts(topic.id, postNumbers, () => 0);
             }
+            nextTopic();
         });
-        nextTopic();
     }, () => 0);
 };
 
