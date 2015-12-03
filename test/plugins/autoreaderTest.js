@@ -76,7 +76,9 @@ describe('autoreader', () => {
     });
     describe('stop()', () => {
         it('should stop timer', () => {
-            autoreader.internals.timer = {clear: () => 0};
+            autoreader.internals.timer = {
+                clear: () => 0
+            };
             autoreader.stop();
             expect(autoreader.internals.timer).to.be.undefined;
         });
@@ -103,11 +105,13 @@ describe('autoreader', () => {
             sandbox.restore();
         });
         it('should not read anything', () => {
-            const spy = sandbox.stub(browser, 'getTopics');
-            spy.callsArgWith(0, undefined);
+            const spy = sandbox.stub(browser, 'getTopics'),
+                spy2 = sinon.spy();
+            spy.callsArgWith(0, undefined, spy2);
             autoreader.prepare(undefined, dummyCfg, events, browser);
             autoreader.readify();
             events.emit.calledWith('logMessage').should.be.false;
+            spy2.called.should.be.true;
         });
         it('should read the topic', () => {
             const topicSpy = sandbox.stub(browser, 'getTopics');
@@ -118,7 +122,18 @@ describe('autoreader', () => {
             sandbox.stub(browser, 'getPosts');
             autoreader.prepare(undefined, dummyCfg, events, browser);
             autoreader.readify();
-            events.emit.calledWith('logMessage', 'Reading topic `Test`').should.be.true;
+        });
+        it('should not read the topic when no new posts could have been made', () => {
+            const topicSpy = sandbox.stub(browser, 'getTopics');
+            topicSpy.callsArgWith(0, {
+                id: 1,
+                slug: 'Test',
+                'last_posted_at': new Date(Date.now() - 5 * 25 * 60 * 60 * 1000).toISOString()
+            }, () => 0);
+            sandbox.stub(browser, 'getPosts');
+            autoreader.prepare(undefined, dummyCfg, events, browser);
+            autoreader.readify();
+            events.emit.calledWith('logMessage', 'Reading topic `Test`').should.be.false;
         });
         /*eslint-disable camelcase */
         it('should read the unread post', () => {
