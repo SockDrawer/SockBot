@@ -23,7 +23,7 @@ For example, if the bot is summoned by user @joeRandom and the reply
 the value of the `username` key in the post, resulting in the reply text of: 
 `'@joeRandom has summoned me, and so I appear.'`
 
-[post]: ../api/external/posts/#external.module_posts.Post
+[post]: ../api/external/posts.md#external.module_posts.Post
 
 ## Configuration Options
 

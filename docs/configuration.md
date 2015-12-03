@@ -7,7 +7,7 @@ Core configuration options are fixed and can be found described in the API docum
 Plugin configuration options are determined by the individual plugins and will vary from plugin to plugin;
 consult each plugins' documentation for more details.
 
-[defaultConfig]: api/config/#defaultConfig
+[defaultConfig]: ./api/lib/config.md#defaultConfig
 
 ## Core Configuration
 Core configuration sets options for the entire bot, such as username/password to login as and what forum to 
