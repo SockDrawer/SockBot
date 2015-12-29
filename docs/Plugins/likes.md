@@ -22,7 +22,7 @@ server error occurs during a catchup run, the run is aborted immediately.
 | `bingeMinute`    | Number         | `0`      | 
 | `bingeRandomize` | Boolean        | `true`   | 
 | `bingeCap`       | Number         | `500`    | 
-| `topics`         | List of Number | `[1000]` | 
+| `topics`         | List of Number | `[]` | 
 | `delay`          | Number         | `15000`  | 
 | `scatter`        | Number         | `5000`   | 
 
