@@ -51,7 +51,7 @@ const defaultConfig = {
          * @type {number[]}
          * @default
          */
-        topics: [1000],
+        topics: [],
         /**
          * Time to delay liking post as posts are streamed in
          * @type {number}
