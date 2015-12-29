@@ -6,22 +6,22 @@ Automatically read posts older than the configured interval.
 **License**: MIT  
 
 * [autoreader](#module_autoreader)
-  * _static_
-    * [.prepare(plugConfig, config, events, browser)](#module_autoreader.prepare)
-    * [.start()](#module_autoreader.start)
-    * [.stop()](#module_autoreader.stop)
-    * [.readify()](#module_autoreader.readify)
-  * _inner_
-    * [~defaultConfig](#module_autoreader..defaultConfig) : <code>object</code>
-      * [.minAge](#module_autoreader..defaultConfig.minAge) : <code>number</code>
-      * [.hour](#module_autoreader..defaultConfig.hour) : <code>number</code>
-      * [.minute](#module_autoreader..defaultConfig.minute) : <code>number</code>
-      * [.randomize](#module_autoreader..defaultConfig.randomize) : <code>boolean</code>
-    * [~internals](#module_autoreader..internals) : <code>object</code>
-      * [.browser](#module_autoreader..internals.browser) : <code>Browser</code>
-      * [.config](#module_autoreader..internals.config) : <code>object</code>
-      * [.timer](#module_autoreader..internals.timer) : <code>object</code>
-      * [.events](#module_autoreader..internals.events) : <code>externals.events.SockEvents</code>
+    * _static_
+        * [.prepare(plugConfig, config, events, browser)](#module_autoreader.prepare)
+        * [.start()](#module_autoreader.start)
+        * [.stop()](#module_autoreader.stop)
+        * [.readify()](#module_autoreader.readify)
+    * _inner_
+        * [~defaultConfig](#module_autoreader..defaultConfig) : <code>object</code>
+            * [.minAge](#module_autoreader..defaultConfig.minAge) : <code>number</code>
+            * [.hour](#module_autoreader..defaultConfig.hour) : <code>number</code>
+            * [.minute](#module_autoreader..defaultConfig.minute) : <code>number</code>
+            * [.randomize](#module_autoreader..defaultConfig.randomize) : <code>boolean</code>
+        * [~internals](#module_autoreader..internals) : <code>object</code>
+            * [.browser](#module_autoreader..internals.browser) : <code>Browser</code>
+            * [.config](#module_autoreader..internals.config) : <code>object</code>
+            * [.timer](#module_autoreader..internals.timer) : <code>object</code>
+            * [.events](#module_autoreader..internals.events) : <code>externals.events.SockEvents</code>
 
 <a name="module_autoreader.prepare"></a>
 ### autoreader.prepare(plugConfig, config, events, browser)
@@ -58,7 +58,7 @@ Default configuration settings
 
 **Kind**: inner typedef of <code>[autoreader](#module_autoreader)</code>  
 
-  * [~defaultConfig](#module_autoreader..defaultConfig) : <code>object</code>
+* [~defaultConfig](#module_autoreader..defaultConfig) : <code>object</code>
     * [.minAge](#module_autoreader..defaultConfig.minAge) : <code>number</code>
     * [.hour](#module_autoreader..defaultConfig.hour) : <code>number</code>
     * [.minute](#module_autoreader..defaultConfig.minute) : <code>number</code>
@@ -93,7 +93,7 @@ Internal status store
 
 **Kind**: inner typedef of <code>[autoreader](#module_autoreader)</code>  
 
-  * [~internals](#module_autoreader..internals) : <code>object</code>
+* [~internals](#module_autoreader..internals) : <code>object</code>
     * [.browser](#module_autoreader..internals.browser) : <code>Browser</code>
     * [.config](#module_autoreader..internals.config) : <code>object</code>
     * [.timer](#module_autoreader..internals.timer) : <code>object</code>

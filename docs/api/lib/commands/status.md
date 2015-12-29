@@ -6,25 +6,25 @@ Status command
 **License**: MIT  
 
 * [status](#module_status)
-  * _static_
-    * [.command](#module_status.command) : <code>string</code>
-    * [.helpText](#module_status.helpText) : <code>string</code>
-    * [.handler(command)](#module_status.handler)
-  * _inner_
-    * [~uptime()](#module_status..uptime) ⇒ <code>string</code>
-    * [~runtime()](#module_status..runtime) ⇒ <code>string</code>
-    * [~platform()](#module_status..platform) ⇒ <code>string</code>
-    * [~cpuArch()](#module_status..cpuArch) ⇒ <code>string</code>
-    * [~cpuUsage()](#module_status..cpuUsage) ⇒ <code>string</code>
-    * [~memoryUsage()](#module_status..memoryUsage) ⇒ <code>string</code>
-    * [~socksFolded()](#module_status..socksFolded) ⇒ <code>string</code>
-    * [~splinesReticulated()](#module_status..splinesReticulated) ⇒ <code>string</code>
-    * [~cogsThrown()](#module_status..cogsThrown) ⇒ <code>string</code>
-    * [~holesDarned()](#module_status..holesDarned) ⇒ <code>string</code>
-    * [~starsGazed()](#module_status..starsGazed) ⇒ <code>string</code>
-    * [~ringsCollected()](#module_status..ringsCollected) ⇒ <code>string</code>
-    * [~dangersWarned(username)](#module_status..dangersWarned) ⇒ <code>string</code>
-    * [~random(limit)](#module_status..random) ⇒ <code>number</code>
+    * _static_
+        * [.command](#module_status.command) : <code>string</code>
+        * [.helpText](#module_status.helpText) : <code>string</code>
+        * [.handler(command)](#module_status.handler)
+    * _inner_
+        * [~uptime()](#module_status..uptime) ⇒ <code>string</code>
+        * [~runtime()](#module_status..runtime) ⇒ <code>string</code>
+        * [~platform()](#module_status..platform) ⇒ <code>string</code>
+        * [~cpuArch()](#module_status..cpuArch) ⇒ <code>string</code>
+        * [~cpuUsage()](#module_status..cpuUsage) ⇒ <code>string</code>
+        * [~memoryUsage()](#module_status..memoryUsage) ⇒ <code>string</code>
+        * [~socksFolded()](#module_status..socksFolded) ⇒ <code>string</code>
+        * [~splinesReticulated()](#module_status..splinesReticulated) ⇒ <code>string</code>
+        * [~cogsThrown()](#module_status..cogsThrown) ⇒ <code>string</code>
+        * [~holesDarned()](#module_status..holesDarned) ⇒ <code>string</code>
+        * [~starsGazed()](#module_status..starsGazed) ⇒ <code>string</code>
+        * [~ringsCollected()](#module_status..ringsCollected) ⇒ <code>string</code>
+        * [~dangersWarned(username)](#module_status..dangersWarned) ⇒ <code>string</code>
+        * [~random(limit)](#module_status..random) ⇒ <code>number</code>
 
 <a name="module_status.command"></a>
 ### status.command : <code>string</code>

@@ -22,10 +22,10 @@ Note: Bot must have permission to post in the topic specified.
 **License**: MIT  
 
 * [anonymizer](#module_anonymizer)
-  * [.prepare(plugConfig, config, events, browser)](#module_anonymizer.prepare)
-  * [.start()](#module_anonymizer.start)
-  * [.stop()](#module_anonymizer.stop)
-  * [.handler(notification, topic, post)](#module_anonymizer.handler)
+    * [.prepare(plugConfig, config, events, browser)](#module_anonymizer.prepare)
+    * [.start()](#module_anonymizer.start)
+    * [.stop()](#module_anonymizer.stop)
+    * [.handler(notification, topic, post)](#module_anonymizer.handler)
 
 <a name="module_anonymizer.prepare"></a>
 ### anonymizer.prepare(plugConfig, config, events, browser)

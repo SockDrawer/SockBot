@@ -5,11 +5,11 @@ Documentation for message-bus JSON objects
 **License**: MIT  
 
 * [messageBus](#external.module_messageBus)
-  * [~message](#external.module_messageBus..message) : <code>object</code>
-  * [~postMessage](#external.module_messageBus..postMessage) : <code>object</code>
-  * [~topicMessage](#external.module_messageBus..topicMessage) : <code>object</code>
-  * [~topicTrackingState](#external.module_messageBus..topicTrackingState) : <code>object</code>
-  * [~notificationsMessage](#external.module_messageBus..notificationsMessage) : <code>object</code>
+    * [~message](#external.module_messageBus..message) : <code>object</code>
+    * [~postMessage](#external.module_messageBus..postMessage) : <code>object</code>
+    * [~topicMessage](#external.module_messageBus..topicMessage) : <code>object</code>
+    * [~topicTrackingState](#external.module_messageBus..topicTrackingState) : <code>object</code>
+    * [~notificationsMessage](#external.module_messageBus..notificationsMessage) : <code>object</code>
 
 <a name="external.module_messageBus..message"></a>
 ### messageBus~message : <code>object</code>

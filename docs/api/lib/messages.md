@@ -6,20 +6,20 @@ message-bus handler for SockBot2.0
 **License**: MIT  
 
 * [messages](#module_messages)
-  * [~processTopicMessage(message)](#module_messages..processTopicMessage)
-  * [~updateChannelPositions(messages)](#module_messages..updateChannelPositions)
-  * [~resetChannelPositions()](#module_messages..resetChannelPositions)
-  * [~statusChannelHandler(message)](#module_messages..statusChannelHandler)
-  * [~onChannel(channel, handler)](#module_messages..onChannel) ⇒ <code>EventEmitter</code>
-  * [~onTopic(topicId, handler)](#module_messages..onTopic) ⇒ <code>EventEmitter</code>
-  * [~removeChannel(channel, handler)](#module_messages..removeChannel) ⇒ <code>EventEmitter</code>
-  * [~removeTopic(topicId, handler)](#module_messages..removeTopic) ⇒ <code>EventEmitter</code>
-  * [~onMessageAdd(event)](#module_messages..onMessageAdd) ⇒ <code>boolean</code>
-  * [~onMessageRemove(event)](#module_messages..onMessageRemove) ⇒ <code>boolean</code>
-  * [~completionCallback](#module_messages..completionCallback)
-  * [~filterCallback](#module_messages..filterCallback)
-  * [~messageHandler](#module_messages..messageHandler)
-  * [~topicMessageHandler](#module_messages..topicMessageHandler)
+    * [~processTopicMessage(message)](#module_messages..processTopicMessage)
+    * [~updateChannelPositions(messages)](#module_messages..updateChannelPositions)
+    * [~resetChannelPositions()](#module_messages..resetChannelPositions)
+    * [~statusChannelHandler(message)](#module_messages..statusChannelHandler)
+    * [~onChannel(channel, handler)](#module_messages..onChannel) ⇒ <code>EventEmitter</code>
+    * [~onTopic(topicId, handler)](#module_messages..onTopic) ⇒ <code>EventEmitter</code>
+    * [~removeChannel(channel, handler)](#module_messages..removeChannel) ⇒ <code>EventEmitter</code>
+    * [~removeTopic(topicId, handler)](#module_messages..removeTopic) ⇒ <code>EventEmitter</code>
+    * [~onMessageAdd(event)](#module_messages..onMessageAdd) ⇒ <code>boolean</code>
+    * [~onMessageRemove(event)](#module_messages..onMessageRemove) ⇒ <code>boolean</code>
+    * [~completionCallback](#module_messages..completionCallback)
+    * [~filterCallback](#module_messages..filterCallback)
+    * [~messageHandler](#module_messages..messageHandler)
+    * [~topicMessageHandler](#module_messages..topicMessageHandler)
 
 <a name="module_messages..processTopicMessage"></a>
 ### messages~processTopicMessage(message)

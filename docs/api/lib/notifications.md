@@ -6,17 +6,17 @@ notifications handler for SockBot2.0
 **License**: MIT  
 
 * [notifications](#module_notifications)
-  * _static_
-    * [.prepare(events, callback)](#module_notifications.prepare)
-    * [.start(events, callback)](#module_notifications.start)
-    * [.pollNotifications(callback)](#module_notifications.pollNotifications)
-  * _inner_
-    * [~handleTopicNotification(notification)](#module_notifications..handleTopicNotification)
-    * [~onNotificationMessage(message)](#module_notifications..onNotificationMessage)
-    * [~onNotification(type, handler)](#module_notifications..onNotification) ⇒ <code>EventEmitter</code>
-    * [~removeNotification(type, handler)](#module_notifications..removeNotification) ⇒ <code>EventEmitter</code>
-    * [~completionCallback](#module_notifications..completionCallback)
-    * [~notificationCallback](#module_notifications..notificationCallback)
+    * _static_
+        * [.prepare(events, callback)](#module_notifications.prepare)
+        * [.start(events, callback)](#module_notifications.start)
+        * [.pollNotifications(callback)](#module_notifications.pollNotifications)
+    * _inner_
+        * [~handleTopicNotification(notification)](#module_notifications..handleTopicNotification)
+        * [~onNotificationMessage(message)](#module_notifications..onNotificationMessage)
+        * [~onNotification(type, handler)](#module_notifications..onNotification) ⇒ <code>EventEmitter</code>
+        * [~removeNotification(type, handler)](#module_notifications..removeNotification) ⇒ <code>EventEmitter</code>
+        * [~completionCallback](#module_notifications..completionCallback)
+        * [~notificationCallback](#module_notifications..notificationCallback)
 
 <a name="module_notifications.prepare"></a>
 ### notifications.prepare(events, callback)

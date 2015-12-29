@@ -5,9 +5,9 @@ Documentation for discourse JSON objects
 **License**: MIT  
 
 * [users](#external.module_users)
-  * [.UserBadge](#external.module_users.UserBadge) : <code>object</code>
-  * [.Badge](#external.module_users.Badge) : <code>object</code>
-  * [.BadgeType](#external.module_users.BadgeType) : <code>object</code>
+    * [.UserBadge](#external.module_users.UserBadge) : <code>object</code>
+    * [.Badge](#external.module_users.Badge) : <code>object</code>
+    * [.BadgeType](#external.module_users.BadgeType) : <code>object</code>
 
 <a name="external.module_users.UserBadge"></a>
 ### users.UserBadge : <code>object</code>

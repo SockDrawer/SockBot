@@ -5,15 +5,15 @@ Documentation for discourse JSON objects
 **License**: MIT  
 
 * [topics](#external.module_topics)
-  * [.NotificationLevel](#external.module_topics.NotificationLevel)
-  * [.NotificationReason](#external.module_topics.NotificationReason)
-  * [.Archetype](#external.module_topics.Archetype)
-  * [.Participant](#external.module_topics.Participant) ⇐ <code>external.users.UserSummary</code>
-  * [.PostStream](#external.module_topics.PostStream) : <code>object</code>
-  * [.TopicSummary](#external.module_topics.TopicSummary) : <code>object</code>
-  * [.Link](#external.module_topics.Link) : <code>object</code>
-  * [.TopicDetails](#external.module_topics.TopicDetails) : <code>object</code>
-  * [.Topic](#external.module_topics.Topic) : <code>object</code>
+    * [.NotificationLevel](#external.module_topics.NotificationLevel)
+    * [.NotificationReason](#external.module_topics.NotificationReason)
+    * [.Archetype](#external.module_topics.Archetype)
+    * [.Participant](#external.module_topics.Participant) ⇐ <code>external.users.UserSummary</code>
+    * [.PostStream](#external.module_topics.PostStream) : <code>object</code>
+    * [.TopicSummary](#external.module_topics.TopicSummary) : <code>object</code>
+    * [.Link](#external.module_topics.Link) : <code>object</code>
+    * [.TopicDetails](#external.module_topics.TopicDetails) : <code>object</code>
+    * [.Topic](#external.module_topics.Topic) : <code>object</code>
 
 <a name="external.module_topics.NotificationLevel"></a>
 ### topics.NotificationLevel

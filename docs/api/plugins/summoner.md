@@ -8,13 +8,13 @@ Watches for @mentions and replies with a canned response
 **License**: MIT  
 
 * [summoner](#module_summoner)
-  * [.defaultConfig](#module_summoner.defaultConfig)
-    * [.cooldown](#module_summoner.defaultConfig.cooldown) : <code>Number</code>
-    * [.messages](#module_summoner.defaultConfig.messages) : <code>Array.&lt;string&gt;</code>
-  * [.mentionHandler(_, topic, post)](#module_summoner.mentionHandler)
-  * [.prepare(plugConfig, config, events, browser)](#module_summoner.prepare)
-  * [.start()](#module_summoner.start)
-  * [.stop()](#module_summoner.stop)
+    * [.defaultConfig](#module_summoner.defaultConfig)
+        * [.cooldown](#module_summoner.defaultConfig.cooldown) : <code>Number</code>
+        * [.messages](#module_summoner.defaultConfig.messages) : <code>Array.&lt;string&gt;</code>
+    * [.mentionHandler(_, topic, post)](#module_summoner.mentionHandler)
+    * [.prepare(plugConfig, config, events, browser)](#module_summoner.prepare)
+    * [.start()](#module_summoner.start)
+    * [.stop()](#module_summoner.stop)
 
 <a name="module_summoner.defaultConfig"></a>
 ### summoner.defaultConfig
@@ -23,8 +23,8 @@ Default plugin configuration
 **Kind**: static property of <code>[summoner](#module_summoner)</code>  
 
 * [.defaultConfig](#module_summoner.defaultConfig)
-  * [.cooldown](#module_summoner.defaultConfig.cooldown) : <code>Number</code>
-  * [.messages](#module_summoner.defaultConfig.messages) : <code>Array.&lt;string&gt;</code>
+    * [.cooldown](#module_summoner.defaultConfig.cooldown) : <code>Number</code>
+    * [.messages](#module_summoner.defaultConfig.messages) : <code>Array.&lt;string&gt;</code>
 
 <a name="module_summoner.defaultConfig.cooldown"></a>
 #### defaultConfig.cooldown : <code>Number</code>
