@@ -1,4 +1,5 @@
 ## Members
+
 <dl>
 <dt><a href="#core">core</a></dt>
 <dd><p>Current core configuration</p>
@@ -19,13 +20,17 @@ exposed to allow plugins to call it without <code>require</code>ing <code>utils<
 <p>Set by internals. Do not edit</p>
 </dd>
 </dl>
+
 ## Constants
+
 <dl>
 <dt><a href="#defaultConfig">defaultConfig</a> : <code>object</code></dt>
 <dd><p>Default configuration options</p>
 </dd>
 </dl>
+
 ## Functions
+
 <dl>
 <dt><a href="#readFile">readFile(path, callback)</a></dt>
 <dd><p>Read and parse configuration file from disc</p>
@@ -34,12 +39,15 @@ exposed to allow plugins to call it without <code>require</code>ing <code>utils<
 <dd><p>Load configuration from disc</p>
 </dd>
 </dl>
+
 ## Typedefs
+
 <dl>
 <dt><a href="#configComplete">configComplete</a></dt>
 <dd><p>Configuration Loaded Callback</p>
 </dd>
 </dl>
+
 <a name="core"></a>
 ## core
 Current core configuration
@@ -89,7 +97,26 @@ Default configuration options
 **Read only**: true  
 
 * [defaultConfig](#defaultConfig) : <code>object</code>
-  * [.core](#defaultConfig.core) : <code>object</code>
+    * [.core](#defaultConfig.core) : <code>object</code>
+        * [.username](#defaultConfig.core.username) : <code>string</code>
+        * [.password](#defaultConfig.core.password) : <code>string</code>
+        * [.owner](#defaultConfig.core.owner) : <code>string</code>
+        * [.forum](#defaultConfig.core.forum) : <code>string</code>
+        * [.ignoreUsers](#defaultConfig.core.ignoreUsers) : <code>Array.&lt;string&gt;</code>
+        * [.ignoreCategories](#defaultConfig.core.ignoreCategories) : <code>Array.&lt;Number&gt;</code>
+        * [.cooldownPeriod](#defaultConfig.core.cooldownPeriod) : <code>Number</code>
+        * [.handleActedMessage](#defaultConfig.core.handleActedMessage) : <code>boolean</code>
+        * [.pollMessages](#defaultConfig.core.pollMessages) : <code>boolean</code>
+        * [.pollNotifications](#defaultConfig.core.pollNotifications) : <code>boolean</code>
+    * [.plugins](#defaultConfig.plugins) : <code>object</code>
+
+<a name="defaultConfig.core"></a>
+### defaultConfig.core : <code>object</code>
+Core configuration options
+
+**Kind**: static property of <code>[defaultConfig](#defaultConfig)</code>  
+
+* [.core](#defaultConfig.core) : <code>object</code>
     * [.username](#defaultConfig.core.username) : <code>string</code>
     * [.password](#defaultConfig.core.password) : <code>string</code>
     * [.owner](#defaultConfig.core.owner) : <code>string</code>
@@ -100,25 +127,6 @@ Default configuration options
     * [.handleActedMessage](#defaultConfig.core.handleActedMessage) : <code>boolean</code>
     * [.pollMessages](#defaultConfig.core.pollMessages) : <code>boolean</code>
     * [.pollNotifications](#defaultConfig.core.pollNotifications) : <code>boolean</code>
-  * [.plugins](#defaultConfig.plugins) : <code>object</code>
-
-<a name="defaultConfig.core"></a>
-### defaultConfig.core : <code>object</code>
-Core configuration options
-
-**Kind**: static property of <code>[defaultConfig](#defaultConfig)</code>  
-
-* [.core](#defaultConfig.core) : <code>object</code>
-  * [.username](#defaultConfig.core.username) : <code>string</code>
-  * [.password](#defaultConfig.core.password) : <code>string</code>
-  * [.owner](#defaultConfig.core.owner) : <code>string</code>
-  * [.forum](#defaultConfig.core.forum) : <code>string</code>
-  * [.ignoreUsers](#defaultConfig.core.ignoreUsers) : <code>Array.&lt;string&gt;</code>
-  * [.ignoreCategories](#defaultConfig.core.ignoreCategories) : <code>Array.&lt;Number&gt;</code>
-  * [.cooldownPeriod](#defaultConfig.core.cooldownPeriod) : <code>Number</code>
-  * [.handleActedMessage](#defaultConfig.core.handleActedMessage) : <code>boolean</code>
-  * [.pollMessages](#defaultConfig.core.pollMessages) : <code>boolean</code>
-  * [.pollNotifications](#defaultConfig.core.pollNotifications) : <code>boolean</code>
 
 <a name="defaultConfig.core.username"></a>
 #### core.username : <code>string</code>

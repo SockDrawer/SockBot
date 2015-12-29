@@ -6,10 +6,10 @@ Example plugin, echos your words back at you.
 **License**: MIT  
 
 * [echo](#module_echo)
-  * [.prepare(plugConfig, config, events, browser)](#module_echo.prepare)
-  * [.start()](#module_echo.start)
-  * [.stop()](#module_echo.stop)
-  * [.handler(notification, topic, post)](#module_echo.handler)
+    * [.prepare(plugConfig, config, events, browser)](#module_echo.prepare)
+    * [.start()](#module_echo.start)
+    * [.stop()](#module_echo.stop)
+    * [.handler(notification, topic, post)](#module_echo.handler)
 
 <a name="module_echo.prepare"></a>
 ### echo.prepare(plugConfig, config, events, browser)

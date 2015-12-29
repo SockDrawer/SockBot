@@ -5,12 +5,12 @@ Documentation for discourse JSON objects
 **License**: MIT  
 
 * [users](#external.module_users)
-  * [.UserActionType](#external.module_users.UserActionType)
-  * [.UserSummary](#external.module_users.UserSummary) : <code>object</code>
-  * [.UserActionSummary](#external.module_users.UserActionSummary) : <code>object</code>
-  * [.UserGroup](#external.module_users.UserGroup) : <code>object</code>
-  * [.User](#external.module_users.User) : <code>object</code>
-  * [.UserProfile](#external.module_users.UserProfile) : <code>object</code>
+    * [.UserActionType](#external.module_users.UserActionType)
+    * [.UserSummary](#external.module_users.UserSummary) : <code>object</code>
+    * [.UserActionSummary](#external.module_users.UserActionSummary) : <code>object</code>
+    * [.UserGroup](#external.module_users.UserGroup) : <code>object</code>
+    * [.User](#external.module_users.User) : <code>object</code>
+    * [.UserProfile](#external.module_users.UserProfile) : <code>object</code>
 
 <a name="external.module_users.UserActionType"></a>
 ### users.UserActionType

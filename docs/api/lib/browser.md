@@ -5,47 +5,47 @@ Webbrowser abstraction for communicating with discourse
 **License**: MIT  
 
 * [browser](#module_browser)
-  * [~trustLevels](#module_browser..trustLevels)
-  * [~postActions](#module_browser..postActions)
-  * [~setCore()](#module_browser..setCore) ⇒ <code>browser</code>
-  * [~setPlugins()](#module_browser..setPlugins) ⇒ <code>browser</code>
-  * [~prepare(events, callback)](#module_browser..prepare)
-  * [~stop()](#module_browser..stop)
-  * [~start()](#module_browser..start)
-  * [~pauseQueues(duration)](#module_browser..pauseQueues)
-  * [~throttleQueues(err, resp, waitTime)](#module_browser..throttleQueues)
-  * [~queueWorker(task, callback)](#module_browser..queueWorker)
-  * [~getData(url, callback)](#module_browser..getData)
-  * [~postData(url, data, callback)](#module_browser..postData)
-  * [~createPost(topicId, [replyTo], content, callback)](#module_browser..createPost)
-  * [~createPrivateMessage(to, title, content, callback)](#module_browser..createPrivateMessage)
-  * [~editPost(postId, content, [editReason], callback)](#module_browser..editPost)
-  * [~readPosts(topicId, postNumbers, callback)](#module_browser..readPosts)
-  * [~getPost(postId, callback)](#module_browser..getPost)
-  * [~getPosts(topicId, eachPost, complete)](#module_browser..getPosts)
-  * [~getLastPosts(topicId, eachPost, complete)](#module_browser..getLastPosts)
-  * [~getTopics(eachTopic, complete)](#module_browser..getTopics)
-  * [~postAction(action, postId, message, callback)](#module_browser..postAction)
-  * [~getTopic(topicId, callback)](#module_browser..getTopic)
-  * [~getUser(username, callback)](#module_browser..getUser)
-  * [~getCSRF(delay, queue, callback)](#module_browser..getCSRF)
-  * [~doLogin(delay, queue, callback)](#module_browser..doLogin)
-  * [~login(callback)](#module_browser..login)
-  * [~messageBus(channels, clientId, callback)](#module_browser..messageBus)
-  * [~getNotifications(callback)](#module_browser..getNotifications)
-  * [~setPostUrl(post)](#module_browser..setPostUrl) ⇒ <code>external.module_posts.CleanedPost</code>
-  * [~setTrustLevel(post)](#module_browser..setTrustLevel) ⇒ <code>external.module_posts.CleanedPost</code>
-  * [~cleanPostRaw(post)](#module_browser..cleanPostRaw) ⇒ <code>external.module_posts.CleanedPost</code>
-  * [~cleanPost(post)](#module_browser..cleanPost) ⇒ <code>external.posts.CleanedPost</code>
-  * [~requestComplete](#module_browser..requestComplete)
-  * [~postedCallback](#module_browser..postedCallback)
-  * [~topicCallback](#module_browser..topicCallback)
-  * [~completedCallback](#module_browser..completedCallback)
-  * [~loginCallback](#module_browser..loginCallback)
-  * [~messageBusCallback](#module_browser..messageBusCallback)
-  * [~notificationsCallback](#module_browser..notificationsCallback)
-  * [~eachTopicCallback](#module_browser..eachTopicCallback)
-  * [~eachPostCallback](#module_browser..eachPostCallback)
+    * [~trustLevels](#module_browser..trustLevels)
+    * [~postActions](#module_browser..postActions)
+    * [~setCore()](#module_browser..setCore) ⇒ <code>browser</code>
+    * [~setPlugins()](#module_browser..setPlugins) ⇒ <code>browser</code>
+    * [~prepare(events, callback)](#module_browser..prepare)
+    * [~stop()](#module_browser..stop)
+    * [~start()](#module_browser..start)
+    * [~pauseQueues(duration)](#module_browser..pauseQueues)
+    * [~throttleQueues(err, resp, waitTime)](#module_browser..throttleQueues)
+    * [~queueWorker(task, callback)](#module_browser..queueWorker)
+    * [~getData(url, callback)](#module_browser..getData)
+    * [~postData(url, data, callback)](#module_browser..postData)
+    * [~createPost(topicId, [replyTo], content, callback)](#module_browser..createPost)
+    * [~createPrivateMessage(to, title, content, callback)](#module_browser..createPrivateMessage)
+    * [~editPost(postId, content, [editReason], callback)](#module_browser..editPost)
+    * [~readPosts(topicId, postNumbers, callback)](#module_browser..readPosts)
+    * [~getPost(postId, callback)](#module_browser..getPost)
+    * [~getPosts(topicId, eachPost, complete)](#module_browser..getPosts)
+    * [~getLastPosts(topicId, eachPost, complete)](#module_browser..getLastPosts)
+    * [~getTopics(eachTopic, complete)](#module_browser..getTopics)
+    * [~postAction(action, postId, message, callback)](#module_browser..postAction)
+    * [~getTopic(topicId, callback)](#module_browser..getTopic)
+    * [~getUser(username, callback)](#module_browser..getUser)
+    * [~getCSRF(delay, queue, callback)](#module_browser..getCSRF)
+    * [~doLogin(delay, queue, callback)](#module_browser..doLogin)
+    * [~login(callback)](#module_browser..login)
+    * [~messageBus(channels, clientId, callback)](#module_browser..messageBus)
+    * [~getNotifications(callback)](#module_browser..getNotifications)
+    * [~setPostUrl(post)](#module_browser..setPostUrl) ⇒ <code>external.module_posts.CleanedPost</code>
+    * [~setTrustLevel(post)](#module_browser..setTrustLevel) ⇒ <code>external.module_posts.CleanedPost</code>
+    * [~cleanPostRaw(post)](#module_browser..cleanPostRaw) ⇒ <code>external.module_posts.CleanedPost</code>
+    * [~cleanPost(post)](#module_browser..cleanPost) ⇒ <code>external.posts.CleanedPost</code>
+    * [~requestComplete](#module_browser..requestComplete)
+    * [~postedCallback](#module_browser..postedCallback)
+    * [~topicCallback](#module_browser..topicCallback)
+    * [~completedCallback](#module_browser..completedCallback)
+    * [~loginCallback](#module_browser..loginCallback)
+    * [~messageBusCallback](#module_browser..messageBusCallback)
+    * [~notificationsCallback](#module_browser..notificationsCallback)
+    * [~eachTopicCallback](#module_browser..eachTopicCallback)
+    * [~eachPostCallback](#module_browser..eachPostCallback)
 
 <a name="module_browser..trustLevels"></a>
 ### browser~trustLevels

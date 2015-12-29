@@ -10,18 +10,18 @@ for details.
 **License**: MIT  
 
 * [SockEvents](#module_SockEvents) ⇐ <code>EventEmitter</code>
-  * [~onChannel(channel, handler)](#module_SockEvents..onChannel) ⇒ <code>SockEvents</code>
-  * [~removeChannel(channel, handler)](#module_SockEvents..removeChannel) ⇒ <code>SockEvents</code>
-  * [~removeTopic(topicId, handler)](#module_SockEvents..removeTopic) ⇒ <code>SockEvents</code>
-  * [~onNotification(type, handler)](#module_SockEvents..onNotification) ⇒ <code>SockEvents</code>
-  * [~removeNotification(type, handler)](#module_SockEvents..removeNotification) ⇒ <code>SockEvents</code>
-  * [~onCommand(type, helpstring, handler)](#module_SockEvents..onCommand) ⇒ <code>SockEvents</code>
-  * [~removeCommand(command, handler)](#module_SockEvents..removeCommand) ⇒ <code>SockEvents</code>
-  * [~command](#module_SockEvents..command) : <code>object</code>
-  * [~messageHandler](#module_SockEvents..messageHandler)
-  * [~topicMessageHandler](#module_SockEvents..topicMessageHandler)
-  * [~notificationHandler](#module_SockEvents..notificationHandler)
-  * [~commandHandler](#module_SockEvents..commandHandler)
+    * [~onChannel(channel, handler)](#module_SockEvents..onChannel) ⇒ <code>SockEvents</code>
+    * [~removeChannel(channel, handler)](#module_SockEvents..removeChannel) ⇒ <code>SockEvents</code>
+    * [~removeTopic(topicId, handler)](#module_SockEvents..removeTopic) ⇒ <code>SockEvents</code>
+    * [~onNotification(type, handler)](#module_SockEvents..onNotification) ⇒ <code>SockEvents</code>
+    * [~removeNotification(type, handler)](#module_SockEvents..removeNotification) ⇒ <code>SockEvents</code>
+    * [~onCommand(type, helpstring, handler)](#module_SockEvents..onCommand) ⇒ <code>SockEvents</code>
+    * [~removeCommand(command, handler)](#module_SockEvents..removeCommand) ⇒ <code>SockEvents</code>
+    * [~command](#module_SockEvents..command) : <code>object</code>
+    * [~messageHandler](#module_SockEvents..messageHandler)
+    * [~topicMessageHandler](#module_SockEvents..topicMessageHandler)
+    * [~notificationHandler](#module_SockEvents..notificationHandler)
+    * [~commandHandler](#module_SockEvents..commandHandler)
 
 <a name="module_SockEvents..onChannel"></a>
 ### SockEvents~onChannel(channel, handler) ⇒ <code>SockEvents</code>

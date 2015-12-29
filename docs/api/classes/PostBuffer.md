@@ -5,9 +5,9 @@ Data structure to manage post merging to prevent spamming
 **License**: MIT  
 
 * [PostBuffer](#classes.module_PostBuffer)
-  * [~PostBuffer(delay, callback)](#classes.module_PostBuffer..PostBuffer)
-    * [.add(topicId, [replyTo], content, callback)](#classes.module_PostBuffer..PostBuffer+add)
-  * [~postBufferCallback](#classes.module_PostBuffer..postBufferCallback)
+    * [~PostBuffer(delay, callback)](#classes.module_PostBuffer..PostBuffer)
+        * [.add(topicId, [replyTo], content, callback)](#classes.module_PostBuffer..PostBuffer+add)
+    * [~postBufferCallback](#classes.module_PostBuffer..postBufferCallback)
 
 <a name="classes.module_PostBuffer..PostBuffer"></a>
 ### PostBuffer~PostBuffer(delay, callback)

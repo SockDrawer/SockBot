@@ -5,13 +5,13 @@ Documentation for notification JSON objects
 **License**: MIT  
 
 * [notifications](#external.module_notifications)
-  * _static_
-    * [.notificationTypes](#external.module_notifications.notificationTypes) : <code>enum</code>
-  * _inner_
-    * [~notifiactions](#external.module_notifications..notifiactions) : <code>object</code>
-    * [~notification](#external.module_notifications..notification) : <code>object</code>
-    * [~topicNotificationData](#external.module_notifications..topicNotificationData) : <code>object</code>
-    * [~badgeNotificationData](#external.module_notifications..badgeNotificationData) : <code>object</code>
+    * _static_
+        * [.notificationTypes](#external.module_notifications.notificationTypes) : <code>enum</code>
+    * _inner_
+        * [~notifiactions](#external.module_notifications..notifiactions) : <code>object</code>
+        * [~notification](#external.module_notifications..notification) : <code>object</code>
+        * [~topicNotificationData](#external.module_notifications..topicNotificationData) : <code>object</code>
+        * [~badgeNotificationData](#external.module_notifications..badgeNotificationData) : <code>object</code>
 
 <a name="external.module_notifications.notificationTypes"></a>
 ### notifications.notificationTypes : <code>enum</code>

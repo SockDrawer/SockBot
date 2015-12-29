@@ -5,11 +5,11 @@ Documentation for discourse JSON objects
 **License**: MIT  
 
 * [posts](#external.module_posts)
-  * [.PostType](#external.module_posts.PostType)
-  * [.PostActionType](#external.module_posts.PostActionType)
-  * [.ActionSummary](#external.module_posts.ActionSummary) : <code>object</code>
-  * [.Post](#external.module_posts.Post) : <code>object</code>
-  * [.CleanedPost](#external.module_posts.CleanedPost) : <code>object</code>
+    * [.PostType](#external.module_posts.PostType)
+    * [.PostActionType](#external.module_posts.PostActionType)
+    * [.ActionSummary](#external.module_posts.ActionSummary) : <code>object</code>
+    * [.Post](#external.module_posts.Post) : <code>object</code>
+    * [.CleanedPost](#external.module_posts.CleanedPost) : <code>object</code>
 
 <a name="external.module_posts.PostType"></a>
 ### posts.PostType

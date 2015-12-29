@@ -5,19 +5,19 @@ Core Utilities for Sockbot
 **License**: MIT  
 
 * [utils](#module_utils)
-  * _static_
-    * [.uuid()](#module_utils.uuid) ⇒ <code>string</code>
-    * [.log(message)](#module_utils.log)
-    * [.warn(message)](#module_utils.warn)
-    * [.error(message)](#module_utils.error)
-    * [.cloneData(original)](#module_utils.cloneData) ⇒ <code>\*</code>
-    * [.mergeObjects([mergeArrays], ...mixin)](#module_utils.mergeObjects) ⇒ <code>object</code>
-    * [.filterIgnoredOnPost(post, callback)](#module_utils.filterIgnoredOnPost) ⇒ <code>null</code>
-    * [.filterIgnoredOnTopic(topic, callback)](#module_utils.filterIgnoredOnTopic) ⇒ <code>null</code>
-    * [.filterIgnored(topic, post, callback)](#module_utils.filterIgnored)
-  * _inner_
-    * [~addTimestamp(message)](#module_utils..addTimestamp) ⇒ <code>string</code>
-    * [~mergeInner(base, mixin, [mergeArrays])](#module_utils..mergeInner)
+    * _static_
+        * [.uuid()](#module_utils.uuid) ⇒ <code>string</code>
+        * [.log(message)](#module_utils.log)
+        * [.warn(message)](#module_utils.warn)
+        * [.error(message)](#module_utils.error)
+        * [.cloneData(original)](#module_utils.cloneData) ⇒ <code>\*</code>
+        * [.mergeObjects([mergeArrays], ...mixin)](#module_utils.mergeObjects) ⇒ <code>object</code>
+        * [.filterIgnoredOnPost(post, callback)](#module_utils.filterIgnoredOnPost) ⇒ <code>null</code>
+        * [.filterIgnoredOnTopic(topic, callback)](#module_utils.filterIgnoredOnTopic) ⇒ <code>null</code>
+        * [.filterIgnored(topic, post, callback)](#module_utils.filterIgnored)
+    * _inner_
+        * [~addTimestamp(message)](#module_utils..addTimestamp) ⇒ <code>string</code>
+        * [~mergeInner(base, mixin, [mergeArrays])](#module_utils..mergeInner)
 
 <a name="module_utils.uuid"></a>
 ### utils.uuid() ⇒ <code>string</code>

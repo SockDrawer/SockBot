@@ -6,24 +6,24 @@ Command Parser for SockBot2.0
 **License**: MIT  
 
 * [commands](#module_commands)
-  * _static_
-    * [.prepare(events, callback)](#module_commands.prepare)
-    * [.start()](#module_commands.start)
-    * [.parseCommands(post, topic, callback)](#module_commands.parseCommands)
-  * _inner_
-    * [~parseShortCommand(line)](#module_commands..parseShortCommand) ⇒ <code>command</code>
-    * [~parseMentionCommand(line)](#module_commands..parseMentionCommand) ⇒ <code>command</code>
-    * [~getCommandHelps()](#module_commands..getCommandHelps) ⇒ <code>string</code>
-    * [~cmdError(command)](#module_commands..cmdError)
-    * [~shutdown()](#module_commands..shutdown)
-    * [~cmdShutUp(command)](#module_commands..cmdShutUp)
-    * [~cmdHelp(command)](#module_commands..cmdHelp)
-    * [~registerCommand(command, helpstring, handler, callback)](#module_commands..registerCommand) ⇒ <code>undefined</code>
-    * [~commandProtect(event, handler)](#module_commands..commandProtect) ⇒ <code>boolean</code>
-    * [~command](#module_commands..command) : <code>object</code>
-    * [~completedCallback](#module_commands..completedCallback)
-    * [~parseCallback](#module_commands..parseCallback)
-    * [~commandHandler](#module_commands..commandHandler)
+    * _static_
+        * [.prepare(events, callback)](#module_commands.prepare)
+        * [.start()](#module_commands.start)
+        * [.parseCommands(post, topic, callback)](#module_commands.parseCommands)
+    * _inner_
+        * [~parseShortCommand(line)](#module_commands..parseShortCommand) ⇒ <code>command</code>
+        * [~parseMentionCommand(line)](#module_commands..parseMentionCommand) ⇒ <code>command</code>
+        * [~getCommandHelps()](#module_commands..getCommandHelps) ⇒ <code>string</code>
+        * [~cmdError(command)](#module_commands..cmdError)
+        * [~shutdown()](#module_commands..shutdown)
+        * [~cmdShutUp(command)](#module_commands..cmdShutUp)
+        * [~cmdHelp(command)](#module_commands..cmdHelp)
+        * [~registerCommand(command, helpstring, handler, callback)](#module_commands..registerCommand) ⇒ <code>undefined</code>
+        * [~commandProtect(event, handler)](#module_commands..commandProtect) ⇒ <code>boolean</code>
+        * [~command](#module_commands..command) : <code>object</code>
+        * [~completedCallback](#module_commands..completedCallback)
+        * [~parseCallback](#module_commands..parseCallback)
+        * [~commandHandler](#module_commands..commandHandler)
 
 <a name="module_commands.prepare"></a>
 ### commands.prepare(events, callback)

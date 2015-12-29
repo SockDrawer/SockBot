@@ -8,30 +8,30 @@ Watches threads for new posts and likes them, includes "binge" functionality to 
 **License**: MIT  
 
 * [likes](#module_likes)
-  * _static_
-    * [.prepare(plugConfig, config, events, browser)](#module_likes.prepare)
-    * [.start()](#module_likes.start)
-    * [.stop()](#module_likes.stop)
-    * [.messageHandler(data, topic, post)](#module_likes.messageHandler)
-    * [.binge()](#module_likes.binge)
-    * [.handlePost(post, callback)](#module_likes.handlePost)
-  * _inner_
-    * [~defaultConfig](#module_likes..defaultConfig) : <code>object</code>
-      * [.binge](#module_likes..defaultConfig.binge) : <code>boolean</code>
-      * [.bingeCap](#module_likes..defaultConfig.bingeCap) : <code>number</code>
-      * [.bingeHour](#module_likes..defaultConfig.bingeHour) : <code>number</code>
-      * [.bingeMinute](#module_likes..defaultConfig.bingeMinute) : <code>number</code>
-      * [.bingeRandomize](#module_likes..defaultConfig.bingeRandomize) : <code>boolean</code>
-      * [.topics](#module_likes..defaultConfig.topics) : <code>Array.&lt;number&gt;</code>
-      * [.delay](#module_likes..defaultConfig.delay) : <code>number</code>
-      * [.scatter](#module_likes..defaultConfig.scatter) : <code>number</code>
-    * [~internals](#module_likes..internals) : <code>object</code>
-      * [.browser](#module_likes..internals.browser) : <code>Browser</code>
-      * [.config](#module_likes..internals.config) : <code>object</code>
-      * [.bingeInterval](#module_likes..internals.bingeInterval) : <code>\*</code>
-      * [.likeCount](#module_likes..internals.likeCount) : <code>number</code>
-      * [.events](#module_likes..internals.events) : <code>externals.events.SockEvents</code>
-    * [~completionCallback](#module_likes..completionCallback)
+    * _static_
+        * [.prepare(plugConfig, config, events, browser)](#module_likes.prepare)
+        * [.start()](#module_likes.start)
+        * [.stop()](#module_likes.stop)
+        * [.messageHandler(data, topic, post)](#module_likes.messageHandler)
+        * [.binge()](#module_likes.binge)
+        * [.handlePost(post, callback)](#module_likes.handlePost)
+    * _inner_
+        * [~defaultConfig](#module_likes..defaultConfig) : <code>object</code>
+            * [.binge](#module_likes..defaultConfig.binge) : <code>boolean</code>
+            * [.bingeCap](#module_likes..defaultConfig.bingeCap) : <code>number</code>
+            * [.bingeHour](#module_likes..defaultConfig.bingeHour) : <code>number</code>
+            * [.bingeMinute](#module_likes..defaultConfig.bingeMinute) : <code>number</code>
+            * [.bingeRandomize](#module_likes..defaultConfig.bingeRandomize) : <code>boolean</code>
+            * [.topics](#module_likes..defaultConfig.topics) : <code>Array.&lt;number&gt;</code>
+            * [.delay](#module_likes..defaultConfig.delay) : <code>number</code>
+            * [.scatter](#module_likes..defaultConfig.scatter) : <code>number</code>
+        * [~internals](#module_likes..internals) : <code>object</code>
+            * [.browser](#module_likes..internals.browser) : <code>Browser</code>
+            * [.config](#module_likes..internals.config) : <code>object</code>
+            * [.bingeInterval](#module_likes..internals.bingeInterval) : <code>\*</code>
+            * [.likeCount](#module_likes..internals.likeCount) : <code>number</code>
+            * [.events](#module_likes..internals.events) : <code>externals.events.SockEvents</code>
+        * [~completionCallback](#module_likes..completionCallback)
 
 <a name="module_likes.prepare"></a>
 ### likes.prepare(plugConfig, config, events, browser)
@@ -97,7 +97,7 @@ Default configuration settings
 
 **Kind**: inner typedef of <code>[likes](#module_likes)</code>  
 
-  * [~defaultConfig](#module_likes..defaultConfig) : <code>object</code>
+* [~defaultConfig](#module_likes..defaultConfig) : <code>object</code>
     * [.binge](#module_likes..defaultConfig.binge) : <code>boolean</code>
     * [.bingeCap](#module_likes..defaultConfig.bingeCap) : <code>number</code>
     * [.bingeHour](#module_likes..defaultConfig.bingeHour) : <code>number</code>
@@ -142,7 +142,7 @@ Randomise the time of day the likes binge starts (if set, overrides `bingeHour` 
 Topics to hand out likes in
 
 **Kind**: static property of <code>[defaultConfig](#module_likes..defaultConfig)</code>  
-**Default**: <code>[1000]</code>  
+**Default**: <code>[]</code>  
 <a name="module_likes..defaultConfig.delay"></a>
 #### defaultConfig.delay : <code>number</code>
 Time to delay liking post as posts are streamed in
@@ -159,7 +159,7 @@ Internal status store
 
 **Kind**: inner typedef of <code>[likes](#module_likes)</code>  
 
-  * [~internals](#module_likes..internals) : <code>object</code>
+* [~internals](#module_likes..internals) : <code>object</code>
     * [.browser](#module_likes..internals.browser) : <code>Browser</code>
     * [.config](#module_likes..internals.config) : <code>object</code>
     * [.bingeInterval](#module_likes..internals.bingeInterval) : <code>\*</code>

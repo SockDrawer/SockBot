@@ -6,20 +6,20 @@ Main Module for SockBot2.0
 **License**: MIT  
 
 * [SockBot](#module_SockBot)
-  * _static_
-    * [.prepare(configuration, callback)](#module_SockBot.prepare)
-    * [.start(callback)](#module_SockBot.start)
-    * [.stop(callback)](#module_SockBot.stop)
-    * [.logMessage(message)](#module_SockBot.logMessage)
-    * [.logWarning(warning)](#module_SockBot.logWarning)
-    * [.logError(error)](#module_SockBot.logError)
-  * _inner_
-    * [~doPluginRequire(module, requireIt)](#module_SockBot..doPluginRequire) ⇒ <code>object</code>
-    * [~prepareEvents(callback)](#module_SockBot..prepareEvents)
-    * [~loadPlugins()](#module_SockBot..loadPlugins)
-    * [~loadConfig(cfg, callback)](#module_SockBot..loadConfig)
-    * [~preparedCallback](#module_SockBot..preparedCallback)
-    * [~completedCallback](#module_SockBot..completedCallback)
+    * _static_
+        * [.prepare(configuration, callback)](#module_SockBot.prepare)
+        * [.start(callback)](#module_SockBot.start)
+        * [.stop(callback)](#module_SockBot.stop)
+        * [.logMessage(message)](#module_SockBot.logMessage)
+        * [.logWarning(warning)](#module_SockBot.logWarning)
+        * [.logError(error)](#module_SockBot.logError)
+    * _inner_
+        * [~doPluginRequire(module, requireIt)](#module_SockBot..doPluginRequire) ⇒ <code>object</code>
+        * [~prepareEvents(callback)](#module_SockBot..prepareEvents)
+        * [~loadPlugins()](#module_SockBot..loadPlugins)
+        * [~loadConfig(cfg, callback)](#module_SockBot..loadConfig)
+        * [~preparedCallback](#module_SockBot..preparedCallback)
+        * [~completedCallback](#module_SockBot..completedCallback)
 
 <a name="module_SockBot.prepare"></a>
 ### SockBot.prepare(configuration, callback)
