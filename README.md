@@ -17,12 +17,14 @@ Sockbot - A rebuild of a sock puppet robot worthy of TheDailyWTF in EcmaScript 6
 So how do I run this thing anyway?
 ===========
 The global method:
+
 1. `npm install -g sockbot`
 2. For any plugins you want to use, `npm install -g [plugin]`
 3. Create a config.json or config.yml (see samples for formatting)
 4. `sockbot /path/to/config.json` (or `sockbot /path/to/config.yml`
 
 The local install method:
+
 1. In a directory you want to install, run `npm init` and answer the prompts
 2. `npm install sockbot`
 3. For any plugins you want to use, `npm install [plugin]`
