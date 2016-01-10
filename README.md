@@ -12,6 +12,8 @@
 
 SockBot 2.0
 ===========
+
+[![Join the chat at https://gitter.im/SockDrawer/SockBot](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/SockDrawer/SockBot?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 Sockbot - A rebuild of a sock puppet robot worthy of TheDailyWTF in EcmaScript 6.
 
 So how do I run this thing anyway?
