@@ -124,8 +124,11 @@ describe('commands', () => {
                 browser.createPost.called.should.be.false;
             });
             it('should post expected text', () => {
-                const expected = 'Command `foobar` is not recognized\n\nRegistered commands:\n' +
-                    'help: print command help listing\nshutup: tell me to shutup';
+                const expected = 'Command `foobar` is not recognized\n\nRegistered commands:\nhelp: print command ' +
+                    'help listing\nmute: Make the bot mute the topic this command is executed on\nshutup: tell me to ' +
+                    'shutup\nstatus: my current status\nunmute: Make the bot unmute the topic this command is ' +
+                    'executed on\nunwatch: Make the bot unwatch the topic this command is executed on\nwatch: Make ' +
+                    'the bot watch the topic this command is executed on';
                 cmdError({
                     command: 'foobar',
                     post: {
