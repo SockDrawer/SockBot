@@ -33,6 +33,7 @@ Webbrowser abstraction for communicating with discourse
     * [~login(callback)](#module_browser..login)
     * [~messageBus(channels, clientId, callback)](#module_browser..messageBus)
     * [~getNotifications(callback)](#module_browser..getNotifications)
+    * [~setNotificationLevel(topicId, level, callback)](#module_browser..setNotificationLevel)
     * [~setPostUrl(post)](#module_browser..setPostUrl) ⇒ <code>external.module_posts.CleanedPost</code>
     * [~setTrustLevel(post)](#module_browser..setTrustLevel) ⇒ <code>external.module_posts.CleanedPost</code>
     * [~cleanPostRaw(post)](#module_browser..cleanPostRaw) ⇒ <code>external.module_posts.CleanedPost</code>
@@ -380,6 +381,18 @@ Poll for notifications
 | Param | Type | Description |
 | --- | --- | --- |
 | callback | <code>notificationsCallback</code> | Completion callback |
+
+<a name="module_browser..setNotificationLevel"></a>
+### browser~setNotificationLevel(topicId, level, callback)
+Set Notification level
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| topicId | <code>number</code> | Topic to alter notification level |
+| level | <code>number</code> | Notification level to set (0=muted, 3=watching) |
+| callback | <code>function</code> | Completion callback |
 
 <a name="module_browser..setPostUrl"></a>
 ### browser~setPostUrl(post) ⇒ <code>external.module_posts.CleanedPost</code>
