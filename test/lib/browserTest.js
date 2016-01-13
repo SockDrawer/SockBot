@@ -201,7 +201,7 @@ describe('browser', () => {
     describe('externals', () => {
         const fns = ['createPost', 'createPrivateMessage', 'editPost', 'login', 'messageBus', 'getPost', 'getTopic',
                 'getUser', 'getNotifications', 'postAction', 'getLastPosts', 'getPosts', 'getTopics', 'readPosts',
-                'getData', 'postData'
+                'getData', 'postData', 'setNotificationLevel'
             ],
             objs = ['trustLevels', 'postActions'];
         describe('should include expected functions:', () => {
@@ -1759,6 +1759,42 @@ describe('browser', () => {
             it('should set callback', () => {
                 const spy = sinon.spy();
                 object.postAction('like', 0, '', spy);
+                queue.push.firstCall.args[0].callback.should.equal(spy);
+            });
+        });
+        describe('setNotificationLevel()', () => {
+            let object, queue;
+            beforeEach(() => {
+                object = {
+                    delay: 0,
+                    queue: {
+                        push: sinon.stub()
+                    },
+                    setNotificationLevel: browserModule.externals.setNotificationLevel
+                };
+                queue = object.queue;
+            });
+            it('should set HTTP method', () => {
+                object.setNotificationLevel(1234, 4, () => 0);
+                queue.push.firstCall.args[0].method.should.equal('POST');
+            });
+            it('should set URL', () => {
+                object.setNotificationLevel(1234, 4, () => 0);
+                queue.push.firstCall.args[0].url.should.equal('/t/1234/notifications');
+            });
+            it('should set delay', () => {
+                object.delay = Math.random();
+                object.setNotificationLevel(1234, 4, () => 0);
+                queue.push.firstCall.args[0].delay.should.equal(object.delay);
+            });
+            it('should set form.notification_level', () => {
+                const message = Math.random();
+                object.setNotificationLevel(1234, message, () => 0);
+                queue.push.firstCall.args[0].form.notification_level.should.equal(message);
+            });
+            it('should set callback', () => {
+                const spy = sinon.spy();
+                object.setNotificationLevel(1234, 4, spy);
                 queue.push.firstCall.args[0].callback.should.equal(spy);
             });
         });
