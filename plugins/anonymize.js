@@ -70,7 +70,7 @@ exports.stop = function () {};
  * @param {external.posts.CleanedPost} post Post that triggered notification
  */
 exports.handler = function handler(notification, topic, post) {
-    const match = rQuote.xexec(post.raw);
+    const match = xRegExp.exec(post.raw, rQuote);
     //match.topicId is a string, so coerce topic.id type to match
     if (!match) {
         mBrowser.createPost(topic.id, post.post_number, parseError, () => 0);
