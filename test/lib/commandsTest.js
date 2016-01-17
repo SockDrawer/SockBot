@@ -38,11 +38,11 @@ describe('commands', () => {
         });
     });
     describe('internals', () => {
-        const fns = ['parseMentionCommand', 'parseShortCommand', 'registerCommand',
+        const fns = ['parseMentionCommand', 'parseShortCommand', 'registerCommand', 'registerHelp',
                 'commandProtect', 'getCommandHelps', 'cmdError', 'cmdHelp', 'cmdShutUp',
                 'shutdown'
             ],
-            objs = ['mention', 'events', 'commands'],
+            objs = ['mention', 'events', 'commands', 'helpMessages'],
             vals = [];
         describe('should include expected functions:', () => {
             fns.forEach((fn) => {
@@ -183,8 +183,8 @@ describe('commands', () => {
             });
             it('should post expected text', () => {
                 const expected = 'Registered commands:\nhelp: print command help listing\n' +
-                    'shutup: tell me to shutup\n\nMore details may be available by passing' +
-                    ' `help` as the first parameter to a command';
+                    'shutup: tell me to shutup\n\nMore details may be available by passing ' +
+                    'a command name as the first parameter to `help`';
                 commands.internals.commands.help = {
                     help: 'print command help listing'
                 };
@@ -212,6 +212,93 @@ describe('commands', () => {
                 });
                 browser.createPost.lastCall.args[3].should.be.a('function');
                 browser.createPost.lastCall.args[3]().should.equal(0);
+            });
+            describe('with parameters', () => {
+                it('should post default text without parameters', () => {
+                    const expected = 'Registered commands:';
+                    cmdHelp({
+                        command: 'foobar',
+                        post: {
+                            'topic_id': 15,
+                            'post_number': 75
+                        }
+                    });
+                    browser.createPost.callCount.should.equal(1);
+                    browser.createPost.calledWith(15, 75).should.be.true;
+                    browser.createPost.lastCall.args[2].should.startWith(expected);
+                });
+                it('should post default text when called with empty parameters', () => {
+                    const expected = 'Registered commands:';
+                    cmdHelp({
+                        command: 'foobar',
+                        args: [],
+                        post: {
+                            'topic_id': 15,
+                            'post_number': 75
+                        }
+                    });
+                    browser.createPost.callCount.should.equal(1);
+                    browser.createPost.calledWith(15, 75).should.be.true;
+                    browser.createPost.lastCall.args[2].should.startWith(expected);
+                });
+                it('should post default text when called with unexpected parameters', () => {
+                    const expected = 'Registered commands:';
+                    cmdHelp({
+                        command: 'foobar',
+                        args: ['i', 'am', 'not', 'a', 'command'],
+                        post: {
+                            'topic_id': 15,
+                            'post_number': 75
+                        }
+                    });
+                    browser.createPost.callCount.should.equal(1);
+                    browser.createPost.calledWith(15, 75).should.be.true;
+                    browser.createPost.lastCall.args[2].should.startWith(expected);
+                });
+                it('should post extended help message one word command', () => {
+                    const expected = 'Extended help for `whosit`\n\nwhosit extended help' +
+                        '\n\nIssue the `help` command without any parameters to see all available commands';
+                    commands.internals.helpMessages.whosit = 'whosit extended help';
+                    cmdHelp({
+                        command: 'foobar',
+                        args: ['whosit'],
+                        post: {
+                            'topic_id': 15,
+                            'post_number': 75
+                        }
+                    });
+                    browser.createPost.callCount.should.equal(1);
+                    browser.createPost.calledWith(15, 75).should.be.true;
+                    browser.createPost.lastCall.args[2].should.equal(expected);
+                });
+                it('should post extended help message multi-word command', () => {
+                    const expected = 'Extended help for `who am i`';
+                    commands.internals.helpMessages['who am i'] = 'whosit extended help';
+                    cmdHelp({
+                        command: 'foobar',
+                        args: ['who', 'am', 'i'],
+                        post: {
+                            'topic_id': 15,
+                            'post_number': 75
+                        }
+                    });
+                    browser.createPost.callCount.should.equal(1);
+                    browser.createPost.calledWith(15, 75).should.be.true;
+                    browser.createPost.lastCall.args[2].should.startWith(expected);
+                });
+                it('should pass callback to createPost', () => {
+                    commands.internals.helpMessages['who am i'] = 'whosit extended help';
+                    cmdHelp({
+                        command: 'foobar',
+                        args: ['who', 'am', 'i'],
+                        post: {
+                            'topic_id': 1,
+                            'post_number': 5
+                        }
+                    });
+                    browser.createPost.lastCall.args[3].should.be.a('function');
+                    browser.createPost.lastCall.args[3]().should.equal(0);
+                });
             });
         });
         describe('internals.cmdShutUp()', () => {
@@ -613,6 +700,78 @@ describe('commands', () => {
                 const cmd = parseMentionCommand('@foobar help arg1 arg2');
                 cmd.command.should.equal('help');
                 cmd.args.should.deep.equal(['arg1', 'arg2']);
+            });
+        });
+        describe('internals.registerHelp()', () => {
+            const registerHelp = commands.internals.registerHelp,
+                spy = sinon.spy();
+            let sandbox, events;
+            beforeEach(() => {
+                sandbox = sinon.sandbox.create();
+                events = {
+                    on: sinon.spy(),
+                    emit: sinon.spy()
+                };
+                commands.internals.events = events;
+                commands.internals.commands = {};
+            });
+            afterEach(() => {
+                sandbox.restore();
+            });
+            describe('parameter validation', () => {
+                it('should require a callback', () => {
+                    expect(() => registerHelp()).to.throw('callback must be provided');
+                });
+                it('should require callback to be a function', () => {
+                    expect(() => {
+                        registerHelp(undefined, undefined, 'not function');
+                    }).to.throw('callback must be provided');
+                });
+                it('should require `command`', () => {
+                    registerHelp(undefined, undefined, spy);
+                    spy.called.should.be.true;
+                    spy.lastCall.args[0].should.be.instanceOf(Error);
+                    spy.lastCall.args[0].message.should.equal('command must be provided');
+                });
+                it('should require `command` to be string', () => {
+                    registerHelp(true, undefined, spy);
+                    spy.called.should.be.true;
+                    spy.lastCall.args[0].should.be.instanceOf(Error);
+                    spy.lastCall.args[0].message.should.equal('command must be provided');
+                });
+                it('should require `helptext`', () => {
+                    registerHelp('command', undefined, spy);
+                    spy.called.should.be.true;
+                    spy.lastCall.args[0].should.be.instanceOf(Error);
+                    spy.lastCall.args[0].message.should.equal('helptext must be provided');
+                });
+                it('should require `helptext` to be string', () => {
+                    registerHelp('command', true, spy);
+                    spy.called.should.be.true;
+                    spy.lastCall.args[0].should.be.instanceOf(Error);
+                    spy.lastCall.args[0].message.should.equal('helptext must be provided');
+                });
+                it('should call callback without error on help registration', () => {
+                    registerHelp('command', 'help', spy);
+                    spy.called.should.be.true;
+                    spy.lastCall.args.should.have.length(0);
+                });
+            });
+            it('should add command to help Messages on registration', () => {
+                registerHelp('commandhelp', 'help', spy);
+                commands.internals.helpMessages.commandhelp.should.be.ok;
+            });
+            it('should log registration', () => {
+                const cmd = 'CMD' + Math.random();
+                registerHelp(cmd, 'help', spy);
+                events.emit.calledWith('logMessage', 'Extended help registered for: ' + cmd).should.be.true;
+            });
+            it('should warn on help overwrite', () => {
+                const cmd = 'CMD' + Math.random();
+                commands.internals.helpMessages[cmd] = 'foo';
+                registerHelp(cmd, 'help', spy);
+                events.emit.calledWith('logWarning', 'Overwriting existing extended help for: `' + cmd +
+                    '`!').should.be.true;
             });
         });
         describe('internals.registerCommand()', () => {
