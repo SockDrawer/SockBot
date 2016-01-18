@@ -12,10 +12,10 @@ const anonymize = require('../../plugins/anonymize'),
 const browser = browserModule();
 
 const dummyCfg = {
-        core: {
-            forum: 'forumUrl'
-        }
-    };
+    core: {
+        forum: 'forumUrl'
+    }
+};
 
 describe('anonymize', () => {
     it('should export prepare()', () => {
@@ -40,9 +40,20 @@ describe('anonymize', () => {
         it('should register notification listener for `private_message`', () => {
             const spy = sinon.spy();
             anonymize.prepare(undefined, dummyCfg, {
-                onNotification: spy
+                onNotification: spy,
+                registerHelp: sinon.spy()
             }, undefined);
             spy.calledWith('private_message', anonymize.handler).should.be.true;
+        });
+        it('should register extended help', () => {
+            const events = {
+                onNotification: sinon.spy(),
+                registerHelp: sinon.spy()
+            };
+            anonymize.prepare({}, dummyCfg, events);
+            events.registerHelp.calledWith('anonymize', anonymize.internals.extendedHelp).should.be.true;
+            expect(events.registerHelp.firstCall.args[2]).to.be.a('function');
+            expect(events.registerHelp.firstCall.args[2]()).to.equal(0);
         });
     });
     describe('handler()', () => {
@@ -57,7 +68,8 @@ describe('anonymize', () => {
             const spy = sandbox.stub();
             spy.yields(null);
             anonymize.prepare(undefined, dummyCfg, {
-                onNotification: () => 0
+                onNotification: () => 0,
+                registerHelp: sinon.spy()
             }, {
                 createPost: spy
             });
@@ -74,7 +86,8 @@ describe('anonymize', () => {
             const spy = sandbox.stub();
             spy.yields(null);
             anonymize.prepare(undefined, dummyCfg, {
-                onNotification: () => 0
+                onNotification: () => 0,
+                registerHelp: sinon.spy()
             }, {
                 createPost: spy
             });
@@ -92,7 +105,8 @@ describe('anonymize', () => {
                 rawContent = '[quote="SockBot, topic:1"]Anonymized quote![/quote]Anonymized reply!';
             spy.yields(null);
             anonymize.prepare(undefined, dummyCfg, {
-                onNotification: () => 0
+                onNotification: () => 0,
+                registerHelp: sinon.spy()
             }, browser);
             anonymize.handler(undefined, {
                 id: 1
@@ -106,9 +120,13 @@ describe('anonymize', () => {
         it('should create post in reply to target post', () => {
             const spy = sandbox.stub(browser, 'createPost'),
                 rawContent = '[quote="SockBot, post:4, topic:3"]Anonymized quote![/quote]Anonymized reply!';
-            spy.yields(null, {topic_id: 5, post_number: 6}); //eslint-disable-line camelcase
+            spy.yields(null, {
+                topic_id: 5,
+                post_number: 6
+            }); //eslint-disable-line camelcase
             anonymize.prepare(undefined, dummyCfg, {
-                onNotification: () => 0
+                onNotification: () => 0,
+                registerHelp: sinon.spy()
             }, browser);
             anonymize.handler(undefined, {
                 id: 1
@@ -127,7 +145,8 @@ describe('anonymize', () => {
                 rawContent = '[quote="SockBot, post:4, topic:3"]Anonymized quote![/quote]Anonymized reply!';
             spy.yields(true);
             anonymize.prepare(undefined, dummyCfg, {
-                onNotification: () => 0
+                onNotification: () => 0,
+                registerHelp: sinon.spy()
             }, browser);
             anonymize.handler(undefined, {
                 id: 1

@@ -6,11 +6,17 @@ Example plugin, echos your words back at you.
 **License**: MIT  
 
 * [echo](#module_echo)
+    * [.extendedHelp](#module_echo.extendedHelp)
     * [.prepare(plugConfig, config, events, browser)](#module_echo.prepare)
     * [.start()](#module_echo.start)
     * [.stop()](#module_echo.stop)
     * [.handler(notification, topic, post)](#module_echo.handler)
 
+<a name="module_echo.extendedHelp"></a>
+### echo.extendedHelp
+Extended help message
+
+**Kind**: static property of <code>[echo](#module_echo)</code>  
 <a name="module_echo.prepare"></a>
 ### echo.prepare(plugConfig, config, events, browser)
 Prepare Plugin prior to login

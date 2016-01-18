@@ -16,6 +16,7 @@ for details.
     * [~onNotification(type, handler)](#module_SockEvents..onNotification) ⇒ <code>SockEvents</code>
     * [~removeNotification(type, handler)](#module_SockEvents..removeNotification) ⇒ <code>SockEvents</code>
     * [~onCommand(type, helpstring, handler)](#module_SockEvents..onCommand) ⇒ <code>SockEvents</code>
+    * [~registerHelp(command, helptext)](#module_SockEvents..registerHelp) ⇒ <code>SockEvents</code>
     * [~removeCommand(command, handler)](#module_SockEvents..removeCommand) ⇒ <code>SockEvents</code>
     * [~command](#module_SockEvents..command) : <code>object</code>
     * [~messageHandler](#module_SockEvents..messageHandler)
@@ -85,7 +86,7 @@ Remove a notification listener
 
 <a name="module_SockEvents..onCommand"></a>
 ### SockEvents~onCommand(type, helpstring, handler) ⇒ <code>SockEvents</code>
-Add a notification listener
+Add a command listener
 
 **Kind**: inner method of <code>[SockEvents](#module_SockEvents)</code>  
 **Returns**: <code>SockEvents</code> - SockEvents for chaining calls  
@@ -95,6 +96,18 @@ Add a notification listener
 | type | <code>string</code> | Command name |
 | helpstring | <code>string</code> | Short help text for command |
 | handler | <code>commandHandler</code> | Command handler |
+
+<a name="module_SockEvents..registerHelp"></a>
+### SockEvents~registerHelp(command, helptext) ⇒ <code>SockEvents</code>
+Add Extended help for a command or topic
+
+**Kind**: inner method of <code>[SockEvents](#module_SockEvents)</code>  
+**Returns**: <code>SockEvents</code> - SockEvents for chaining calls  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| command | <code>string</code> | Command or topic to register help for |
+| helptext | <code>string</code> | Extended help text |
 
 <a name="module_SockEvents..removeCommand"></a>
 ### SockEvents~removeCommand(command, handler) ⇒ <code>SockEvents</code>

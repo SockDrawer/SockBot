@@ -22,6 +22,7 @@ Automatically read posts older than the configured interval.
             * [.config](#module_autoreader..internals.config) : <code>object</code>
             * [.timer](#module_autoreader..internals.timer) : <code>object</code>
             * [.events](#module_autoreader..internals.events) : <code>externals.events.SockEvents</code>
+            * [.extendedHelp](#module_autoreader..internals.extendedHelp)
 
 <a name="module_autoreader.prepare"></a>
 ### autoreader.prepare(plugConfig, config, events, browser)
@@ -98,6 +99,7 @@ Internal status store
     * [.config](#module_autoreader..internals.config) : <code>object</code>
     * [.timer](#module_autoreader..internals.timer) : <code>object</code>
     * [.events](#module_autoreader..internals.events) : <code>externals.events.SockEvents</code>
+    * [.extendedHelp](#module_autoreader..internals.extendedHelp)
 
 <a name="module_autoreader..internals.browser"></a>
 #### internals.browser : <code>Browser</code>
@@ -117,5 +119,10 @@ Used to stop the autoreading when the plugin is stopped
 <a name="module_autoreader..internals.events"></a>
 #### internals.events : <code>externals.events.SockEvents</code>
 EventEmitter used for internal communication
+
+**Kind**: static property of <code>[internals](#module_autoreader..internals)</code>  
+<a name="module_autoreader..internals.extendedHelp"></a>
+#### internals.extendedHelp
+Extended help message
 
 **Kind**: static property of <code>[internals](#module_autoreader..internals)</code>  

@@ -36,6 +36,7 @@ describe('likes plugin', () => {
         let sandbox;
         beforeEach(() => {
             sandbox = sinon.sandbox.create();
+            dummyEvents.registerHelp = sinon.spy();
         });
         afterEach(() => {
             sandbox.restore();
@@ -66,7 +67,8 @@ describe('likes plugin', () => {
             likes.prepare({
                 topics: [3, 5, 17]
             }, dummyCfg, {
-                onTopic: spy
+                onTopic: spy,
+                registerHelp: () => 0
             }, null);
             spy.calledWith(3, likes.messageHandler).should.be.true;
             spy.calledWith(5, likes.messageHandler).should.be.true;
@@ -82,6 +84,12 @@ describe('likes plugin', () => {
             }, dummyCfg, dummyEvents, undefined);
             likes.internals.config.bingeHour.should.equal(0);
             likes.internals.config.bingeMinute.should.equal(0);
+        });
+        it('should register extended help', () => {
+            likes.prepare({}, dummyCfg, dummyEvents);
+            dummyEvents.registerHelp.calledWith('likes', likes.internals.extendedHelp).should.be.true;
+            expect(dummyEvents.registerHelp.firstCall.args[2]).to.be.a('function');
+            expect(dummyEvents.registerHelp.firstCall.args[2]()).to.equal(0);
         });
     });
     describe('start()', () => {
@@ -110,7 +118,9 @@ describe('likes plugin', () => {
     });
     describe('stop()', () => {
         it('should stop binging', () => {
-            likes.internals.bingeInterval = {clear: () => 0};
+            likes.internals.bingeInterval = {
+                clear: () => 0
+            };
             likes.stop();
             expect(likes.internals.bingeInterval).to.be.undefined;
         });
@@ -178,7 +188,9 @@ describe('likes plugin', () => {
         it('should retry on server error', () => {
             const id = Math.random(),
                 spy = sinon.stub();
-            spy.onCall(0).yields({statusCode: 500});
+            spy.onCall(0).yields({
+                statusCode: 500
+            });
             spy.onCall(1).yields(null);
             setTimeout.callsArg(0);
             likes.internals.browser = {
@@ -195,7 +207,9 @@ describe('likes plugin', () => {
         it('should not retry on other error', () => {
             const id = Math.random(),
                 spy = sinon.stub();
-            spy.onCall(0).yields({statusCode: 499});
+            spy.onCall(0).yields({
+                statusCode: 499
+            });
             spy.onCall(1).yields(null);
             setTimeout.callsArg(0);
             likes.internals.browser = {
@@ -229,7 +243,9 @@ describe('likes plugin', () => {
         it('should not make more than three attempts', () => {
             const id = Math.random(),
                 spy = sinon.stub();
-            spy.yields({statusCode: 500});
+            spy.yields({
+                statusCode: 500
+            });
             setTimeout.callsArg(0);
             likes.internals.browser = {
                 postAction: spy

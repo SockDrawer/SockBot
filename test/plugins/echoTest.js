@@ -30,23 +30,36 @@ describe('echo', () => {
         it('should register notification listener for `mentioned`', () => {
             const spy = sinon.spy();
             echo.prepare(undefined, undefined, {
-                onNotification: spy
+                onNotification: spy,
+                registerHelp: sinon.spy()
             }, undefined);
             spy.calledWith('mentioned', echo.handler).should.be.true;
         });
         it('should register notification listener for `replied`', () => {
             const spy = sinon.spy();
             echo.prepare(undefined, undefined, {
-                onNotification: spy
+                onNotification: spy,
+                registerHelp: sinon.spy()
             }, undefined);
             spy.calledWith('replied', echo.handler).should.be.true;
         });
         it('should register notification listener for `private_message`', () => {
             const spy = sinon.spy();
             echo.prepare(undefined, undefined, {
-                onNotification: spy
+                onNotification: spy,
+                registerHelp: sinon.spy()
             }, undefined);
             spy.calledWith('private_message', echo.handler).should.be.true;
+        });
+        it('should register extended help', () => {
+            const evts = {
+                onNotification: sinon.spy(),
+                registerHelp: sinon.spy()
+            };
+            echo.prepare({}, {}, evts);
+            evts.registerHelp.calledWith('echo', echo.extendedHelp).should.be.true;
+            expect(evts.registerHelp.firstCall.args[2]).to.be.a('function');
+            expect(evts.registerHelp.firstCall.args[2]()).to.equal(0);
         });
     });
     describe('handler()', () => {
@@ -54,7 +67,8 @@ describe('echo', () => {
             const spy = sinon.stub();
             spy.yields(null);
             echo.prepare(undefined, undefined, {
-                onNotification: () => 0
+                onNotification: () => 0,
+                registerHelp: sinon.spy()
             }, {
                 createPost: spy
             });
