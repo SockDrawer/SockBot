@@ -31,6 +31,7 @@ Watches threads for new posts and likes them, includes "binge" functionality to 
             * [.bingeInterval](#module_likes..internals.bingeInterval) : <code>\*</code>
             * [.likeCount](#module_likes..internals.likeCount) : <code>number</code>
             * [.events](#module_likes..internals.events) : <code>externals.events.SockEvents</code>
+            * [.extendedHelp](#module_likes..internals.extendedHelp)
         * [~completionCallback](#module_likes..completionCallback)
 
 <a name="module_likes.prepare"></a>
@@ -165,6 +166,7 @@ Internal status store
     * [.bingeInterval](#module_likes..internals.bingeInterval) : <code>\*</code>
     * [.likeCount](#module_likes..internals.likeCount) : <code>number</code>
     * [.events](#module_likes..internals.events) : <code>externals.events.SockEvents</code>
+    * [.extendedHelp](#module_likes..internals.extendedHelp)
 
 <a name="module_likes..internals.browser"></a>
 #### internals.browser : <code>Browser</code>
@@ -189,6 +191,11 @@ Count of likes handed out during latest binge
 <a name="module_likes..internals.events"></a>
 #### internals.events : <code>externals.events.SockEvents</code>
 EventEmitter used for internal communication
+
+**Kind**: static property of <code>[internals](#module_likes..internals)</code>  
+<a name="module_likes..internals.extendedHelp"></a>
+#### internals.extendedHelp
+Extended help message
 
 **Kind**: static property of <code>[internals](#module_likes..internals)</code>  
 <a name="module_likes..completionCallback"></a>
