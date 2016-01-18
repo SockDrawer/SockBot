@@ -94,7 +94,9 @@ const defaultConfig = {
          * EventEmitter used for internal communication
          * @type {externals.events.SockEvents}
          */
-        events:null
+        events: null,
+        extendedHelp: 'Automatically likes posts in certain threads.\n\nFor more information see the' +
+            ' [full docs](https://sockbot.readthedocs.org/en/latest/Plugins/likes/)'
     };
 exports.defaultConfig = defaultConfig;
 exports.internals = internals;
@@ -119,6 +121,7 @@ exports.prepare = function prepare(plugConfig, config, events, browser) {
         internals.config.bingeHour = Math.floor(Math.random() * 24);
         internals.config.bingeMinute = Math.floor(Math.random() * 60);
     }
+    events.registerHelp('likes', internals.extendedHelp, () => 0);
 };
 
 /**
