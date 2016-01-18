@@ -95,6 +95,9 @@ const defaultConfig = {
          * @type {externals.events.SockEvents}
          */
         events: null,
+        /**
+         * Extended help message
+         */
         extendedHelp: 'Automatically likes posts in certain threads.\n\nFor more information see the' +
             ' [full docs](https://sockbot.readthedocs.org/en/latest/Plugins/likes/)'
     };
