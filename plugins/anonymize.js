@@ -32,10 +32,27 @@ const rQuote = xRegExp('\\[quote.*post:(?<postNumber>\\d+).*topic:(?<topicId>\\d
 let mBrowser, siteUrl;
 
 const internals = {
+    /**
+     * Posted anonymousely message
+     */
     postSuccess: postSuccess,
+    /**
+     * Failed to post because could not parse post to reply to message
+     */
     parseError: parseError,
+    /**
+     * Failed to post because you used same topic for source and dest message
+     */
     topicError: topicError,
-    postError: postError
+    /**
+     * Failed to post message because discourse message
+     */
+    postError: postError,
+    /**
+     * Extended help message
+     */
+    extendedHelp: 'Anonymize posts for you via PM.\n\nFor more information see the' +
+        ' [full docs](https://sockbot.readthedocs.org/en/latest/Plugins/anonymize/)'
 };
 
 /**
@@ -45,11 +62,12 @@ const internals = {
  * @param {Config} config Overall Bot Configuration
  * @param {externals.events.SockEvents} events EventEmitter used for the bot
  * @param {Browser} browser Web browser for communicating with discourse
-*/
+ */
 exports.prepare = function (plugConfig, config, events, browser) {
     mBrowser = browser;
     siteUrl = config.core.forum;
     events.onNotification('private_message', exports.handler);
+    events.registerHelp('anonymize', internals.extendedHelp, () => 0);
 };
 
 /**
@@ -85,16 +103,16 @@ exports.handler = function handler(notification, topic, post) {
             mBrowser.createPost(topic.id, post.post_number, postError, () => 0);
         } else {
             const postUrl = [
-                    siteUrl,
-                    't',
-                    aPost.topic_id,
-                    aPost.post_number
-                ].join('/');
+                siteUrl,
+                't',
+                aPost.topic_id,
+                aPost.post_number
+            ].join('/');
             const message = [
-                    postSuccess,
-                    'Post is here:',
-                    postUrl
-                ].join('\n');
+                postSuccess,
+                'Post is here:',
+                postUrl
+            ].join('\n');
             mBrowser.createPost(topic.id, post.post_number, message, () => 0);
         }
     });
