@@ -43,7 +43,8 @@ exports.defaultConfig = {
     /**
      * Extended help message
      */
-    extendedHelp: 'Respond to @mentions with a randomly selected preconfigured phrase'
+    extendedHelp: 'Respond to @mentions with a randomly selected preconfigured phrase.\n\nFor more information see ' +
+        'the [full docs](https://sockbot.readthedocs.org/en/latest/Plugins/summoner/)'
 };
 
 /**
