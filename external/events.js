@@ -132,7 +132,7 @@
  */
 
 /**
- * Add Extended help fot a command or topic
+ * Add Extended help for a command or topic
  *
  * @function
  * @name registerHelp
