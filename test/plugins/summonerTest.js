@@ -43,7 +43,8 @@ describe('summoner plugin', () => {
             sandbox = sinon.sandbox.create();
             sandbox.stub(dummyCfg, 'mergeObjects');
             events = {
-                onNotification: sinon.spy()
+                onNotification: sinon.spy(),
+                registerHelp: sinon.spy()
             };
         });
         afterEach(() => sandbox.restore());
@@ -96,6 +97,12 @@ describe('summoner plugin', () => {
                     dummyCfg.mergeObjects.firstCall.args[2].should.deep.equal({});
                 });
             });
+        });
+        it('should register extended help', () => {
+            summoner.prepare({}, dummyCfg, events);
+            events.registerHelp.calledWith('summoner', summoner.internals.extendedHelp).should.be.true;
+            expect(events.registerHelp.firstCall.args[2]).to.be.a('function');
+            expect(events.registerHelp.firstCall.args[2]()).to.equal(0);
         });
     });
     describe('mentionHandler()', () => {

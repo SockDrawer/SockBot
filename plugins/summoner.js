@@ -39,7 +39,11 @@ exports.defaultConfig = {
         '@%username% has summoned me, and so I appear.',
         'Yes master %name%, I shall appear as summoned.',
         'Yes mistress %name%, I shall appear as summoned.'
-    ]
+    ],
+    /**
+     * Extended help message
+     */
+    extendedHelp: 'Respond to @mentions with a randomly selected preconfigured phrase'
 };
 
 /**
@@ -87,6 +91,7 @@ exports.prepare = function prepare(plugConfig, config, events, browser) {
     internals.browser = browser;
     internals.configuration = config.mergeObjects(true, exports.defaultConfig, plugConfig);
     events.onNotification('mentioned', exports.mentionHandler);
+    events.registerHelp('summoner', internals.extendedHelp, () => 0);
 };
 
 /**
