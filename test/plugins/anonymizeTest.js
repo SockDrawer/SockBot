@@ -121,8 +121,8 @@ describe('anonymize', () => {
             const spy = sandbox.stub(browser, 'createPost'),
                 rawContent = '[quote="SockBot, post:4, topic:3"]Anonymized quote![/quote]Anonymized reply!';
             spy.yields(null, {
-                topic_id: 5,
-                post_number: 6
+                'topic_id': 5,
+                'post_number': 6
             }); //eslint-disable-line camelcase
             anonymize.prepare(undefined, dummyCfg, {
                 onNotification: () => 0,
