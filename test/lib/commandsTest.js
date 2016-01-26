@@ -158,6 +158,7 @@ describe('commands', () => {
             let sandbox, events;
             beforeEach(() => {
                 commands.internals.commands = {};
+                commands.internals.helpMessages = {};
                 sandbox = sinon.sandbox.create();
                 clock = sandbox.useFakeTimers();
                 events = {
@@ -183,14 +184,65 @@ describe('commands', () => {
             });
             it('should post expected text', () => {
                 const expected = 'Registered commands:\nhelp: print command help listing\n' +
-                    'shutup: tell me to shutup\n\nMore details may be available by passing ' +
-                    'a command name as the first parameter to `help`';
+                    'shutup: tell me to shutup\n\n* Help topic available.\n\nIssue the `help`' +
+                    ' command with an available help topic as a parameter to read additonal help';
                 commands.internals.commands.help = {
                     help: 'print command help listing'
                 };
                 commands.internals.commands.shutup = {
                     help: 'tell me to shutup'
                 };
+                cmdHelp({
+                    command: 'foobar',
+                    post: {
+                        'topic_id': 15,
+                        'post_number': 75
+                    }
+                });
+                browser.createPost.callCount.should.equal(1);
+                browser.createPost.calledWith(15, 75).should.be.true;
+                browser.createPost.lastCall.args[2].should.equal(expected);
+            });
+            it('should post expected text with help topics', () => {
+                const expected = 'Registered commands:\nhelp: print command help listing\n\n' +
+                    'Help Topics:\nshutup: Extended help topic\n\n* Help topic available.\n\n' +
+                    'Issue the `help` command with an available help topic as a parameter to ' +
+                    'read additonal help';
+                commands.internals.commands.help = {
+                    help: 'print command help listing'
+                };
+                commands.internals.helpMessages.shutup = 'tell me to shutup';
+                cmdHelp({
+                    command: 'foobar',
+                    post: {
+                        'topic_id': 15,
+                        'post_number': 75
+                    }
+                });
+                browser.createPost.callCount.should.equal(1);
+                browser.createPost.calledWith(15, 75).should.be.true;
+                browser.createPost.lastCall.args[2].should.equal(expected);
+            });
+            it('should pass callback to createPost', () => {
+                cmdHelp({
+                    command: 'foobar',
+                    post: {
+                        'topic_id': 1,
+                        'post_number': 5
+                    }
+                });
+                browser.createPost.lastCall.args[3].should.be.a('function');
+                browser.createPost.lastCall.args[3]().should.equal(0);
+            });
+
+            it('should indicate presence of help topic on command', () => {
+                const expected = 'Registered commands:\nhelp: print command help listing *\n\n' +
+                    '* Help topic available.\n\nIssue the `help` command with an available help ' +
+                    'topic as a parameter to read additonal help';
+                commands.internals.commands.help = {
+                    help: 'print command help listing'
+                };
+                commands.internals.helpMessages.help = 'foobar';
                 cmdHelp({
                     command: 'foobar',
                     post: {
@@ -256,7 +308,7 @@ describe('commands', () => {
                     browser.createPost.lastCall.args[2].should.startWith(expected);
                 });
                 it('should post extended help message one word command', () => {
-                    const expected = 'Extended help for `whosit`\n\nwhosit extended help' +
+                    const expected = 'Help topic for `whosit`\n\nwhosit extended help' +
                         '\n\nIssue the `help` command without any parameters to see all available commands';
                     commands.internals.helpMessages.whosit = 'whosit extended help';
                     cmdHelp({
@@ -272,7 +324,7 @@ describe('commands', () => {
                     browser.createPost.lastCall.args[2].should.equal(expected);
                 });
                 it('should post extended help message multi-word command', () => {
-                    const expected = 'Extended help for `who am i`';
+                    const expected = 'Help topic for `who am i`';
                     commands.internals.helpMessages['who am i'] = 'whosit extended help';
                     cmdHelp({
                         command: 'foobar',
@@ -764,13 +816,14 @@ describe('commands', () => {
             it('should log registration', () => {
                 const cmd = 'CMD' + Math.random();
                 registerHelp(cmd, 'help', spy);
-                events.emit.calledWith('logMessage', 'Extended help registered for: ' + cmd).should.be.true;
+                events.emit.calledWith('logMessage', 'Extended help registered for: ' +
+                    cmd.toLowerCase()).should.be.true;
             });
             it('should warn on help overwrite', () => {
                 const cmd = 'CMD' + Math.random();
-                commands.internals.helpMessages[cmd] = 'foo';
+                commands.internals.helpMessages[cmd.toLowerCase()] = 'foo';
                 registerHelp(cmd, 'help', spy);
-                events.emit.calledWith('logWarning', 'Overwriting existing extended help for: `' + cmd +
+                events.emit.calledWith('logWarning', 'Overwriting existing extended help for: `' + cmd.toLowerCase() +
                     '`!').should.be.true;
             });
         });

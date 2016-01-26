@@ -111,7 +111,7 @@ Shut the bot up until manually restarted
 
 <a name="module_commands..cmdHelp"></a>
 ### commands~cmdHelp(command)
-Reply with help test top the command !help
+Reply with help to the command !help
 
 **Kind**: inner method of <code>[commands](#module_commands)</code>  
 
