@@ -3,7 +3,6 @@ const gulp = require('gulp'),
     gulpJsdoc2md = require('gulp-jsdoc-to-markdown'),
     rename = require('gulp-rename'),
     istanbul = require('gulp-istanbul'),
-    istanbulHarmony = require('istanbul-harmony'),
     mocha = require('gulp-mocha'),
     eslint = require('gulp-eslint'),
     git = require('gulp-git');
@@ -152,7 +151,6 @@ gulp.task('test', ['lintCore', 'lintTests'], (done) => {
     gulp.src(sockFiles)
         // Instrument code files with istanbulHarmony
         .pipe(istanbul({
-            instrumenter: istanbulHarmony.Instrumenter,
             includeUntested: true
         }))
         // hook require function for complete code coverage

@@ -7,6 +7,13 @@
  */
 let mBrowser;
 
+
+/**
+ * Extended help message
+ */
+exports.extendedHelp = 'Testing plugin that echos your posts back at you.\n\nFor more information see the' +
+    ' [full docs](https://sockbot.readthedocs.org/en/latest/Plugins/echo/)';
+
 /**
  * Prepare Plugin prior to login
  *
@@ -20,6 +27,7 @@ exports.prepare = function (plugConfig, config, events, browser) {
     events.onNotification('mentioned', exports.handler);
     events.onNotification('replied', exports.handler);
     events.onNotification('private_message', exports.handler);
+    events.registerHelp('echo', exports.extendedHelp, () => 0);
 };
 
 /**

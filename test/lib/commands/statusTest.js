@@ -138,7 +138,7 @@ describe('status', () => {
             });
             describe('memoryUsage', () => {
                 it('should return the correct values', () => {
-                    const expected = 'Memory usage: 1 kB free out of 2 kB';
+                    const expected = 'Memory usage: 1 KB free out of 2 KB';
                     sandbox.stub(os, 'freemem', () => 1024);
                     sandbox.stub(os, 'totalmem', () => 2048);
                     expect(status.internals.memoryUsage()).to.be.equal(expected);

@@ -31,30 +31,49 @@ describe('autoreader', () => {
     });
     describe('prepare()', () => {
         it('should use default config', () => {
-            autoreader.prepare(undefined, dummyCfg, undefined, undefined);
+            autoreader.prepare(undefined, dummyCfg, {
+                registerHelp: () => 0
+            }, undefined);
             autoreader.internals.config.minAge.should.equal(3 * 24 * 60 * 60 * 1000);
         });
         it('should use default config if config is not object', () => {
-            autoreader.prepare(true, dummyCfg, undefined, undefined);
+            autoreader.prepare(true, dummyCfg, {
+                registerHelp: () => 0
+            }, undefined);
             autoreader.internals.config.minAge.should.equal(3 * 24 * 60 * 60 * 1000);
         });
         it('should override default config', () => {
             autoreader.prepare({
                 minAge: 1 * 24 * 60 * 60 * 1000
-            }, dummyCfg, undefined, undefined);
+            }, dummyCfg, {
+                registerHelp: () => 0
+            }, undefined);
             autoreader.internals.config.minAge.should.equal(1 * 24 * 60 * 60 * 1000);
         });
         it('should not randomize reader start', () => {
             autoreader.prepare({
                 randomize: false
-            }, dummyCfg, undefined, undefined);
+            }, dummyCfg, {
+                registerHelp: () => 0
+            }, undefined);
             autoreader.internals.config.hour.should.equal(0);
             autoreader.internals.config.minute.should.equal(0);
         });
         it('should store events object in internals', () => {
-            const events = Math.random();
+            const events = {
+                registerHelp: () => 0
+            };
             autoreader.prepare(undefined, dummyCfg, events, undefined);
             autoreader.internals.events.should.equal(events);
+        });
+        it('should register extended help', () => {
+            const events = {
+                registerHelp: sinon.spy()
+            };
+            autoreader.prepare({}, dummyCfg, events);
+            events.registerHelp.calledWith('autoreader', autoreader.internals.extendedHelp).should.be.true;
+            expect(events.registerHelp.firstCall.args[2]).to.be.a('function');
+            expect(events.registerHelp.firstCall.args[2]()).to.equal(0);
         });
     });
     describe('start()', () => {
@@ -97,7 +116,8 @@ describe('autoreader', () => {
                 complete();
             });
             events = {
-                emit: sinon.spy()
+                emit: sinon.spy(),
+                registerHelp: sinon.spy()
             };
             autoreader.internals.events = events;
         });

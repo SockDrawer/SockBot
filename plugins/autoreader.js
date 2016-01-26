@@ -63,7 +63,12 @@ const defaultConfig = {
          * EventEmitter used for internal communication
          * @type {externals.events.SockEvents}
          */
-        events: null
+        events: null,
+        /**
+         * Extended help message
+         */
+        extendedHelp: 'Automatically read posts throughout the forum.\n\nFor more information see the' +
+            ' [full docs](https://sockbot.readthedocs.org/en/latest/Plugins/autoreader/)'
     };
 
 /**
@@ -85,6 +90,7 @@ exports.prepare = function (plugConfig, config, events, browser) {
         internals.config.hour = Math.floor(Math.random() * 24);
         internals.config.minute = Math.floor(Math.random() * 60);
     }
+    events.registerHelp('autoreader', internals.extendedHelp, () => 0);
 };
 
 /**

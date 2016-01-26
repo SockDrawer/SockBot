@@ -121,13 +121,23 @@
  */
 
 /**
- * Add a notification listener
+ * Add a command listener
  *
  * @function
  * @name onCommand
  * @param {string} type Command name
  * @param {string} helpstring Short help text for command
  * @param {commandHandler} handler Command handler
+ * @returns {SockEvents} SockEvents for chaining calls
+ */
+
+/**
+ * Add Extended help for a command or topic
+ *
+ * @function
+ * @name registerHelp
+ * @param {string} command Command or topic to register help for
+ * @param {string} helptext Extended help text
  * @returns {SockEvents} SockEvents for chaining calls
  */
 

@@ -11,6 +11,7 @@ Watches for @mentions and replies with a canned response
     * [.defaultConfig](#module_summoner.defaultConfig)
         * [.cooldown](#module_summoner.defaultConfig.cooldown) : <code>Number</code>
         * [.messages](#module_summoner.defaultConfig.messages) : <code>Array.&lt;string&gt;</code>
+        * [.extendedHelp](#module_summoner.defaultConfig.extendedHelp)
     * [.mentionHandler(_, topic, post)](#module_summoner.mentionHandler)
     * [.prepare(plugConfig, config, events, browser)](#module_summoner.prepare)
     * [.start()](#module_summoner.start)
@@ -25,6 +26,7 @@ Default plugin configuration
 * [.defaultConfig](#module_summoner.defaultConfig)
     * [.cooldown](#module_summoner.defaultConfig.cooldown) : <code>Number</code>
     * [.messages](#module_summoner.defaultConfig.messages) : <code>Array.&lt;string&gt;</code>
+    * [.extendedHelp](#module_summoner.defaultConfig.extendedHelp)
 
 <a name="module_summoner.defaultConfig.cooldown"></a>
 #### defaultConfig.cooldown : <code>Number</code>
@@ -37,6 +39,11 @@ Messages to select reply from.
 
 **Kind**: static property of <code>[defaultConfig](#module_summoner.defaultConfig)</code>  
 **Default**: <code>[&quot;@%username% has summoned me, and so I appear.&quot;,&quot;Yes master %name%, I shall appear as summoned.&quot;,&quot;Yes mistress %name%, I shall appear as summoned.&quot;]</code>  
+<a name="module_summoner.defaultConfig.extendedHelp"></a>
+#### defaultConfig.extendedHelp
+Extended help message
+
+**Kind**: static property of <code>[defaultConfig](#module_summoner.defaultConfig)</code>  
 <a name="module_summoner.mentionHandler"></a>
 ### summoner.mentionHandler(_, topic, post)
 Respond to @mentions

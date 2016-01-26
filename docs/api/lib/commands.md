@@ -19,6 +19,7 @@ Command Parser for SockBot2.0
         * [~cmdShutUp(command)](#module_commands..cmdShutUp)
         * [~cmdHelp(command)](#module_commands..cmdHelp)
         * [~registerCommand(command, helpstring, handler, callback)](#module_commands..registerCommand) ⇒ <code>undefined</code>
+        * [~registerHelp(command, helptext, callback)](#module_commands..registerHelp) ⇒ <code>undefined</code>
         * [~commandProtect(event, handler)](#module_commands..commandProtect) ⇒ <code>boolean</code>
         * [~command](#module_commands..command) : <code>object</code>
         * [~completedCallback](#module_commands..completedCallback)
@@ -110,7 +111,7 @@ Shut the bot up until manually restarted
 
 <a name="module_commands..cmdHelp"></a>
 ### commands~cmdHelp(command)
-Reply with help test top the command !help
+Reply with help to the command !help
 
 **Kind**: inner method of <code>[commands](#module_commands)</code>  
 
@@ -132,6 +133,21 @@ will be added to core EventEmitter as .onCommand()
 | command | <code>string</code> | Command to handle |
 | helpstring | <code>string</code> | One line helpstring describing command |
 | handler | <code>commandHandler</code> | Function to handle the command |
+| callback | <code>completedCallback</code> | Completion callback |
+
+<a name="module_commands..registerHelp"></a>
+### commands~registerHelp(command, helptext, callback) ⇒ <code>undefined</code>
+Register extended help
+
+will be added to core EventEmitter as .registerHelp()
+
+**Kind**: inner method of <code>[commands](#module_commands)</code>  
+**Returns**: <code>undefined</code> - No return value  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| command | <code>string</code> | Command or topic to register help for |
+| helptext | <code>string</code> | Extended help text |
 | callback | <code>completedCallback</code> | Completion callback |
 
 <a name="module_commands..commandProtect"></a>
