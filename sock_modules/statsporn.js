@@ -216,7 +216,7 @@ function queryToChart(cmd, query, date, filename, rows, callback) {
             '```', '',
             '</details>', ''
         ];
-        var txt = '[<img src="%%.svg" height="500" width="700" /><br/>' +
+        var txt = '[<img src="%%.png" height="500" width="700" /><br/>' +
             'Click for interactive graph.](%%)';
         txt = txt.replace(/%%/g, msg.url);
         res.push(txt);
