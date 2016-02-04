@@ -201,7 +201,7 @@ describe('browser', () => {
     describe('externals', () => {
         const fns = ['createPost', 'createPrivateMessage', 'editPost', 'login', 'messageBus', 'getPost', 'getTopic',
                 'getUser', 'getNotifications', 'postAction', 'getLastPosts', 'getPosts', 'getTopics', 'readPosts',
-                'getData', 'postData', 'setNotificationLevel'
+                'getData', 'postData', 'putData', 'setNotificationLevel'
             ],
             objs = ['trustLevels', 'postActions'];
         describe('should include expected functions:', () => {
@@ -1895,6 +1895,63 @@ describe('browser', () => {
                     beforeEach(() => {
                         spy = sinon.spy();
                         object.postData('/some/url', '', spy);
+                        callback = queue.push.firstCall.args[0].callback;
+                    });
+                    it('should be a function', () => {
+                        expect(callback).to.be.a('function');
+                    });
+                    it('should call callback with err', () => {
+                        const err = Math.random();
+                        callback(err, Math.random());
+                        spy.firstCall.args.should.eql([err]);
+                    });
+                    it('should call callback with data', () => {
+                        const data = Math.random();
+                        callback(null, data);
+                        spy.firstCall.args.should.eql([null, data]);
+                    });
+                });
+            });
+            describe('puttData()', () => {
+                let object, queue;
+                beforeEach(() => {
+                    object = {
+                        delay: 0,
+                        queue: {
+                            push: sinon.stub()
+                        },
+                        putData: browserModule.externals.putData
+                    };
+                    queue = object.queue;
+                });
+                it('should set HTTP method', () => {
+                    object.putData('/some/url', '', () => 0);
+                    queue.push.firstCall.args[0].method.should.equal('PUT');
+                });
+                it('should set URL', () => {
+                    object.putData('/some/url', '', () => 0);
+                    queue.push.firstCall.args[0].url.should.equal('/some/url');
+                });
+                it('should set delay', () => {
+                    const delay = Math.random() * 5e4;
+                    object.delay = delay;
+                    object.putData('/some/url', '', () => 0);
+                    queue.push.firstCall.args[0].delay.should.equal(delay);
+                });
+                it('should set form', () => {
+                    const form = Math.random();
+                    object.putData('/some/url', form, () => 0);
+                    queue.push.firstCall.args[0].form.should.equal(form);
+                });
+                it('should set callback', () => {
+                    object.putData('/some/url', '', () => 0);
+                    queue.push.firstCall.args[0].callback.should.be.a('function');
+                });
+                describe('callback', () => {
+                    let callback, spy;
+                    beforeEach(() => {
+                        spy = sinon.spy();
+                        object.putData('/some/url', '', spy);
                         callback = queue.push.firstCall.args[0].callback;
                     });
                     it('should be a function', () => {
