@@ -10,6 +10,7 @@ const expect = chai.expect;
 
 // The thing we're testing
 const commands = require('../../lib/commands'),
+    status = require('../../lib/commands/status'),
     config = require('../../lib/config'),
     SockBot = require('../../SockBot');
 const browser = require('../../lib/browser')();
@@ -988,6 +989,10 @@ describe('commands', () => {
         it('should produce register commandPotect as newListener listener', () => {
             prepare(events, () => 0);
             events.on.calledWith('newListener', commands.internals.commandProtect).should.be.true;
+        });
+        it('should produce register status.loadPlugin as loadPlugin listener', () => {
+            prepare(events, () => 0);
+            events.on.calledWith('loadPlugin', status.loadPlugin).should.be.true;
         });
     });
     describe('parseCommands()', () => {
