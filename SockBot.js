@@ -220,6 +220,7 @@ function loadPlugins() {
                 internals.events.emit('logError', 'Plugin `' + module + '` does not export `stop()` function');
             } else {
                 internals.events.emit('logMessage', 'Plugin `' + module + '` Loaded');
+                internals.events.emit('loadPlugin', module);
                 plugin.prepare.pluginName = module;
                 internals.plugins.push(plugin);
             }
