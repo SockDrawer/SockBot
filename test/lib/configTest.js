@@ -287,8 +287,8 @@ describe('config', () => {
             const cwd = process.cwd();
             [
                 ['./config', cwd],
-                ['../foo/config.js', path.resolve(cwd, '../foo')],
-                ['./foo/config.js', path.resolve(cwd, 'foo')],
+                ['../foo/config.js', path.posix.resolve(cwd, '../foo')],
+                ['./foo/config.js', path.posix.resolve(cwd, 'foo')],
                 ['/foo/bar/baz/config.js', '/foo/bar/baz'],
                 ['/config.js', '/']
             ].forEach((cfg) => {
