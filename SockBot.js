@@ -137,7 +137,7 @@ function doPluginRequire(module, requireIt) {
     try {
         let resolved = './plugins/' + module;
         if (module[0] === '/' || module.substring(0, 2) === './' || module.substring(0, 3) === '../') {
-            resolved = path.resolve(config.basePath, module);
+            resolved = path.posix.resolve(config.basePath, module);
         }
         // Look in plugins first
         return requireIt(resolved);
