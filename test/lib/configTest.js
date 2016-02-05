@@ -10,13 +10,14 @@ const expect = chai.expect;
 // The thing we're testing
 const config = require('../../lib/config'),
     utils = require('../../lib/utils'),
-    fs = require('fs');
+    fs = require('fs'),
+    path = require('path');
 
 describe('config', () => {
     describe('exports', () => {
         const fns = ['loadConfiguration', 'mergeObjects'],
             objs = ['internals', 'core', 'plugins', 'user'],
-            vals = [];
+            vals = ['basePath'];
         describe('should export expected functions:', () => {
             fns.forEach((fn) => {
                 it(fn + '()', () => expect(config[fn]).to.be.a('function'));
@@ -29,7 +30,7 @@ describe('config', () => {
         });
         describe('should export expected values', () => {
             vals.forEach((val) => {
-                it(val, () => config.should.have.key(val));
+                it(val, () => config.should.have.any.key(val));
             });
         });
         it('should export only expected keys', () => {
@@ -67,15 +68,15 @@ describe('config', () => {
     });
     describe('readFile()', () => {
         const readFile = config.internals.readFile;
-		let sandbox;
-		beforeEach(() => {
-			sandbox = sinon.sandbox.create();
-			sandbox.stub(console, 'log');
-			sandbox.stub(fs, 'readFile');
-		});
-		afterEach(() => {
-			sandbox.restore();
-		});
+        let sandbox;
+        beforeEach(() => {
+            sandbox = sinon.sandbox.create();
+            sandbox.stub(console, 'log');
+            sandbox.stub(fs, 'readFile');
+        });
+        afterEach(() => {
+            sandbox.restore();
+        });
         describe('Should error on non string input:', () => {
             [undefined, null, 1, 2.4, false, '', [], {}].forEach((test) => {
                 it(JSON.stringify(test), () => {
@@ -172,15 +173,15 @@ describe('config', () => {
     });
     describe('loadConfiguration()', () => {
         const loadConfiguration = config.loadConfiguration;
-		let sandbox;
-		beforeEach(() => {
-			sandbox = sinon.sandbox.create();
-			sandbox.stub(console, 'log');
-			sandbox.stub(fs, 'readFile');
-		});
-		afterEach(() => {
-			sandbox.restore();
-		});
+        let sandbox;
+        beforeEach(() => {
+            sandbox = sinon.sandbox.create();
+            sandbox.stub(console, 'log');
+            sandbox.stub(fs, 'readFile');
+        });
+        afterEach(() => {
+            sandbox.restore();
+        });
         it('should load valid config', () => {
             const input = {
                     core: {
@@ -190,7 +191,6 @@ describe('config', () => {
                     }
                 },
                 expected = utils.mergeObjects(true, config.internals.defaultConfig, input);
-            fs.readFile.reset();
             fs.readFile.yields(null, JSON.stringify(input));
             const spy = sinon.spy();
             loadConfiguration('config.js', spy);
@@ -209,7 +209,6 @@ describe('config', () => {
                     }
                 },
                 expected = utils.mergeObjects(true, config.internals.defaultConfig, input);
-            fs.readFile.reset();
             fs.readFile.yields(null, JSON.stringify(input));
             const spy = sinon.spy();
             loadConfiguration('config.js', spy);
@@ -219,7 +218,6 @@ describe('config', () => {
             spy.lastCall.args[1].should.deep.equal(expected);
         });
         it('should pass on read error', () => {
-            fs.readFile.reset();
             fs.readFile.yields(new Error('E_NO_ENT'));
             const spy = sinon.spy();
             loadConfiguration('config.js', spy);
@@ -228,7 +226,6 @@ describe('config', () => {
             expect(spy.lastCall.args[0]).to.be.instanceOf(Error);
         });
         it('should pass on YAML error', () => {
-            fs.readFile.reset();
             fs.readFile.yields(null, '1');
             const spy = sinon.spy();
             loadConfiguration('config.js', spy);
@@ -238,12 +235,11 @@ describe('config', () => {
         });
         it('should validate username', () => {
             const input = {
-                    core: {
-                        password: 'crayon',
-                        owner: 'johnson'
-                    }
-                };
-            fs.readFile.reset();
+                core: {
+                    password: 'crayon',
+                    owner: 'johnson'
+                }
+            };
             fs.readFile.yields(null, JSON.stringify(input));
             const spy = sinon.spy();
             loadConfiguration('config.js', spy);
@@ -253,12 +249,11 @@ describe('config', () => {
         });
         it('should validate password', () => {
             const input = {
-                    core: {
-                        username: 'harold',
-                        owner: 'johnson'
-                    }
-                };
-            fs.readFile.reset();
+                core: {
+                    username: 'harold',
+                    owner: 'johnson'
+                }
+            };
             fs.readFile.yields(null, JSON.stringify(input));
             const spy = sinon.spy();
             loadConfiguration('config.js', spy);
@@ -268,18 +263,41 @@ describe('config', () => {
         });
         it('should validate owner', () => {
             const input = {
-                    core: {
-                        username: 'harold',
-                        password: 'crayon'
-                    }
-                };
-            fs.readFile.reset();
+                core: {
+                    username: 'harold',
+                    password: 'crayon'
+                }
+            };
             fs.readFile.yields(null, JSON.stringify(input));
             const spy = sinon.spy();
             loadConfiguration('config.js', spy);
             spy.called.should.be.true;
             spy.lastCall.args.should.have.length(1);
             expect(spy.lastCall.args[0]).to.be.Error;
+        });
+        it('should strip file name from config path', () => {
+            fs.readFile.yields(null, '{}');
+            sandbox.stub(path, 'resolve');
+            loadConfiguration('./config.js', () => 0);
+            path.resolve.firstCall.args.length.should.equal(2);
+            path.resolve.firstCall.args[0].should.equal('./config.js');
+            path.resolve.firstCall.args[1].should.equal('..');
+        });
+        describe('path resolution', () => {
+            const cwd = process.cwd();
+            [
+                ['./config', cwd],
+                ['../foo/config.js', path.resolve(cwd, '../foo')],
+                ['./foo/config.js', path.resolve(cwd, 'foo')],
+                ['/foo/bar/baz/config.js', '/foo/bar/baz'],
+                ['/config.js', '/']
+            ].forEach((cfg) => {
+                it('should resolve `' + cfg[0] + '`corectly', () => {
+                    fs.readFile.yields(null, '{}');
+                    loadConfiguration(cfg[0], () => 0);
+                    config.basePath.should.equal(cfg[1]);
+                });
+            });
         });
     });
 });
