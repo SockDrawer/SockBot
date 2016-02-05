@@ -10,6 +10,7 @@ Status command
         * [.command](#module_status.command) : <code>string</code>
         * [.helpText](#module_status.helpText) : <code>string</code>
         * [.handler(command)](#module_status.handler)
+        * [.loadPlugin(name)](#module_status.loadPlugin)
     * _inner_
         * [~uptime()](#module_status..uptime) ⇒ <code>string</code>
         * [~runtime()](#module_status..runtime) ⇒ <code>string</code>
@@ -17,6 +18,7 @@ Status command
         * [~cpuArch()](#module_status..cpuArch) ⇒ <code>string</code>
         * [~cpuUsage()](#module_status..cpuUsage) ⇒ <code>string</code>
         * [~memoryUsage()](#module_status..memoryUsage) ⇒ <code>string</code>
+        * [~showPlugins()](#module_status..showPlugins) ⇒ <code>string</code>
         * [~socksFolded()](#module_status..socksFolded) ⇒ <code>string</code>
         * [~splinesReticulated()](#module_status..splinesReticulated) ⇒ <code>string</code>
         * [~cogsThrown()](#module_status..cogsThrown) ⇒ <code>string</code>
@@ -47,6 +49,16 @@ Handle the `status` command
 | Param | Type | Description |
 | --- | --- | --- |
 | command | <code>command</code> | The `status` command |
+
+<a name="module_status.loadPlugin"></a>
+### status.loadPlugin(name)
+Handles registering new plugins to the plugin list
+
+**Kind**: static method of <code>[status](#module_status)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| name | <code>string</code> | Plugin Name |
 
 <a name="module_status..uptime"></a>
 ### status~uptime() ⇒ <code>string</code>
@@ -84,6 +96,12 @@ Current memory usage
 
 **Kind**: inner method of <code>[status](#module_status)</code>  
 **Returns**: <code>string</code> - Memory usage as a pre-formatted string  
+<a name="module_status..showPlugins"></a>
+### status~showPlugins() ⇒ <code>string</code>
+Currently loaded plugins
+
+**Kind**: inner method of <code>[status](#module_status)</code>  
+**Returns**: <code>string</code> - List of loaded plugins  
 <a name="module_status..socksFolded"></a>
 ### status~socksFolded() ⇒ <code>string</code>
 'Socks folded' fun stat; random number between 1 and 1000
