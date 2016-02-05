@@ -2,7 +2,8 @@
 /*globals describe, it, beforeEach, afterEach*/
 /*eslint no-unused-expressions:0 */
 
-const EventEmitter = require('events').EventEmitter;
+const EventEmitter = require('events').EventEmitter,
+    path = require('path');
 
 const chai = require('chai'),
     sinon = require('sinon'),
@@ -109,6 +110,24 @@ describe('SockBot', () => {
                 requireIt.onFirstCall().throws(new Error('Cannot find module this is ignored nonsensical text'));
                 requireIt.onSecondCall().throws(value);
                 expect(() => doPluginRequire('foo', requireIt)).to.throw(value);
+            });
+            describe('plugin path resolution', () => {
+                const cwd = process.cwd();
+                beforeEach(() => {
+                    requireIt = sinon.stub();
+                    config.basePath = cwd;
+                });
+                [
+                    ['foo', './plugins/foo'],
+                    ['./foo', path.posix.resolve(cwd, './foo')],
+                    ['../bar/foo', path.posix.resolve(cwd, '../bar/foo')],
+                    ['/baz/quux/foo', '/baz/quux/foo']
+                ].forEach(p => {
+                    it('should resolve `' + p[0] + '` to `' + p[1] + '`', () => {
+                        doPluginRequire(p[0], requireIt);
+                        requireIt.firstCall.args[0].should.equal(p[1]);
+                    });
+                });
             });
         });
         describe('prepareEvents()', () => {

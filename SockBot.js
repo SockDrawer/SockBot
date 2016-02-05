@@ -9,7 +9,8 @@
  */
 
 const async = require('async');
-const EventEmitter = require('events').EventEmitter;
+const EventEmitter = require('events').EventEmitter,
+    path = require('path');
 const config = require('./lib/config'),
     messages = require('./lib/messages'),
     notifications = require('./lib/notifications'),
@@ -134,8 +135,12 @@ exports.stop = function (callback) {
  */
 function doPluginRequire(module, requireIt) {
     try {
+        let resolved = './plugins/' + module;
+        if (module[0] === '/' || module.substring(0, 2) === './' || module.substring(0, 3) === '../') {
+            resolved = path.resolve(config.basePath, module);
+        }
         // Look in plugins first
-        return requireIt('./plugins/' + module);
+        return requireIt(resolved);
     } catch (e) {
         // Error! check if it's ENOENT and try raw module
         if (/^Cannot find module/.test(e.message)) {
