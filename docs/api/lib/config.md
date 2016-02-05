@@ -9,6 +9,10 @@
 <dd><p>Current plugin configuration</p>
 <p>Set by internals. Do not edit</p>
 </dd>
+<dt><a href="#basePath">basePath</a> : <code>string</code></dt>
+<dd><p>Base Path of the active config file</p>
+<p>Set by internals. Do not edit</p>
+</dd>
 <dt><a href="#mergeObjects">mergeObjects</a> ⇒ <code>object</code></dt>
 <dd><p>Merge multiple objects into one object</p>
 <p>Later objects override earlier objects</p>
@@ -32,10 +36,10 @@ exposed to allow plugins to call it without <code>require</code>ing <code>utils<
 ## Functions
 
 <dl>
-<dt><a href="#readFile">readFile(path, callback)</a></dt>
+<dt><a href="#readFile">readFile(filePath, callback)</a></dt>
 <dd><p>Read and parse configuration file from disc</p>
 </dd>
-<dt><a href="#loadConfiguration">loadConfiguration(path, callback)</a></dt>
+<dt><a href="#loadConfiguration">loadConfiguration(filePath, callback)</a></dt>
 <dd><p>Load configuration from disc</p>
 </dd>
 </dl>
@@ -59,6 +63,14 @@ Set by internals. Do not edit
 <a name="plugins"></a>
 ## plugins
 Current plugin configuration
+
+Set by internals. Do not edit
+
+**Kind**: global variable  
+**Read only**: true  
+<a name="basePath"></a>
+## basePath : <code>string</code>
+Base Path of the active config file
 
 Set by internals. Do not edit
 
@@ -109,6 +121,7 @@ Default configuration options
         * [.pollMessages](#defaultConfig.core.pollMessages) : <code>boolean</code>
         * [.pollNotifications](#defaultConfig.core.pollNotifications) : <code>boolean</code>
     * [.plugins](#defaultConfig.plugins) : <code>object</code>
+    * [.basePath](#defaultConfig.basePath) : <code>string</code>
 
 <a name="defaultConfig.core"></a>
 ### defaultConfig.core : <code>object</code>
@@ -214,26 +227,31 @@ Plugin configuration.
 See `Plugin Configuration` for details
 
 **Kind**: static property of <code>[defaultConfig](#defaultConfig)</code>  
+<a name="defaultConfig.basePath"></a>
+### defaultConfig.basePath : <code>string</code>
+Base Path of the active config file
+
+**Kind**: static property of <code>[defaultConfig](#defaultConfig)</code>  
 <a name="readFile"></a>
-## readFile(path, callback)
+## readFile(filePath, callback)
 Read and parse configuration file from disc
 
 **Kind**: global function  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| path | <code>string</code> | Path of file to read |
+| filePath | <code>string</code> | Path of file to read |
 | callback | <code>[configComplete](#configComplete)</code> | Completion callback |
 
 <a name="loadConfiguration"></a>
-## loadConfiguration(path, callback)
+## loadConfiguration(filePath, callback)
 Load configuration from disc
 
 **Kind**: global function  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| path | <code>string</code> | Configuration file path |
+| filePath | <code>string</code> | Configuration file path |
 | callback | <code>[configComplete](#configComplete)</code> | Completion callback |
 
 <a name="configComplete"></a>
