@@ -158,6 +158,14 @@ describe('utils', () => {
             expect(() => mergeInner(base, mixin)).to.not.throw();
             base.should.deep.equal(mixin);
         });
+        it('should accept null mixin key value', () => {
+            const mixin = {
+                    a: null
+                },
+                base = {};
+            expect(() => mergeInner(base, mixin)).to.not.throw();
+            base.should.deep.equal(mixin);
+        });
         it('should accept empty mixin object', () => {
             const base = {
                     a: 1

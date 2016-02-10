@@ -2,7 +2,8 @@
 /*globals describe, it, beforeEach, afterEach*/
 /*eslint no-unused-expressions:0 */
 
-const EventEmitter = require('events').EventEmitter;
+const EventEmitter = require('events').EventEmitter,
+    path = require('path');
 
 const chai = require('chai'),
     sinon = require('sinon'),
@@ -22,9 +23,9 @@ const SockBot = require('../SockBot'),
 const browser = browserPlugin();
 
 describe('SockBot', () => {
-        beforeEach(() => {
-        sinon.stub(async, 'nextTick', (fn) => fn());//setTimeout(fn, 0));
-        sinon.stub(async, 'setImmediate', (fn) => fn());//setTimeout(fn, 0));
+    beforeEach(() => {
+        sinon.stub(async, 'nextTick', (fn) => fn()); //setTimeout(fn, 0));
+        sinon.stub(async, 'setImmediate', (fn) => fn()); //setTimeout(fn, 0));
     });
     afterEach(() => {
         async.nextTick.restore();
@@ -109,6 +110,24 @@ describe('SockBot', () => {
                 requireIt.onFirstCall().throws(new Error('Cannot find module this is ignored nonsensical text'));
                 requireIt.onSecondCall().throws(value);
                 expect(() => doPluginRequire('foo', requireIt)).to.throw(value);
+            });
+            describe('plugin path resolution', () => {
+                const cwd = process.cwd();
+                beforeEach(() => {
+                    requireIt = sinon.stub();
+                    config.basePath = cwd;
+                });
+                [
+                    ['foo', './plugins/foo'],
+                    ['./foo', path.posix.resolve(cwd, './foo')],
+                    ['../bar/foo', path.posix.resolve(cwd, '../bar/foo')],
+                    ['/baz/quux/foo', '/baz/quux/foo']
+                ].forEach(p => {
+                    it('should resolve `' + p[0] + '` to `' + p[1] + '`', () => {
+                        doPluginRequire(p[0], requireIt);
+                        requireIt.firstCall.args[0].should.equal(p[1]);
+                    });
+                });
             });
         });
         describe('prepareEvents()', () => {
@@ -460,6 +479,67 @@ describe('SockBot', () => {
                 };
                 loadPlugins();
                 SockBot.internals.plugins.should.deep.equal([module1, module2]);
+            });
+            describe('loadPlugin event', () => {
+                it('should emit plugin loaded event on success', () => {
+                    const module = {
+                        prepare: () => 0,
+                        start: () => 0,
+                        stop: () => 0
+                    };
+                    doPluginRequire.returns(module);
+                    config.plugins = {
+                        'myModule': true
+                    };
+                    loadPlugins();
+                    events.emit.calledWith('loadPlugin', 'myModule').should.be.true;
+                });
+                it('should not emit plugin loaded event when doPluginRequire throws', () => {
+                    const err = new Error('who am i?');
+                    doPluginRequire.throws(err);
+                    config.plugins = {
+                        'erroring': true
+                    };
+                    loadPlugins();
+                    expect(loadPlugins).to.not.throw;
+                    events.emit.calledWith('loadPlugin').should.equal(false);
+                });
+                it('should not emit plugin loaded event when prepare() function is missing', () => {
+                    const module = {
+                        start: () => 0,
+                        stop: () => 0
+                    };
+                    doPluginRequire.returns(module);
+                    config.plugins = {
+                        'missingno': true
+                    };
+                    loadPlugins();
+                    events.emit.calledWith('loadPlugin').should.equal(false);
+                });
+                it('should not emit plugin loaded event when start() function is missing', () => {
+                    const module = {
+                        prepare: () => 0,
+                        stop: () => 0
+                    };
+                    doPluginRequire.returns(module);
+                    config.plugins = {
+                        'missingno': true
+                    };
+                    loadPlugins();
+                    events.emit.calledWith('loadPlugin').should.equal(false);
+                });
+                it('should not emit plugin loaded event when stop() function is missing', () => {
+                    const module = {
+                        start: () => 0,
+                        prepare: () => 0
+                    };
+                    doPluginRequire.returns(module);
+                    config.plugins = {
+                        'missingno': true
+                    };
+                    loadPlugins();
+                    events.emit.calledWith('loadPlugin').should.equal(false);
+                });
             });
         });
         describe('loadConfig()', () => {

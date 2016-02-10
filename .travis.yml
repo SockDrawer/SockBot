@@ -2,11 +2,11 @@ language: node_js
 node_js:
 - node
 - iojs
-- '0.11'
 - '0.12'
 - '4.1'
 - '4.2'
-- '5.3'
+- '5.5'
+- '5.6'
 before_script:
 - rm -rf ./coverage
 - git config credential.helper "store --file=.git/credentials"

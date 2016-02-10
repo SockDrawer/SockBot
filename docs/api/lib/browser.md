@@ -17,6 +17,7 @@ Webbrowser abstraction for communicating with discourse
     * [~queueWorker(task, callback)](#module_browser..queueWorker)
     * [~getData(url, callback)](#module_browser..getData)
     * [~postData(url, data, callback)](#module_browser..postData)
+    * [~putData(url, data, callback)](#module_browser..putData)
     * [~createPost(topicId, [replyTo], content, callback)](#module_browser..createPost)
     * [~createPrivateMessage(to, title, content, callback)](#module_browser..createPrivateMessage)
     * [~editPost(postId, content, [editReason], callback)](#module_browser..editPost)
@@ -192,6 +193,18 @@ Post data to a URL
 | --- | --- | --- |
 | url | <code>string</code> | URL to issue POST request to |
 | data | <code>object</code> | Data to POST |
+| callback | <code>requestComplete</code> | Completion callback |
+
+<a name="module_browser..putData"></a>
+### browser~putData(url, data, callback)
+Put data to a URL
+
+**Kind**: inner method of <code>[browser](#module_browser)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| url | <code>string</code> | URL to issue PUT request to |
+| data | <code>object</code> | Data to PUT |
 | callback | <code>requestComplete</code> | Completion callback |
 
 <a name="module_browser..createPost"></a>
