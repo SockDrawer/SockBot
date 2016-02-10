@@ -10,6 +10,7 @@ const expect = chai.expect;
 //The things we're mocking
 const os = require('os'),
     shuffle = require('knuth-shuffle');
+const utils = require('../../../lib/utils');
 const browser = require('../../../lib/browser')();
 
 // The thing we're testing
@@ -68,23 +69,48 @@ describe('status', () => {
             sandbox.restore();
         });
         describe('handler', () => {
-            it('should return the correct values', () => {
-                const command = {
-                    post: {
-                        'topic_id': 1,
-                        'post_number': 2
-                    }
-                };
-                const spy = sandbox.stub(browser, 'createPost', (_, __, ___, fn) => fn());
-                for (let fn in status.internals) { //eslint-disable-line prefer-const
-                    sandbox.stub(status.internals, fn, () => 0);
+            let browserSpy;
+            const command = {
+                post: {
+                    'topic_id': 1,
+                    'post_number': 2
                 }
+            };
+            beforeEach(() => {
+                sandbox.stub(status.internals, 'uptime');
+                sandbox.stub(status.internals, 'runtime');
+                sandbox.stub(status.internals, 'platform');
+                sandbox.stub(status.internals, 'cpuArch');
+                sandbox.stub(status.internals, 'cpuUsage');
+                sandbox.stub(status.internals, 'memoryUsage');
+                sandbox.stub(status.internals, 'socksFolded');
+                sandbox.stub(status.internals, 'splinesReticulated');
+                sandbox.stub(status.internals, 'cogsThrown');
+                sandbox.stub(status.internals, 'holesDarned');
+                sandbox.stub(status.internals, 'starsGazed');
+                sandbox.stub(status.internals, 'ringsCollected');
+                sandbox.stub(status.internals, 'dangersWarned');
+                sandbox.stub(status.internals, 'showPlugins');
+                browserSpy = sandbox.stub(browser, 'createPost', (_, __, ___, fn) => fn());
+            });
+            it('should return the correct values', () => {
                 status.handler(command);
-                spy.calledOnce.should.be.true;
-                spy.firstCall.args[0].should.equal(1);
-                spy.firstCall.args[1].should.equal(2);
-                spy.firstCall.args[2].should.be.a('string');
-                spy.firstCall.args[3].should.be.a('function');
+                browserSpy.calledOnce.should.be.true;
+                browserSpy.firstCall.args[0].should.equal(1);
+                browserSpy.firstCall.args[1].should.equal(2);
+                browserSpy.firstCall.args[2].should.be.a('string');
+                browserSpy.firstCall.args[3].should.be.a('function');
+            });
+            ['uptime', 'runtime', 'platform', 'cpuArch', 'cpuUsage', 'memoryUsage', 'socksFolded',
+                'splinesReticulated', 'cogsThrown', 'holesDarned', 'starsGazed', 'ringsCollected', 'dangersWarned',
+                'showPlugins'
+            ].forEach((fn) => {
+                it('should include ' + fn + ' statistics', () => {
+                    const expected = utils.uuid();
+                    status.internals[fn].returns(expected);
+                    status.handler(command);
+                    browserSpy.firstCall.args[2].should.contain(expected);
+                });
             });
         });
         describe('real stats', () => {
