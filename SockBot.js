@@ -179,6 +179,17 @@ exports.logError = function logError(error) {
 };
 
 /**
+ * Log an extended message
+ *
+ * @param {number} level Log Level
+ * @param {string} message Log Message
+ * @param {*} [data] Optional extended log data
+ */
+exports.logExtended = function logExtended(level, message, data) {
+    utils.logExtended(level, message, data);
+};
+
+/**
  * Prepare core EventEmitter as a SockEvents object
  *
  * @param {preparedCallback} callback Completion callback
@@ -192,6 +203,7 @@ function prepareEvents(callback) {
             events.on('logMessage', exports.logMessage);
             events.on('logWarning', exports.logWarning);
             events.on('logError', exports.logError);
+            events.on('logExtended', exports.logExtended);
             next();
         }, (next) => {
             messages.prepare(events, clientid, next);
