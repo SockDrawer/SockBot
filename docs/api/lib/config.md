@@ -120,6 +120,8 @@ Default configuration options
         * [.handleActedMessage](#defaultConfig.core.handleActedMessage) : <code>boolean</code>
         * [.pollMessages](#defaultConfig.core.pollMessages) : <code>boolean</code>
         * [.pollNotifications](#defaultConfig.core.pollNotifications) : <code>boolean</code>
+        * [.extendedLogLevel](#defaultConfig.core.extendedLogLevel) : <code>boolean</code>
+        * [.extendedLog](#defaultConfig.core.extendedLog) : <code>number</code> &#124; <code>string</code>
     * [.plugins](#defaultConfig.plugins) : <code>object</code>
     * [.basePath](#defaultConfig.basePath) : <code>string</code>
 
@@ -140,6 +142,8 @@ Core configuration options
     * [.handleActedMessage](#defaultConfig.core.handleActedMessage) : <code>boolean</code>
     * [.pollMessages](#defaultConfig.core.pollMessages) : <code>boolean</code>
     * [.pollNotifications](#defaultConfig.core.pollNotifications) : <code>boolean</code>
+    * [.extendedLogLevel](#defaultConfig.core.extendedLogLevel) : <code>boolean</code>
+    * [.extendedLog](#defaultConfig.core.extendedLog) : <code>number</code> &#124; <code>string</code>
 
 <a name="defaultConfig.core.username"></a>
 #### core.username : <code>string</code>
@@ -220,6 +224,25 @@ For cyberparts, set this to `false` to stop the bot marking notifications as rea
 
 **Kind**: static property of <code>[core](#defaultConfig.core)</code>  
 **Default**: <code>true</code>  
+<a name="defaultConfig.core.extendedLogLevel"></a>
+#### core.extendedLogLevel : <code>boolean</code>
+Extended Logging Level.
+
+Extended log messages will only be logged if they have a lower level than this value. omit or set to `0` to
+disable extended logging
+
+**Kind**: static property of <code>[core](#defaultConfig.core)</code>  
+**Default**: <code>0</code>  
+<a name="defaultConfig.core.extendedLog"></a>
+#### core.extendedLog : <code>number</code> &#124; <code>string</code>
+Extended Logging Destination.
+
+Where to write extended log information. Can be `stderr`, or stdout` to write to the respective outputs, or
+a file path to append logs to, or if you are using input redirection to attach additional open file
+descriptors a number indicating the file descriptor to write to.
+
+**Kind**: static property of <code>[core](#defaultConfig.core)</code>  
+**Default**: <code>stderr</code>  
 <a name="defaultConfig.plugins"></a>
 ### defaultConfig.plugins : <code>object</code>
 Plugin configuration.
