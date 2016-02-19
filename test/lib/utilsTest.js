@@ -2,6 +2,8 @@
 /*globals describe, it, before, beforeEach, after, afterEach*/
 /*eslint no-unused-expressions:0 */
 
+const fs = require('fs');
+
 const chai = require('chai'),
     sinon = require('sinon');
 chai.should();
@@ -14,7 +16,7 @@ const utils = require('../../lib/utils'),
 describe('utils', () => {
     describe('exports', () => {
         const fns = ['uuid', 'log', 'warn', 'error', 'addTimestamp', 'mergeObjects', 'mergeInner', 'cloneData',
-                'filterIgnored', 'filterIgnoredOnPost', 'filterIgnoredOnTopic'
+                'filterIgnored', 'filterIgnoredOnPost', 'filterIgnoredOnTopic', 'logExtended'
             ],
             objs = ['internals'],
             vals = [];
@@ -760,6 +762,148 @@ describe('utils', () => {
                 spy.lastCall.args.should.deep.equal(['ignore']);
                 utils.warn.called.should.be.true;
                 utils.warn.lastCall.args.should.deep.equal(['Post #undefined Ignored: POST OK, TOPIC NOT OK']);
+            });
+        });
+    });
+    describe('logExtended()', () => {
+        let sandbox;
+        beforeEach(() => {
+            sandbox = sinon.sandbox.create();
+            sandbox.stub(fs, 'write');
+            fs.write.yields();
+            sandbox.stub(fs, 'appendFile');
+            fs.appendFile.yields();
+            sandbox.stub(utils, 'error');
+            sandbox.useFakeTimers(1455075316497);
+            config.core.extendedLogLevel = 10;
+            config.core.extendedLog = 'stderr';
+        });
+        afterEach(() => {
+            sandbox.restore();
+        });
+        describe('Log Level Triggering', () => {
+            it('should not log when config log level is 0', () => {
+                config.core.extendedLogLevel = 0;
+                utils.logExtended(0, 'testing');
+                fs.write.called.should.equal(false);
+            });
+            it('should not log when log level is greater than config log level', () => {
+                utils.logExtended(100, 'testing');
+                fs.write.called.should.equal(false);
+                fs.appendFile.called.should.equal(false);
+                utils.error.called.should.equal(false);
+            });
+            it('should log when log level is equal to config log level', () => {
+                utils.logExtended(10, 'testing');
+                fs.write.called.should.equal(true);
+            });
+            it('should log when log level is less than config log level', () => {
+                utils.logExtended(1, 'testing');
+                fs.write.called.should.equal(true);
+            });
+        });
+        describe('Log Destinations', () => {
+            it('should log to stdout when destination is `stdout`', () => {
+                config.core.extendedLog = 'stdout';
+                utils.logExtended(0, 'testing');
+                fs.write.called.should.equal(true);
+                fs.appendFile.called.should.equal(false);
+                fs.write.firstCall.args[0].should.equal(1);
+            });
+            it('should log to stdout when destination is `STDOUT`', () => {
+                config.core.extendedLog = 'STDOUT';
+                utils.logExtended(0, 'testing');
+                fs.write.called.should.equal(true);
+                fs.appendFile.called.should.equal(false);
+                fs.write.firstCall.args[0].should.equal(1);
+            });
+            it('should log to stdout when destination is `stderr`', () => {
+                config.core.extendedLog = 'stderr';
+                utils.logExtended(0, 'testing');
+                fs.write.called.should.equal(true);
+                fs.appendFile.called.should.equal(false);
+                fs.write.firstCall.args[0].should.equal(2);
+            });
+            it('should log to stdout when destination is `STDERR`', () => {
+                config.core.extendedLog = 'STDERR';
+                utils.logExtended(0, 'testing');
+                fs.write.called.should.equal(true);
+                fs.appendFile.called.should.equal(false);
+                fs.write.firstCall.args[0].should.equal(2);
+            });
+            it('should log to provided fd when destination is numeric', () => {
+                const fd = Math.ceil(Math.random() * 1000);
+                config.core.extendedLog = fd;
+                utils.logExtended(0, 'testing');
+                fs.write.called.should.equal(true);
+                fs.appendFile.called.should.equal(false);
+                fs.write.firstCall.args[0].should.equal(fd);
+            });
+            it('should log to fileame when destination is not numeric', () => {
+                const fd = '/tmp/log_' + Math.ceil(Math.random() * 1000);
+                config.core.extendedLog = fd;
+                utils.logExtended(0, 'testing');
+                fs.write.called.should.equal(false);
+                fs.appendFile.called.should.equal(true);
+                fs.appendFile.firstCall.args[0].should.equal(fd);
+            });
+        });
+        describe('error handling', () => {
+            it('should log error when fs.write errors', () => {
+                const expected = 'Extended Log Error: i am a scary error!';
+                fs.write.yields(new Error('i am a scary error!'));
+                utils.logExtended(0, 'testing');
+                utils.error.firstCall.args[0].should.equal(expected);
+            });
+            it('should log error when fs.appendFile errors', () => {
+                const expected = 'Extended Log Error: i am not a scary error!';
+                config.core.extendedLog = 'foo';
+                fs.appendFile.yields(new Error('i am not a scary error!'));
+                utils.logExtended(0, 'testing');
+                utils.error.firstCall.args[0].should.equal(expected);
+            });
+        });
+        describe('output', () => {
+            it('should produce expected output for simple message', () => {
+                const expected = '0 : 2016-02-10T03:35:16.497Z : message';
+                utils.logExtended(0, 'message');
+                fs.write.firstCall.args[1].should.equal(expected);
+            });
+            it('should produce expected output for complex message', () => {
+                const expected = '0 : 2016-02-10T03:35:16.497Z : [object Object]';
+                utils.logExtended(0, {});
+                fs.write.firstCall.args[1].should.equal(expected);
+            });
+            it('should produce expected output for numeric extra data', () => {
+                const expected = '1 : 2016-02-10T03:35:16.497Z : message : 42';
+                utils.logExtended(1, 'message', 42);
+                fs.write.firstCall.args[1].should.equal(expected);
+            });
+            it('should produce expected output for string extra data', () => {
+                const expected = '2 : 2016-02-10T03:35:16.497Z : message : "42"';
+                utils.logExtended(2, 'message', '42');
+                fs.write.firstCall.args[1].should.equal(expected);
+            });
+            it('should produce expected output for array extra data', () => {
+                const expected = '3 : 2016-02-10T03:35:16.497Z : message : [1,2,3]';
+                utils.logExtended(3, 'message', [1, 2, 3]);
+                fs.write.firstCall.args[1].should.equal(expected);
+            });
+            it('should produce expected output for object extra data', () => {
+                const expected = '4 : 2016-02-10T03:35:16.497Z : message : {"a":1}';
+                utils.logExtended(4, 'message', {
+                    a: 1
+                });
+                fs.write.firstCall.args[1].should.equal(expected);
+            });
+            it('should produce expected output for object extra data', () => {
+                const expected = '5 : 2016-02-10T03:35:16.497Z : message : {"a":1,"b":[1,2,3],"c":"foobar"}';
+                utils.logExtended(5, 'message', {
+                    a: 1,
+                    b: [1, 2, 3],
+                    c: 'foobar'
+                });
+                fs.write.firstCall.args[1].should.equal(expected);
             });
         });
     });

@@ -168,6 +168,20 @@ gulp.task('test', ['lintCore', 'lintTests'], (done) => {
         });
 });
 
+/**
+ * Run regular tests
+ */
+gulp.task('mocha', (done) => {
+    // Run all tests
+    gulp.src(sockTests)
+        .pipe(mocha({
+            reporter: testReporter
+        }))
+        .on('error', done)
+        // Write code coverage reports
+        .on('finish', done);
+});
+
 // Meta tasks
 gulp.task('buildDocs', ['docs'], () => 0);
 gulp.task('preBuild', ['buildDocs'], () => 0);
