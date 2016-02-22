@@ -1,7 +1,7 @@
 {
   "name": "sockbot",
-  "version": "2.13.0",
-  "releaseName": "Frisky Fishnetg",
+  "version": "2.13.5",
+  "releaseName": "Frisky Fishnet",
   "description": "A sockpuppet bot to use on http://what.thedailywtf.com.",
   "repository": "https://github.com/SockDrawer/SockBot",
   "license": "MIT",
