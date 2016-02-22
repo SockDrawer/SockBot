@@ -13,6 +13,7 @@ Main Module for SockBot2.0
         * [.logMessage(message)](#module_SockBot.logMessage)
         * [.logWarning(warning)](#module_SockBot.logWarning)
         * [.logError(error)](#module_SockBot.logError)
+        * [.logExtended(level, message, [data])](#module_SockBot.logExtended)
     * _inner_
         * [~doPluginRequire(module, requireIt)](#module_SockBot..doPluginRequire) ⇒ <code>object</code>
         * [~prepareEvents(callback)](#module_SockBot..prepareEvents)
@@ -81,6 +82,18 @@ Log an error to console
 | Param | Type | Description |
 | --- | --- | --- |
 | error | <code>\*</code> | Message to log |
+
+<a name="module_SockBot.logExtended"></a>
+### SockBot.logExtended(level, message, [data])
+Log an extended message
+
+**Kind**: static method of <code>[SockBot](#module_SockBot)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| level | <code>number</code> | Log Level |
+| message | <code>string</code> | Log Message |
+| [data] | <code>\*</code> | Optional extended log data |
 
 <a name="module_SockBot..doPluginRequire"></a>
 ### SockBot~doPluginRequire(module, requireIt) ⇒ <code>object</code>

@@ -32,7 +32,7 @@ describe('SockBot', () => {
         async.setImmediate.restore();
     });
     describe('exports', () => {
-        const fns = ['start', 'stop', 'prepare', 'logMessage', 'logWarning', 'logError'],
+        const fns = ['start', 'stop', 'prepare', 'logMessage', 'logWarning', 'logError', 'logExtended'],
             objs = ['privateFns', 'internals'],
             vals = ['version', 'releaseName'];
         describe('should export expected functions:', () => {
@@ -182,6 +182,18 @@ describe('SockBot', () => {
                     spy.called.should.be.true;
                     const events = spy.firstCall.args[1];
                     events.listeners('logError').should.eql([SockBot.logError]);
+                });
+                it('should set up `logExtended` event', () => {
+                    const spy = sinon.spy();
+                    messages.prepare.yields(null);
+                    notifications.prepare.yields(null);
+                    commands.prepare.yields(null);
+                    browser.prepare.yields(null);
+                    prepareEvents(spy);
+                    sandbox.clock.tick(0);
+                    spy.called.should.be.true;
+                    const events = spy.firstCall.args[1];
+                    events.listeners('logExtended').should.eql([SockBot.logExtended]);
                 });
             });
             describe('setup calls', () => {
@@ -992,6 +1004,15 @@ describe('SockBot', () => {
             const message = 'foobar' + Math.random();
             SockBot.logError(message);
             utils.error.calledWith(message).should.equal(true);
+        });
+    });
+    describe('logExtended()', () => {
+        beforeEach(() => sinon.stub(utils, 'logExtended'));
+        afterEach(() => utils.logExtended.restore());
+        it('should proxy utils.logExtended()', () => {
+            const message = 'foobar' + Math.random();
+            SockBot.logExtended(42, message, Math);
+            utils.logExtended.calledWith(42, message, Math).should.equal(true);
         });
     });
 });

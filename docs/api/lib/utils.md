@@ -10,6 +10,7 @@ Core Utilities for Sockbot
         * [.log(message)](#module_utils.log)
         * [.warn(message)](#module_utils.warn)
         * [.error(message)](#module_utils.error)
+        * [.logExtended(level, message, [data])](#module_utils.logExtended)
         * [.cloneData(original)](#module_utils.cloneData) ⇒ <code>\*</code>
         * [.mergeObjects([mergeArrays], ...mixin)](#module_utils.mergeObjects) ⇒ <code>object</code>
         * [.filterIgnoredOnPost(post, callback)](#module_utils.filterIgnoredOnPost) ⇒ <code>null</code>
@@ -56,6 +57,18 @@ Log an error to the console
 | Param | Type | Description |
 | --- | --- | --- |
 | message | <code>\*</code> | Error to log |
+
+<a name="module_utils.logExtended"></a>
+### utils.logExtended(level, message, [data])
+Write an extended log entry
+
+**Kind**: static method of <code>[utils](#module_utils)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| level | <code>number</code> | Log Level |
+| message | <code>string</code> | Log Message |
+| [data] | <code>\*</code> | Optional extended log data |
 
 <a name="module_utils.cloneData"></a>
 ### utils.cloneData(original) ⇒ <code>\*</code>
