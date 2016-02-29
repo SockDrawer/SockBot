@@ -34,6 +34,7 @@
     "blns": "^2.0.2",
     "chai": "^3.5.0",
     "chai-string": "^1.1.6",
+    "codeclimate-test-reporter": "^0.3.1",
     "coveralls": "^2.11.6",
     "gulp": "^3.9.0",
     "gulp-eslint": "^1.1.1",

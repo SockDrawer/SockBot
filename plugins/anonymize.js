@@ -22,7 +22,8 @@
  * @author RaceProUK
  * @license MIT
  */
-const xRegExp = require('xregexp').XRegExp;
+// WORKAROUND: Older version of XRegexp exposed the function we wanted indirectly
+const xRegExp = require('xregexp').XRegExp || require('xregexp');
 const rQuote = xRegExp('\\[quote.*post:(?<postNumber>\\d+).*topic:(?<topicId>\\d+)'),
     postSuccess = 'Anonymizied reply sent. Thank you for using Anonymizer, a SockDrawer application.',
     errorStub = 'Anonymizied reply **not** sent; ',
