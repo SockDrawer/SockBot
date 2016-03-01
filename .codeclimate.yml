@@ -11,8 +11,6 @@ engines:
     enabled: true
   fixme:
     enabled: true
-  nodesecurity:
-    enabled: true
 ratings:
   paths:
   - "**.inc"
@@ -23,5 +21,5 @@ ratings:
   - "**.py"
   - "**.rb"
 exclude_paths:
-- test/
+- test/**
 - externals/**
