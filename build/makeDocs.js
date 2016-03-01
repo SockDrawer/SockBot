@@ -75,8 +75,10 @@ function generateDocs(complete) {
     });
 }
 
-//const job = process.env.TRAVIS_JOB_NUMBER;
-//console.log(job, JSON.stringify(job));
-//if (!job || job.test(/[.]1$/)){
+
+const JobNumber = process.env.TRAVIS_JOB_NUMBER,
+    PullRequestFlag = process.env.TRAVIS_PULL_REQUEST,
+    PullRequest = PullRequestFlag && PullRequestFlag !== 'false';
+if (!PullRequest && (!JobNumber || /[.]1$/.test(JobNumber))) {
     generateDocs(() => verifyDocumentation(() => 0));
-//}
+}

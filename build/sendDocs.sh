@@ -1,5 +1,8 @@
 #!/bin/bash
 
+if [[ "$TRAVIS_PULL_REQUEST" -eq "true" ]]; then
+    exit 0; # nothing to do here, it's a PR
+fi
 
 if [[ "$TRAVIS_JOB_NUMBER" != *.1 ]]; then
     exit 0; # Nothing to see here folks!
