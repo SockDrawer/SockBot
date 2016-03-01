@@ -133,7 +133,7 @@ exports.readify = function () {
 
         internals.events.emit('logMessage', 'Reading topic `' + topic.slug + '`');
         const postNumbers = [];
-        internals.browser.getPosts(topic.id, (post, nextPost) => {
+        return internals.browser.getPosts(topic.id, (post, nextPost) => {
             if (post && !post.read && Date.parse(post.created_at) < minAge) {
                 postNumbers.push(post.post_number);
             }

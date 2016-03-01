@@ -18,7 +18,8 @@ function processFile(file, complete) {
     const name = path.basename(file, '.js') + '.md';
     mkdirp(dir, (err) => {
         if (err) {
-            return complete(err);
+            complete(err);
+            return;
         }
         const inFile = fs.createReadStream(file);
         const outFile = fs.createWriteStream(path.join(dir, name));
@@ -39,7 +40,8 @@ function verifyDocumented(file, complete) {
             const origFile = '.' + file.replace(/[.]md$/, '.js').slice(documentationDest.length);
             console.warn('Verify: ' + origFile + ' has no documentation. ' + //eslint-disable-line no-console
                 'Consider adding documentation for this file.');
-            return fs.unlink(file, complete);
+            fs.unlink(file, complete);
+            return;
         }
         complete();
     });
@@ -51,7 +53,8 @@ function verifySourceExists(file, complete) {
         if (e) {
             console.warn('Verify: ' + origFile + ' has been removed. ' + //eslint-disable-line no-console
                 'Removing Documentation.');
-            return fs.unlink(file, complete);
+            fs.unlink(file, complete);
+            return;
         }
         complete();
     });
