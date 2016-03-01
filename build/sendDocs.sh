@@ -7,6 +7,7 @@ fi
 
 git config user.name "Travis-CI" || exit 1;
 git config user.email "Travis-CI@servercooties.com" || exit 2;
+git fetch || exit 10;
 git checkout "$TRAVIS_BRANCH" || exit 3;
 git pull origin "$TRAVIS_BRANCH" || exit 4;
 git add "docs/api" || exit 5;
