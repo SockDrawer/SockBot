@@ -1,10 +1,12 @@
 ---
-+engines:
+engines:
   duplication:
     enabled: true
     config:
       languages:
       - javascript
+    exclude_fingerprints:
+      - 1d8d290e451d3458322376d96772519c # Test code false positive
   eslint:
     enabled: true
   fixme:
