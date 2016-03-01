@@ -8,6 +8,7 @@ engines:
     exclude_fingerprints:
       - 1d8d290e451d3458322376d96772519c # Test code false positive
       - e0657835cc2ee807fdb3bbbe162abd69 # Messages.js filtering false positive
+      - d3918e2fb50feeeb19d5f27b8c412ac8 # likes and autoreader positive, fixes applied genrated more warnings. let it lie.
   eslint:
     enabled: true
   fixme:

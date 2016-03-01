@@ -7,6 +7,8 @@
  * @license MIT
  */
 
+const later = require('later');
+
 const binger = require('./binge-helper');
 /**
  * Default configuration settings
@@ -95,10 +97,11 @@ exports.prepare = function (plugConfig, config, events, browser) {
  * Start the plugin after login
  */
 exports.start = function () {
-    internals.timer = binger.scheduleBinge({
-        hour: internals.config.hour,
-        minute: internals.config.minute
-    }, exports.readify);
+    //Daily at the specified time
+    const sched = later.parse.recur()
+        .on(internals.config.hour).hour()
+        .on(internals.config.minute).minute();
+    internals.timer = later.setInterval(exports.readify, sched);
 };
 
 /**

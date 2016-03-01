@@ -8,7 +8,8 @@
  * @author Accalia
  * @license MIT
  */
-const async = require('async');
+const async = require('async'),
+    later = require('later');
 const binger = require('./binge-helper');
 /**
  * Default configuration settings
@@ -133,10 +134,11 @@ exports.prepare = function prepare(plugConfig, config, events, browser) {
  */
 exports.start = function start() {
     if (internals.config.binge) {
-        internals.bingeInterval = binger.scheduleBinge({
-            hour: internals.config.bingeHour,
-            minute: internals.config.bingeMinute
-        }, exports.binge);
+        //Daily at the specified time
+        const sched = later.parse.recur()
+            .on(internals.config.hour).hour()
+            .on(internals.config.minute).minute();
+        internals.bingeInterval = later.setInterval(exports.binge, sched);
     }
 };
 
