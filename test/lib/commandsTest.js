@@ -1207,5 +1207,33 @@ describe('commands', () => {
             });
             browser.createPost.firstCall.args[2].should.equal(message);
         });
+        it('should post custom trust exception message', () => {
+            const name = 'TEST' + Math.random();
+            const message = 'I\'m sorry ' + name + ', but I cannot comply.\n\n' +
+                'You are not authorized to give me direct orders.\n\n' +
+                'Please contact the flying spaghetti monster, or my owner, @' + config.core.owner +
+                ', for assistance in this matter';
+            commands.postPermissionDenied({
+                post: {
+                    username: name
+                }
+            }, 'the flying spaghetti monster');
+            browser.createPost.firstCall.args[2].should.equal(message);
+        });
+        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].forEach((level) => {
+            it('should post Trust Level ' + level + ' message', () => {
+                const name = 'TEST' + Math.random();
+                const message = 'I\'m sorry ' + name + ', but I cannot comply.\n\n' +
+                    'You are not authorized to give me direct orders.\n\n' +
+                    'Please contact someone of Trust Level ' + level + ' or higher, or my owner, @' +
+                    config.core.owner + ', for assistance in this matter';
+                commands.postPermissionDenied({
+                    post: {
+                        username: name
+                    }
+                }, level);
+                browser.createPost.firstCall.args[2].should.equal(message);
+            });
+        });
     });
 });
