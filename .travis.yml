@@ -15,7 +15,7 @@ script:
 - npm run lint
 - npm test
 after_script:
-- npm run buildDocs && npm run pushDocs
+- [[ "$TRAVIS_JOB_NUMBER" == *.1 ]] && npm run buildDocs && npm run pushDocs
 - test -e ./coverage/lcov.info && < ./coverage/lcov.info ./node_modules/.bin/coveralls
 - test -e ./coverage/lcov.info && < ./coverage/lcov.info ./node_modules/.bin/codeclimate-test-reporter 
 branches:
