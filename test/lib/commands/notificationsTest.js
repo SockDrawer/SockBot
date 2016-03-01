@@ -91,7 +91,7 @@ describe('status', () => {
 				};
 				notifications.mute(command);
 				browser.setNotificationLevel.called.should.equal(false);
-				commands.postPermissionDenied.calledWith(command,3).should.equal(true);
+				commands.postPermissionDenied.calledWith(command, 3).should.equal(true);
 				browser.createPost.called.should.equal(false);
 				browser.createPrivateMessage.called.should.equal(false);
 			});
@@ -144,7 +144,7 @@ describe('status', () => {
 				};
 				notifications.watch(command);
 				browser.setNotificationLevel.called.should.equal(false);
-				commands.postPermissionDenied.calledWith(command,3).should.equal(true);
+				commands.postPermissionDenied.calledWith(command, 3).should.equal(true);
 				browser.createPost.called.should.equal(false);
 				browser.createPrivateMessage.called.should.equal(false);
 			});
@@ -200,7 +200,7 @@ describe('status', () => {
 				};
 				notifications.unwatch(command);
 				browser.setNotificationLevel.called.should.equal(false);
-				commands.postPermissionDenied.calledWith(command,3).should.equal(true);
+				commands.postPermissionDenied.calledWith(command, 3).should.equal(true);
 				browser.createPost.called.should.equal(false);
 				browser.createPrivateMessage.called.should.equal(false);
 			});
