@@ -22,4 +22,4 @@ ratings:
   - "**.rb"
 exclude_paths:
 - test/**
-- externals/**
+- external/**
