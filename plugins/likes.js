@@ -215,7 +215,7 @@ exports.handlePost = function handlePost(post, callback) {
             if (internals.likeCount >= internals.config.bingeCap) {
                 return callback('Like Binge Limit Reached');
             }
-            setTimeout(callback, 1000);
+            return setTimeout(callback, 1000);
         });
     } else {
         callback();

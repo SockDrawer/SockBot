@@ -106,7 +106,7 @@ exports.start = function (callback) {
                 notifications.pollNotifications(() => setTimeout(next, 5 * 60 * 1000));
             });
         }
-        callback(null);
+        return callback(null);
     });
 };
 
@@ -218,7 +218,7 @@ function prepareEvents(callback) {
         if (err) {
             return callback(err);
         }
-        callback(null, events, pluginBrowser);
+        return callback(null, events, pluginBrowser);
     });
 }
 

@@ -611,7 +611,7 @@ describe('commands', () => {
         describe('internals.commandProtect()', () => {
             const commandProtect = commands.internals.commandProtect;
             let cmds;
-            let sandbox, events;
+            let sandbox, events = 0;
             before(() => {
                 commands.internals.commands = {};
             });
@@ -663,7 +663,7 @@ describe('commands', () => {
         });
         describe('internals.parseMentionCommand()', () => {
             const parseMentionCommand = commands.internals.parseMentionCommand;
-            let emit;
+            let emit = 0;
             before((done) => {
                 config.core.username = 'foobar';
                 emit = sinon.spy();
@@ -941,14 +941,13 @@ describe('commands', () => {
         });
     });
     describe('start()', () => {
-        let sandbox, events;
+        let sandbox;
         beforeEach(() => {
             config.core.username = 'foo';
             sandbox = sinon.sandbox.create();
-            events = {
+            commands.internals.events = {
                 emit: sinon.spy()
             };
-            commands.internals.events = events;
         });
         afterEach(() => {
             sandbox.restore();
