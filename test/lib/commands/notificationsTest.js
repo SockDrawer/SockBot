@@ -126,7 +126,7 @@ describe('status', () => {
 				};
 				notifications.mute(command);
 				browser.setNotificationLevel.calledWith(topic, 0).should.equal(true);
-				browser.createPost.calledWith(topic, post, 'Muting this topic in 3... 2... 1...').should.equal(true);
+				browser.createPost.calledWith(topic, post, 'Muteing this topic in 3... 2... 1...').should.equal(true);
 				browser.createPrivateMessage.calledWith(['foobar', config.core.owner],
 					'Complying with Mute Request by @foobar',
 					'' + url + '\n\nthis is the raw mute post').should.equal(true);
