@@ -16,7 +16,7 @@ const commands = require('../../lib/commands'),
 const browser = require('../../lib/browser')();
 describe('commands', () => {
     describe('exports', () => {
-        const fns = ['prepare', 'start', 'parseCommands'],
+        const fns = ['prepare', 'start', 'parseCommands', 'postPermissionDenied'],
             objs = ['internals'],
             vals = [];
         describe('should export expected functions:', () => {
@@ -1160,6 +1160,79 @@ describe('commands', () => {
                 clocks.tick(0);
                 events.emit.calledWith('command#ERROR').should.equal(true);
                 events.emit.calledWith('error').should.equal(true);
+            });
+        });
+    });
+    describe('postPermissionDenied()', () => {
+        let sandbox;
+        beforeEach(() => {
+            sandbox = sinon.sandbox.create();
+            sandbox.stub(browser, 'createPost');
+        });
+        afterEach(() => sandbox.restore());
+        it('should call browser.createPost()', () => {
+            commands.postPermissionDenied({
+                post: {}
+            });
+            browser.createPost.called.should.equal(true);
+        });
+        it('should reply to correct topic', () => {
+            const topicId = Math.random();
+            commands.postPermissionDenied({
+                post: {
+                    'topic_id': topicId
+                }
+            });
+            browser.createPost.firstCall.args[0].should.equal(topicId);
+        });
+        it('should reply to correct post', () => {
+            const postId = Math.random();
+            commands.postPermissionDenied({
+                post: {
+                    'post_number': postId
+                }
+            });
+            browser.createPost.firstCall.args[1].should.equal(postId);
+        });
+        it('should post expected message', () => {
+            const name = 'TEST' + Math.random();
+            const message = 'I\'m sorry ' + name + ', but I cannot comply.\n\n' +
+                'You are not authorized to give me direct orders.\n\n' +
+                'Please contact a member of the forum staff, or my owner, @' + config.core.owner +
+                ', for assistance in this matter';
+            commands.postPermissionDenied({
+                post: {
+                    username: name
+                }
+            });
+            browser.createPost.firstCall.args[2].should.equal(message);
+        });
+        it('should post custom trust exception message', () => {
+            const name = 'TEST' + Math.random();
+            const message = 'I\'m sorry ' + name + ', but I cannot comply.\n\n' +
+                'You are not authorized to give me direct orders.\n\n' +
+                'Please contact the flying spaghetti monster, or my owner, @' + config.core.owner +
+                ', for assistance in this matter';
+            commands.postPermissionDenied({
+                post: {
+                    username: name
+                }
+            }, 'the flying spaghetti monster');
+            browser.createPost.firstCall.args[2].should.equal(message);
+        });
+        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].forEach((level) => {
+            it('should post Trust Level ' + level + ' message', () => {
+                const name = 'TEST' + Math.random();
+                const message = 'I\'m sorry ' + name + ', but I cannot comply.\n\n' +
+                    'You are not authorized to give me direct orders.\n\n' +
+                    'Please contact someone of Trust Level ' + level + ' or higher, or my owner, @' +
+                    config.core.owner + ', for assistance in this matter';
+                commands.postPermissionDenied({
+                    post: {
+                        username: name
+                    }
+                }, level);
+                browser.createPost.firstCall.args[2].should.equal(message);
             });
         });
     });

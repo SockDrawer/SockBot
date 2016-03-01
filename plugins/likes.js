@@ -10,7 +10,7 @@
  */
 const async = require('async'),
     later = require('later');
-
+const binger = require('./binge-helper');
 /**
  * Default configuration settings
  * @typedef {object}
@@ -121,8 +121,10 @@ exports.prepare = function prepare(plugConfig, config, events, browser) {
     internals.config = config.mergeObjects(true, defaultConfig, plugConfig);
     internals.config.topics.forEach((topic) => events.onTopic(topic, exports.messageHandler));
     if (internals.config.bingeRandomize) {
-        internals.config.bingeHour = Math.floor(Math.random() * 24);
-        internals.config.bingeMinute = Math.floor(Math.random() * 60);
+        const time = {};
+        binger.randomizeStart(time);
+        internals.config.bingeHour = time.hour;
+        internals.config.bingeMinute = time.minute;
     }
     events.registerHelp('likes', internals.extendedHelp, () => 0);
 };
@@ -134,8 +136,8 @@ exports.start = function start() {
     if (internals.config.binge) {
         //Daily at the specified time
         const sched = later.parse.recur()
-            .on(internals.config.bingeHour).hour()
-            .on(internals.config.bingeMinute).minute();
+            .on(internals.config.hour).hour()
+            .on(internals.config.minute).minute();
         internals.bingeInterval = later.setInterval(exports.binge, sched);
     }
 };

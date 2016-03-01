@@ -8,6 +8,7 @@ const expect = chai.expect;
 
 
 const browser = require('../../../lib/browser')();
+const commands = require('../../../lib/commands');
 const config = require('../../../lib/config');
 
 // The thing we're testing
@@ -15,7 +16,7 @@ const notifications = require('../../../lib/commands/notifications');
 
 describe('status', () => {
 	describe('exports', () => {
-		const fns = ['prepare', 'getErrorMessage', 'mute', 'unmute', 'watch', 'unwatch'];
+		const fns = ['prepare', 'mute', 'unmute', 'watch', 'unwatch'];
 		fns.forEach((fn) => {
 			it('should export `' + fn + '()`', () => expect(notifications[fn]).to.be.a('function'));
 		});
@@ -66,25 +67,11 @@ describe('status', () => {
 			});
 		});
 	});
-	describe('exports.getErrorMessage()', () => {
-		it('should produce expected message', () => {
-			const expected = 'I\'m sorry foobar, but I cannot comply.\n\n' +
-				'You are not authorized to use this command.\n\n' +
-				'Please ask someone of Trust Level 3 or higher, or my owner, @quux' +
-				', for assistance in this matter';
-			const command = {
-				post: {
-					username: 'foobar'
-				}
-			};
-			config.core.owner = 'quux';
-			expect(notifications.getErrorMessage(command)).to.equal(expected);
-		});
-	});
 	describe('exports.mute()', () => {
 		let sandbox;
 		beforeEach(() => {
 			sandbox = sinon.sandbox.create();
+			sandbox.stub(commands, 'postPermissionDenied');
 			sandbox.stub(browser, 'createPost').callsArg(3);
 			sandbox.stub(browser, 'createPrivateMessage').callsArg(3);
 			sandbox.stub(browser, 'setNotificationLevel').callsArg(2);
@@ -102,10 +89,10 @@ describe('status', () => {
 						'post_number': post
 					}
 				};
-				const message = notifications.getErrorMessage(command);
 				notifications.mute(command);
 				browser.setNotificationLevel.called.should.equal(false);
-				browser.createPost.calledWith(topic, post, message).should.equal(true);
+				commands.postPermissionDenied.calledWith(command, 3).should.equal(true);
+				browser.createPost.called.should.equal(false);
 				browser.createPrivateMessage.called.should.equal(false);
 			});
 		});
@@ -126,7 +113,7 @@ describe('status', () => {
 				};
 				notifications.mute(command);
 				browser.setNotificationLevel.calledWith(topic, 0).should.equal(true);
-				browser.createPost.calledWith(topic, post, 'Muting this topic in 3... 2... 1...').should.equal(true);
+				browser.createPost.calledWith(topic, post, 'Muteing this topic in 3... 2... 1...').should.equal(true);
 				browser.createPrivateMessage.calledWith(['foobar', config.core.owner],
 					'Complying with Mute Request by @foobar',
 					'' + url + '\n\nthis is the raw mute post').should.equal(true);
@@ -137,6 +124,7 @@ describe('status', () => {
 		let sandbox;
 		beforeEach(() => {
 			sandbox = sinon.sandbox.create();
+			sandbox.stub(commands, 'postPermissionDenied');
 			sandbox.stub(browser, 'createPost').callsArg(3);
 			sandbox.stub(browser, 'createPrivateMessage').callsArg(3);
 			sandbox.stub(browser, 'setNotificationLevel').callsArg(2);
@@ -154,10 +142,10 @@ describe('status', () => {
 						'post_number': post
 					}
 				};
-				const message = notifications.getErrorMessage(command);
 				notifications.watch(command);
 				browser.setNotificationLevel.called.should.equal(false);
-				browser.createPost.calledWith(topic, post, message).should.equal(true);
+				commands.postPermissionDenied.calledWith(command, 3).should.equal(true);
+				browser.createPost.called.should.equal(false);
 				browser.createPrivateMessage.called.should.equal(false);
 			});
 		});
@@ -189,6 +177,7 @@ describe('status', () => {
 		let sandbox;
 		beforeEach(() => {
 			sandbox = sinon.sandbox.create();
+			sandbox.stub(commands, 'postPermissionDenied');
 			sandbox.stub(browser, 'createPost').callsArg(3);
 			sandbox.stub(browser, 'createPrivateMessage').callsArg(3);
 			sandbox.stub(browser, 'setNotificationLevel').callsArg(2);
@@ -209,10 +198,10 @@ describe('status', () => {
 						'post_number': post
 					}
 				};
-				const message = notifications.getErrorMessage(command);
 				notifications.unwatch(command);
 				browser.setNotificationLevel.called.should.equal(false);
-				browser.createPost.calledWith(topic, post, message).should.equal(true);
+				commands.postPermissionDenied.calledWith(command, 3).should.equal(true);
+				browser.createPost.called.should.equal(false);
 				browser.createPrivateMessage.called.should.equal(false);
 			});
 		});

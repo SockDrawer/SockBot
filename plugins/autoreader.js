@@ -9,6 +9,7 @@
 
 const later = require('later');
 
+const binger = require('./binge-helper');
 /**
  * Default configuration settings
  * @typedef {object}
@@ -87,8 +88,7 @@ exports.prepare = function (plugConfig, config, events, browser) {
     internals.events = events;
     internals.config = config.mergeObjects(true, defaultConfig, plugConfig);
     if (internals.config.randomize) {
-        internals.config.hour = Math.floor(Math.random() * 24);
-        internals.config.minute = Math.floor(Math.random() * 60);
+        binger.randomizeStart(internals.config);
     }
     events.registerHelp('autoreader', internals.extendedHelp, () => 0);
 };

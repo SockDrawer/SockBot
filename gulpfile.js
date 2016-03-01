@@ -7,7 +7,9 @@ const gulp = require('gulp'),
     eslint = require('gulp-eslint'),
     git = require('gulp-git');
 
-const sockFiles = ['*.js', '!./gulpfile.js', '**/lib/**/*.js', '**/classes/**/*.js', '**/plugins/**/*.js', '!node_modules/**', '!test/**'],
+const sockFiles = ['*.js', '!./gulpfile.js', '**/lib/**/*.js', '**/classes/**/*.js', '**/plugins/**/*.js',
+        '!node_modules/**', '!test/**'
+    ],
     sockExterns = ['**/external/**/*.js'],
     sockDocs = ['README.md', 'docs/**/*.md'],
     sockTests = ['test/**/*.js'];
@@ -18,7 +20,7 @@ const JobNumber = process.env.TRAVIS_JOB_NUMBER,
     CI = process.env.CI === 'true',
     runDocs = !PullRequest && (!JobNumber || /[.]1$/.test(JobNumber));
 
-const testReporter = CI ? 'spec': 'dot';
+const testReporter = CI ? 'spec' : 'dot';
 
 /**
  * Pull git branch locally (solves detached head issue in CI)
@@ -59,15 +61,17 @@ gulp.task('docs', ['gitBranch', 'lintExterns'], (done) => {
         .on('finish', done);
 });
 
+const lintIt = (selector) => gulp.src(selector)
+    .pipe(eslint())
+    .pipe(eslint.format())
+    .pipe(eslint.failAfterError());
+
+
 /**
  * Run all js files through eslint and report status.
  */
-gulp.task('lintCore', () => {
-    return gulp.src(sockFiles)
-        .pipe(eslint())
-        .pipe(eslint.format())
-        .pipe(eslint.failAfterError());
-});
+gulp.task('lintCore', () => lintIt(sockFiles));
+
 /**
  * Run all js files through eslint and report status.
  */
@@ -75,21 +79,13 @@ gulp.task('lintExterns', (done) => {
     if (!runDocs) {
         return done();
     }
-    return gulp.src(sockExterns)
-        .pipe(eslint())
-        .pipe(eslint.format())
-        .pipe(eslint.failAfterError());
+    return lintIt(sockExterns);
 });
 
 /**
  * Run all tests through eslint and report status.
  */
-gulp.task('lintTests', () => {
-    return gulp.src(sockTests)
-        .pipe(eslint())
-        .pipe(eslint.format())
-        .pipe(eslint.failAfterError());
-});
+gulp.task('lintTests', () => lintIt(sockTests));
 
 /**
  * Set git username/email to CI user
@@ -144,6 +140,12 @@ gulp.task('pushDocs', ['gitConfig', 'commitDocs'], (done) => {
     });
 });
 
+const testit = (done) => gulp.src(sockTests)
+    .pipe(mocha({
+        reporter: testReporter
+    }))
+    .on('error', done);
+
 /**
  * Run code coverage instrumented tests
  */
@@ -157,11 +159,7 @@ gulp.task('test', ['lintCore', 'lintTests'], (done) => {
         .pipe(istanbul.hookRequire())
         .on('finish', () => {
             // Run all tests
-            gulp.src(sockTests)
-                .pipe(mocha({
-                    reporter: testReporter
-                }))
-                .on('error', done)
+            testit(done)
                 // Write code coverage reports
                 .pipe(istanbul.writeReports())
                 .on('finish', done);
@@ -173,13 +171,7 @@ gulp.task('test', ['lintCore', 'lintTests'], (done) => {
  */
 gulp.task('mocha', (done) => {
     // Run all tests
-    gulp.src(sockTests)
-        .pipe(mocha({
-            reporter: testReporter
-        }))
-        .on('error', done)
-        // Write code coverage reports
-        .on('finish', done);
+    testit(done).on('finish', done);
 });
 
 // Meta tasks
