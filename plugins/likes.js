@@ -8,9 +8,8 @@
  * @author Accalia
  * @license MIT
  */
-const async = require('async'),
-    later = require('later');
-
+const async = require('async');
+const binger = require('./binge-helper');
 /**
  * Default configuration settings
  * @typedef {object}
@@ -121,8 +120,10 @@ exports.prepare = function prepare(plugConfig, config, events, browser) {
     internals.config = config.mergeObjects(true, defaultConfig, plugConfig);
     internals.config.topics.forEach((topic) => events.onTopic(topic, exports.messageHandler));
     if (internals.config.bingeRandomize) {
-        internals.config.bingeHour = Math.floor(Math.random() * 24);
-        internals.config.bingeMinute = Math.floor(Math.random() * 60);
+        const time = {};
+        binger.randomizeStart(time);
+        internals.config.bingeHour = time.hour;
+        internals.config.bingeMinute = time.minute;
     }
     events.registerHelp('likes', internals.extendedHelp, () => 0);
 };
@@ -132,11 +133,10 @@ exports.prepare = function prepare(plugConfig, config, events, browser) {
  */
 exports.start = function start() {
     if (internals.config.binge) {
-        //Daily at the specified time
-        const sched = later.parse.recur()
-            .on(internals.config.bingeHour).hour()
-            .on(internals.config.bingeMinute).minute();
-        internals.bingeInterval = later.setInterval(exports.binge, sched);
+        internals.bingeInterval = binger.scheduleBinge({
+            hour: internals.config.bingeHour,
+            minute: internals.config.bingeMinute
+        }, exports.binge);
     }
 };
 

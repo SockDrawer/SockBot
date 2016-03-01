@@ -7,8 +7,7 @@
  * @license MIT
  */
 
-const later = require('later');
-
+const binger = require('./binge-helper');
 /**
  * Default configuration settings
  * @typedef {object}
@@ -87,8 +86,7 @@ exports.prepare = function (plugConfig, config, events, browser) {
     internals.events = events;
     internals.config = config.mergeObjects(true, defaultConfig, plugConfig);
     if (internals.config.randomize) {
-        internals.config.hour = Math.floor(Math.random() * 24);
-        internals.config.minute = Math.floor(Math.random() * 60);
+        binger.randomizeStart(internals.config);
     }
     events.registerHelp('autoreader', internals.extendedHelp, () => 0);
 };
@@ -97,11 +95,10 @@ exports.prepare = function (plugConfig, config, events, browser) {
  * Start the plugin after login
  */
 exports.start = function () {
-    //Daily at the specified time
-    const sched = later.parse.recur()
-        .on(internals.config.hour).hour()
-        .on(internals.config.minute).minute();
-    internals.timer = later.setInterval(exports.readify, sched);
+    internals.timer = binger.scheduleBinge({
+        hour: internals.config.hour,
+        minute: internals.config.minute
+    }, exports.readify);
 };
 
 /**
