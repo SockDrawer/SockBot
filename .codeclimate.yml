@@ -7,6 +7,7 @@ engines:
       - javascript
     exclude_fingerprints:
       - 1d8d290e451d3458322376d96772519c # Test code false positive
+      - e0657835cc2ee807fdb3bbbe162abd69 # Messages.js filtering false positive
   eslint:
     enabled: true
   fixme:
