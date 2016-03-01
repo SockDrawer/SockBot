@@ -9,6 +9,10 @@ git config user.name "Travis-CI" || exit 1;
 git config user.email "Travis-CI@servercooties.com" || exit 2;
 git remote add github 'https://github.com/SockDrawer/SockBot.git' || exit 7;
 git fetch github || exit 10;
+echo local branches
+git branch
+echo remote branches
+git branch -r
 #//git checkout github"$TRAVIS_BRANCH" || exit 3;
 git pull github "$TRAVIS_BRANCH" || exit 4;
 git add "docs/api" || exit 5;
