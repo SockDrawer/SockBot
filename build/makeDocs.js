@@ -75,8 +75,8 @@ function generateDocs(complete) {
     });
 }
 
-const job = process.env.TRAVIS_JOB_NUMBER;
-
-if (!job || job.test(/[.]1$/)){
+//const job = process.env.TRAVIS_JOB_NUMBER;
+//console.log(job, JSON.stringify(job));
+//if (!job || job.test(/[.]1$/)){
     generateDocs(() => verifyDocumentation(() => 0));
-}
+//}
