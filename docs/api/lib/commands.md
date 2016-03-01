@@ -10,6 +10,7 @@ Command Parser for SockBot2.0
         * [.prepare(events, callback)](#module_commands.prepare)
         * [.start()](#module_commands.start)
         * [.parseCommands(post, topic, callback)](#module_commands.parseCommands)
+        * [.postPermissionDenied(command, minimumTrust)](#module_commands.postPermissionDenied)
     * _inner_
         * [~parseShortCommand(line)](#module_commands..parseShortCommand) ⇒ <code>command</code>
         * [~parseMentionCommand(line)](#module_commands..parseMentionCommand) ⇒ <code>command</code>
@@ -55,6 +56,17 @@ Parse commands from post and emit command events
 | post | <code>external.posts.CleanedPost</code> | Post to parse commands from |
 | topic | <code>external.topics.Topic</code> | Topic comamnd belongs to |
 | callback | <code>parseCallback</code> | CompletionCallback |
+
+<a name="module_commands.postPermissionDenied"></a>
+### commands.postPermissionDenied(command, minimumTrust)
+Post "Permission Denied" Error Message
+
+**Kind**: static method of <code>[commands](#module_commands)</code>  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| command | <code>command</code> | The command that should be replied to as permission denied |
+| minimumTrust | <code>number</code> &#124; <code>string</code> | The minimum trust level required |
 
 <a name="module_commands..parseShortCommand"></a>
 ### commands~parseShortCommand(line) ⇒ <code>command</code>
