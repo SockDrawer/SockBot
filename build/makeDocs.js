@@ -9,7 +9,7 @@ const async = require('async'),
     path = require('path');
 
 const documentableFiles = ['*.js', '!./gulpfile.js', '**/lib/**/*.js', '**/classes/**/*.js', '**/plugins/**/*.js',
-    '!node_modules/**', '!test/**'
+    '!node_modules/**', '!test/**', '**/providers/**/*.js'
 ];
 const documentationDest = path.join('docs', 'api');
 
