@@ -3,9 +3,12 @@
 const io = require('socket.io-client'),
     request = require('request');
 
+const bindPost = require('./post').bindPost;
+
 class Forum {
     constructor(baseUrl) {
         this.url = baseUrl;
+        this.Post = bindPost(this);
     }
     login(username, password) {
         return new Promise((resolve, reject) => {

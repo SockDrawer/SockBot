@@ -5,7 +5,7 @@ function getValue(obj, key) {
     return (storage.get(obj) || {})[key];
 }
 
-exports.bindPost = function bindPost(socket) {
+exports.bindPost = function bindPost(forum) {
     class Post {
         /**
          * Construct a post object from a previously retrieved payload
@@ -122,7 +122,20 @@ exports.bindPost = function bindPost(socket) {
          * @reject {Error} An Error that occured while posting
          */
         reply(content) {
-            return Promise.reject(new Error('[[E-NOT-IMPLEMENTED-YET]]'));
+            return new Promise((resolve, reject) => {
+                forum.socket.emit('posts.reply', {
+                    tid: this.topicId,
+                    content: content,
+                    toPid: this.id,
+                    lock: false
+                }, (e, result) => {
+                    if (e) {
+                        return reject(e);
+                    } else {
+                        return Post.parse(result);
+                    }
+                });
+            });
         }
 
         /**
@@ -248,7 +261,14 @@ exports.bindPost = function bindPost(socket) {
          * @reject {Error} An Error that occured retrieving the post
          */
         static get(postId) {
-            return Promise.reject(new Error('[[E-NOT-IMPLEMENTED-YET]]'));
+            return new Promise((resolve, reject) => {
+                forum.socket.emit('posts.getPost', postId, (e, result) => {
+                    if (e) {
+                        return reject(e);
+                    }
+                    resolve(Post.parse(result));
+                });
+            });
         }
 
         /**
