@@ -4,11 +4,13 @@ const io = require('socket.io-client'),
     request = require('request');
 
 const bindPost = require('./post').bindPost;
+const bindTopic = require('./topic').bindTopic;
 
 class Forum {
     constructor(baseUrl) {
         this.url = baseUrl;
         this.Post = bindPost(this);
+        this.Topic = bindTopic(this);
     }
     login(username, password) {
         return new Promise((resolve, reject) => {
@@ -32,7 +34,6 @@ class Forum {
                     url: this.url + '/login',
                     jar: jar,
                     headers: {
-
                         'x-csrf-token': config.csrf_token
                     },
                     form: {
@@ -60,5 +61,19 @@ class Forum {
     deactivate() {}
     setHelpTopic(topic, description, helpText) {}
     onCommand(command, description, handler) {}
+    _emit(event, arg) {
+        const args = Array.prototype.slice.call(arguments);
+        return new Promise((resolve, reject) => {
+            args.push(function (e) {
+                if (e) {
+                    return reject(e);
+                }
+                const results = Array.prototype.slice.call(arguments);
+                results.shift();
+                resolve.apply(undefined, results);
+            });
+            this.socket.emit.apply(this.socket, args);
+        });
+    }
 }
 exports.Forum = Forum;

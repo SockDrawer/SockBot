@@ -61,7 +61,8 @@ exports.bindPost = function bindPost(forum) {
         }
 
         /**
-         * Cleaned content of the post, removing quotes and code blocks from the raw content. suitible for parsing for bots
+         * Cleaned content of the post, removing quotes and code blocks from the raw content.
+         * Suitible for parsing for bots
          * of all ages.
          *
          * @type {string}
@@ -107,7 +108,13 @@ exports.bindPost = function bindPost(forum) {
          * @reject {Error} An Error that occured while retreiving post URL
          */
         url() {
-            return Promise.reject(new Error('[[E-NOT-IMPLEMENTED-YET]]'));
+            return Promise.all([
+                forum.Topic.get(this.topicId).then((t) => t.url()),
+                forum._emit('posts.getPidIndex', {
+                    pid: this.id,
+                    tid: this.topicId
+                })
+            ]).then((results) => `${results[0]}/${results[1]}`);
         }
 
         /**
@@ -122,20 +129,12 @@ exports.bindPost = function bindPost(forum) {
          * @reject {Error} An Error that occured while posting
          */
         reply(content) {
-            return new Promise((resolve, reject) => {
-                forum.socket.emit('posts.reply', {
-                    tid: this.topicId,
-                    content: content,
-                    toPid: this.id,
-                    lock: false
-                }, (e, result) => {
-                    if (e) {
-                        return reject(e);
-                    } else {
-                        return Post.parse(result);
-                    }
-                });
-            });
+            return forum._emit('posts.reply', {
+                tid: this.topicId,
+                content: content,
+                toPid: this.id,
+                lock: false
+            }, (result) => Post.parse(result));
         }
 
         /**
@@ -151,7 +150,17 @@ exports.bindPost = function bindPost(forum) {
          * @reject {Error} An Error that occured while editing
          */
         edit(newContent, reason) {
-            return Promise.reject(new Error('[[E-NOT-IMPLEMENTED-YET]]'));
+            if (reason) {
+                newContent = `${newContent}\n\n<h6>${reason}</h6>`;
+            }
+            return forum._emit('plugins.composer.push', this.id)
+                .then((composer) => forum._emit('posts.edit', {
+                    pid: composer.pid,
+                    content: newContent,
+                    title: composer.title,
+                    tags: composer.tags
+                }))
+                .then((result) => Post.parse(result));
         }
 
         /**
@@ -167,7 +176,17 @@ exports.bindPost = function bindPost(forum) {
          * @reject {Error} An Error that occured while editing
          */
         append(newContent, reason) {
-            return Promise.reject(new Error('[[E-NOT-IMPLEMENTED-YET]]'));
+            if (reason) {
+                newContent = `${newContent}\n\n<h6>${reason}</h6>`;
+            }
+            return forum._emit('plugins.composer.push', this.id)
+                .then((composer) => forum._emit('posts.edit', {
+                    pid: composer.pid,
+                    content: `${composer.body}\n\n---\n\n${newContent}`,
+                    title: composer.title,
+                    tags: composer.tags
+                }))
+                .then((result) => Post.parse(result));
         }
 
         /**
@@ -180,7 +199,10 @@ exports.bindPost = function bindPost(forum) {
          * @reject {Error} An Error that occured while deleting
          */
         delete() {
-            return Promise.reject(new Error('[[E-NOT-IMPLEMENTED-YET]]'));
+            return forum._emit('posts.delete', {
+                pid: this.id,
+                tid: this.topicId
+            }).then(() => this);
         }
 
         /**
@@ -193,7 +215,10 @@ exports.bindPost = function bindPost(forum) {
          * @reject {Error} An Error that occured while deleting
          */
         undelete() {
-            return Promise.reject(new Error('[[E-NOT-IMPLEMENTED-YET]]'));
+            return forum._emit('posts.restore', {
+                pid: this.id,
+                tid: this.topicId
+            }).then(() => this);
         }
 
         /**
@@ -206,7 +231,10 @@ exports.bindPost = function bindPost(forum) {
          * @reject {Error} An Error that occured while upvoting
          */
         upvote() {
-            return Promise.reject(new Error('[[E-NOT-IMPLEMENTED-YET]]'));
+            return forum._emit('posts.upvote', {
+                pid: this.id,
+                'room_id': `topic_${this.topicId}`
+            }).then(() => this);
         }
 
         /**
@@ -219,7 +247,26 @@ exports.bindPost = function bindPost(forum) {
          * @reject {Error} An Error that occured while downvoting
          */
         downvote() {
-            return Promise.reject(new Error('[[E-NOT-IMPLEMENTED-YET]]'));
+            return forum._emit('posts.downvote', {
+                pid: this.id,
+                'room_id': `topic_${this.topicId}`
+            }).then(() => this);
+        }
+
+        /**
+         * Unvote this post
+         *
+         * @returns {Promise<Post>} Resolves to the unvoted post
+         *
+         * @promise
+         * @fulfill {Post} The unvoted Post
+         * @reject {Error} An Error that occured while downvoting
+         */
+        downvote() {
+            return forum._emit('posts.unvote', {
+                pid: this.id,
+                'room_id': `topic_${this.topicId}`
+            }).then(() => this);
         }
 
         /**
@@ -232,7 +279,10 @@ exports.bindPost = function bindPost(forum) {
          * @reject {Error} An Error that occured while bookmarking
          */
         bookmark() {
-            return Promise.reject(new Error('[[E-NOT-IMPLEMENTED-YET]]'));
+            return forum._emit('posts.favorite', {
+                pid: this.id,
+                'room_id': `topic_${this.topicId}`
+            }).then(() => this);
         }
 
         /**
@@ -245,7 +295,10 @@ exports.bindPost = function bindPost(forum) {
          * @reject {Error} An Error that occured while unbookmarking
          */
         unbookmark() {
-            return Promise.reject(new Error('[[E-NOT-IMPLEMENTED-YET]]'));
+            return forum._emit('posts.unfavorite', {
+                pid: this.id,
+                'room_id': `topic_${this.topicId}`
+            }).then(() => this);
         }
 
         /**
@@ -261,14 +314,8 @@ exports.bindPost = function bindPost(forum) {
          * @reject {Error} An Error that occured retrieving the post
          */
         static get(postId) {
-            return new Promise((resolve, reject) => {
-                forum.socket.emit('posts.getPost', postId, (e, result) => {
-                    if (e) {
-                        return reject(e);
-                    }
-                    resolve(Post.parse(result));
-                });
-            });
+            return forum._emit('posts.getPost', postId)
+                .then((result) => Post.parse(result));
         }
 
         /**

@@ -5,7 +5,7 @@ function getValue(obj, key) {
     return (storage.get(obj) || {})[key];
 }
 
-exports.bindTopic = function bindTopic(socket) {
+exports.bindTopic = function bindTopic(forum) {
     class Topic {
         /**
          * description
@@ -100,7 +100,7 @@ exports.bindTopic = function bindTopic(socket) {
          *
          */
         url() {
-            return getValue(this, 'url');
+            return Promise.resolve(`${forum.url}/${getValue(this, 'url')}`);
         }
 
         /**
@@ -177,7 +177,8 @@ exports.bindTopic = function bindTopic(socket) {
          *
          */
         static get(topicId) {
-            return Promise.reject(new Error('[[E-NOT-IMPLEMENTED-YET]]'));
+            return forum._emit('topics.getTopic', topicId)
+                .then((topic) => Topic.parse(topic));
         }
 
         /**
