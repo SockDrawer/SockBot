@@ -1,121 +1,148 @@
 'use strict';
-const storage = new WeakMap();
-
-function getValue(obj, key) {
-    return (storage.get(obj) || {})[key];
-}
+const utils = require('./utils');
 
 exports.bindTopic = function bindTopic(forum) {
     class Topic {
         /**
-         * description
+         * Construct a topic object from a provided payload
          *
+         * @class
+         *
+         * @param {*} payload Serilaized topic representation retrieved from forum
          */
         constructor(payload) {
-            if (!payload) {
-                throw new Error('[[invalid-argument:payload required]]');
-            }
-            if (typeof payload === 'string') {
-                try {
-                    payload = JSON.parse(payload);
-                } catch (e) {
-                    throw new Error(`[[invalid-json:${e.message}]]`);
-                }
-            }
-            const type = typeof payload;
-            if (type !== 'object') {
-                throw new Error(`[[invalid-argument: expected object but received ${type}]]`);
-            }
+            payload = utils.parseJSON(payload);
             const values = {
                 authorId: payload.uid,
                 title: payload.title,
-                url: `/${payload.slug}`,
+                url: payload.slug,
                 posted: new Date(payload.timestamp),
                 lastPosted: new Date(payload.lastposttime),
                 id: payload.tid,
                 mainPostId: payload.mainPid,
-                postCount: payload.postCount
+                postCount: payload.postcount
             };
-            storage.set(this, values);
+            utils.mapSet(this, values);
         }
 
         /**
-         * description
+         * Forum specific ID for topic author
          *
+         * @type {*}
          */
         get authorId() {
-            return getValue(this, 'authorId');
+            return utils.mapGet(this, 'authorId');
         }
 
         /**
-         * description
+         * Topic title
          *
+         * @type {string}
          */
         get title() {
-            return getValue(this, 'title');
+            return utils.mapGet(this, 'title');
         }
 
         /**
-         * description
+         * DateTime that the topic was created
          *
+         * @type {Date}
          */
         get posted() {
-            return getValue(this, 'posted');
+            return utils.mapGet(this, 'posted');
         }
 
         /**
-         * description
+         * DateTime that the topic was last replied to
          *
+         * @type {Date}
          */
         get lastPosted() {
-            return getValue(this, 'lastPosted');
+            return utils.mapGet(this, 'lastPosted');
         }
 
         /**
-         * description
+         * Forum Specific Topic Id
          *
+         * @type {*}
          */
         get id() {
-            return getValue(this, 'id');
+            return utils.mapGet(this, 'id');
         }
 
         /**
-         * description
+         * Forum id of the opening post
          *
+         * @type {*}
          */
         get mainPostId() {
-            return getValue(this, 'mainPostId');
+            return utils.mapGet(this, 'mainPostId');
         }
 
         /**
-         * description
+         * Count of posts in topic
          *
+         * @type {number}
          */
         get postCount() {
-            return getValue(this, 'postCount');
+            return utils.mapGet(this, 'postCount');
         }
 
         /**
-         * description
+         * Retrieve the web URL for the topic
          *
+         * @returns {Promise<string>} Resolves to the web URL for this topic
+         *
+         * @promise
+         * @fulfill {string} The Web URL for this topic
+         * @reject {Error} An Error that occured while retrieving the post URL
          */
         url() {
-            return Promise.resolve(`${forum.url}/${getValue(this, 'url')}`);
+            return Promise.resolve(`${forum.url}/${utils.mapGet(this, 'url')}`);
         }
 
         /**
-         * description
+         * Reply to this topic with the given content
          *
+         * @param {string} content Post Content
+         * @returns {Promise<Post>} Resolves to the newly created Post
+         *
+         * @promise
+         * @fulfill {Post} The newly created Post
+         * @reject {Error} An Error that occured while posting
          */
         reply(content) {
-                return Promise.reject(new Error('[[E-NOT-IMPLEMENTED-YET]]'));
-            }
-            /**
-             * description
-             *
-             */
+            const payload = {
+                tid: this.id,
+                content: content
+            };
+            return forum._emit('posts.reply', payload)
+                .then((result) => forum.Post.parse(result));
+        }
+
+        /**
+         * Retrieve all posts from this topic, passing each off to a provided iterator function.
+         *
+         * TODO: add topic and user to eachPost call as they are part of the J
+         *
+         */
         getAllPosts(eachPost) {
-            return Promise.reject(new Error('[[E-NOT-IMPLEMENTED-YET]]'));
+            return new Promise((resolve, reject) => {
+                let idx = 0;
+                const iterate = () => forum._emit('topics.loadMore', {
+                    tid: this.id,
+                    after: idx,
+                    direction: 1
+                }).then((results) => {
+                    if (!results.posts || !results.posts.length) {
+                        return resolve(this);
+                    }
+                    idx += results.posts.length;
+                    return utils.iterate(results.posts, (post) => eachPost(forum.Post.parse(post)))
+                        .then(iterate).catch(reject);
+                });
+                iterate();
+            });
         }
 
         /**
@@ -123,15 +150,13 @@ exports.bindTopic = function bindTopic(forum) {
          *
          */
         getLatestPosts(eachPost) {
-            return Promise.reject(new Error('[[E-NOT-IMPLEMENTED-YET]]'));
-        }
-
-        /**
-         * description
-         *
-         */
-        getPost(postNumber) {
-            return Promise.reject(new Error('[[E-NOT-IMPLEMENTED-YET]]'));
+            return forum._emit('topics.loadMore', {
+                tid: this.id,
+                after: this.postCount,
+                direction: 0
+            }).then((results) => {
+                return utils.iterate(results.posts, (post) => eachPost(forum.Post.parse(post)));
+            });
         }
 
         /**
@@ -139,7 +164,16 @@ exports.bindTopic = function bindTopic(forum) {
          *
          */
         markRead(postNumber) {
-            return Promise.reject(new Error('[[E-NOT-IMPLEMENTED-YET]]'));
+            if (postNumber) {
+                const payload = {
+                    tid: this.id,
+                    index: postNumber
+                };
+                return forum._emit('topics.bookmark', payload)
+                    .then(() => this);
+            }
+            return forum._emit('topics.markAsRead', [this.id])
+                .then(() => this);
         }
 
         /**
@@ -147,13 +181,23 @@ exports.bindTopic = function bindTopic(forum) {
          *
          */
         watch() {
-            return Promise.reject(new Error('[[E-NOT-IMPLEMENTED-YET]]'));
+            return forum._emit('topics.follow', this.id)
+                .then(() => this);
         }
 
         /**
+         * description
+         *
          */
         unwatch() {
-            return Promise.reject(new Error('[[E-NOT-IMPLEMENTED-YET]]'));
+            return forum._emit('topics.toggleFollow', this.id)
+                .then((following) => {
+                    if (following) {
+                        return forum._emit('topics.toggleFollow', this.id);
+                    }
+                    return Promise.resolve();
+                })
+                .then(() => this);
         }
 
         /**
@@ -161,7 +205,7 @@ exports.bindTopic = function bindTopic(forum) {
          *
          */
         mute() {
-            return Promise.reject(new Error('[[E-NOT-IMPLEMENTED-YET]]'));
+            return Promise.resolve(this);
         }
 
         /**
@@ -169,7 +213,7 @@ exports.bindTopic = function bindTopic(forum) {
          *
          */
         unmute() {
-            return Promise.reject(new Error('[[E-NOT-IMPLEMENTED-YET]]'));
+            return Promise.resolve(this);
         }
 
         /**

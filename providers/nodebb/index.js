@@ -5,12 +5,14 @@ const io = require('socket.io-client'),
 
 const bindPost = require('./post').bindPost;
 const bindTopic = require('./topic').bindTopic;
+const bindCategory = require('./category').bindCategory;
 
 class Forum {
     constructor(baseUrl) {
         this.url = baseUrl;
         this.Post = bindPost(this);
         this.Topic = bindTopic(this);
+        this.Category = bindCategory(this);
     }
     login(username, password) {
         return new Promise((resolve, reject) => {

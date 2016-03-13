@@ -1,9 +1,5 @@
 'use strict';
-const storage = new WeakMap();
-
-function getValue(obj, key) {
-    return (storage.get(obj) || {})[key];
-}
+const utils = require('./utils');
 
 exports.bindPost = function bindPost(forum) {
     class Post {
@@ -15,20 +11,7 @@ exports.bindPost = function bindPost(forum) {
          * @param {*} payload Serialized post representation retrieved from forum
          */
         constructor(payload) {
-            if (!payload) {
-                throw new Error('[[invalid-argument:payload required]]');
-            }
-            if (typeof payload === 'string') {
-                try {
-                    payload = JSON.parse(payload);
-                } catch (e) {
-                    throw new Error(`[[invalid-json:${e.message}]]`);
-                }
-            }
-            const type = typeof payload;
-            if (type !== 'object') {
-                throw new Error(`[[invalid-argument: expected object but received ${type}]]`);
-            }
+            payload = utils.parseJSON(payload);
             const values = {
                 authorId: payload.uid,
                 raw: payload.content,
@@ -37,18 +20,16 @@ exports.bindPost = function bindPost(forum) {
                 id: payload.pid,
                 topicId: payload.tid
             };
-            storage.set(this, values);
+            utils.mapSet(this, values);
         }
 
         /**
-         * authorId
-         *
          * Forum specific ID for post author
          *
          * @type {*}
          */
         get authorId() {
-            return getValue(this, 'authorId');
+            return utils.mapGet(this, 'authorId');
         }
 
         /**
@@ -57,7 +38,7 @@ exports.bindPost = function bindPost(forum) {
          * @type {string}
          */
         get raw() {
-            return getValue(this, 'raw');
+            return utils.mapGet(this, 'raw');
         }
 
         /**
@@ -68,7 +49,7 @@ exports.bindPost = function bindPost(forum) {
          * @type {string}
          */
         get cleaned() {
-            return getValue(this, 'cleaned');
+            return utils.mapGet(this, 'cleaned');
         }
 
         /**
@@ -77,7 +58,7 @@ exports.bindPost = function bindPost(forum) {
          * @type {Date}
          */
         get posted() {
-            return getValue(this, 'posted');
+            return utils.mapGet(this, 'posted');
         }
 
         /**
@@ -86,7 +67,7 @@ exports.bindPost = function bindPost(forum) {
          * @type {*}
          */
         get id() {
-            return getValue(this, 'id');
+            return utils.mapGet(this, 'id');
         }
 
         /**
@@ -95,7 +76,7 @@ exports.bindPost = function bindPost(forum) {
          * @type {*}
          */
         get topicId() {
-            return getValue(this, 'topicId');
+            return utils.mapGet(this, 'topicId');
         }
 
         /**
@@ -109,7 +90,7 @@ exports.bindPost = function bindPost(forum) {
          */
         url() {
             return Promise.all([
-                forum.Topic.get(this.topicId).then((t) => t.url()),
+                forum.Topic.get(this.topicId).then((topic) => topic.url()),
                 forum._emit('posts.getPidIndex', {
                     pid: this.id,
                     tid: this.topicId
@@ -121,7 +102,6 @@ exports.bindPost = function bindPost(forum) {
          * Reply to this post with the given content
          *
          * @param {string} content Post content
-         *
          * @returns {Promise<Post>} Resolves to the newly created Post
          *
          * @promise
@@ -151,7 +131,7 @@ exports.bindPost = function bindPost(forum) {
          */
         edit(newContent, reason) {
             if (reason) {
-                newContent = `${newContent}\n\n<h6>${reason}</h6>`;
+                newContent = `${newContent}\n\n###### ${reason}`;
             }
             return forum._emit('plugins.composer.push', this.id)
                 .then((composer) => forum._emit('posts.edit', {
