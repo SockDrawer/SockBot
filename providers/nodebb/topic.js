@@ -123,8 +123,6 @@ exports.bindTopic = function bindTopic(forum) {
         /**
          * Retrieve all posts from this topic, passing each off to a provided iterator function.
          *
-         * TODO: add topic and user to eachPost call as they are part of the J
-         *
          */
         getAllPosts(eachPost) {
             return new Promise((resolve, reject) => {
@@ -138,7 +136,12 @@ exports.bindTopic = function bindTopic(forum) {
                         return resolve(this);
                     }
                     idx += results.posts.length;
-                    return utils.iterate(results.posts, (post) => eachPost(forum.Post.parse(post)))
+                    const each = (data) => {
+                        const post = forum.Post.parse(data);
+                        const user = forum.User.parse(data.user);
+                        return eachPost(post, user, this);
+                    };
+                    return utils.iterate(results.posts, each)
                         .then(iterate).catch(reject);
                 });
                 iterate();
@@ -154,9 +157,11 @@ exports.bindTopic = function bindTopic(forum) {
                 tid: this.id,
                 after: this.postCount,
                 direction: 0
-            }).then((results) => {
-                return utils.iterate(results.posts, (post) => eachPost(forum.Post.parse(post)));
-            });
+            }).then((results) => utils.iterate(results.posts, (data) => {
+                const post = forum.Post.parse(data);
+                const user = forum.User.parse(data.user);
+                return eachPost(post, user);
+            }));
         }
 
         /**
@@ -216,6 +221,10 @@ exports.bindTopic = function bindTopic(forum) {
             return Promise.resolve(this);
         }
 
+        toString() {
+            return `Topic {${this.id}:${this.title}}`;
+        }
+
         /**
          * description
          *
@@ -231,6 +240,53 @@ exports.bindTopic = function bindTopic(forum) {
          */
         static parse(payload) {
             return new Topic(payload);
+        }
+
+        static getUnreadTopics(eachTopic) {
+            return new Promise((resolve, reject) => {
+                let idx = 0;
+                const iterate = () => forum._emit('topics.loadMoreUnreadTopics', {
+                    after: `${idx}`
+                }).then((results) => {
+                    if (!results.topics || !results.topics.length) {
+                        return resolve(this);
+                    }
+                    idx += results.topics.length;
+                    const each = (data) => {
+                        const topic = forum.Topic.parse(data);
+                        const user = forum.User.parse(data.user);
+                        const category = forum.Category.parse(data.category);
+                        return eachTopic(topic, user, category);
+                    };
+                    return utils.iterate(results.topics, each)
+                        .then(iterate).catch(reject);
+                }).catch(reject);
+                iterate();
+            });
+        }
+
+        static getRecentTopics(eachTopic) {
+            return new Promise((resolve, reject) => {
+                let idx = 0;
+                const iterate = () => forum._emit('topics.loadMoreFromSet', {
+                    after: `${idx}`,
+                    set: 'topics:recent'
+                }).then((results) => {
+                    if (!results.topics || !results.topics.length) {
+                        return resolve(this);
+                    }
+                    idx += results.topics.length;
+                    const each = (data) => {
+                        const topic = forum.Topic.parse(data);
+                        const user = forum.User.parse(data.user);
+                        const category = forum.Category.parse(data.category);
+                        return eachTopic(topic, user, category);
+                    };
+                    return utils.iterate(results.topics, each)
+                        .then(iterate).catch(reject);
+                }).catch(reject);
+                iterate();
+            });
         }
     }
     return Topic;

@@ -94,7 +94,28 @@ exports.bindCategory = function bindCategory(forum) {
          *
          */
         getAllTopics(eachTopic) {
-
+            return new Promise((resolve, reject) => {
+                let idx = 0;
+                const iterate = () => forum._emit('categories.loadMore', {
+                    cid: this.id,
+                    after: idx,
+                    direction: 1
+                }).then((results) => {
+                    if (!results.topics || !results.topics.length) {
+                        return resolve(this);
+                    }
+                    idx += results.topics.length;
+                    const each = (data) => {
+                        const topic = forum.Topic.parse(data);
+                        const category = forum.category.parse(data.category);
+                        const user = forum.User.parse(data.user);
+                        return eachTopic(topic, user, category);
+                    };
+                    return utils.iterate(results.topics, each)
+                        .then(iterate).catch(reject);
+                });
+                iterate();
+            });
         }
 
         /**
@@ -102,13 +123,60 @@ exports.bindCategory = function bindCategory(forum) {
          *
          */
         getRecentTopics(eachTopic) {
-            return forum._emit('categories.loadMore', {
-                    cid: this.id,
-                    after: 0,
-                    direction: 1
-                })
-                .then((results) => utils.iterate(results.topics, (topic) => eachTopic(forum.Topic.parse(topic))))
+            const payload = {
+                cid: this.id,
+                after: 0,
+                direction: 1
+            };
+            const each = (data) => {
+                const topic = forum.Topic.parse(data);
+                const category = forum.category.parse(data.category);
+                const user = forum.User.parse(data.user);
+                return eachTopic(topic, user, category);
+            };
+            return forum._emit('categories.loadMore', payload)
+                .then((results) => utils.iterate(results.topics, each))
                 .then(() => this);
+        }
+
+        /**
+         * description
+         *
+         */
+        watch() {
+            const payload = {
+                cid: this.id
+            };
+            return forum._emit('categories:watch', payload)
+                .then(() => this);
+        }
+
+        /**
+         * description
+         *
+         */
+        unwatch() {
+            const payload = {
+                cid: this.id
+            };
+            return forum._emit('categories.ignore', payload)
+                .then(() => this);
+        }
+
+        /**
+         * description
+         *
+         */
+        mute() {
+            return Promise.resolve(this);
+        }
+
+        /**
+         * description
+         *
+         */
+        unmute() {
+            return Promise.resolve(this);
         }
 
         /**
