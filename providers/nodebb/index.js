@@ -1,20 +1,25 @@
 'use strict';
 
+const EventEmitter = require('events').EventEmitter;
+
 const io = require('socket.io-client'),
     request = require('request');
 
 const bindPost = require('./post').bindPost;
 const bindTopic = require('./topic').bindTopic;
 const bindCategory = require('./category').bindCategory,
-bindUser = require('./user').bindUser;
+    bindUser = require('./user').bindUser,
+    bindNotification = require('./notification').bindNotification;
 
-class Forum {
+class Forum extends EventEmitter {
     constructor(baseUrl) {
+        super();
         this.url = baseUrl;
         this.Post = bindPost(this);
         this.Topic = bindTopic(this);
         this.Category = bindCategory(this);
         this.User = bindUser(this);
+        this.Notification = bindNotification(this);
     }
     login(username, password) {
         return new Promise((resolve, reject) => {
@@ -56,6 +61,8 @@ class Forum {
                             'Cookie': cookies
                         }
                     });
+                    this.socket.on('connect', () => this.emit('connect'));
+                    this.socket.on('disconnect', () => this.emit('disconnect'));
                     resolve(this);
                 });
             });
