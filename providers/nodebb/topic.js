@@ -246,7 +246,7 @@ exports.bindTopic = function bindTopic(forum) {
             return new Promise((resolve, reject) => {
                 let idx = 0;
                 const iterate = () => forum._emit('topics.loadMoreUnreadTopics', {
-                    after: `${idx}`
+                    after: idx
                 }).then((results) => {
                     if (!results.topics || !results.topics.length) {
                         return resolve(this);
