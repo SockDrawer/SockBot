@@ -1,15 +1,15 @@
 'use strict';
-
+const string = require('string');
 const utils = require('./utils');
 
 exports.bindNotification = function bindNotification(forum) {
-    function notificationHandler(data) {
-        const notification = Notification.parse(data);
-        //TODO: apply ignore filtering, also rate limiting
-        forum.emit(`notification:${notification.type}`, notification);
-        forum.emit(`notification`, notification);
-    }
+    const commandTest = new RegExp(`/(^|\\n)(!\\w+|@${forum.username})`);
+
     class Notification {
+        /**
+         * description
+         *
+         */
         constructor(data) {
             data = utils.parseJSON(data);
             let type = 'notification';
@@ -18,9 +18,20 @@ exports.bindNotification = function bindNotification(forum) {
             } else if (/^\[\[mentions:user_mentioned_you_in/.test(data.bodyShort)) {
                 type = 'mention';
             }
+
+            const subtype = (/^\[\[\w+:(\w+)/.exec(data.bodyShort) || [])[1] || '';
+
+            let body = string(data.bodyLong || '');
+            if (type !== 'mention') {
+                body = body.unescapeHTML();
+            }
+            body = body.stripTags();
+
             const values = {
                 type: type,
-                body: data.bodyShort,
+                subtype: subtype,
+                label: data.bodyShort,
+                body: body.s,
                 id: data.nid,
                 postId: data.pid,
                 topicId: data.tid,
@@ -31,42 +42,128 @@ exports.bindNotification = function bindNotification(forum) {
             };
             utils.mapSet(this, values);
         }
+
+        /**
+         * description
+         *
+         */
         get id() {
             return utils.mapGet(this, 'id');
         }
+
+        /**
+         * description
+         *
+         */
         get postId() {
             return utils.mapGet(this, 'postId');
         }
+
+        /**
+         * description
+         *
+         */
         get topicId() {
             return utils.mapGet(this, 'topicId');
         }
+
+        /**
+         * description
+         *
+         */
         get userId() {
             return utils.mapGet(this, 'userId');
         }
+
+        /**
+         * description
+         *
+         */
         get type() {
             return utils.mapGet(this, 'type');
         }
+
+        /**
+         * description
+         *
+         */
+        get subtype() {
+            return utils.mapGet(this, 'subtype');
+        }
+
+        /**
+         * description
+         *
+         */
         get read() {
             return utils.mapGet(this, 'read');
         }
+
+        /**
+         * description
+         *
+         */
         get date() {
             return utils.mapGet(this, 'date');
         }
+
+        /**
+         * description
+         *
+         */
+        get label() {
+            return utils.mapGet(this, 'label');
+        }
+
+        /**
+         * description
+         *
+         */
         get body() {
             return utils.mapGet(this, 'body');
         }
+
+        /**
+         * description
+         *
+         */
         url() {
-            return Promise.resolve(`${forum.url}/${utils.mapGet(this,'url')}`);
+            const value = utils.mapGet(this, 'url');
+            return Promise.resolve(`${forum.url}/${value}`);
         }
+
+        hasCommands() {
+            return commandTest.test(this.body);
+        }
+
+        /**
+         * description
+         *
+         */
         getPost() {
             return forum.Post.get(this.postId);
         }
+
+        /**
+         * description
+         *
+         */
         getTopic() {
             return forum.Topic.get(this.topicId);
         }
+
+        /**
+         * description
+         *
+         */
         getUser() {
             return forum.User.get(this.userId);
         }
+
+        /**
+         * description
+         *
+         */
         static get(notificationId) {
             const payload = {
                 nids: [notificationId]
@@ -74,9 +171,19 @@ exports.bindNotification = function bindNotification(forum) {
             return forum._emit('notifications.get', payload)
                 .then((data) => Notification.parse(data[0]));
         }
+
+        /**
+         * description
+         *
+         */
         static parse(payload) {
             return new Notification(payload);
         }
+
+        /**
+         * description
+         *
+         */
         static getNotifications(eachNotification) {
             return new Promise((resolve, reject) => {
                 let idx = 0;
@@ -94,12 +201,33 @@ exports.bindNotification = function bindNotification(forum) {
                 iterate();
             });
         }
+
+        /**
+         * description
+         *
+         */
         static activate() {
-            forum.addListener('event:new_notification', notificationHandler);
+            forum.addListener('event:new_notification', notifyHandler);
         }
+
+        /**
+         * description
+         *
+         */
         static deactivate() {
-            forum.removeListener('event:new_notification', notificationHandler);
+            forum.removeListener('event:new_notification', notifyHandler);
         }
+    }
+
+    /**
+     * description
+     *
+     */
+    function notifyHandler(data) {
+        const notification = Notification.parse(data);
+        //TODO: apply ignore filtering, also rate limiting
+        forum.emit(`notification:${notification.type}`, notification);
+        forum.emit('notification', notification);
     }
     return Notification;
 };

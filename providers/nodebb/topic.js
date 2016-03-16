@@ -221,10 +221,6 @@ exports.bindTopic = function bindTopic(forum) {
             return Promise.resolve(this);
         }
 
-        toString() {
-            return `Topic {${this.id}:${this.title}}`;
-        }
-
         /**
          * description
          *
