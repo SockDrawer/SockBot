@@ -21,17 +21,11 @@ exports.bindNotification = function bindNotification(forum) {
 
             const subtype = (/^\[\[\w+:(\w+)/.exec(data.bodyShort) || [])[1] || '';
 
-            let body = string(data.bodyLong || '');
-            if (type !== 'mention') {
-                body = body.unescapeHTML();
-            }
-            body = body.stripTags();
-
             const values = {
                 type: type,
                 subtype: subtype,
                 label: data.bodyShort,
-                body: body.s,
+                body: string(data.bodyLong).unescapeHTML().s,
                 id: data.nid,
                 postId: data.pid,
                 topicId: data.tid,
@@ -229,5 +223,10 @@ exports.bindNotification = function bindNotification(forum) {
         forum.emit(`notification:${notification.type}`, notification);
         forum.emit('notification', notification);
     }
+    
+    function handleCommands(notification){
+        
+    }
+    
     return Notification;
 };

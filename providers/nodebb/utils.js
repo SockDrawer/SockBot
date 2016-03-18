@@ -1,4 +1,8 @@
 'use strict';
+
+const string = require('string'),
+    sanitizeHtml = require('sanitize-html');
+
 const storage = new WeakMap();
 
 /**
@@ -13,8 +17,13 @@ exports.mapGet = function mapGet(obj, key) {
  * description
  *
  */
-exports.mapSet = function mapSet(obj, value) {
-    storage.set(obj, value);
+exports.mapSet = function mapSet(obj, key, value) {
+    let values = key;
+    if (value) {
+        values = storage.get(obj) || {};
+        values[key] = value;
+    }
+    storage.set(obj, values);
 };
 
 /**
@@ -56,4 +65,16 @@ exports.iterate = function iterate(arr, each) {
         };
         next();
     });
+};
+
+/**
+ * description
+ *
+ */
+exports.htmlToRaw = function htmlToRaw(markup) {
+    markup = sanitizeHtml(markup,{
+        allowedTags:['code','blockquote'],
+        exclusiveFilter:(frame)=>frame.tag ==='code' || frame.tag==='blockquote'
+    });
+    return markup;
 };

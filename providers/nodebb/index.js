@@ -21,7 +21,7 @@ class Forum extends EventEmitter {
         this.Category = bindCategory(this);
         this.User = bindUser(this);
         this.Notification = bindNotification(this);
-        this.Command = bindCommands(this);
+        this.Commands = bindCommands(this);
     }
 
     _verifyCookies() {

@@ -109,10 +109,24 @@ exports.bindPost = function bindPost(forum) {
          * @reject {Error} An Error that occured while posting
          */
         reply(content) {
+            return Post.reply(this.topicId,this.id, content);
+        }
+        
+        /**
+         * Reply to this post with the given content
+         *
+         * @param {string} content Post content
+         * @returns {Promise<Post>} Resolves to the newly created Post
+         *
+         * @promise
+         * @fulfill {Post} The newly created Post
+         * @reject {Error} An Error that occured while posting
+         */
+        static reply(topicId, postId, content) {
             return forum._emit('posts.reply', {
-                tid: this.topicId,
+                tid: topicId,
                 content: content,
-                toPid: this.id,
+                toPid: postId,
                 lock: false
             }, (result) => Post.parse(result));
         }
@@ -308,6 +322,15 @@ exports.bindPost = function bindPost(forum) {
          */
         static parse(payload) {
             return new Post(payload);
+        }
+        
+        /**
+         * description
+         *
+         */
+        static preview(content){
+            console.log(content);
+            return forum._emit('plugins.composer.renderPreview', content);
         }
     }
     return Post;
