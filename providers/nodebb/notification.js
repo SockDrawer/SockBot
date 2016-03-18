@@ -1,6 +1,6 @@
 'use strict';
 const string = require('string');
-const utils = require('./utils');
+const utils = require('../../lib/utils');
 
 exports.bindNotification = function bindNotification(forum) {
     const commandTest = new RegExp(`/(^|\\n)(!\\w+|@${forum.username})`);

@@ -1,6 +1,6 @@
 'use strict';
 
-const utils = require('./utils');
+const utils = require('../../lib/utils');
 
 exports.bindCommands = function bindCommands(forum) {
     const handlers = {};

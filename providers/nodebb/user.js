@@ -1,6 +1,6 @@
 'use strict';
 
-const utils = require('./utils');
+const utils = require('../../lib/utils');
 
 exports.bindUser = function bindUser(forum) {
     class User {

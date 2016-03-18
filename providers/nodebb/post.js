@@ -1,5 +1,5 @@
 'use strict';
-const utils = require('./utils');
+const utils = require('../../lib/utils');
 
 exports.bindPost = function bindPost(forum) {
     class Post {
@@ -14,8 +14,7 @@ exports.bindPost = function bindPost(forum) {
             payload = utils.parseJSON(payload);
             const values = {
                 authorId: payload.uid,
-                raw: payload.content,
-                cleaned: `unclean: ${payload.content}`, //TODO: clean content
+                content: payload.content,
                 posted: new Date(payload.timestamp),
                 id: payload.pid,
                 topicId: payload.tid
@@ -37,19 +36,16 @@ exports.bindPost = function bindPost(forum) {
          *
          * @type {string}
          */
-        get raw() {
-            return utils.mapGet(this, 'raw');
+        get content() {
+            return utils.mapGet(this, 'content');
         }
-
+        
         /**
-         * Cleaned content of the post, removing quotes and code blocks from the raw content.
-         * Suitible for parsing for bots
-         * of all ages.
+         * description
          *
-         * @type {string}
          */
-        get cleaned() {
-            return utils.mapGet(this, 'cleaned');
+        markup(){
+            return Post.preview(this.content);
         }
 
         /**
@@ -109,9 +105,9 @@ exports.bindPost = function bindPost(forum) {
          * @reject {Error} An Error that occured while posting
          */
         reply(content) {
-            return Post.reply(this.topicId,this.id, content);
+            return Post.reply(this.topicId, this.id, content);
         }
-        
+
         /**
          * Reply to this post with the given content
          *
@@ -323,13 +319,12 @@ exports.bindPost = function bindPost(forum) {
         static parse(payload) {
             return new Post(payload);
         }
-        
+
         /**
          * description
          *
          */
-        static preview(content){
-            console.log(content);
+        static preview(content) {
             return forum._emit('plugins.composer.renderPreview', content);
         }
     }
