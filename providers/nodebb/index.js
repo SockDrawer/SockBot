@@ -10,7 +10,7 @@ const bindTopic = require('./topic').bindTopic;
 const bindCategory = require('./category').bindCategory,
     bindUser = require('./user').bindUser,
     bindNotification = require('./notification').bindNotification,
-    bindCommands = require('./commands').bindCommands;
+    bindCommands = require('../../lib/commands').bindCommands;
 
 class Forum extends EventEmitter {
     constructor(baseUrl) {

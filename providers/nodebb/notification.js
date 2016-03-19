@@ -121,6 +121,17 @@ exports.bindNotification = function bindNotification(forum) {
          * description
          *
          */
+        getText() {
+            if (this.type === 'mention') {
+                return forum.Post.preview(this.body);
+            }
+            return Promise.resolve(this.body);
+        }
+
+        /**
+         * description
+         *
+         */
         url() {
             const value = utils.mapGet(this, 'url');
             return Promise.resolve(`${forum.url}/${value}`);
@@ -201,7 +212,7 @@ exports.bindNotification = function bindNotification(forum) {
          *
          */
         static activate() {
-            forum.addListener('event:new_notification', notifyHandler);
+            forum.socket.on('event:new_notification', notifyHandler);
         }
 
         /**
@@ -209,7 +220,7 @@ exports.bindNotification = function bindNotification(forum) {
          *
          */
         static deactivate() {
-            forum.removeListener('event:new_notification', notifyHandler);
+            forum.socket.removeListener('event:new_notification', notifyHandler);
         }
     }
 
@@ -220,13 +231,10 @@ exports.bindNotification = function bindNotification(forum) {
     function notifyHandler(data) {
         const notification = Notification.parse(data);
         //TODO: apply ignore filtering, also rate limiting
+        forum.Commands.get(notification).then((command)=>command.execute());
         forum.emit(`notification:${notification.type}`, notification);
         forum.emit('notification', notification);
     }
-    
-    function handleCommands(notification){
-        
-    }
-    
+
     return Notification;
 };
