@@ -6,14 +6,6 @@
  * @license MIT
  */
 
-
-/**
- * Extended help message
- */
-exports.extendedHelp = 'Testing plugin that echos your posts back at you.\n\nFor more information see the' +
-    ' [full docs](https://sockbot.readthedocs.org/en/latest/Plugins/echo/)';
-
-
 exports.plugin = function plugin(forum, config) {
     function echo(command) {
         return Promise.all([

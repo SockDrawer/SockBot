@@ -15,7 +15,9 @@ const utils = require('../../lib/utils'),
 class Forum extends EventEmitter {
     constructor(config) {
         super();
-        utils.mapSet(this, config);
+        utils.mapSet(this, {
+            config: config
+        });
         this.Post = bindPost(this);
         this.Topic = bindTopic(this);
         this.Category = bindCategory(this);
@@ -24,18 +26,22 @@ class Forum extends EventEmitter {
         this._plugins = [];
     }
 
+    get config() {
+        return utils.mapGet(this, 'config');
+    }
+
     get url() {
-        return utils.mapGet(this, 'core').forum;
+        return this.config.core.forum;
     }
 
     get username() {
-        return utils.mapGet(this, 'core').username;
+        return this.config.core.username;
     }
     get user() {
-        return utils.mapGet(this, 'core').user;
+        return utils.mapGet(this, 'user');
     }
     get owner() {
-        return utils.mapGet(this, 'core').owner;
+        return utils.mapGet(this, 'owner');
     }
 
     get Commands() {
@@ -84,8 +90,8 @@ class Forum extends EventEmitter {
                         'x-csrf-token': config.csrf_token
                     },
                     form: {
-                        username: utils.mapGet(this, 'core').username,
-                        password: utils.mapGet(this, 'core').password,
+                        username: this.config.core.username,
+                        password: this.config.core.password,
                         remember: 'off',
                         returnTo: this.url
                     }
@@ -117,7 +123,6 @@ class Forum extends EventEmitter {
             .then(() => this);
     }
     addPlugin(fnPlugin, pluginConfig) {
-        console.log(arguments);
         return new Promise((resolve, reject) => {
             const plugin = fnPlugin.plugin(this, pluginConfig);
             if (typeof plugin !== 'object') {
@@ -135,8 +140,8 @@ class Forum extends EventEmitter {
     activate() {
         return this.connectWebsocket()
             .then(() => Promise.all([
-                this.User.getByName(utils.mapGet(this, 'core').username),
-                this.User.getByName(utils.mapGet(this, 'core').owner),
+                this.User.getByName(this.config.core.username),
+                this.User.getByName(this.config.core.owner),
             ]))
             .then((data) => {
                 utils.mapSet(this, 'user', data[0]);
