@@ -212,6 +212,7 @@ exports.bindNotification = function bindNotification(forum) {
          *
          */
         static activate() {
+            console.log('notifications go!')
             forum.socket.on('event:new_notification', notifyHandler);
         }
 

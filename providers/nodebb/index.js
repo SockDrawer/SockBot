@@ -5,23 +5,45 @@ const EventEmitter = require('events').EventEmitter;
 const io = require('socket.io-client'),
     request = require('request');
 
-const bindPost = require('./post').bindPost;
-const bindTopic = require('./topic').bindTopic;
-const bindCategory = require('./category').bindCategory,
+const utils = require('../../lib/utils'),
+    bindPost = require('./post').bindPost,
+    bindTopic = require('./topic').bindTopic,
+    bindCategory = require('./category').bindCategory,
     bindUser = require('./user').bindUser,
-    bindNotification = require('./notification').bindNotification,
-    bindCommands = require('../../lib/commands').bindCommands;
+    bindNotification = require('./notification').bindNotification;
 
 class Forum extends EventEmitter {
-    constructor(baseUrl) {
+    constructor(config) {
         super();
-        this.url = baseUrl;
+        utils.mapSet(this, config);
         this.Post = bindPost(this);
         this.Topic = bindTopic(this);
         this.Category = bindCategory(this);
         this.User = bindUser(this);
         this.Notification = bindNotification(this);
-        this.Commands = bindCommands(this);
+        this._plugins = [];
+    }
+
+    get url() {
+        return utils.mapGet(this, 'core').forum;
+    }
+
+    get username() {
+        return utils.mapGet(this, 'core').username;
+    }
+    get user() {
+        return utils.mapGet(this, 'core').user;
+    }
+    get owner() {
+        return utils.mapGet(this, 'core').owner;
+    }
+
+    get Commands() {
+        return utils.mapGet(this, 'commands');
+    }
+
+    set Commands(commands) {
+        utils.mapSet(this, 'commands', commands);
     }
 
     _verifyCookies() {
@@ -51,51 +73,85 @@ class Forum extends EventEmitter {
             });
         });
     }
-    login(username, password) {
-        this.username = username;
-        return this._getConfig().then((config) => new Promise((resolve, reject) => {
-            this._verifyCookies();
-            request.post({
-                url: this.url + '/login',
-                jar: this._cookiejar,
-                headers: {
-                    'x-csrf-token': config.csrf_token
-                },
-                form: {
-                    username: username,
-                    password: password,
-                    remember: 'off',
-                    returnTo: this.url
-                }
-            }, (loginError) => {
-                if (loginError) {
-                    return reject(loginError);
-                }
-                resolve(this);
-            });
-        }));
+    login() {
+        return this._getConfig()
+            .then((config) => new Promise((resolve, reject) => {
+                this._verifyCookies();
+                request.post({
+                    url: this.url + '/login',
+                    jar: this._cookiejar,
+                    headers: {
+                        'x-csrf-token': config.csrf_token
+                    },
+                    form: {
+                        username: utils.mapGet(this, 'core').username,
+                        password: utils.mapGet(this, 'core').password,
+                        remember: 'off',
+                        returnTo: this.url
+                    }
+                }, (loginError) => {
+                    if (loginError) {
+                        return reject(loginError);
+                    }
+                    resolve();
+                });
+            }))
+            .then(() => Promise.resolve(this));
     }
     connectWebsocket() {
-        this._verifyCookies();
-        const cookies = this._cookiejar.getCookieString(this.url);
-        this.socket = io(this.url, {
-            extraHeaders: {
-                'Cookie': cookies
-            }
-        });
-        this.socket.on('connect', () => this.emit('connect'));
-        this.socket.on('disconnect', () => this.emit('disconnect'));
-        return Promise.resolve(this);
-    }
-    activate() {
-        if (this.socket){
+        if (this.socket) {
             return Promise.resolve(this);
         }
-        return this.connectWebsocket();
+        return new Promise((resolve, reject) => {
+                this._verifyCookies();
+                const cookies = this._cookiejar.getCookieString(this.url);
+                this.socket = io(this.url, {
+                    extraHeaders: {
+                        'Cookie': cookies
+                    }
+                });
+                this.socket.on('connect', () => this.emit('connect'));
+                this.socket.on('disconnect', () => this.emit('disconnect'));
+                this.socket.once('connect', () => resolve());
+            })
+            .then(() => this);
     }
-    deactivate() {}
-    setHelpTopic(topic, description, helpText) {}
-    onCommand(command, description, handler) {}
+    addPlugin(fnPlugin, pluginConfig) {
+        console.log(arguments);
+        return new Promise((resolve, reject) => {
+            const plugin = fnPlugin.plugin(this, pluginConfig);
+            if (typeof plugin !== 'object') {
+                return reject('[[invalid_plugin:no_plugin_object]]');
+            }
+            if (typeof plugin.activate !== 'function') {
+                return reject('[[invalid_plugin:no_activate_function]]');
+            }
+            if (typeof plugin.deactivate !== 'function') {
+                return reject('[[invalid_plugin:no_deactivate_function]]');
+            }
+            this._plugins.push(plugin);
+        });
+    }
+    activate() {
+        return this.connectWebsocket()
+            .then(() => Promise.all([
+                this.User.getByName(utils.mapGet(this, 'core').username),
+                this.User.getByName(utils.mapGet(this, 'core').owner),
+            ]))
+            .then((data) => {
+                utils.mapSet(this, 'user', data[0]);
+                utils.mapSet(this, 'owner', data[1]);
+            })
+            .then(() => {
+                this.Notification.activate();
+                return Promise.all(this._plugins.map((plugin) => plugin.activate()));
+            })
+            .then(() => this);
+    }
+    deactivate() {
+        this.Notification.deactivate();
+        return Promise.resolve(this);
+    }
     _emit(event, arg) {
         const args = Array.prototype.slice.call(arguments);
         return new Promise((resolve, reject) => {
