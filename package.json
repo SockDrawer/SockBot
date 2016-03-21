@@ -21,25 +21,19 @@
     "iojs": ">=1.7"
   },
   "dependencies": {
-    "async": "^1.5.2",
     "debug": "^2.2.0",
-    "filesize": "^3.2.0",
     "js-yaml": "^3.5.4",
-    "knuth-shuffle": "^1.0.1",
-    "later": "^1.2.0",
     "request": "^2.69.0",
     "sanitize-html": "^1.11.3",
     "socket.io-client": "^1.4.5",
     "string": "^3.3.1",
-    "xregexp": "^3.0.0",
     "yargs": "^4.2.0"
   },
   "devDependencies": {
     "blns": "^2.0.2",
     "chai": "^3.5.0",
-    "chai-string": "^1.1.6",
+    "chai-as-promised": "^5.2.0",
     "codeclimate-test-reporter": "^0.3.1",
-    "coveralls": "^2.11.6",
     "dmd": "^1.3.10",
     "eslint": "^2.4.0",
     "glob-all": "^3.0.1",
@@ -48,16 +42,17 @@
     "mkdirp": "^0.5.1",
     "mocha": "^2.4.5",
     "sinon": "^1.17.3",
+    "sinon-as-promised": "^4.0.0",
     "sinon-chai": "^2.8.0"
   },
   "scripts": {
     "start": "node lib/app.js",
     "lint": "eslint .",
-    "pretest": "node --harmony --harmony_arrow_functions node_modules/.bin/istanbul cover node_modules/mocha/bin/_mocha --print both -x 'external/**' -x 'build/**' --include-all-sources -- --recursive -R spec",
-    "test": "node --harmony --harmony-arrow-functions node_modules/.bin/istanbul check-coverage coverage/coverage.json",
-    "istanbul": "node --harmony --harmony_arrow_functions node_modules/.bin/istanbul cover node_modules/mocha/bin/_mocha --print both -x 'external/**' -x 'build/**' --include-all-sources -- --recursive -R dot",
-    "mocha": "node --harmony --harmony_arrow_functions node_modules/.bin/_mocha --recursive -R dot",
-    "buildDocs": "node --harmony --harmony_arrow_functions build/makeDocs.js",
+    "pretest": "istanbul cover node_modules/mocha/bin/_mocha --print both -x 'external/**' -x 'build/**' --include-all-sources -- --recursive -R spec",
+    "test": "istanbul check-coverage coverage/coverage.json",
+    "istanbul": "istanbul cover node_modules/mocha/bin/_mocha --print both -x 'external/**' -x 'build/**' --include-all-sources -- --recursive -R dot",
+    "mocha": "mocha --recursive -R dot",
+    "buildDocs": "node build/makeDocs.js",
     "pushDocs": "bash build/sendDocs.sh"
   }
 }
