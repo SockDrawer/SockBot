@@ -12,7 +12,7 @@ require('sinon-as-promised');
 
 const utils = require('../../lib/utils');
 
-describe('utils', () => {
+describe('lib/utils', () => {
     describe('exports', () => {
         const fns = ['logExtended', 'cloneData', 'mergeInner', 'mergeObjects', 'mapGet', 'mapSet',
                 'parseJSON', 'iterate', 'htmlToRaw'
