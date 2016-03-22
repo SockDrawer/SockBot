@@ -1,7 +1,7 @@
 {
   "name": "sockbot",
-  "version": "2.13.6",
-  "releaseName": "Frisky Fishnet",
+  "version": "3.0.0-ALPHA1",
+  "releaseName": "Alpha Alpaca",
   "description": "A sockpuppet bot to use on http://what.thedailywtf.com.",
   "repository": "https://github.com/SockDrawer/SockBot",
   "license": "MIT",
@@ -23,6 +23,7 @@
   "dependencies": {
     "debug": "^2.2.0",
     "js-yaml": "^3.5.4",
+    "random-js": "^1.0.8",
     "request": "^2.69.0",
     "sanitize-html": "^1.11.3",
     "socket.io-client": "^1.4.5",
