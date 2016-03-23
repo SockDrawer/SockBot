@@ -5,7 +5,6 @@ const chaiAsPromised = require("chai-as-promised");
 
 chai.use(chaiAsPromised);
 chai.should();
-const expect = chai.expect;
 
 const sinon = require('sinon');
 require('sinon-as-promised');
@@ -224,6 +223,5 @@ describe('providers/nodebb/user', () => {
                 utils.mapGet(user, 'lastSeen').getTime().should.equal(expected);
             });
         });
-        
     });
 });
