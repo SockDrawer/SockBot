@@ -143,7 +143,7 @@ exports.bindTopic = function bindTopic(forum) {
                     };
                     return utils.iterate(results.posts, each)
                         .then(iterate).catch(reject);
-                });
+                }).catch((e) => reject(e));
                 iterate();
             });
         }
@@ -156,11 +156,11 @@ exports.bindTopic = function bindTopic(forum) {
             return forum._emit('topics.loadMore', {
                 tid: this.id,
                 after: this.postCount,
-                direction: 0
+                direction: -1
             }).then((results) => utils.iterate(results.posts, (data) => {
                 const post = forum.Post.parse(data);
                 const user = forum.User.parse(data.user);
-                return eachPost(post, user);
+                return eachPost(post, user, this);
             }));
         }
 
