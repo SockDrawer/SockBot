@@ -13,7 +13,7 @@ exports.bindUser = function bindUser(forum) {
             const values = {
                 username: payload.username,
                 name: payload.fullname,
-                email: payload.email || '',
+                email: payload.email,
                 avatar: payload.picture,
                 id: payload.uid,
                 postCount: payload.postcount,
