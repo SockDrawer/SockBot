@@ -13,9 +13,9 @@ exports.bindNotification = function bindNotification(forum) {
         constructor(data) {
             data = utils.parseJSON(data);
             let type = 'notification';
-            if (/^\[\[notifications:user_posted_to/.test(data.bodyShort)) {
+            if (/^\[\[notifications:user_posted_to/i.test(data.bodyShort)) {
                 type = 'reply';
-            } else if (/^\[\[mentions:user_mentioned_you_in/.test(data.bodyShort)) {
+            } else if (/^\[\[mentions:user_mentioned_you_in/i.test(data.bodyShort)) {
                 type = 'mention';
             }
 
@@ -25,7 +25,7 @@ exports.bindNotification = function bindNotification(forum) {
                 type: type,
                 subtype: subtype,
                 label: data.bodyShort,
-                body: string(data.bodyLong).unescapeHTML().s,
+                body: string(data.bodyLong || '').unescapeHTML().s,
                 id: data.nid,
                 postId: data.pid,
                 topicId: data.tid,
@@ -137,10 +137,6 @@ exports.bindNotification = function bindNotification(forum) {
             return Promise.resolve(`${forum.url}/${value}`);
         }
 
-        hasCommands() {
-            return commandTest.test(this.body);
-        }
-
         /**
          * description
          *
@@ -212,7 +208,6 @@ exports.bindNotification = function bindNotification(forum) {
          *
          */
         static activate() {
-            console.log('notifications go!')
             forum.socket.on('event:new_notification', notifyHandler);
         }
 
@@ -221,7 +216,7 @@ exports.bindNotification = function bindNotification(forum) {
          *
          */
         static deactivate() {
-            forum.socket.removeListener('event:new_notification', notifyHandler);
+            forum.socket.off('event:new_notification', notifyHandler);
         }
     }
 
@@ -232,9 +227,10 @@ exports.bindNotification = function bindNotification(forum) {
     function notifyHandler(data) {
         const notification = Notification.parse(data);
         //TODO: apply ignore filtering, also rate limiting
-        forum.Commands.get(notification).then((command)=>command.execute());
         forum.emit(`notification:${notification.type}`, notification);
         forum.emit('notification', notification);
+        return forum.Commands.get(notification)
+            .then((command) => command.execute());
     }
 
     return Notification;
