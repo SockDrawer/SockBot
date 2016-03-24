@@ -529,25 +529,18 @@ describe('providers/nodebb/notification', () => {
             });
             it('should execute parsed commands', () => {
                 const spy = sinon.spy();
-                forum.Commands.get.resolves({
-                    execute: spy
-                });
-                return notifyHandler(5).then(() => {
-                    spy.called.should.be.true;
-                });
+                forum.Commands.get.resolves({execute:spy});
+                return notifyHandler(5).then(()=>{
+                spy.called.should.be.true;});
             });
             it('should emit specific notification event', () => {
-                const expected = {
-                    type: `a${Math.random()}b`
-                };
+                const expected = {type:`a${Math.random()}b`};
                 Notification.parse.returns(expected);
                 notifyHandler(5);
                 forum.emit.calledWith(`notification:${expected.type}`, expected).should.be.true;
             });
             it('should emit general notification event', () => {
-                const expected = {
-                    type: `a${Math.random()}b`
-                };
+                const expected = {type:`a${Math.random()}b`};
                 Notification.parse.returns(expected);
                 notifyHandler(5);
                 forum.emit.calledWith(`notification`, expected).should.be.true;

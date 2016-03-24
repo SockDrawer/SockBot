@@ -229,8 +229,7 @@ exports.bindNotification = function bindNotification(forum) {
         //TODO: apply ignore filtering, also rate limiting
         forum.emit(`notification:${notification.type}`, notification);
         forum.emit('notification', notification);
-        return forum.Commands.get(notification)
-            .then((command) => command.execute());
+        return forum.Commands.get(notification).then((command) => command.execute());
     }
 
     return Notification;
