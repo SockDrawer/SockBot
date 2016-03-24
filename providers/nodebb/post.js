@@ -39,7 +39,7 @@ exports.bindPost = function bindPost(forum) {
         get content() {
             return utils.mapGet(this, 'content');
         }
-        
+
         /**
          * description
          *
@@ -124,7 +124,7 @@ exports.bindPost = function bindPost(forum) {
                 content: content,
                 toPid: postId,
                 lock: false
-            }, (result) => Post.parse(result));
+            }).then((result) => Post.parse(result));
         }
 
         /**
@@ -167,7 +167,7 @@ exports.bindPost = function bindPost(forum) {
          */
         append(newContent, reason) {
             if (reason) {
-                newContent = `${newContent}\n\n<h6>${reason}</h6>`;
+                newContent = `${newContent}\n\n###### ${reason}`;
             }
             return forum._emit('plugins.composer.push', this.id)
                 .then((composer) => forum._emit('posts.edit', {
@@ -252,7 +252,7 @@ exports.bindPost = function bindPost(forum) {
          * @fulfill {Post} The unvoted Post
          * @reject {Error} An Error that occured while downvoting
          */
-        downvote() {
+        unvote() {
             return forum._emit('posts.unvote', {
                 pid: this.id,
                 'room_id': `topic_${this.topicId}`
