@@ -69,7 +69,7 @@ exports.bindCategory = function bindCategory(forum) {
          * description
          *
          */
-        get postCounts() {
+        get postCount() {
             return utils.mapGet(this, 'postCount');
         }
 
@@ -86,7 +86,7 @@ exports.bindCategory = function bindCategory(forum) {
          *
          */
         url() {
-            return Promise.resolve(`${forum.url}/${utils.mapGet(this, 'id')}`);
+            return Promise.resolve(`${forum.url}/category/${utils.mapGet(this, 'url')}`);
         }
 
         /**
@@ -104,16 +104,16 @@ exports.bindCategory = function bindCategory(forum) {
                     if (!results.topics || !results.topics.length) {
                         return resolve(this);
                     }
-                    idx += results.topics.length;
+                    idx = results.nextStart;
                     const each = (data) => {
                         const topic = forum.Topic.parse(data);
-                        const category = forum.category.parse(data.category);
+                        const category = forum.Category.parse(data.category);
                         const user = forum.User.parse(data.user);
                         return eachTopic(topic, user, category);
                     };
                     return utils.iterate(results.topics, each)
                         .then(iterate).catch(reject);
-                });
+                }).catch(reject);
                 iterate();
             });
         }
@@ -130,7 +130,7 @@ exports.bindCategory = function bindCategory(forum) {
             };
             const each = (data) => {
                 const topic = forum.Topic.parse(data);
-                const category = forum.category.parse(data.category);
+                const category = forum.Category.parse(data.category);
                 const user = forum.User.parse(data.user);
                 return eachTopic(topic, user, category);
             };
@@ -147,7 +147,7 @@ exports.bindCategory = function bindCategory(forum) {
             const payload = {
                 cid: this.id
             };
-            return forum._emit('categories:watch', payload)
+            return forum._emit('categories.watch', payload)
                 .then(() => this);
         }
 
