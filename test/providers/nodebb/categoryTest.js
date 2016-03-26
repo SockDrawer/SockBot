@@ -12,7 +12,7 @@ require('sinon-as-promised');
 const categoryModule = require('../../../providers/nodebb/category');
 const utils = require('../../../lib/utils');
 
-describe('providers/nodebb/notification', () => {
+describe('providers/nodebb/categor', () => {
     it('should export bindCategory()', () => {
         categoryModule.bindCategory.should.be.a('function');
     });

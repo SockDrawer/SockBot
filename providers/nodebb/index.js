@@ -6,11 +6,11 @@ const io = require('socket.io-client'),
     request = require('request');
 
 const utils = require('../../lib/utils'),
-    bindPost = require('./post').bindPost,
-    bindTopic = require('./topic').bindTopic,
-    bindCategory = require('./category').bindCategory,
-    bindUser = require('./user').bindUser,
-    bindNotification = require('./notification').bindNotification;
+    postModule = require('./post'),
+    topicModule = require('./topic'),
+    categoryModule = require('./category'),
+    userModule = require('./user'),
+    notificationModule = require('./notification');
 
 class Forum extends EventEmitter {
     constructor(config) {
@@ -18,16 +18,16 @@ class Forum extends EventEmitter {
         utils.mapSet(this, {
             config: config
         });
-        this.Post = bindPost(this);
-        this.Topic = bindTopic(this);
-        this.Category = bindCategory(this);
-        this.User = bindUser(this);
-        this.Notification = bindNotification(this);
+        this.Post = postModule.bindPost(this);
+        this.Topic = topicModule.bindTopic(this);
+        this.Category = categoryModule.bindCategory(this);
+        this.User = userModule.bindUser(this);
+        this.Notification = notificationModule.bindNotification(this);
         this._plugins = [];
     }
 
     get config() {
-        return utils.mapGet(this, 'config');
+        return JSON.parse(JSON.stringify(utils.mapGet(this, 'config')));
     }
 
     get url() {
@@ -43,7 +43,6 @@ class Forum extends EventEmitter {
     get owner() {
         return utils.mapGet(this, 'owner');
     }
-
     get Commands() {
         return utils.mapGet(this, 'commands');
     }
@@ -72,9 +71,7 @@ class Forum extends EventEmitter {
                     this._config = JSON.parse(data);
                     resolve(this._config);
                 } catch (jsonErr) {
-                    if (jsonErr) {
-                        reject(jsonErr);
-                    }
+                    reject(jsonErr);
                 }
             });
         });
@@ -111,7 +108,7 @@ class Forum extends EventEmitter {
         return new Promise((resolve, reject) => {
                 this._verifyCookies();
                 const cookies = this._cookiejar.getCookieString(this.url);
-                this.socket = io(this.url, {
+                this.socket = Forum.io(this.url, {
                     extraHeaders: {
                         'Cookie': cookies
                     }
@@ -119,6 +116,7 @@ class Forum extends EventEmitter {
                 this.socket.on('connect', () => this.emit('connect'));
                 this.socket.on('disconnect', () => this.emit('disconnect'));
                 this.socket.once('connect', () => resolve());
+                this.socket.once('error', (err) => reject(err));
             })
             .then(() => this);
     }
@@ -155,7 +153,7 @@ class Forum extends EventEmitter {
     }
     deactivate() {
         this.Notification.deactivate();
-        return Promise.resolve(this);
+        return Promise.all(this._plugins.map((plugin) => plugin.deactivate()));
     }
     _emit(event, arg) {
         const args = Array.prototype.slice.call(arguments);
@@ -172,4 +170,5 @@ class Forum extends EventEmitter {
         });
     }
 }
-exports.Forum = Forum;
+Forum.io = io;
+module.exports = Forum;
