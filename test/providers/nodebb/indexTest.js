@@ -489,4 +489,234 @@ describe('providers/nodebb', () => {
             });
         });
     });
+    describe('addPlugin()', () => {
+        let forum = null,
+            plug = null;
+        beforeEach(() => {
+            forum = new Forum({
+                core: {}
+            });
+            plug = {
+                activate: sinon.stub(),
+                deactivate: sinon.stub()
+            };
+        });
+        it('should accept direct generation function', () => {
+            return forum.addPlugin(() => plug).should.be.resolved;
+        });
+        it('should accept indirect generation function', () => {
+            return forum.addPlugin({
+                plugin: () => plug
+            }).should.be.resolved;
+        });
+        it('should add plugin to plugin list', () => {
+            forum._plugins = [5, 3, 4, 1, 2];
+            return forum.addPlugin(() => plug).then(() => {
+                forum._plugins.should.eql([5, 3, 4, 1, 2, plug]);
+            });
+        });
+        it('should pass forum to plugin function', () => {
+            const spy = sinon.spy(() => plug);
+            return forum.addPlugin(spy).then(() => {
+                spy.calledWith(forum).should.be.true;
+            });
+        });
+        it('should pass configuration to plugin function', () => {
+            const spy = sinon.spy(() => plug);
+            const expected = Math.random();
+            return forum.addPlugin(spy, expected).then(() => {
+                spy.calledWith(forum, expected).should.be.true;
+            });
+        });
+        it('should reject when plugin function does not return an object', () => {
+            return forum.addPlugin(() => 7).should.be.rejected;
+        });
+        it('should reject when plugin is missing activate function', () => {
+            delete plug.activate;
+            return forum.addPlugin(() => plug).should.be.rejected;
+        });
+        it('should reject when plugin is missing activate function', () => {
+            delete plug.deactivate;
+            return forum.addPlugin(() => plug).should.be.rejected;
+        });
+    });
+    describe('activate()', () => {
+        let forum = null,
+            data = null,
+            sandbox = null;
+        beforeEach(() => {
+            sandbox = sinon.sandbox.create();
+            forum = new Forum({
+                core: {}
+            });
+            data = utils.mapGet(forum);
+            sandbox.stub(forum.User, 'getByName').resolves({});
+            sandbox.stub(forum.Notification, 'activate');
+            sandbox.stub(forum, 'connectWebsocket').resolves();
+        });
+        afterEach(() => sandbox.restore());
+        it('should connect to websocket', () => {
+            return forum.activate().then(() => {
+                forum.connectWebsocket.called.should.be.true;
+            });
+        });
+        it('should fetch logged in user info', () => {
+            const name = `name${Math.random()}`;
+            data.config.core.username = name;
+            return forum.activate().then(() => {
+                forum.User.getByName.calledWith(name).should.be.true;
+            });
+        });
+        it('should fetch logged in user info', () => {
+            const name = `owner${Math.random()}`;
+            data.config.core.owner = name;
+            return forum.activate().then(() => {
+                forum.User.getByName.calledWith(name).should.be.true;
+            });
+        });
+        it('should store logged in user information', () => {
+            const user = Math.random();
+            forum.User.getByName.onFirstCall().resolves(user);
+            return forum.activate().then(() => {
+                data.user.should.equal(user);
+            });
+        });
+        it('should store owner information', () => {
+            const owner = Math.random();
+            forum.User.getByName.onSecondCall().resolves(owner);
+            return forum.activate().then(() => {
+                data.owner.should.equal(owner);
+            });
+        });
+        it('should activate notifications', () => {
+            return forum.activate().then(() => {
+                forum.Notification.activate.called.should.be.true;
+            });
+        });
+        it('should activate plugins', () => {
+            const spy1 = sinon.stub().resolves(),
+                spy2 = sinon.stub().resolves();
+            forum._plugins = [{
+                activate: spy1
+            }, {
+                activate: spy2
+            }];
+            return forum.activate().then(() => {
+                spy1.called.should.be.true;
+                spy2.called.should.be.true;
+            });
+        });
+        it('should resolve to self', () => {
+            return forum.activate().should.become(forum);
+        });
+        it('should reject when websocket rejects', () => {
+            forum.connectWebsocket.rejects('bad');
+            return forum.activate().should.be.rejected;
+        });
+        it('should reject when user fetch rejects', () => {
+            forum.User.getByName.onFirstCall().rejects('bad');
+            return forum.activate().should.be.rejected;
+        });
+        it('should reject when owner fetch rejects', () => {
+            forum.User.getByName.onSecondCall().rejects('bad');
+            return forum.activate().should.be.rejected;
+        });
+        it('should reject when notification activation throw', () => {
+            forum.Notification.activate.throws('bad');
+            return forum.activate().should.be.rejected;
+        });
+        it('should reject when plugin activation rejects', () => {
+            forum._plugins = [{
+                activate: sinon.stub().rejects('bad')
+            }];
+            return forum.activate().should.be.rejected;
+        });
+    });
+    describe('deactivate()', () => {
+        let forum = null,
+            sandbox = null;
+        beforeEach(() => {
+            sandbox = sinon.sandbox.create();
+            forum = new Forum({
+                core: {}
+            });
+            sandbox.stub(forum.Notification, 'deactivate');
+        });
+        afterEach(() => sandbox.restore());
+        it('should deactivate notifications', () => {
+            return forum.deactivate().then(() => {
+                forum.Notification.deactivate.called.should.be.true;
+            });
+        });
+        it('should deactivate plugins', () => {
+            const spy1 = sinon.stub().resolves(),
+                spy2 = sinon.stub().resolves();
+            forum._plugins = [{
+                deactivate: spy1
+            }, {
+                deactivate: spy2
+            }];
+            return forum.deactivate().then(() => {
+                spy1.called.should.be.true;
+                spy2.called.should.be.true;
+            });
+        });
+        it('should resolve to self', () => {
+            return forum.deactivate().should.become(forum);
+        });
+        it('should reject when notification activation throw', () => {
+            forum.Notification.deactivate.throws('bad');
+            return forum.deactivate().should.be.rejected;
+        });
+        it('should reject when plugin activation rejects', () => {
+            forum._plugins = [{
+                deactivate: sinon.stub().rejects('bad')
+            }];
+            return forum.deactivate().should.be.rejected;
+        });
+    });
+    describe('_emit', () => {
+        let forum = null;
+        beforeEach(() => {
+            forum = new Forum({
+                core: {}
+            });
+            forum.socket = {
+                emit: sinon.stub().yields()
+            };
+        });
+        it('should use websocket emit', () => {
+            return forum._emit().then(() => {
+                forum.socket.emit.called.should.be.true;
+            });
+        });
+        it('should bind websocket emit to websokcet', () => {
+            return forum._emit().then(() => {
+                forum.socket.emit.thisValues[0].should.equal(forum.socket);
+            });
+        });
+        it('should pass arguments to websocket emit', () => {
+            const evt = Math.random(),
+                arg1 = Math.random(),
+                arg2 = Math.random();
+            return forum._emit(evt, arg1, arg2).then(() => {
+                forum.socket.emit.calledWith(evt, arg1, arg2).should.be.true;
+            });
+        });
+        it('should resolve to single vlaue on success', () => {
+            const res = Math.random();
+            forum.socket.emit.yields(null, res);
+            return forum._emit().should.become(res);
+        });
+        it('should resolve to array on multi success', () => {
+            const res1 = Math.random(),
+                res2 = Math.random();
+            forum.socket.emit.yields(null, res1, res2);
+            return forum._emit().should.become([res1, res2]);
+        });
+        it('should reject when websocket errors', () => {
+            forum.socket.emit.yields('bad');
+            return forum._emit().should.be.rejected;
+        });
+    });
 });

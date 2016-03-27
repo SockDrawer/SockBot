@@ -122,7 +122,11 @@ class Forum extends EventEmitter {
     }
     addPlugin(fnPlugin, pluginConfig) {
         return new Promise((resolve, reject) => {
-            const plugin = fnPlugin.plugin(this, pluginConfig);
+            let fn = fnPlugin;
+            if (typeof fn !== 'function') {
+                fn = fn.plugin;
+            }
+            const plugin = fn(this, pluginConfig);
             if (typeof plugin !== 'object') {
                 return reject('[[invalid_plugin:no_plugin_object]]');
             }
@@ -133,6 +137,7 @@ class Forum extends EventEmitter {
                 return reject('[[invalid_plugin:no_deactivate_function]]');
             }
             this._plugins.push(plugin);
+            resolve();
         });
     }
     activate() {
@@ -152,8 +157,13 @@ class Forum extends EventEmitter {
             .then(() => this);
     }
     deactivate() {
-        this.Notification.deactivate();
-        return Promise.all(this._plugins.map((plugin) => plugin.deactivate()));
+        return new Promise((resolve, reject) => {
+                this.Notification.deactivate();
+                return Promise.all(this._plugins.map((plugin) => plugin.deactivate()))
+                    .then(resolve)
+                    .catch(reject);
+            })
+            .then(() => this);
     }
     _emit(event, arg) {
         const args = Array.prototype.slice.call(arguments);
@@ -163,8 +173,13 @@ class Forum extends EventEmitter {
                     return reject(e);
                 }
                 const results = Array.prototype.slice.call(arguments);
+
                 results.shift();
-                resolve.apply(undefined, results);
+                if (!results || results.length < 2) {
+                    resolve(results[0]);
+                } else {
+                    resolve(results);
+                }
             });
             this.socket.emit.apply(this.socket, args);
         });
