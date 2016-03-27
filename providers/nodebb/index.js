@@ -173,9 +173,8 @@ class Forum extends EventEmitter {
                     return reject(e);
                 }
                 const results = Array.prototype.slice.call(arguments);
-
                 results.shift();
-                if (!results || results.length < 2) {
+                if (results.length < 2) {
                     resolve(results[0]);
                 } else {
                     resolve(results);

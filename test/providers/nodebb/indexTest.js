@@ -703,6 +703,11 @@ describe('providers/nodebb', () => {
                 forum.socket.emit.calledWith(evt, arg1, arg2).should.be.true;
             });
         });
+        it('should resolve to undefined on empty success', () => {
+
+            forum.socket.emit.yields();
+            return forum._emit().should.become(undefined);
+        });
         it('should resolve to single vlaue on success', () => {
             const res = Math.random();
             forum.socket.emit.yields(null, res);
