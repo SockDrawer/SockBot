@@ -385,7 +385,7 @@ describe('providers/nodebb/topic', () => {
                 it('should retrieve topics via `topics.loadMoreFromSet`', () => {
                     return Topic.getRecentTopics(spy).then(() => {
                         forum._emit.calledWith('topics.loadMoreFromSet', {
-                            after: '0',
+                            after: 0,
                             set: 'topics:recent'
                         }).should.be.true;
                     });
@@ -396,11 +396,11 @@ describe('providers/nodebb/topic', () => {
                     });
                     return Topic.getRecentTopics(spy).then(() => {
                         forum._emit.calledWith('topics.loadMoreFromSet', {
-                            after: '0',
+                            after: 0,
                             set: 'topics:recent'
                         }).should.be.true;
                         forum._emit.calledWith('topics.loadMoreFromSet', {
-                            after: '3',
+                            after: 3,
                             set: 'topics:recent'
                         }).should.be.true;
                     });
@@ -506,6 +506,7 @@ describe('providers/nodebb/topic', () => {
                         topics: [{}, {}, {}]
                     });
                     return Topic.getUnreadTopics(spy).then(() => {
+                        
                         forum._emit.calledWith('topics.loadMoreUnreadTopics', {
                             after: 0
                         }).should.be.true;

@@ -238,16 +238,14 @@ exports.bindTopic = function bindTopic(forum) {
             return new Topic(payload);
         }
 
-        static getUnreadTopics(eachTopic) {
+        static _getMany(room, query, eachTopic){
             return new Promise((resolve, reject) => {
-                let idx = 0;
-                const iterate = () => forum._emit('topics.loadMoreUnreadTopics', {
-                    after: idx
-                }).then((results) => {
+                query.after = 0;
+                const iterate = () => forum._emit(room, utils.cloneData(query)).then((results) => {
                     if (!results.topics || !results.topics.length) {
                         return resolve(this);
                     }
-                    idx += results.topics.length;
+                    query.after += results.topics.length;
                     const each = (data) => {
                         const topic = forum.Topic.parse(data);
                         const user = forum.User.parse(data.user);
@@ -261,28 +259,12 @@ exports.bindTopic = function bindTopic(forum) {
             });
         }
 
+        static getUnreadTopics(eachTopic) {
+            return Topic._getMany('topics.loadMoreUnreadTopics', {}, eachTopic);
+        }
+
         static getRecentTopics(eachTopic) {
-            return new Promise((resolve, reject) => {
-                let idx = 0;
-                const iterate = () => forum._emit('topics.loadMoreFromSet', {
-                    after: `${idx}`,
-                    set: 'topics:recent'
-                }).then((results) => {
-                    if (!results.topics || !results.topics.length) {
-                        return resolve(this);
-                    }
-                    idx += results.topics.length;
-                    const each = (data) => {
-                        const topic = forum.Topic.parse(data);
-                        const user = forum.User.parse(data.user);
-                        const category = forum.Category.parse(data.category);
-                        return eachTopic(topic, user, category);
-                    };
-                    return utils.iterate(results.topics, each)
-                        .then(iterate).catch(reject);
-                }).catch(reject);
-                iterate();
-            });
+            return Topic._getMany('topics.loadMoreFromSet', {set: 'topics:recent'}, eachTopic);
         }
     }
     return Topic;
