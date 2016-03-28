@@ -138,8 +138,7 @@ exports.bindUser = function bindUser(forum) {
          *
          */
         static get(userId) {
-            return forum._emit('user.getUserByUID', userId)
-                .then((data) => User.parse(data));
+            return forum.fetchObject('user.getUserByUID', userId, User.parse);
         }
 
         /**
@@ -147,8 +146,7 @@ exports.bindUser = function bindUser(forum) {
          *
          */
         static getByName(username) {
-            return forum._emit('user.getUserByUsername', username)
-                .then((data) => User.parse(data));
+            return forum.fetchObject('user.getUserByUsername', username, User.parse);
         }
 
         /**

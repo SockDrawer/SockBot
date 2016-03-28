@@ -106,18 +106,18 @@ class Forum extends EventEmitter {
             return Promise.resolve(this);
         }
         return new Promise((resolve, reject) => {
-            this._verifyCookies();
-            const cookies = this._cookiejar.getCookieString(this.url);
-            this.socket = Forum.io(this.url, {
-                extraHeaders: {
-                    'Cookie': cookies
-                }
-            });
-            this.socket.on('connect', () => this.emit('connect'));
-            this.socket.on('disconnect', () => this.emit('disconnect'));
-            this.socket.once('connect', () => resolve());
-            this.socket.once('error', (err) => reject(err));
-        })
+                this._verifyCookies();
+                const cookies = this._cookiejar.getCookieString(this.url);
+                this.socket = Forum.io(this.url, {
+                    extraHeaders: {
+                        'Cookie': cookies
+                    }
+                });
+                this.socket.on('connect', () => this.emit('connect'));
+                this.socket.on('disconnect', () => this.emit('disconnect'));
+                this.socket.once('connect', () => resolve());
+                this.socket.once('error', (err) => reject(err));
+            })
             .then(() => this);
     }
     addPlugin(fnPlugin, pluginConfig) {
@@ -158,11 +158,11 @@ class Forum extends EventEmitter {
     }
     deactivate() {
         return new Promise((resolve, reject) => {
-            this.Notification.deactivate();
-            return Promise.all(this._plugins.map((plugin) => plugin.deactivate()))
+                this.Notification.deactivate();
+                return Promise.all(this._plugins.map((plugin) => plugin.deactivate()))
                     .then(resolve)
                     .catch(reject);
-        })
+            })
             .then(() => this);
     }
     _emit(event, arg) {
@@ -182,6 +182,9 @@ class Forum extends EventEmitter {
             });
             this.socket.emit.apply(this.socket, args);
         });
+    }
+    fetchObject(func, id, parser) {
+        return this._emit(func, id).then((data) => parser(data));
     }
 }
 Forum.io = io;

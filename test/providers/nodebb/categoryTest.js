@@ -24,6 +24,7 @@ describe('providers/nodebb/categor', () => {
         const Category = categoryModule.bindCategory(forum);
         beforeEach(() => {
             forum._emit = sinon.stub().resolves();
+            forum.fetchObject = sinon.stub().resolves();
         });
         describe('ctor()', () => {
             it('should store instance data in utils.storage', () => {
@@ -447,32 +448,19 @@ describe('providers/nodebb/categor', () => {
             });
         });
         describe('static get()', () => {
-            let sandbox = null;
-            beforeEach(() => {
-                sandbox = sinon.sandbox.create();
-                sandbox.stub(Category, 'parse');
-            });
-            afterEach(() => sandbox.restore());
-            it('should load via `categories.getCategory`', () => {
+            it('should load via function `categories.getCategory`', () => {
                 const expected = Math.random();
                 return Category.get(expected).then(() => {
-                    forum._emit.calledWith('categories.getCategory', expected).should.be.true;
+                    forum.fetchObject.calledWith('categories.getCategory', expected, Category.parse).should.be.true;
                 });
             });
-            it('should parse result of websocket with Category.parse()', () => {
+            it('should resolve to result of forum.fetchObject()', () => {
                 const expected = Math.random();
-                forum._emit.resolves(expected);
-                return Category.get(5).then(() => {
-                    Category.parse.calledWith(expected).should.be.true;
-                });
-            });
-            it('should resolve to result of Category.parse()', () => {
-                const expected = Math.random();
-                Category.parse.returns(expected);
+                forum.fetchObject.resolves(expected);
                 return Category.get(5).should.become(expected);
             });
             it('should reject when websocket rejects', () => {
-                forum._emit.rejects('bad');
+                forum.fetchObject.rejects('bad');
                 return Category.get(5).should.be.rejected;
             });
         });

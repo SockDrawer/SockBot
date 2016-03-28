@@ -296,8 +296,7 @@ exports.bindPost = function bindPost(forum) {
          * @reject {Error} An Error that occured retrieving the post
          */
         static get(postId) {
-            return forum._emit('posts.getPost', postId)
-                .then((result) => Post.parse(result));
+            return forum.fetchObject('posts.getPost', postId,Post.parse);
         }
 
         /**

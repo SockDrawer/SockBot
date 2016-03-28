@@ -24,6 +24,7 @@ describe('providers/nodebb/user', () => {
         const User = userModule.bindUser(forum);
         beforeEach(() => {
             forum._emit = sinon.stub().resolves();
+            forum.fetchObject = sinon.stub().resolves();
         });
         describe('ctor()', () => {
             it('should store instance data in utils.storage', () => {
@@ -117,73 +118,38 @@ describe('providers/nodebb/user', () => {
             });
         });
         describe('static get()', () => {
-            let sandbox = null;
-            beforeEach(() => {
-                sandbox = sinon.sandbox.create();
-                sandbox.stub(User, 'parse');
-            });
-            afterEach(() => sandbox.restore());
-            it('should retrieve user via \'user.getUserByUID\'', () => {
-                return User.get(8472).then(() => {
-                    forum._emit.calledWith('user.getUserByUID', 8472).should.be.true;
+             it('should load via function `user.getUserByUID`', () => {
+                    const expected = Math.random();
+                    return User.get(expected).then(() => {
+                        forum.fetchObject.calledWith('user.getUserByUID', expected, User.parse).should.be.true;
+                    });
                 });
-            });
-            it('should reject when socket call rejects', () => {
-                forum._emit.rejects('bad');
-                return User.get(8472).should.be.rejected;
-            });
-            it('should parse user data via User.parse', () => {
-                return User.get(8472).then(() => {
-                    User.parse.called.should.be.true;
+                it('should resolve to result of forum.fetchObject()', () => {
+                    const expected = Math.random();
+                    forum.fetchObject.resolves(expected);
+                    return User.get(5).should.become(expected);
                 });
-            });
-            it('should pass websocket data to User.parse', () => {
-                const expected = Math.random();
-                forum._emit.resolves(expected);
-                return User.get(8472).then(() => {
-                    User.parse.calledWith(expected).should.be.true;
+                it('should reject when websocket rejects', () => {
+                    forum.fetchObject.rejects('bad');
+                    return User.get(5).should.be.rejected;
                 });
-            });
-            it('should resolve to results of User.parse', () => {
-                const expected = Math.random();
-                User.parse.resolves(expected);
-                return User.get(8472).should.become(expected);
-            });
         });
-
         describe('static getByName()', () => {
-            let sandbox = null;
-            beforeEach(() => {
-                sandbox = sinon.sandbox.create();
-                sandbox.stub(User, 'parse');
-            });
-            afterEach(() => sandbox.restore());
-            it('should retrieve user via \'user.getUserByUID\'', () => {
-                return User.getByName('foobar').then(() => {
-                    forum._emit.calledWith('user.getUserByUsername', 'foobar').should.be.true;
+            it('should load via function `user.getUserByUID`', () => {
+                    const expected = Math.random();
+                    return User.getByName(expected).then(() => {
+                        forum.fetchObject.calledWith('user.getUserByUsername', expected, User.parse).should.be.true;
+                    });
                 });
-            });
-            it('should reject when socket call rejects', () => {
-                forum._emit.rejects('bad');
-                return User.getByName('foobar').should.be.rejected;
-            });
-            it('should parse user data via User.parse', () => {
-                return User.getByName('foobar').then(() => {
-                    User.parse.called.should.be.true;
+                it('should resolve to result of forum.fetchObject()', () => {
+                    const expected = Math.random();
+                    forum.fetchObject.resolves(expected);
+                    return User.getByName(5).should.become(expected);
                 });
-            });
-            it('should pass websocket data to User.parse', () => {
-                const expected = Math.random();
-                forum._emit.resolves(expected);
-                return User.getByName('foobar').then(() => {
-                    User.parse.calledWith(expected).should.be.true;
+                it('should reject when websocket rejects', () => {
+                    forum.fetchObject.rejects('bad');
+                    return User.getByName(5).should.be.rejected;
                 });
-            });
-            it('should resolve to results of User.parse', () => {
-                const expected = Math.random();
-                User.parse.resolves(expected);
-                return User.getByName('foobar').should.become(expected);
-            });
         });
         describe('ctor()', () => {
             it('should store instance data in utils.storage', () => {

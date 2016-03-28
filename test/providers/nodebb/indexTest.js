@@ -726,4 +726,49 @@ describe('providers/nodebb', () => {
             return forum._emit().should.be.rejected;
         });
     });
+    describe('fetchObject', () => {
+        let forum = null,sandbox=null;
+        beforeEach(() => {
+            forum = new Forum({
+                core: {}
+            });
+            sandbox=sinon.sandbox.create();
+            sandbox.stub(forum,'_emit').resolves({});
+        });
+        it('should use self._emit', () => {
+            return forum.fetchObject('','',()=>0).then(() => {
+                forum._emit.called.should.be.true;
+            });
+        });
+        it('should pass arguments to _emit', () => {
+            const func = Math.random(),
+                id = Math.random(),
+                parser = sinon.spy();
+            return forum.fetchObject(func, id, parser).then(() => {
+                forum._emit.calledWith(func, id).should.be.true;
+            });
+        });
+        it('should pass result to parser', () => {
+            const parser = sinon.spy();
+            const expected = Math.random();
+            forum._emit.resolves(expected);
+            return forum.fetchObject('','', parser).then(() => {
+                parser.calledWith(expected).should.be.true;
+            });
+        });
+        it('should resolve to results of parser', () => {
+            const expected = Math.random();
+            const parser = sinon.stub().returns(expected);
+            forum._emit.resolves(expected);
+            return forum.fetchObject('','', parser).should.become(expected);
+        });
+        it('should reject when websocket errors', () => {
+            forum._emit.rejects('bad');
+            return forum.fetchObject().should.be.rejected;
+        });
+        it('should reject when parser throws', () => {
+            const parser = sinon.stub().throws('bad');
+            return forum.fetchObject('','', parser).should.be.rejected;
+        });
+    });
 });

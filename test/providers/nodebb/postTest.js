@@ -24,6 +24,7 @@ describe('providers/nodebb/post', () => {
         const Post = postModule.bindPost(forum);
         beforeEach(() => {
             forum._emit = sinon.stub().resolves();
+            forum.fetchObject = sinon.stub().resolves();
         });
         describe('ctor()', () => {
             it('should store instance data in utils.storage', () => {
@@ -629,39 +630,20 @@ describe('providers/nodebb/post', () => {
                 });
             });
             describe('get()', () => {
-                let sandbox = null;
-                beforeEach(() => {
-                    forum._emit = sinon.stub().resolves();
-                    sandbox = sinon.sandbox.create();
-                    sandbox.stub(Post, 'parse').resolves();
-                });
-                afterEach(() => sandbox.restore());
-                it('should emit `posts.getPost`', () => {
-                    return Post.get().then(() => {
-                        forum._emit.calledWith('posts.getPost').should.be.true;
+                it('should load via function `posts.getPost`', () => {
+                    const expected = Math.random();
+                    return Post.get(expected).then(() => {
+                        forum.fetchObject.calledWith('posts.getPost', expected, Post.parse).should.be.true;
                     });
                 });
-                it('should provide id to `posts.getPost`', () => {
-                    const id = Math.random();
-                    return Post.get(id).then(() => {
-                        forum._emit.calledWith('posts.getPost', id).should.be.true;
-                    });
+                it('should resolve to result of forum.fetchObject()', () => {
+                    const expected = Math.random();
+                    forum.fetchObject.resolves(expected);
+                    return Post.get(5).should.become(expected);
                 });
                 it('should reject when websocket rejects', () => {
-                    forum._emit.rejects('bad');
+                    forum.fetchObject.rejects('bad');
                     return Post.get(5).should.be.rejected;
-                });
-                it('should pass results to Post.parse()', () => {
-                    const expected = Math.random();
-                    forum._emit.resolves(expected);
-                    return Post.get(5).then(() => {
-                        Post.parse.calledWith(expected).should.be.true;
-                    });
-                });
-                it('should resolve to results of Post.parse()', () => {
-                    const expected = Math.random();
-                    Post.parse.resolves(expected);
-                    return Post.get(5).should.become(expected);
                 });
             });
             describe('preview()', () => {

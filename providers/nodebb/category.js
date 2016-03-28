@@ -184,8 +184,7 @@ exports.bindCategory = function bindCategory(forum) {
          *
          */
         static get(categoryId) {
-            return forum._emit('categories.getCategory', categoryId)
-                .then((category) => Category.parse(category));
+            return forum.fetchObject('categories.getCategory', categoryId, Category.parse);
         }
 
         /**
