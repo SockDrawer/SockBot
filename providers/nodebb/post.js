@@ -211,6 +211,13 @@ exports.bindPost = function bindPost(forum) {
             }).then(() => this);
         }
 
+        _roomAction(action){
+            return forum._emit(action, {
+                pid: this.id,
+                'room_id': `topic_${this.topicId}`
+            }).then(() => this);
+        }
+
         /**
          * Upvote this post
          *
@@ -221,10 +228,7 @@ exports.bindPost = function bindPost(forum) {
          * @reject {Error} An Error that occured while upvoting
          */
         upvote() {
-            return forum._emit('posts.upvote', {
-                pid: this.id,
-                'room_id': `topic_${this.topicId}`
-            }).then(() => this);
+            return this._roomAction('posts.upvote');
         }
 
         /**
@@ -237,10 +241,7 @@ exports.bindPost = function bindPost(forum) {
          * @reject {Error} An Error that occured while downvoting
          */
         downvote() {
-            return forum._emit('posts.downvote', {
-                pid: this.id,
-                'room_id': `topic_${this.topicId}`
-            }).then(() => this);
+            return this._roomAction('posts.downvote');
         }
 
         /**
@@ -253,10 +254,7 @@ exports.bindPost = function bindPost(forum) {
          * @reject {Error} An Error that occured while downvoting
          */
         unvote() {
-            return forum._emit('posts.unvote', {
-                pid: this.id,
-                'room_id': `topic_${this.topicId}`
-            }).then(() => this);
+            return this._roomAction('posts.unvote');
         }
 
         /**
@@ -269,10 +267,7 @@ exports.bindPost = function bindPost(forum) {
          * @reject {Error} An Error that occured while bookmarking
          */
         bookmark() {
-            return forum._emit('posts.favorite', {
-                pid: this.id,
-                'room_id': `topic_${this.topicId}`
-            }).then(() => this);
+            return this._roomAction('posts.favorite');
         }
 
         /**
@@ -285,10 +280,7 @@ exports.bindPost = function bindPost(forum) {
          * @reject {Error} An Error that occured while unbookmarking
          */
         unbookmark() {
-            return forum._emit('posts.unfavorite', {
-                pid: this.id,
-                'room_id': `topic_${this.topicId}`
-            }).then(() => this);
+            return this._roomAction('posts.unfavorite');
         }
 
         /**
