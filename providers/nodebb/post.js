@@ -44,7 +44,7 @@ exports.bindPost = function bindPost(forum) {
          * description
          *
          */
-        markup(){
+        markup() {
             return Post.preview(this.content);
         }
 
@@ -179,6 +179,13 @@ exports.bindPost = function bindPost(forum) {
                 .then((result) => Post.parse(result));
         }
 
+        _postAction(action) {
+            return forum._emit(action, {
+                pid: this.id,
+                tid: this.topicId
+            }).then(() => this);
+        }
+
         /**
          * Delete this post
          *
@@ -189,10 +196,7 @@ exports.bindPost = function bindPost(forum) {
          * @reject {Error} An Error that occured while deleting
          */
         delete() {
-            return forum._emit('posts.delete', {
-                pid: this.id,
-                tid: this.topicId
-            }).then(() => this);
+            return this._postAction('posts.delete');
         }
 
         /**
@@ -205,13 +209,10 @@ exports.bindPost = function bindPost(forum) {
          * @reject {Error} An Error that occured while deleting
          */
         undelete() {
-            return forum._emit('posts.restore', {
-                pid: this.id,
-                tid: this.topicId
-            }).then(() => this);
+            return this._postAction('posts.restore');
         }
 
-        _roomAction(action){
+        _roomAction(action) {
             return forum._emit(action, {
                 pid: this.id,
                 'room_id': `topic_${this.topicId}`
@@ -296,7 +297,7 @@ exports.bindPost = function bindPost(forum) {
          * @reject {Error} An Error that occured retrieving the post
          */
         static get(postId) {
-            return forum.fetchObject('posts.getPost', postId,Post.parse);
+            return forum.fetchObject('posts.getPost', postId, Post.parse);
         }
 
         /**

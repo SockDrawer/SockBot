@@ -5,6 +5,10 @@ const utils = require('../../lib/utils');
  * description
  */
 exports.bindCategory = function bindCategory(forum) {
+    function onEachTopic(eachTopic) {
+        return (data) => forum.Topic.parseWithUserCategory(data)
+            .then((parsed) => eachTopic(parsed[0], parsed[1], parsed[2]));
+    }
     class Category {
         /**
          * description
@@ -96,6 +100,7 @@ exports.bindCategory = function bindCategory(forum) {
         getAllTopics(eachTopic) {
             return new Promise((resolve, reject) => {
                 let idx = 0;
+                const each = onEachTopic(eachTopic);
                 const iterate = () => forum._emit('categories.loadMore', {
                     cid: this.id,
                     after: idx,
@@ -105,8 +110,6 @@ exports.bindCategory = function bindCategory(forum) {
                         return resolve(this);
                     }
                     idx = results.nextStart;
-                    const each = (data) => forum.Topic.parseWithUserCategory(data)
-                        .then((parsed) => eachTopic(parsed[0], parsed[1], parsed[2]));
                     return utils.iterate(results.topics, each)
                         .then(iterate).catch(reject);
                 }).catch(reject);
@@ -124,10 +127,17 @@ exports.bindCategory = function bindCategory(forum) {
                 after: 0,
                 direction: 1
             };
-            const each = (data) => forum.Topic.parseWithUserCategory(data)
-                        .then((parsed) => eachTopic(parsed[0], parsed[1], parsed[2]));
+            const each = onEachTopic(eachTopic);
             return forum._emit('categories.loadMore', payload)
                 .then((results) => utils.iterate(results.topics, each))
+                .then(() => this);
+        }
+
+        _categoryAction(action) {
+            const payload = {
+                cid: this.id
+            };
+            return forum._emit(action, payload)
                 .then(() => this);
         }
 
@@ -136,11 +146,7 @@ exports.bindCategory = function bindCategory(forum) {
          *
          */
         watch() {
-            const payload = {
-                cid: this.id
-            };
-            return forum._emit('categories.watch', payload)
-                .then(() => this);
+            return this._categoryAction('categories.watch');
         }
 
         /**
@@ -148,11 +154,7 @@ exports.bindCategory = function bindCategory(forum) {
          *
          */
         unwatch() {
-            const payload = {
-                cid: this.id
-            };
-            return forum._emit('categories.ignore', payload)
-                .then(() => this);
+            return this._categoryAction('categories.ignore');
         }
 
         /**
