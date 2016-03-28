@@ -105,12 +105,8 @@ exports.bindCategory = function bindCategory(forum) {
                         return resolve(this);
                     }
                     idx = results.nextStart;
-                    const each = (data) => {
-                        const topic = forum.Topic.parse(data);
-                        const category = forum.Category.parse(data.category);
-                        const user = forum.User.parse(data.user);
-                        return eachTopic(topic, user, category);
-                    };
+                    const each = (data) => forum.Topic.parseWithUserCategory(data)
+                        .then((parsed) => eachTopic(parsed[0], parsed[1], parsed[2]));
                     return utils.iterate(results.topics, each)
                         .then(iterate).catch(reject);
                 }).catch(reject);
@@ -128,12 +124,8 @@ exports.bindCategory = function bindCategory(forum) {
                 after: 0,
                 direction: 1
             };
-            const each = (data) => {
-                const topic = forum.Topic.parse(data);
-                const category = forum.Category.parse(data.category);
-                const user = forum.User.parse(data.user);
-                return eachTopic(topic, user, category);
-            };
+            const each = (data) => forum.Topic.parseWithUserCategory(data)
+                        .then((parsed) => eachTopic(parsed[0], parsed[1], parsed[2]));
             return forum._emit('categories.loadMore', payload)
                 .then((results) => utils.iterate(results.topics, each))
                 .then(() => this);

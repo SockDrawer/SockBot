@@ -120,6 +120,12 @@ exports.bindTopic = function bindTopic(forum) {
                 .then((result) => forum.Post.parse(result));
         }
 
+        _forEachPost(data, eachPost) {
+            const post = forum.Post.parse(data);
+            const user = forum.User.parse(data.user);
+            return eachPost(post, user, this);
+        }
+
         /**
          * Retrieve all posts from this topic, passing each off to a provided iterator function.
          *
@@ -136,12 +142,7 @@ exports.bindTopic = function bindTopic(forum) {
                         return resolve(this);
                     }
                     idx += results.posts.length;
-                    const each = (data) => {
-                        const post = forum.Post.parse(data);
-                        const user = forum.User.parse(data.user);
-                        return eachPost(post, user, this);
-                    };
-                    return utils.iterate(results.posts, each)
+                    return utils.iterate(results.posts, (data) => this._forEachPost(data, eachPost))
                         .then(iterate).catch(reject);
                 }).catch((e) => reject(e));
                 iterate();
@@ -157,11 +158,7 @@ exports.bindTopic = function bindTopic(forum) {
                 tid: this.id,
                 after: this.postCount,
                 direction: -1
-            }).then((results) => utils.iterate(results.posts, (data) => {
-                const post = forum.Post.parse(data);
-                const user = forum.User.parse(data.user);
-                return eachPost(post, user, this);
-            }));
+            }).then((results) => utils.iterate(results.posts, (data) => this._forEachPost(data, eachPost)));
         }
 
         /**
@@ -238,7 +235,14 @@ exports.bindTopic = function bindTopic(forum) {
             return new Topic(payload);
         }
 
-        static _getMany(room, query, eachTopic){
+        static parseWithUserCategory(data) {
+            const topic = forum.Topic.parse(data);
+            const user = forum.User.parse(data.user);
+            const category = forum.Category.parse(data.category);
+            return Promise.resolve([topic, user, category]);
+        }
+
+        static _getMany(room, query, eachTopic) {
             return new Promise((resolve, reject) => {
                 query.after = 0;
                 const iterate = () => forum._emit(room, utils.cloneData(query)).then((results) => {
@@ -246,12 +250,8 @@ exports.bindTopic = function bindTopic(forum) {
                         return resolve(this);
                     }
                     query.after += results.topics.length;
-                    const each = (data) => {
-                        const topic = forum.Topic.parse(data);
-                        const user = forum.User.parse(data.user);
-                        const category = forum.Category.parse(data.category);
-                        return eachTopic(topic, user, category);
-                    };
+                    const each = (data) => Topic.parseWithUserCategory(data)
+                        .then((parsed) => eachTopic(parsed[0], parsed[1], parsed[2]));
                     return utils.iterate(results.topics, each)
                         .then(iterate).catch(reject);
                 }).catch(reject);
@@ -264,7 +264,9 @@ exports.bindTopic = function bindTopic(forum) {
         }
 
         static getRecentTopics(eachTopic) {
-            return Topic._getMany('topics.loadMoreFromSet', {set: 'topics:recent'}, eachTopic);
+            return Topic._getMany('topics.loadMoreFromSet', {
+                set: 'topics:recent'
+            }, eachTopic);
         }
     }
     return Topic;
