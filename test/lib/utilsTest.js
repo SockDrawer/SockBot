@@ -1,7 +1,7 @@
 'use strict';
 
-const chai = require("chai");
-const chaiAsPromised = require("chai-as-promised");
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
 
 chai.use(chaiAsPromised);
 chai.should();
@@ -22,7 +22,7 @@ describe('lib/utils', () => {
 
         describe('should export expected functions:', () => {
             fns.forEach((fn) => {
-                it(fn + '()', () => expect(utils[fn]).to.be.a('function'));
+                it(`${fn}()`, () => expect(utils[fn]).to.be.a('function'));
             });
         });
         describe('should export expected objects', () => {
@@ -49,7 +49,7 @@ describe('lib/utils', () => {
             ['blockquote tag missing open tag', 'content</blockquote>', 'content'],
             ['code tag', '<code>content</code>', ''],
             ['code tag missing close tag', '<code>content', ''],
-            ['code tag missing open tag', 'content</code>', 'content'],
+            ['code tag missing open tag', 'content</code>', 'content']
         ];
         tests.forEach((test) => {
             const description = test[0],
@@ -142,20 +142,20 @@ describe('lib/utils', () => {
                 .throw('[[invalid-json:Unexpected end of input]]');
         });
         it('should parse input correctly', () => {
-            const input = '[{"a":true,"b":{"c":"false"}},5.9,{}]';
+            const input = '[{"alpha":true,"beta":{"gamma":"false"}},5.9,{}]';
             const expected = [{
-                a: true,
-                b: {
-                    c: 'false'
+                alpha: true,
+                beta: {
+                    gamma: 'false'
                 }
             }, 5.9, {}];
             utils.parseJSON(input).should.deep.equal(expected);
         });
         it('should accept valid object', () => {
             const expected = {
-                a: true,
-                b: {
-                    c: 'false'
+                alpha: true,
+                beta: {
+                    gamma: 'false'
                 }
             };
             utils.parseJSON(expected).should.equal(expected);
@@ -230,7 +230,7 @@ describe('lib/utils', () => {
         it('should throw on attempt to clone undefined', () => expect(cloneData(undefined)).to.equal(undefined));
         describe('simple data structures tests', () => {
             [null, false, true, 0, 1, -1, 1e100, Math.PI, Math.E, '', 'a', 'a longer string'].forEach((test) => {
-                it('should clone to self: ' + JSON.stringify(test), () => expect(cloneData(test)).to.equal(test));
+                it(`should clone to self: ${JSON.stringify(test)}`, () => expect(cloneData(test)).to.equal(test));
             });
         });
         it('should clone array', () => {
@@ -242,12 +242,12 @@ describe('lib/utils', () => {
         });
         it('should clone object', () => {
             const orig = {
-                    a: 1,
-                    b: 2
+                    alpha: 1,
+                    beta: 2
                 },
                 result = cloneData(orig);
             result.should.deep.equal(orig);
-            result.c = 3;
+            result.gamma = 3;
             result.should.not.deep.equal(orig);
         });
     });
@@ -255,19 +255,19 @@ describe('lib/utils', () => {
         const mergeInner = utils.mergeInner;
         describe('should reject non object base', () => {
             [undefined, null, false, 0, '', []].forEach((base) => {
-                it(': ' + JSON.stringify(base), () => expect(() => mergeInner(base)).to.throw('base must be object'));
+                it(`: ${JSON.stringify(base)}`, () => expect(() => mergeInner(base)).to.throw('base must be object'));
             });
         });
         describe('should reject non object mixin', () => {
             [undefined, null, false, 0, '', []].forEach((mixin) => {
-                it(': ' + JSON.stringify(mixin), () => {
+                it(`: ${JSON.stringify(mixin)}`, () => {
                     expect(() => mergeInner({}, mixin)).to.throw('mixin must be object');
                 });
             });
         });
         it('should accept empty base object', () => {
             const mixin = {
-                    a: 1
+                    alpha: 1
                 },
                 base = {};
             expect(() => mergeInner(base, mixin)).to.not.throw();
@@ -275,7 +275,7 @@ describe('lib/utils', () => {
         });
         it('should accept null mixin key value', () => {
             const mixin = {
-                    a: null
+                    alpha: null
                 },
                 base = {};
             expect(() => mergeInner(base, mixin)).to.not.throw();
@@ -283,7 +283,7 @@ describe('lib/utils', () => {
         });
         it('should accept empty mixin object', () => {
             const base = {
-                    a: 1
+                    alpha: 1
                 },
                 mixin = {};
             expect(() => mergeInner(base, mixin)).to.not.throw();
@@ -291,8 +291,8 @@ describe('lib/utils', () => {
         });
         it('should accept merge missing base object', () => {
             const mixin = {
-                    a: {
-                        b: 1
+                    alpha: {
+                        beta: 1
                     }
                 },
                 base = {};
@@ -301,31 +301,31 @@ describe('lib/utils', () => {
         });
         it('should merge objects with no overlap', () => {
             const base = {
-                    a: 1
+                    alpha: 1
                 },
                 mixin = {
-                    b: 2
+                    beta: 2
                 },
                 expected = {
-                    a: 1,
-                    b: 2
+                    alpha: 1,
+                    beta: 2
                 };
             mergeInner(base, mixin);
             base.should.deep.equal(expected);
         });
         it('should merge objects with overlap', () => {
             const base = {
-                    a: 1,
-                    b: 3
+                    alpha: 1,
+                    beta: 3
                 },
                 mixin = {
-                    b: 2,
-                    c: 3
+                    beta: 2,
+                    gamma: 3
                 },
                 expected = {
-                    a: 1,
-                    b: 2,
-                    c: 3
+                    alpha: 1,
+                    beta: 2,
+                    gamma: 3
                 };
             mergeInner(base, mixin);
             base.should.deep.equal(expected);
@@ -333,75 +333,75 @@ describe('lib/utils', () => {
         describe('array concatenation/merging tests', () => {
             it('should concatenate arrays', () => {
                 const base = {
-                        a: [1]
+                        alpha: [1]
                     },
                     mixin = {
-                        a: [2]
+                        alpha: [2]
                     },
                     expected = {
-                        a: [1, 2]
+                        alpha: [1, 2]
                     };
                 mergeInner(base, mixin);
                 base.should.deep.equal(expected);
             });
             it('should merge arrays', () => {
                 const base = {
-                        a: [1]
+                        alpha: [1]
                     },
                     mixin = {
-                        a: [2]
+                        alpha: [2]
                     },
                     expected = {
-                        a: [2]
+                        alpha: [2]
                     };
                 mergeInner(base, mixin, true);
                 base.should.deep.equal(expected);
             });
             it('should not overwrite array', () => {
                 const base = {
-                        a: [1]
+                        alpha: [1]
                     },
                     mixin = {
-                        b: [2]
+                        beta: [2]
                     },
                     expected = {
-                        a: [1],
-                        b: [2]
+                        alpha: [1],
+                        beta: [2]
                     };
                 mergeInner(base, mixin);
                 base.should.deep.equal(expected);
             });
             it('should not overwrite array', () => {
                 const base = {
-                        a: [1]
+                        alpha: [1]
                     },
                     mixin = {
-                        b: [2]
+                        beta: [2]
                     },
                     expected = {
-                        a: [1],
-                        b: [2]
+                        alpha: [1],
+                        beta: [2]
                     };
                 mergeInner(base, mixin, true);
                 base.should.deep.equal(expected);
             });
             it('should concatenate arrays recursively', () => {
                 const base = {
-                        a: [1],
-                        b: {
-                            c: [1]
+                        alpha: [1],
+                        beta: {
+                            gamma: [1]
                         }
                     },
                     mixin = {
-                        a: [2],
-                        b: {
-                            c: [2]
+                        alpha: [2],
+                        beta: {
+                            gamma: [2]
                         }
                     },
                     expected = {
-                        a: [1, 2],
-                        b: {
-                            c: [1, 2]
+                        alpha: [1, 2],
+                        beta: {
+                            gamma: [1, 2]
                         }
                     };
                 mergeInner(base, mixin);
@@ -409,21 +409,21 @@ describe('lib/utils', () => {
             });
             it('should merge arrays recursively', () => {
                 const base = {
-                        a: [1],
-                        b: {
-                            c: [1]
+                        alpha: [1],
+                        beta: {
+                            gamma: [1]
                         }
                     },
                     mixin = {
-                        a: [2],
-                        b: {
-                            c: [2]
+                        alpha: [2],
+                        beta: {
+                            gamma: [2]
                         }
                     },
                     expected = {
-                        a: [2],
-                        b: {
-                            c: [2]
+                        alpha: [2],
+                        beta: {
+                            gamma: [2]
                         }
                     };
                 mergeInner(base, mixin, true);
@@ -431,48 +431,48 @@ describe('lib/utils', () => {
             });
             it('should not overwrite arrays recursively', () => {
                 const base = {
-                        a: [1],
-                        b: {
-                            c: [1]
+                        alpha: [1],
+                        beta: {
+                            gamma: [1]
                         }
                     },
                     mixin = {
-                        d: [2],
-                        b: {
-                            e: [2]
+                        delta: [2],
+                        beta: {
+                            epsilon: [2]
                         }
                     },
                     expected = {
-                        a: [1],
-                        b: {
-                            c: [1],
-                            e: [2]
+                        alpha: [1],
+                        beta: {
+                            gamma: [1],
+                            epsilon: [2]
                         },
-                        d: [2]
+                        delta: [2]
                     };
                 mergeInner(base, mixin);
                 base.should.deep.equal(expected);
             });
             it('should not overwrite arrays recursively', () => {
                 const base = {
-                        a: [1],
-                        b: {
-                            c: [1]
+                        alpha: [1],
+                        beta: {
+                            gamma: [1]
                         }
                     },
                     mixin = {
-                        d: [2],
-                        b: {
-                            e: [2]
+                        delta: [2],
+                        beta: {
+                            epsilon: [2]
                         }
                     },
                     expected = {
-                        a: [1],
-                        b: {
-                            c: [1],
-                            e: [2]
+                        alpha: [1],
+                        beta: {
+                            gamma: [1],
+                            epsilon: [2]
                         },
-                        d: [2]
+                        delta: [2]
                     };
                 mergeInner(base, mixin, true);
                 base.should.deep.equal(expected);
@@ -480,45 +480,45 @@ describe('lib/utils', () => {
         });
         it('should replace non-array with array', () => {
             const base = {
-                    a: {}
+                    alpha: {}
                 },
                 mixin = {
-                    a: [2]
+                    alpha: [2]
                 },
                 expected = {
-                    a: [2]
+                    alpha: [2]
                 };
             mergeInner(base, mixin);
             base.should.deep.equal(expected);
         });
         it('should replace array with non-array', () => {
             const base = {
-                    a: [1]
+                    alpha: [1]
                 },
                 mixin = {
-                    a: {}
+                    alpha: {}
                 },
                 expected = {
-                    a: {}
+                    alpha: {}
                 };
             mergeInner(base, mixin);
             base.should.deep.equal(expected);
         });
         it('should merge inner objects', () => {
             const base = {
-                    a: {
-                        b: [1]
+                    alpha: {
+                        beta: [1]
                     }
                 },
                 mixin = {
-                    a: {
-                        c: false
+                    alpha: {
+                        gamma: false
                     }
                 },
                 expected = {
-                    a: {
-                        b: [1],
-                        c: false
+                    alpha: {
+                        beta: [1],
+                        gamma: false
                     }
                 };
             mergeInner(base, mixin);
@@ -526,10 +526,10 @@ describe('lib/utils', () => {
         });
         it('should not merge prototype', () => {
             const base = {
-                    a: null
+                    alpha: null
                 },
                 expected = {
-                    a: null
+                    alpha: null
                 };
             mergeInner(base, /object/);
             base.should.deep.equal(expected);

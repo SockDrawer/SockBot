@@ -1,7 +1,7 @@
 'use strict';
 
-const chai = require("chai");
-const chaiAsPromised = require("chai-as-promised");
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
 
 chai.use(chaiAsPromised);
 chai.should();
@@ -22,7 +22,9 @@ describe('providers/nodebb/post', () => {
     describe('Post', () => {
         const forum = {};
         const Post = postModule.bindPost(forum);
-        beforeEach(() => forum._emit = sinon.stub().resolves());
+        beforeEach(() => {
+            forum._emit = sinon.stub().resolves();
+        });
         describe('ctor()', () => {
             it('should store instance data in utils.storage', () => {
                 const post = new Post({});
@@ -201,49 +203,6 @@ describe('providers/nodebb/post', () => {
                 return post.reply('').should.be.rejected;
             });
         });
-        describe('static reply()', () => {
-            let sandbox = null;
-            beforeEach(() => {
-                sandbox = sinon.sandbox.create();
-                sandbox.stub(Post, 'parse').resolves();
-                forum._emit = sinon.stub().resolves();
-            });
-            afterEach(() => sandbox.restore());
-            it('should emit `posts.reply`', () => {
-                return Post.reply(1, 2, '').then(() => {
-                    forum._emit.calledWith('posts.reply').should.be.true;
-                });
-            });
-            it('should pass post spec to `posts.reply`', () => {
-                const topic = Math.random();
-                const post = Math.random();
-                const content = `${Math.random()}${Math.random()}`;
-                return Post.reply(topic, post, content).then(() => {
-                    forum._emit.calledWith('posts.reply', {
-                        tid: topic,
-                        toPid: post,
-                        lock: false,
-                        content: content
-                    }).should.be.true;
-                });
-            });
-            it('should reject if `posts.reply` rejects', () => {
-                forum._emit.rejects('bad');
-                return Post.reply(1, 2, '').should.be.rejected;
-            });
-            it('should pass results of `posts.reply` to Post.parse()', () => {
-                const expected = Math.random();
-                forum._emit.resolves(expected);
-                return Post.reply(1, 2, '').then(() => {
-                    Post.parse.calledWith(expected).should.be.true;
-                });
-            });
-            it('should resolve to results of Post.parse()', () => {
-                const expected = Math.random();
-                Post.parse.resolves(expected);
-                return Post.reply(1, 2, '').should.become(expected);
-            });
-        });
         describe('edit()', () => {
             let post = null,
                 data = null,
@@ -406,315 +365,362 @@ describe('providers/nodebb/post', () => {
                 });
             });
         });
-        describe('delete()', () => {
-            let post = null,
-                data = null;
-            beforeEach(() => {
-                post = new Post({});
-                data = utils.mapGet(post);
-                forum._emit = sinon.stub().resolves({});
-            });
-            it('should emit `posts.delete`', () => {
-                return post.delete().then(() => {
-                    forum._emit.calledWith('posts.delete').should.be.true;
+        describe('post tools', () => {
+            describe('delete()', () => {
+                let post = null,
+                    data = null;
+                beforeEach(() => {
+                    post = new Post({});
+                    data = utils.mapGet(post);
+                    forum._emit = sinon.stub().resolves({});
+                });
+                it('should emit `posts.delete`', () => {
+                    return post.delete().then(() => {
+                        forum._emit.calledWith('posts.delete').should.be.true;
+                    });
+                });
+                it('should pass postId and topicId to `posts.delete`', () => {
+                    data.id = Math.random();
+                    data.topicId = Math.random();
+                    return post.delete().then(() => {
+                        forum._emit.calledWith('posts.delete', {
+                            pid: data.id,
+                            tid: data.topicId
+                        }).should.be.true;
+                    });
+                });
+                it('should resolve to self', () => {
+                    return post.delete().should.become(post);
+                });
+                it('should reject when `posts.delete` rejects', () => {
+                    forum._emit.rejects('bad');
+                    return post.delete().should.be.rejected;
                 });
             });
-            it('should pass postId and topicId to `posts.delete`', () => {
-                data.id = Math.random();
-                data.topicId = Math.random();
-                return post.delete().then(() => {
-                    forum._emit.calledWith('posts.delete', {
-                        pid: data.id,
-                        tid: data.topicId
-                    }).should.be.true;
+            describe('undelete()', () => {
+                let post = null,
+                    data = null;
+                beforeEach(() => {
+                    post = new Post({});
+                    data = utils.mapGet(post);
+                    forum._emit = sinon.stub().resolves({});
+                });
+                it('should emit `posts.restore`', () => {
+                    return post.undelete().then(() => {
+                        forum._emit.calledWith('posts.restore').should.be.true;
+                    });
+                });
+                it('should pass postId and topicId to `posts.restore`', () => {
+                    data.id = Math.random();
+                    data.topicId = Math.random();
+                    return post.undelete().then(() => {
+                        forum._emit.calledWith('posts.restore', {
+                            pid: data.id,
+                            tid: data.topicId
+                        }).should.be.true;
+                    });
+                });
+                it('should resolve to self', () => {
+                    return post.undelete().should.become(post);
+                });
+                it('should reject when `posts.delete` rejects', () => {
+                    forum._emit.rejects('bad');
+                    return post.undelete().should.be.rejected;
                 });
             });
-            it('should resolve to self', () => {
-                return post.delete().should.become(post);
+            describe('upvote()', () => {
+                let post = null,
+                    data = null;
+                beforeEach(() => {
+                    post = new Post({});
+                    data = utils.mapGet(post);
+                    forum._emit = sinon.stub().resolves({});
+                });
+                it('should emit `posts.upvote`', () => {
+                    return post.upvote().then(() => {
+                        forum._emit.calledWith('posts.upvote').should.be.true;
+                    });
+                });
+                it('should pass postId and topicId to `posts.upvote`', () => {
+                    data.id = Math.random();
+                    data.topicId = Math.random();
+                    return post.upvote().then(() => {
+                        forum._emit.calledWith('posts.upvote', {
+                            pid: data.id,
+                            'room_id': `topic_${data.topicId}`
+                        }).should.be.true;
+                    });
+                });
+                it('should resolve to self', () => {
+                    return post.upvote().should.become(post);
+                });
+                it('should reject when `posts.upvote` rejects', () => {
+                    forum._emit.rejects('bad');
+                    return post.upvote().should.be.rejected;
+                });
             });
-            it('should reject when `posts.delete` rejects', () => {
-                forum._emit.rejects('bad');
-                return post.delete().should.be.rejected;
+            describe('downvote()', () => {
+                let post = null,
+                    data = null;
+                beforeEach(() => {
+                    post = new Post({});
+                    data = utils.mapGet(post);
+                    forum._emit = sinon.stub().resolves({});
+                });
+                it('should emit `posts.downvote`', () => {
+                    return post.downvote().then(() => {
+                        forum._emit.calledWith('posts.downvote').should.be.true;
+                    });
+                });
+                it('should pass postId and topicId to `posts.downvote`', () => {
+                    data.id = Math.random();
+                    data.topicId = Math.random();
+                    return post.downvote().then(() => {
+                        forum._emit.calledWith('posts.downvote', {
+                            pid: data.id,
+                            'room_id': `topic_${data.topicId}`
+                        }).should.be.true;
+                    });
+                });
+                it('should resolve to self', () => {
+                    return post.downvote().should.become(post);
+                });
+                it('should reject when `posts.downvote` rejects', () => {
+                    forum._emit.rejects('bad');
+                    return post.downvote().should.be.rejected;
+                });
+            });
+            describe('unvote()', () => {
+                let post = null,
+                    data = null;
+                beforeEach(() => {
+                    post = new Post({});
+                    data = utils.mapGet(post);
+                    forum._emit = sinon.stub().resolves({});
+                });
+                it('should emit `posts.unvote`', () => {
+                    return post.unvote().then(() => {
+                        forum._emit.calledWith('posts.unvote').should.be.true;
+                    });
+                });
+                it('should pass postId and topicId to `posts.unvote`', () => {
+                    data.id = Math.random();
+                    data.topicId = Math.random();
+                    return post.unvote().then(() => {
+                        forum._emit.calledWith('posts.unvote', {
+                            pid: data.id,
+                            'room_id': `topic_${data.topicId}`
+                        }).should.be.true;
+                    });
+                });
+                it('should resolve to self', () => {
+                    return post.unvote().should.become(post);
+                });
+                it('should reject when `posts.unvote` rejects', () => {
+                    forum._emit.rejects('bad');
+                    return post.unvote().should.be.rejected;
+                });
+            });
+            describe('bookmark()', () => {
+                let post = null,
+                    data = null;
+                beforeEach(() => {
+                    post = new Post({});
+                    data = utils.mapGet(post);
+                    forum._emit = sinon.stub().resolves({});
+                });
+                it('should emit `posts.favorite`', () => {
+                    return post.bookmark().then(() => {
+                        forum._emit.calledWith('posts.favorite').should.be.true;
+                    });
+                });
+                it('should pass postId and topicId to `posts.favorite`', () => {
+                    data.id = Math.random();
+                    data.topicId = Math.random();
+                    return post.bookmark().then(() => {
+                        forum._emit.calledWith('posts.favorite', {
+                            pid: data.id,
+                            'room_id': `topic_${data.topicId}`
+                        }).should.be.true;
+                    });
+                });
+                it('should resolve to self', () => {
+                    return post.bookmark().should.become(post);
+                });
+                it('should reject when `posts.bookmark` rejects', () => {
+                    forum._emit.rejects('bad');
+                    return post.bookmark().should.be.rejected;
+                });
+            });
+            describe('unbookmark()', () => {
+                let post = null,
+                    data = null;
+                beforeEach(() => {
+                    post = new Post({});
+                    data = utils.mapGet(post);
+                    forum._emit = sinon.stub().resolves({});
+                });
+                it('should emit `posts.unfavorite`', () => {
+                    return post.unbookmark().then(() => {
+                        forum._emit.calledWith('posts.unfavorite').should.be.true;
+                    });
+                });
+                it('should pass postId and topicId to `posts.unfavorite`', () => {
+                    data.id = Math.random();
+                    data.topicId = Math.random();
+                    return post.unbookmark().then(() => {
+                        forum._emit.calledWith('posts.unfavorite', {
+                            pid: data.id,
+                            'room_id': `topic_${data.topicId}`
+                        }).should.be.true;
+                    });
+                });
+                it('should resolve to self', () => {
+                    return post.unbookmark().should.become(post);
+                });
+                it('should reject when `posts.unbookmark` rejects', () => {
+                    forum._emit.rejects('bad');
+                    return post.unbookmark().should.be.rejected;
+                });
             });
         });
-        describe('undelete()', () => {
-            let post = null,
-                data = null;
-            beforeEach(() => {
-                post = new Post({});
-                data = utils.mapGet(post);
-                forum._emit = sinon.stub().resolves({});
-            });
-            it('should emit `posts.restore`', () => {
-                return post.undelete().then(() => {
-                    forum._emit.calledWith('posts.restore').should.be.true;
+        describe('functions', () => {
+            describe('reply()', () => {
+                let sandbox = null;
+                beforeEach(() => {
+                    sandbox = sinon.sandbox.create();
+                    sandbox.stub(Post, 'parse').resolves();
+                    forum._emit = sinon.stub().resolves();
+                });
+                afterEach(() => sandbox.restore());
+                it('should emit `posts.reply`', () => {
+                    return Post.reply(1, 2, '').then(() => {
+                        forum._emit.calledWith('posts.reply').should.be.true;
+                    });
+                });
+                it('should pass post spec to `posts.reply`', () => {
+                    const topic = Math.random();
+                    const post = Math.random();
+                    const content = `${Math.random()}${Math.random()}`;
+                    return Post.reply(topic, post, content).then(() => {
+                        forum._emit.calledWith('posts.reply', {
+                            tid: topic,
+                            toPid: post,
+                            lock: false,
+                            content: content
+                        }).should.be.true;
+                    });
+                });
+                it('should reject if `posts.reply` rejects', () => {
+                    forum._emit.rejects('bad');
+                    return Post.reply(1, 2, '').should.be.rejected;
+                });
+                it('should pass results of `posts.reply` to Post.parse()', () => {
+                    const expected = Math.random();
+                    forum._emit.resolves(expected);
+                    return Post.reply(1, 2, '').then(() => {
+                        Post.parse.calledWith(expected).should.be.true;
+                    });
+                });
+                it('should resolve to results of Post.parse()', () => {
+                    const expected = Math.random();
+                    Post.parse.resolves(expected);
+                    return Post.reply(1, 2, '').should.become(expected);
                 });
             });
-            it('should pass postId and topicId to `posts.restore`', () => {
-                data.id = Math.random();
-                data.topicId = Math.random();
-                return post.undelete().then(() => {
-                    forum._emit.calledWith('posts.restore', {
-                        pid: data.id,
-                        tid: data.topicId
-                    }).should.be.true;
+            describe('get()', () => {
+                let sandbox = null;
+                beforeEach(() => {
+                    forum._emit = sinon.stub().resolves();
+                    sandbox = sinon.sandbox.create();
+                    sandbox.stub(Post, 'parse').resolves();
+                });
+                afterEach(() => sandbox.restore());
+                it('should emit `posts.getPost`', () => {
+                    return Post.get().then(() => {
+                        forum._emit.calledWith('posts.getPost').should.be.true;
+                    });
+                });
+                it('should provide id to `posts.getPost`', () => {
+                    const id = Math.random();
+                    return Post.get(id).then(() => {
+                        forum._emit.calledWith('posts.getPost', id).should.be.true;
+                    });
+                });
+                it('should reject when websocket rejects', () => {
+                    forum._emit.rejects('bad');
+                    return Post.get(5).should.be.rejected;
+                });
+                it('should pass results to Post.parse()', () => {
+                    const expected = Math.random();
+                    forum._emit.resolves(expected);
+                    return Post.get(5).then(() => {
+                        Post.parse.calledWith(expected).should.be.true;
+                    });
+                });
+                it('should resolve to results of Post.parse()', () => {
+                    const expected = Math.random();
+                    Post.parse.resolves(expected);
+                    return Post.get(5).should.become(expected);
                 });
             });
-            it('should resolve to self', () => {
-                return post.undelete().should.become(post);
-            });
-            it('should reject when `posts.delete` rejects', () => {
-                forum._emit.rejects('bad');
-                return post.undelete().should.be.rejected;
-            });
-        });
-        describe('upvote()', () => {
-            let post = null,
-                data = null;
-            beforeEach(() => {
-                post = new Post({});
-                data = utils.mapGet(post);
-                forum._emit = sinon.stub().resolves({});
-            });
-            it('should emit `posts.upvote`', () => {
-                return post.upvote().then(() => {
-                    forum._emit.calledWith('posts.upvote').should.be.true;
+            describe('preview()', () => {
+                beforeEach(() => {
+                    forum._emit = sinon.stub().resolves();
+                });
+                it('should emit `plugins.composer.renderPreview`', () => {
+                    return Post.preview('').then(() => {
+                        forum._emit.calledWith('plugins.composer.renderPreview').should.be.true;
+                    });
+                });
+                it('should pass content `plugins.composer.renderPreview`', () => {
+                    const content = `a${Math.random()}b`;
+                    return Post.preview(content).then(() => {
+                        forum._emit.calledWith('plugins.composer.renderPreview', content).should.be.true;
+                    });
+                });
+                it('should resolve to results of `plugins.composer.renderPreview`', () => {
+                    const content = `a${Math.random()}b`;
+                    forum._emit.resolves(content);
+                    return Post.preview('').should.become(content);
+                });
+                it('should reject when `plugins.composer.renderPreview` rejects', () => {
+                    forum._emit.rejects('bad');
+                    return Post.preview('').should.be.rejected;
                 });
             });
-            it('should pass postId and topicId to `posts.upvote`', () => {
-                data.id = Math.random();
-                data.topicId = Math.random();
-                return post.upvote().then(() => {
-                    forum._emit.calledWith('posts.upvote', {
-                        pid: data.id,
-                        'room_id': `topic_${data.topicId}`
-                    }).should.be.true;
+            describe('parse()', () => {
+                it('should store instance data in utils.storage', () => {
+                    const post = Post.parse({});
+                    utils.mapGet(post).should.be.ok;
                 });
-            });
-            it('should resolve to self', () => {
-                return post.upvote().should.become(post);
-            });
-            it('should reject when `posts.upvote` rejects', () => {
-                forum._emit.rejects('bad');
-                return post.upvote().should.be.rejected;
-            });
-        });
-        describe('downvote()', () => {
-            let post = null,
-                data = null;
-            beforeEach(() => {
-                post = new Post({});
-                data = utils.mapGet(post);
-                forum._emit = sinon.stub().resolves({});
-            });
-            it('should emit `posts.downvote`', () => {
-                return post.downvote().then(() => {
-                    forum._emit.calledWith('posts.downvote').should.be.true;
+                it('should accept serialized input', () => {
+                    const post = Post.parse('{}');
+                    utils.mapGet(post).should.be.ok;
                 });
-            });
-            it('should pass postId and topicId to `posts.downvote`', () => {
-                data.id = Math.random();
-                data.topicId = Math.random();
-                return post.downvote().then(() => {
-                    forum._emit.calledWith('posts.downvote', {
-                        pid: data.id,
-                        'room_id': `topic_${data.topicId}`
-                    }).should.be.true;
+                [
+                    ['authorId', 'uid'],
+                    ['content', 'content'],
+                    ['id', 'pid'],
+                    ['topicId', 'tid']
+                ].forEach((keys) => {
+                    const outKey = keys[0],
+                        inKey = keys[1];
+                    it(`should store ${outKey} in utils.storage`, () => {
+                        const expected = `a${Math.random()}b`;
+                        const values = {};
+                        values[inKey] = expected;
+                        const post = Post.parse(values);
+                        utils.mapGet(post, outKey).should.equal(expected);
+                    });
                 });
-            });
-            it('should resolve to self', () => {
-                return post.downvote().should.become(post);
-            });
-            it('should reject when `posts.downvote` rejects', () => {
-                forum._emit.rejects('bad');
-                return post.downvote().should.be.rejected;
-            });
-        });
-        describe('unvote()', () => {
-            let post = null,
-                data = null;
-            beforeEach(() => {
-                post = new Post({});
-                data = utils.mapGet(post);
-                forum._emit = sinon.stub().resolves({});
-            });
-            it('should emit `posts.unvote`', () => {
-                return post.unvote().then(() => {
-                    forum._emit.calledWith('posts.unvote').should.be.true;
+                it('should parse timestamp for posted', () => {
+                    const expected = Math.round(Math.random() * (2 << 29));
+                    const user = Post.parse({
+                        timestamp: expected
+                    });
+                    utils.mapGet(user, 'posted').getTime().should.equal(expected);
                 });
-            });
-            it('should pass postId and topicId to `posts.unvote`', () => {
-                data.id = Math.random();
-                data.topicId = Math.random();
-                return post.unvote().then(() => {
-                    forum._emit.calledWith('posts.unvote', {
-                        pid: data.id,
-                        'room_id': `topic_${data.topicId}`
-                    }).should.be.true;
-                });
-            });
-            it('should resolve to self', () => {
-                return post.unvote().should.become(post);
-            });
-            it('should reject when `posts.unvote` rejects', () => {
-                forum._emit.rejects('bad');
-                return post.unvote().should.be.rejected;
-            });
-        });
-        describe('bookmark()', () => {
-            let post = null,
-                data = null;
-            beforeEach(() => {
-                post = new Post({});
-                data = utils.mapGet(post);
-                forum._emit = sinon.stub().resolves({});
-            });
-            it('should emit `posts.favorite`', () => {
-                return post.bookmark().then(() => {
-                    forum._emit.calledWith('posts.favorite').should.be.true;
-                });
-            });
-            it('should pass postId and topicId to `posts.favorite`', () => {
-                data.id = Math.random();
-                data.topicId = Math.random();
-                return post.bookmark().then(() => {
-                    forum._emit.calledWith('posts.favorite', {
-                        pid: data.id,
-                        'room_id': `topic_${data.topicId}`
-                    }).should.be.true;
-                });
-            });
-            it('should resolve to self', () => {
-                return post.bookmark().should.become(post);
-            });
-            it('should reject when `posts.bookmark` rejects', () => {
-                forum._emit.rejects('bad');
-                return post.bookmark().should.be.rejected;
-            });
-        });
-        describe('unbookmark()', () => {
-            let post = null,
-                data = null;
-            beforeEach(() => {
-                post = new Post({});
-                data = utils.mapGet(post);
-                forum._emit = sinon.stub().resolves({});
-            });
-            it('should emit `posts.unfavorite`', () => {
-                return post.unbookmark().then(() => {
-                    forum._emit.calledWith('posts.unfavorite').should.be.true;
-                });
-            });
-            it('should pass postId and topicId to `posts.unfavorite`', () => {
-                data.id = Math.random();
-                data.topicId = Math.random();
-                return post.unbookmark().then(() => {
-                    forum._emit.calledWith('posts.unfavorite', {
-                        pid: data.id,
-                        'room_id': `topic_${data.topicId}`
-                    }).should.be.true;
-                });
-            });
-            it('should resolve to self', () => {
-                return post.unbookmark().should.become(post);
-            });
-            it('should reject when `posts.unbookmark` rejects', () => {
-                forum._emit.rejects('bad');
-                return post.unbookmark().should.be.rejected;
-            });
-        });
-        describe('static get()',()=>{
-            let sandbox=null;
-            beforeEach(()=>{
-                forum._emit = sinon.stub().resolves();
-                sandbox = sinon.sandbox.create();
-                sandbox.stub(Post,'parse').resolves();
-            });
-            afterEach(()=>sandbox.restore());
-            it('should emit `posts.getPost`',()=>{
-                return Post.get().then(()=>{
-                   forum._emit.calledWith('posts.getPost').should.be.true; 
-                });
-            });
-            it('should provide id to `posts.getPost`',()=>{
-                const id = Math.random();
-                return Post.get(id).then(()=>{
-                   forum._emit.calledWith('posts.getPost', id).should.be.true; 
-                });
-            });
-            it('should reject when websocket rejects',()=>{
-                forum._emit.rejects('bad');
-                return Post.get(5).should.be.rejected;
-            });
-            it('should pass results to Post.parse()',()=>{
-                const expected = Math.random();
-                forum._emit.resolves(expected);
-                return Post.get(5).then(()=>{
-                    Post.parse.calledWith(expected).should.be.true;
-                });
-            });
-            it('should resolve to results of Post.parse()',()=>{
-                const expected = Math.random();
-                Post.parse.resolves(expected);
-                return Post.get(5).should.become(expected);
-            });
-        });
-        describe('static preview()',()=>{
-            beforeEach(()=>{
-                forum._emit = sinon.stub().resolves();
-            });
-            it('should emit `plugins.composer.renderPreview`',()=>{
-                return Post.preview('').then(()=>{
-                    forum._emit.calledWith('plugins.composer.renderPreview').should.be.true;
-                });
-            });
-            it('should pass content `plugins.composer.renderPreview`',()=>{
-                const content = `a${Math.random()}b`;
-                return Post.preview(content).then(()=>{
-                    forum._emit.calledWith('plugins.composer.renderPreview',content).should.be.true;
-                });
-            });
-            it('should resolve to results of `plugins.composer.renderPreview`',()=>{
-                const content = `a${Math.random()}b`;
-                forum._emit.resolves(content);
-                return Post.preview('').should.become(content);
-            });
-            it('should reject when `plugins.composer.renderPreview` rejects',()=>{
-                forum._emit.rejects('bad');
-                return Post.preview('').should.be.rejected;
-            });
-        });
-        describe('static parse()', () => {
-            it('should store instance data in utils.storage', () => {
-                const post = Post.parse({});
-                utils.mapGet(post).should.be.ok;
-            });
-            it('should accept serialized input', () => {
-                const post = Post.parse('{}');
-                utils.mapGet(post).should.be.ok;
-            });
-            [
-                ['authorId', 'uid'],
-                ['content', 'content'],
-                ['id', 'pid'],
-                ['topicId', 'tid']
-            ].forEach((keys) => {
-                const outKey = keys[0],
-                    inKey = keys[1];
-                it(`should store ${outKey} in utils.storage`, () => {
-                    const expected = `a${Math.random()}b`;
-                    const values = {};
-                    values[inKey] = expected;
-                    const post = Post.parse(values);
-                    utils.mapGet(post, outKey).should.equal(expected);
-                });
-            });
-            it('should parse timestamp for posted', () => {
-                const expected = Math.round(Math.random() * (2 << 29));
-                const user = Post.parse({
-                    timestamp: expected
-                });
-                utils.mapGet(user, 'posted').getTime().should.equal(expected);
             });
         });
     });

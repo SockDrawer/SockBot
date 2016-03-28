@@ -1,7 +1,7 @@
 'use strict';
 
-const chai = require("chai");
-const chaiAsPromised = require("chai-as-promised");
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
 
 chai.use(chaiAsPromised);
 chai.should();
@@ -25,7 +25,7 @@ describe('lib/config', () => {
 
         describe('should export expected functions:', () => {
             fns.forEach((fn) => {
-                it(fn + '()', () => expect(config[fn]).to.be.a('function'));
+                it(`${fn}()`, () => expect(config[fn]).to.be.a('function'));
             });
         });
         describe('should export expected objects', () => {

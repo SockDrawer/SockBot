@@ -1,7 +1,7 @@
 'use strict';
 
-const chai = require("chai");
-chai.use(require("chai-as-promised"));
+const chai = require('chai');
+chai.use(require('chai-as-promised'));
 chai.use(require('chai-string'));
 chai.should();
 const expect = chai.expect;
@@ -20,7 +20,7 @@ describe('lib/config', () => {
 
         describe('should export expected functions:', () => {
             fns.forEach((fn) => {
-                it(fn + '()', () => expect(commands[fn]).to.be.a('function'));
+                it(`${fn}()`, () => expect(commands[fn]).to.be.a('function'));
             });
         });
         describe('should export expected objects', () => {
@@ -47,7 +47,7 @@ describe('lib/config', () => {
 
         describe('should internalize expected functions:', () => {
             fns.forEach((fn) => {
-                it(fn + '()', () => expect(commands.internals[fn]).to.be.a('function'));
+                it(`${fn}()`, () => expect(commands.internals[fn]).to.be.a('function'));
             });
         });
         describe('should internalize expected objects', () => {
@@ -98,10 +98,10 @@ describe('lib/config', () => {
                     '\u2005', '\u2006', '\u2007', '\u2008', '\u2009', '\u200a', '\u2028', '\u2029', '\u202f', '\u205f',
                     '\u3000'
                 ].forEach((space) => {
-                    let str = ('0000' + space.charCodeAt().toString(16));
-                    str = '\\u' + str.substring(str.length - 4);
-                    it(': ' + str, () => {
-                        const input = '!help' + space + 'arg1' + space + 'arg2';
+                    let str = `0000${space.charCodeAt().toString(16)}`;
+                    str = `\\u${str.substring(str.length - 4)}`;
+                    it(`: ${str}`, () => {
+                        const input = `!help${space}arg1${space}arg2`;
                         parseLine(input).args.should.deep.equal(['arg1', 'arg2']);
                     });
                 });
@@ -159,10 +159,10 @@ describe('lib/config', () => {
                     '\u2005', '\u2006', '\u2007', '\u2008', '\u2009', '\u200a', '\u2028', '\u2029', '\u202f', '\u205f',
                     '\u3000'
                 ].forEach((space) => {
-                    let str = ('0000' + space.charCodeAt().toString(16));
-                    str = '\\u' + str.substring(str.length - 4);
-                    it(': ' + str, () => {
-                        const input = '!help' + space + 'arg1' + space + 'arg2';
+                    let str = `0000${space.charCodeAt().toString(16)}`;
+                    str = `\\u${str.substring(str.length - 4)}`;
+                    it(`: ${str}`, () => {
+                        const input = `!help${space}arg1${space}arg2`;
                         parseLine(input).args.should.deep.equal(['arg1', 'arg2']);
                     });
                 });
@@ -220,10 +220,10 @@ describe('lib/config', () => {
                     '\u2005', '\u2006', '\u2007', '\u2008', '\u2009', '\u200a', '\u2028', '\u2029', '\u202f', '\u205f',
                     '\u3000'
                 ].forEach((space) => {
-                    let str = ('0000' + space.charCodeAt().toString(16));
-                    str = '\\u' + str.substring(str.length - 4);
-                    it(': ' + str, () => {
-                        const input = '@fred help' + space + 'arg1' + space + 'arg2';
+                    let str = `0000${space.charCodeAt().toString(16)}`;
+                    str = `\\u${str.substring(str.length - 4)}`;
+                    it(`: ${str}`, () => {
+                        const input = `@fred${space}help${space}arg1${space}arg2`;
                         parseLine(input).args.should.deep.equal(['arg1', 'arg2']);
                     });
                 });
@@ -272,96 +272,103 @@ describe('lib/config', () => {
             onComplete = commands.internals.onComplete;
         });
         it('should not attempt to post on no content', () => {
-            return onComplete({
-                    commands: [{
-                        replyText: ''
-                    }]
-                })
+            const command = {
+                commands: [{
+                    replyText: ''
+                }]
+            };
+            return onComplete(command)
                 .then(() => {
                     forum.Post.reply.called.should.be.false;
                 });
         });
         it('should not attempt to post on whitespace content', () => {
-            return onComplete({
-                    commands: [{
-                        replyText: ' '
-                    }]
-                })
+            const command = {
+                commands: [{
+                    replyText: ' '
+                }]
+            };
+            return onComplete(command)
                 .then(() => {
                     forum.Post.reply.called.should.be.false;
                 });
         });
         it('should post with content', () => {
-            return onComplete({
-                    commands: [{
-                        replyText: 'foo'
-                    }],
-                    notification: {
-                        topicId: 45,
-                        postId: -7
-                    }
-                })
+            const command = {
+                commands: [{
+                    replyText: 'foo'
+                }],
+                notification: {
+                    topicId: 45,
+                    postId: -7
+                }
+            };
+            return onComplete(command)
                 .then(() => {
                     forum.Post.reply.calledWith(45, -7, 'foo').should.be.true;
                 });
         });
         it('should merge multiple command replies', () => {
-            return onComplete({
-                    commands: [{
-                        replyText: 'foo'
-                    }, {
-                        replyText: 'bar'
-                    }],
-                    notification: {
-                        topicId: 45,
-                        postId: -7
-                    }
-                })
+            const command = {
+                commands: [{
+                    replyText: 'foo'
+                }, {
+                    replyText: 'bar'
+                }],
+                notification: {
+                    topicId: 45,
+                    postId: -7
+                }
+            };
+            return onComplete(command)
                 .then(() => {
                     forum.Post.reply.calledWith(45, -7, 'foo\n\n---\n\nbar').should.be.true;
                 });
         });
         it('should merge preseve whitespace in command replies', () => {
-            return onComplete({
-                    commands: [{
-                        replyText: '\nfoo '
-                    }, {
-                        replyText: '\tbar\n'
-                    }],
-                    notification: {
-                        topicId: 45,
-                        postId: -7
-                    }
-                })
+            const command = {
+                commands: [{
+                    replyText: '\nfoo '
+                }, {
+                    replyText: '\tbar\n'
+                }],
+                notification: {
+                    topicId: 45,
+                    postId: -7
+                }
+            };
+            return onComplete(command)
                 .then(() => {
                     forum.Post.reply.calledWith(45, -7, '\nfoo \n\n---\n\n\tbar\n').should.be.true;
                 });
         });
         it('should ignore blank command replies', () => {
-            return onComplete({
-                    commands: [{
-                        replyText: '\n\t'
-                    }, {
-                        replyText: 'foo'
-                    }, {
-                        replyText: '\n'
-                    }, {
-                        replyText: 'bar'
-                    }, {
-                        replyText: ' '
-                    }],
-                    notification: {
-                        topicId: 45,
-                        postId: -7
-                    }
-                })
+            const command = {
+                commands: [{
+                    replyText: '\n\t'
+                }, {
+                    replyText: 'foo'
+                }, {
+                    replyText: '\n'
+                }, {
+                    replyText: 'bar'
+                }, {
+                    replyText: ' '
+                }],
+                notification: {
+                    topicId: 45,
+                    postId: -7
+                }
+            };
+            return onComplete(command)
                 .then(() => {
                     forum.Post.reply.calledWith(45, -7, 'foo\n\n---\n\nbar').should.be.true;
                 });
         });
     });
     describe('internals.onError()', () => {
-        let forum, onError;
+        let forum = null,
+            onError = null;
         beforeEach(() => {
             forum = {
                 Post: {
@@ -385,7 +392,8 @@ describe('lib/config', () => {
         });
     });
     describe('internals.defaultHandler()', () => {
-        let forum, defaultHandler;
+        let forum = null,
+            defaultHandler = null;
         beforeEach(() => {
             forum = {};
             commands.bindCommands(forum);
@@ -413,7 +421,8 @@ describe('lib/config', () => {
         });
     });
     describe('internals.cmdHelp', () => {
-        let forum, cmdHelp;
+        let forum = null,
+            cmdHelp = null;
         beforeEach(() => {
             forum = {
                 Post: {
@@ -425,7 +434,7 @@ describe('lib/config', () => {
             cmdHelp = commands.internals.cmdHelp;
         });
         it('should be registered as `command#help` event', () => {
-            commands.internals.handlers['help'].handler.should.equal(cmdHelp);
+            commands.internals.handlers.help.handler.should.equal(cmdHelp);
         });
         it('should post expected text', () => {
             const expected = 'Registered commands:\nhelp: print command help listing\n' +
@@ -534,7 +543,9 @@ describe('lib/config', () => {
         });
     });
     describe('internals.getCommandHelps()', () => {
-        let cmds, forum, getCommandHelps;
+        let cmds = null,
+            forum = null,
+            getCommandHelps = null;
         beforeEach(() => {
             forum = {};
             commands.bindCommands(forum);
@@ -568,7 +579,9 @@ describe('lib/config', () => {
         });
     });
     describe('Command', () => {
-        let forum, Command, handlers;
+        let forum = null,
+            Command = null,
+            handlers = null;
         beforeEach(() => {
             forum = {};
             commands.bindCommands(forum);
@@ -866,7 +879,8 @@ describe('lib/config', () => {
                 return command.execute().then(() => {
                     forum.Post.reply.calledWith(50,
                         1,
-                        'An unexpected error `Error: bad` occured and your commands could not be processed!').should.be.true;
+                        'An unexpected error `Error: bad` occured and your commands' +
+                        ' could not be processed!').should.be.true;
                 });
             });
             it('should emit error when onError rejects', () => {
@@ -889,7 +903,7 @@ describe('lib/config', () => {
                 const notification = {
                     getText: sinon.stub().resolves('<div>content</div>')
                 };
-                return Commands.get(notification).then((command) => {
+                return Commands.get(notification).then(() => {
                     notification.getText.called.should.be.true;
                 });
             });

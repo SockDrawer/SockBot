@@ -1,7 +1,7 @@
 'use strict';
 
-const chai = require("chai");
-const chaiAsPromised = require("chai-as-promised");
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
 
 chai.use(chaiAsPromised);
 chai.should();
@@ -87,24 +87,24 @@ describe('lib/app', () => {
             testModule.relativeRequire.returns(plugin);
             testModule.loadPlugins(forum, {
                 plugins: {
-                    a: cfg
+                    alpha: cfg
                 }
             });
             forum.addPlugin.calledWith(plugin, cfg).should.be.true;
         });
     });
     describe('activateConfig()', () => {
+        let sandbox = null,
+            instance = null,
+            basicConfig = null;
         class DummyForum {
             constructor(cfg) {
                 this.login = DummyForum.login;
                 this.activate = DummyForum.activate;
                 this.config = cfg;
-                instance = this;
+                instance = this; //eslint-disable-line consistent-this
             }
         }
-        let sandbox = null,
-            instance = null,
-            basicConfig = null;
         beforeEach(() => {
             sandbox = sinon.sandbox.create();
             sandbox.stub(testModule, 'relativeRequire');

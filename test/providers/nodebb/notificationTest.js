@@ -1,7 +1,7 @@
 'use strict';
 
-const chai = require("chai");
-const chaiAsPromised = require("chai-as-promised");
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
 
 chai.use(chaiAsPromised);
 chai.should();
@@ -9,20 +9,22 @@ chai.should();
 const sinon = require('sinon');
 require('sinon-as-promised');
 
-const notificationModule = require('../../../providers/nodebb/notification');
+const testModule = require('../../../providers/nodebb/notification');
 const utils = require('../../../lib/utils');
 
 describe('providers/nodebb/notification', () => {
     it('should export bindNotification()', () => {
-        notificationModule.bindNotification.should.be.a('function');
+        testModule.bindNotification.should.be.a('function');
     });
     it('should return a class on call to bindPost()', () => {
-        notificationModule.bindNotification({}).should.be.a('function');
+        testModule.bindNotification({}).should.be.a('function');
     });
     describe('Post', () => {
         const forum = {};
-        const Notification = notificationModule.bindNotification(forum);
-        beforeEach(() => forum._emit = sinon.stub().resolves());
+        const Notification = testModule.bindNotification(forum);
+        beforeEach(() => {
+            forum._emit = sinon.stub().resolves();
+        });
         describe('ctor()', () => {
             it('should store instance data in utils.storage', () => {
                 const notification = new Notification({});
@@ -62,7 +64,8 @@ describe('providers/nodebb/notification', () => {
             it('should unescape HTML in `body`', () => {
                 const expected = '<div><b><i><a href="https://example.com">hi there!</a></i></b></div>';
                 const notification = new Notification({
-                    bodyLong: '&lt;div&gt;&lt;b&gt;&lt;i&gt;&lt;a href=&quot;https://example.com&quot;&gt;hi there!&lt;/a&gt;&lt;/i&gt;&lt;/b&gt;&lt;/div&gt;'
+                    bodyLong: '&lt;div&gt;&lt;b&gt;&lt;i&gt;&lt;a href=&quot;https://example.com&quot;&gt;' +
+                        'hi there!&lt;/a&gt;&lt;/i&gt;&lt;/b&gt;&lt;/div&gt;'
                 });
                 utils.mapGet(notification, 'body').should.equal(expected);
             });
@@ -170,7 +173,7 @@ describe('providers/nodebb/notification', () => {
             });
             it('should resolve to result of Post.preview for mention notification', () => {
                 const expected = Math.random();
-                data.body = `aMath.random()b`;
+                data.body = `a${Math.random()}b`;
                 data.type = 'mention';
                 forum.Post.preview.resolves(expected);
                 return notification.getText().should.become(expected);
@@ -327,7 +330,8 @@ describe('providers/nodebb/notification', () => {
             it('should unescape HTML in `body`', () => {
                 const expected = '<div><b><i><a href="https://example.com">hi there!</a></i></b></div>';
                 const notification = Notification.parse({
-                    bodyLong: '&lt;div&gt;&lt;b&gt;&lt;i&gt;&lt;a href=&quot;https://example.com&quot;&gt;hi there!&lt;/a&gt;&lt;/i&gt;&lt;/b&gt;&lt;/div&gt;'
+                    bodyLong: '&lt;div&gt;&lt;b&gt;&lt;i&gt;&lt;a href=&quot;https://example.com&quot;&gt;' +
+                        'hi there!&lt;/a&gt;&lt;/i&gt;&lt;/b&gt;&lt;/div&gt;'
                 });
                 utils.mapGet(notification, 'body').should.equal(expected);
             });
@@ -529,21 +533,28 @@ describe('providers/nodebb/notification', () => {
             });
             it('should execute parsed commands', () => {
                 const spy = sinon.spy();
-                forum.Commands.get.resolves({execute:spy});
-                return notifyHandler(5).then(()=>{
-                spy.called.should.be.true;});
+                forum.Commands.get.resolves({
+                    execute: spy
+                });
+                return notifyHandler(5).then(() => {
+                    spy.called.should.be.true;
+                });
             });
             it('should emit specific notification event', () => {
-                const expected = {type:`a${Math.random()}b`};
+                const expected = {
+                    type: `a${Math.random()}b`
+                };
                 Notification.parse.returns(expected);
                 notifyHandler(5);
                 forum.emit.calledWith(`notification:${expected.type}`, expected).should.be.true;
             });
             it('should emit general notification event', () => {
-                const expected = {type:`a${Math.random()}b`};
+                const expected = {
+                    type: `a${Math.random()}b`
+                };
                 Notification.parse.returns(expected);
                 notifyHandler(5);
-                forum.emit.calledWith(`notification`, expected).should.be.true;
+                forum.emit.calledWith('notification', expected).should.be.true;
             });
         });
     });

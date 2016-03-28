@@ -1,7 +1,7 @@
 'use strict';
 
-const chai = require("chai");
-const chaiAsPromised = require("chai-as-promised");
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
 
 chai.use(chaiAsPromised);
 chai.should();
@@ -14,7 +14,7 @@ const Forum = require('../../../providers/nodebb'),
     topicModule = require('../../../providers/nodebb/topic'),
     categoryModule = require('../../../providers/nodebb/category'),
     userModule = require('../../../providers/nodebb/user'),
-    notificationModule = require('../../../providers/nodebb/notification');
+    notifyModule = require('../../../providers/nodebb/notification');
 const utils = require('../../../lib/utils');
 
 const request = require('request');
@@ -31,7 +31,7 @@ describe('providers/nodebb', () => {
             sandbox.stub(topicModule, 'bindTopic');
             sandbox.stub(categoryModule, 'bindCategory');
             sandbox.stub(userModule, 'bindUser');
-            sandbox.stub(notificationModule, 'bindNotification');
+            sandbox.stub(notifyModule, 'bindNotification');
         });
         afterEach(() => sandbox.restore());
         it('should store configuration data in utils.storage', () => {
@@ -81,11 +81,11 @@ describe('providers/nodebb', () => {
         });
         it('should use Notification.bindNotification to generate Notification object', () => {
             const forum = new Forum({});
-            notificationModule.bindNotification.calledWith(forum).should.be.true;
+            notifyModule.bindNotification.calledWith(forum).should.be.true;
         });
         it('should store Notification object in this.Notification', () => {
             const expected = Math.random();
-            notificationModule.bindNotification.returns(expected);
+            notifyModule.bindNotification.returns(expected);
             new Forum().Notification.should.equal(expected);
         });
     });
@@ -321,7 +321,7 @@ describe('providers/nodebb', () => {
         it('should use csrf token header', () => {
             const expected = `a${Math.random()}b`;
             forum._getConfig.resolves({
-                csrf_token: expected
+                'csrf_token': expected
             });
             return forum.login().then(() => {
                 const posted = request.post.firstCall.args[0];
@@ -606,30 +606,32 @@ describe('providers/nodebb', () => {
                 spy2.called.should.be.true;
             });
         });
-        it('should resolve to self', () => {
-            return forum.activate().should.become(forum);
-        });
-        it('should reject when websocket rejects', () => {
-            forum.connectWebsocket.rejects('bad');
-            return forum.activate().should.be.rejected;
-        });
-        it('should reject when user fetch rejects', () => {
-            forum.User.getByName.onFirstCall().rejects('bad');
-            return forum.activate().should.be.rejected;
-        });
-        it('should reject when owner fetch rejects', () => {
-            forum.User.getByName.onSecondCall().rejects('bad');
-            return forum.activate().should.be.rejected;
-        });
-        it('should reject when notification activation throw', () => {
-            forum.Notification.activate.throws('bad');
-            return forum.activate().should.be.rejected;
-        });
-        it('should reject when plugin activation rejects', () => {
-            forum._plugins = [{
-                activate: sinon.stub().rejects('bad')
-            }];
-            return forum.activate().should.be.rejected;
+        describe('promise behavior', () => {
+            it('should resolve to self', () => {
+                return forum.activate().should.become(forum);
+            });
+            it('should reject when websocket rejects', () => {
+                forum.connectWebsocket.rejects('bad');
+                return forum.activate().should.be.rejected;
+            });
+            it('should reject when user fetch rejects', () => {
+                forum.User.getByName.onFirstCall().rejects('bad');
+                return forum.activate().should.be.rejected;
+            });
+            it('should reject when owner fetch rejects', () => {
+                forum.User.getByName.onSecondCall().rejects('bad');
+                return forum.activate().should.be.rejected;
+            });
+            it('should reject when notification activation throw', () => {
+                forum.Notification.activate.throws('bad');
+                return forum.activate().should.be.rejected;
+            });
+            it('should reject when plugin activation rejects', () => {
+                forum._plugins = [{
+                    activate: sinon.stub().rejects('bad')
+                }];
+                return forum.activate().should.be.rejected;
+            });
         });
     });
     describe('deactivate()', () => {

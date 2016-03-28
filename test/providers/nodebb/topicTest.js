@@ -1,7 +1,7 @@
 'use strict';
 
-const chai = require("chai");
-const chaiAsPromised = require("chai-as-promised");
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
 
 chai.use(chaiAsPromised);
 chai.should();
@@ -367,297 +367,299 @@ describe('providers/nodebb/topic', () => {
                 return topic.unmute().should.become(topic);
             });
         });
-        describe('static getRecentTopics()', () => {
-            let spy = () => 0;
-            beforeEach(() => {
-                forum.Topic = {
-                    parse: sinon.stub()
-                };
-                forum.User = {
-                    parse: sinon.stub()
-                };
-                forum.Category = {
-                    parse: sinon.stub()
-                };
-                spy = sinon.stub().resolves();
-            });
-            it('should retrieve topics via `topics.loadMoreFromSet`', () => {
-                return Topic.getRecentTopics(spy).then(() => {
-                    forum._emit.calledWith('topics.loadMoreFromSet', {
-                        after: '0',
-                        set: 'topics:recent'
-                    }).should.be.true;
+        describe('static functions', () => {
+            describe('static getRecentTopics()', () => {
+                let spy = () => 0;
+                beforeEach(() => {
+                    forum.Topic = {
+                        parse: sinon.stub()
+                    };
+                    forum.User = {
+                        parse: sinon.stub()
+                    };
+                    forum.Category = {
+                        parse: sinon.stub()
+                    };
+                    spy = sinon.stub().resolves();
+                });
+                it('should retrieve topics via `topics.loadMoreFromSet`', () => {
+                    return Topic.getRecentTopics(spy).then(() => {
+                        forum._emit.calledWith('topics.loadMoreFromSet', {
+                            after: '0',
+                            set: 'topics:recent'
+                        }).should.be.true;
+                    });
+                });
+                it('should retrieve additional topics via `topics.loadMoreFromSet`', () => {
+                    forum._emit.onFirstCall().resolves({
+                        topics: [{}, {}, {}]
+                    });
+                    return Topic.getRecentTopics(spy).then(() => {
+                        forum._emit.calledWith('topics.loadMoreFromSet', {
+                            after: '0',
+                            set: 'topics:recent'
+                        }).should.be.true;
+                        forum._emit.calledWith('topics.loadMoreFromSet', {
+                            after: '3',
+                            set: 'topics:recent'
+                        }).should.be.true;
+                    });
+                });
+                it('should abort successfully when websocket does not return topics', () => {
+                    return Topic.getRecentTopics(spy).then(() => {
+                        spy.called.should.be.false;
+                    });
+                });
+                it('should abort successfully when websocket returns zero topics', () => {
+                    forum._emit.resolves({
+                        topics: []
+                    });
+                    return Topic.getRecentTopics(spy).then(() => {
+                        spy.called.should.be.false;
+                    });
+                });
+                it('should reject when websocket rejects', () => {
+                    forum._emit.rejects('bad');
+                    return Topic.getRecentTopics(spy).should.be.rejected;
+                });
+                it('should iterate through topics by calling eachTopic progress fn', () => {
+                    forum._emit.onFirstCall().resolves({
+                        topics: [{}, {}, {}]
+                    });
+                    return Topic.getRecentTopics(spy).then(() => {
+                        spy.callCount.should.equal(3);
+                    });
+                });
+                it('should reject when progress fn rejects', () => {
+                    forum._emit.onFirstCall().resolves({
+                        topics: [{}, {}, {}]
+                    });
+                    spy.onCall(1).rejects('bad');
+                    return Topic.getRecentTopics(spy).should.be.rejected;
+                });
+                it('should pass expected values to progress fn', () => {
+                    forum._emit.onFirstCall().resolves({
+                        topics: [{}]
+                    });
+                    forum.Topic.parse.returns('TOPIC');
+                    forum.User.parse.returns('USER');
+                    forum.Category.parse.returns('CATEGORY');
+                    return Topic.getRecentTopics(spy).then(() => {
+                        spy.calledWith('TOPIC', 'USER', 'CATEGORY').should.be.true;
+                    });
+                });
+                it('should pass expected values to Topic.parse()', () => {
+                    const expected = {};
+                    forum._emit.onFirstCall().resolves({
+                        topics: [expected]
+                    });
+                    return Topic.getRecentTopics(spy).then(() => {
+                        forum.Topic.parse.calledWith(expected).should.be.true;
+                    });
+                });
+                it('should pass expected values to User.parse()', () => {
+                    const expected = {};
+                    forum._emit.onFirstCall().resolves({
+                        topics: [{
+                            user: expected
+                        }]
+                    });
+                    return Topic.getRecentTopics(spy).then(() => {
+                        forum.User.parse.calledWith(expected).should.be.true;
+                    });
+                });
+                it('should pass expected values to Category.parse()', () => {
+                    const expected = {};
+                    forum._emit.onFirstCall().resolves({
+                        topics: [{
+                            category: expected
+                        }]
+                    });
+                    return Topic.getRecentTopics(spy).then(() => {
+                        forum.Category.parse.calledWith(expected).should.be.true;
+                    });
                 });
             });
-            it('should retrieve additional topics via `topics.loadMoreFromSet`', () => {
-                forum._emit.onFirstCall().resolves({
-                    topics: [{}, {}, {}]
+            describe('static getUnreadTopics()', () => {
+                let spy = () => 0;
+                beforeEach(() => {
+                    forum.Topic = {
+                        parse: sinon.stub()
+                    };
+                    forum.User = {
+                        parse: sinon.stub()
+                    };
+                    forum.Category = {
+                        parse: sinon.stub()
+                    };
+                    spy = sinon.stub().resolves();
                 });
-                return Topic.getRecentTopics(spy).then(() => {
-                    forum._emit.calledWith('topics.loadMoreFromSet', {
-                        after: '0',
-                        set: 'topics:recent'
-                    }).should.be.true;
-                    forum._emit.calledWith('topics.loadMoreFromSet', {
-                        after: '3',
-                        set: 'topics:recent'
-                    }).should.be.true;
+                it('should retrieve topics via `topics.loadMoreUnreadTopics`', () => {
+                    return Topic.getUnreadTopics(spy).then(() => {
+                        forum._emit.calledWith('topics.loadMoreUnreadTopics', {
+                            after: 0
+                        }).should.be.true;
+                    });
                 });
-            });
-            it('should abort successfully when websocket does not return topics', () => {
-                return Topic.getRecentTopics(spy).then(() => {
-                    spy.called.should.be.false;
+                it('should retrieve additional topics via `topics.loadMoreUnreadTopics`', () => {
+                    forum._emit.onFirstCall().resolves({
+                        topics: [{}, {}, {}]
+                    });
+                    return Topic.getUnreadTopics(spy).then(() => {
+                        forum._emit.calledWith('topics.loadMoreUnreadTopics', {
+                            after: 0
+                        }).should.be.true;
+                        forum._emit.calledWith('topics.loadMoreUnreadTopics', {
+                            after: 3
+                        }).should.be.true;
+                    });
                 });
-            });
-            it('should abort successfully when websocket returns zero topics', () => {
-                forum._emit.resolves({
-                    topics: []
+                it('should abort successfully when websocket does not return topics', () => {
+                    return Topic.getUnreadTopics(spy).then(() => {
+                        spy.called.should.be.false;
+                    });
                 });
-                return Topic.getRecentTopics(spy).then(() => {
-                    spy.called.should.be.false;
+                it('should abort successfully when websocket returns zero topics', () => {
+                    forum._emit.resolves({
+                        topics: []
+                    });
+                    return Topic.getUnreadTopics(spy).then(() => {
+                        spy.called.should.be.false;
+                    });
                 });
-            });
-            it('should reject when websocket rejects', () => {
-                forum._emit.rejects('bad');
-                return Topic.getRecentTopics(spy).should.be.rejected;
-            });
-            it('should iterate through topics by calling eachTopic progress fn', () => {
-                forum._emit.onFirstCall().resolves({
-                    topics: [{}, {}, {}]
+                it('should reject when websocket rejects', () => {
+                    forum._emit.rejects('bad');
+                    return Topic.getUnreadTopics(spy).should.be.rejected;
                 });
-                return Topic.getRecentTopics(spy).then(() => {
-                    spy.callCount.should.equal(3);
+                it('should iterate through topics by calling eachTopic progress fn', () => {
+                    forum._emit.onFirstCall().resolves({
+                        topics: [{}, {}, {}]
+                    });
+                    return Topic.getUnreadTopics(spy).then(() => {
+                        spy.callCount.should.equal(3);
+                    });
                 });
-            });
-            it('should reject when progress fn rejects', () => {
-                forum._emit.onFirstCall().resolves({
-                    topics: [{}, {}, {}]
+                it('should reject when progress fn rejects', () => {
+                    forum._emit.onFirstCall().resolves({
+                        topics: [{}, {}, {}]
+                    });
+                    spy.onCall(1).rejects('bad');
+                    return Topic.getUnreadTopics(spy).should.be.rejected;
                 });
-                spy.onCall(1).rejects('bad');
-                return Topic.getRecentTopics(spy).should.be.rejected;
-            });
-            it('should pass expected values to progress fn', () => {
-                forum._emit.onFirstCall().resolves({
-                    topics: [{}]
+                it('should pass expected values to progress fn', () => {
+                    forum._emit.onFirstCall().resolves({
+                        topics: [{}]
+                    });
+                    forum.Topic.parse.returns('TOPIC');
+                    forum.User.parse.returns('USER');
+                    forum.Category.parse.returns('CATEGORY');
+                    return Topic.getUnreadTopics(spy).then(() => {
+                        spy.calledWith('TOPIC', 'USER', 'CATEGORY').should.be.true;
+                    });
                 });
-                forum.Topic.parse.returns('TOPIC');
-                forum.User.parse.returns('USER');
-                forum.Category.parse.returns('CATEGORY');
-                return Topic.getRecentTopics(spy).then(() => {
-                    spy.calledWith('TOPIC', 'USER', 'CATEGORY').should.be.true;
+                it('should pass expected values to Topic.parse()', () => {
+                    const expected = {};
+                    forum._emit.onFirstCall().resolves({
+                        topics: [expected]
+                    });
+                    return Topic.getUnreadTopics(spy).then(() => {
+                        forum.Topic.parse.calledWith(expected).should.be.true;
+                    });
                 });
-            });
-            it('should pass expected values to Topic.parse()', () => {
-                const expected = {};
-                forum._emit.onFirstCall().resolves({
-                    topics: [expected]
+                it('should pass expected values to User.parse()', () => {
+                    const expected = {};
+                    forum._emit.onFirstCall().resolves({
+                        topics: [{
+                            user: expected
+                        }]
+                    });
+                    return Topic.getUnreadTopics(spy).then(() => {
+                        forum.User.parse.calledWith(expected).should.be.true;
+                    });
                 });
-                return Topic.getRecentTopics(spy).then(() => {
-                    forum.Topic.parse.calledWith(expected).should.be.true;
-                });
-            });
-            it('should pass expected values to User.parse()', () => {
-                const expected = {};
-                forum._emit.onFirstCall().resolves({
-                    topics: [{
-                        user: expected
-                    }]
-                });
-                return Topic.getRecentTopics(spy).then(() => {
-                    forum.User.parse.calledWith(expected).should.be.true;
-                });
-            });
-            it('should pass expected values to Category.parse()', () => {
-                const expected = {};
-                forum._emit.onFirstCall().resolves({
-                    topics: [{
-                        category: expected
-                    }]
-                });
-                return Topic.getRecentTopics(spy).then(() => {
-                    forum.Category.parse.calledWith(expected).should.be.true;
-                });
-            });
-        });
-        describe('static getUnreadTopics()', () => {
-            let spy = () => 0;
-            beforeEach(() => {
-                forum.Topic = {
-                    parse: sinon.stub()
-                };
-                forum.User = {
-                    parse: sinon.stub()
-                };
-                forum.Category = {
-                    parse: sinon.stub()
-                };
-                spy = sinon.stub().resolves();
-            });
-            it('should retrieve topics via `topics.loadMoreUnreadTopics`', () => {
-                return Topic.getUnreadTopics(spy).then(() => {
-                    forum._emit.calledWith('topics.loadMoreUnreadTopics', {
-                        after: 0
-                    }).should.be.true;
+                it('should pass expected values to Category.parse()', () => {
+                    const expected = {};
+                    forum._emit.onFirstCall().resolves({
+                        topics: [{
+                            category: expected
+                        }]
+                    });
+                    return Topic.getUnreadTopics(spy).then(() => {
+                        forum.Category.parse.calledWith(expected).should.be.true;
+                    });
                 });
             });
-            it('should retrieve additional topics via `topics.loadMoreUnreadTopics`', () => {
-                forum._emit.onFirstCall().resolves({
-                    topics: [{}, {}, {}]
+            describe('static get()', () => {
+                let sandbox = {};
+                beforeEach(() => {
+                    sandbox = sinon.sandbox.create();
+                    sandbox.stub(Topic, 'parse');
                 });
-                return Topic.getUnreadTopics(spy).then(() => {
-                    forum._emit.calledWith('topics.loadMoreUnreadTopics', {
-                        after: 0
-                    }).should.be.true;
-                    forum._emit.calledWith('topics.loadMoreUnreadTopics', {
-                        after: 3
-                    }).should.be.true;
+                afterEach(() => sandbox.restore());
+                it('should emit `topics.getTopic', () => {
+                    const id = Math.random();
+                    return Topic.get(id).then(() => {
+                        forum._emit.calledWith('topics.getTopic', id).should.be.true;
+                    });
                 });
-            });
-            it('should abort successfully when websocket does not return topics', () => {
-                return Topic.getUnreadTopics(spy).then(() => {
-                    spy.called.should.be.false;
+                it('should reject if websocket rejects', () => {
+                    forum._emit.rejects('bad');
+                    return Topic.get(8472).should.be.rejected;
                 });
-            });
-            it('should abort successfully when websocket returns zero topics', () => {
-                forum._emit.resolves({
-                    topics: []
+                it('should parse results with Topic.parse()', () => {
+                    const expected = Math.random();
+                    forum._emit.resolves(expected);
+                    return Topic.get(8472).then(() => {
+                        Topic.parse.calledWith(expected).should.be.true;
+                    });
                 });
-                return Topic.getUnreadTopics(spy).then(() => {
-                    spy.called.should.be.false;
-                });
-            });
-            it('should reject when websocket rejects', () => {
-                forum._emit.rejects('bad');
-                return Topic.getUnreadTopics(spy).should.be.rejected;
-            });
-            it('should iterate through topics by calling eachTopic progress fn', () => {
-                forum._emit.onFirstCall().resolves({
-                    topics: [{}, {}, {}]
-                });
-                return Topic.getUnreadTopics(spy).then(() => {
-                    spy.callCount.should.equal(3);
+                it('should resolve to return value of Topic.parse()', () => {
+                    const expected = Math.random();
+                    Topic.parse.resolves(expected);
+                    return Topic.get(8472).should.become(expected);
                 });
             });
-            it('should reject when progress fn rejects', () => {
-                forum._emit.onFirstCall().resolves({
-                    topics: [{}, {}, {}]
+            describe('static parse()', () => {
+                it('should store instance data in utils.storage', () => {
+                    const topic = Topic.parse({});
+                    utils.mapGet(topic).should.be.ok;
                 });
-                spy.onCall(1).rejects('bad');
-                return Topic.getUnreadTopics(spy).should.be.rejected;
-            });
-            it('should pass expected values to progress fn', () => {
-                forum._emit.onFirstCall().resolves({
-                    topics: [{}]
+                it('should accept serialized input', () => {
+                    const topic = Topic.parse('{}');
+                    utils.mapGet(topic).should.be.ok;
                 });
-                forum.Topic.parse.returns('TOPIC');
-                forum.User.parse.returns('USER');
-                forum.Category.parse.returns('CATEGORY');
-                return Topic.getUnreadTopics(spy).then(() => {
-                    spy.calledWith('TOPIC', 'USER', 'CATEGORY').should.be.true;
+                [
+                    ['authorId', 'uid'],
+                    ['title', 'title'],
+                    ['url', 'slug'],
+                    ['id', 'tid'],
+                    ['mainPostId', 'mainPid'],
+                    ['postCount', 'postcount']
+                ].forEach((keys) => {
+                    const outKey = keys[0],
+                        inKey = keys[1];
+                    it(`should store ${outKey} in utils.storage`, () => {
+                        const expected = `a${Math.random()}b`;
+                        const values = {};
+                        values[inKey] = expected;
+                        const topic = Topic.parse(values);
+                        utils.mapGet(topic, outKey).should.equal(expected);
+                    });
                 });
-            });
-            it('should pass expected values to Topic.parse()', () => {
-                const expected = {};
-                forum._emit.onFirstCall().resolves({
-                    topics: [expected]
+                it('should parse timestamp for posted', () => {
+                    const expected = Math.round(Math.random() * (2 << 29));
+                    const topic = Topic.parse({
+                        timestamp: expected
+                    });
+                    utils.mapGet(topic, 'posted').getTime().should.equal(expected);
                 });
-                return Topic.getUnreadTopics(spy).then(() => {
-                    forum.Topic.parse.calledWith(expected).should.be.true;
+                it('should parse timestamp for lastPosted', () => {
+                    const expected = Math.round(Math.random() * (2 << 29));
+                    const topic = Topic.parse({
+                        lastposttime: expected
+                    });
+                    utils.mapGet(topic, 'lastPosted').getTime().should.equal(expected);
                 });
-            });
-            it('should pass expected values to User.parse()', () => {
-                const expected = {};
-                forum._emit.onFirstCall().resolves({
-                    topics: [{
-                        user: expected
-                    }]
-                });
-                return Topic.getUnreadTopics(spy).then(() => {
-                    forum.User.parse.calledWith(expected).should.be.true;
-                });
-            });
-            it('should pass expected values to Category.parse()', () => {
-                const expected = {};
-                forum._emit.onFirstCall().resolves({
-                    topics: [{
-                        category: expected
-                    }]
-                });
-                return Topic.getUnreadTopics(spy).then(() => {
-                    forum.Category.parse.calledWith(expected).should.be.true;
-                });
-            });
-        });
-        describe('static get()',()=>{
-            let sandbox={};
-            beforeEach(()=>{
-                sandbox = sinon.sandbox.create();
-                sandbox.stub(Topic,'parse');
-            });
-            afterEach(()=>sandbox.restore());
-            it('should emit `topics.getTopic',()=>{
-                const id = Math.random();
-                return Topic.get(id).then(()=>{
-                    forum._emit.calledWith('topics.getTopic',id).should.be.true;
-                });
-            });
-            it('should reject if websocket rejects',()=>{
-                forum._emit.rejects('bad');
-                return Topic.get(8472).should.be.rejected;
-            });
-            it('should parse results with Topic.parse()',()=>{
-                const expected = Math.random();
-                forum._emit.resolves(expected);
-                return Topic.get(8472).then(()=>{
-                    Topic.parse.calledWith(expected).should.be.true;
-                });
-            });
-            it('should resolve to return value of Topic.parse()',()=>{
-                const expected = Math.random();
-                Topic.parse.resolves(expected);
-                return Topic.get(8472).should.become(expected);
-            });
-        });
-        describe('static parse()', () => {
-            it('should store instance data in utils.storage', () => {
-                const topic = Topic.parse({});
-                utils.mapGet(topic).should.be.ok;
-            });
-            it('should accept serialized input', () => {
-                const topic = Topic.parse('{}');
-                utils.mapGet(topic).should.be.ok;
-            });
-            [
-                ['authorId', 'uid'],
-                ['title', 'title'],
-                ['url', 'slug'],
-                ['id', 'tid'],
-                ['mainPostId', 'mainPid'],
-                ['postCount', 'postcount']
-            ].forEach((keys) => {
-                const outKey = keys[0],
-                    inKey = keys[1];
-                it(`should store ${outKey} in utils.storage`, () => {
-                    const expected = `a${Math.random()}b`;
-                    const values = {};
-                    values[inKey] = expected;
-                    const topic = Topic.parse(values);
-                    utils.mapGet(topic, outKey).should.equal(expected);
-                });
-            });
-            it('should parse timestamp for posted', () => {
-                const expected = Math.round(Math.random() * (2 << 29));
-                const topic = Topic.parse({
-                    timestamp: expected
-                });
-                utils.mapGet(topic, 'posted').getTime().should.equal(expected);
-            });
-            it('should parse timestamp for lastPosted', () => {
-                const expected = Math.round(Math.random() * (2 << 29));
-                const topic = Topic.parse({
-                    lastposttime: expected
-                });
-                utils.mapGet(topic, 'lastPosted').getTime().should.equal(expected);
             });
         });
     });
