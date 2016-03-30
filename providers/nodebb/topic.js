@@ -235,7 +235,7 @@ exports.bindTopic = function bindTopic(forum) {
             return new Topic(payload);
         }
 
-        static parseWithUserCategory(data) {
+        static parseExtended(data) {
             const topic = forum.Topic.parse(data);
             const user = forum.User.parse(data.user);
             const category = forum.Category.parse(data.category);
@@ -250,7 +250,7 @@ exports.bindTopic = function bindTopic(forum) {
                         return resolve(this);
                     }
                     query.after += results.topics.length;
-                    const each = (data) => Topic.parseWithUserCategory(data)
+                    const each = (data) => Topic.parseExtended(data)
                         .then((parsed) => eachTopic(parsed[0], parsed[1], parsed[2]));
                     return utils.iterate(results.topics, each)
                         .then(iterate).catch(reject);

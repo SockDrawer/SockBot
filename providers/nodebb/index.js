@@ -1,5 +1,6 @@
 'use strict';
 
+const debug = require('debug')('sockbot:provider:nodebb');
 const EventEmitter = require('events').EventEmitter;
 
 const io = require('socket.io-client'),
@@ -60,17 +61,21 @@ class Forum extends EventEmitter {
         this._verifyCookies();
         this._config = {};
         return new Promise((resolve, reject) => {
+            debug('begin configuration fetch for CSRF token');
             request.get({
                 url: `${this.url}/api/config`,
                 jar: this._cookiejar
             }, (err, _, data) => {
                 if (err) {
+                    debug('failed configuration fetch for CSRF token');
                     return reject(err);
                 }
                 try {
+                    debug('completed configuration fetch for CSRF token');
                     this._config = JSON.parse(data);
                     resolve(this._config);
                 } catch (jsonErr) {
+                    debug('parse of retrieved configuration data failed');
                     reject(jsonErr);
                 }
             });
@@ -80,6 +85,7 @@ class Forum extends EventEmitter {
         return this._getConfig()
             .then((config) => new Promise((resolve, reject) => {
                 this._verifyCookies();
+                debug('begin post login data');
                 request.post({
                     url: this.url + '/login',
                     jar: this._cookiejar,
@@ -94,8 +100,10 @@ class Forum extends EventEmitter {
                     }
                 }, (loginError) => {
                     if (loginError) {
+                        debug(`Login failed for reason: ${loginError}`);
                         return reject(loginError);
                     }
+                    debug('complete post login data');
                     resolve();
                 });
             }))
@@ -113,6 +121,7 @@ class Forum extends EventEmitter {
                         'Cookie': cookies
                     }
                 });
+                this.socket.on('pong', (data) => this.emit('log', `Ping exchanged with ${data}ms latency`));
                 this.socket.on('connect', () => this.emit('connect'));
                 this.socket.on('disconnect', () => this.emit('disconnect'));
                 this.socket.once('connect', () => resolve());

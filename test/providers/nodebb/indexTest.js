@@ -89,96 +89,98 @@ describe('providers/nodebb', () => {
             new Forum().Notification.should.equal(expected);
         });
     });
-    describe('get config', () => {
-        let forum = null,
-            data = null;
-        beforeEach(() => {
-            forum = new Forum({
-                core: {}
+    describe('getters', () => {
+        describe('get config', () => {
+            let forum = null,
+                data = null;
+            beforeEach(() => {
+                forum = new Forum({
+                    core: {}
+                });
+                data = utils.mapGet(forum);
             });
-            data = utils.mapGet(forum);
-        });
-        it('should retrieve stored config', () => {
-            const expected = {};
-            expected[`a${Math.random()}b`] = `c${Math.random()}d`;
-            data.config = expected;
-            forum.config.should.eql(expected);
-        });
-        it('should retrieve clone of stored config', () => {
-            const expected = {};
-            expected[`a${Math.random()}b`] = `c${Math.random()}d`;
-            data.config = expected;
-            forum.config.should.not.equal(expected);
-        });
-    });
-    describe('get url', () => {
-        let forum = null,
-            data = null;
-        beforeEach(() => {
-            forum = new Forum({
-                core: {}
+            it('should retrieve stored config', () => {
+                const expected = {};
+                expected[`a${Math.random()}b`] = `c${Math.random()}d`;
+                data.config = expected;
+                forum.config.should.eql(expected);
             });
-            data = utils.mapGet(forum);
-        });
-        it('should return url from config', () => {
-            const expected = `c${Math.random()}d`;
-            data.config.core.forum = expected;
-            forum.url.should.eql(expected);
-        });
-    });
-    describe('get username', () => {
-        let forum = null,
-            data = null;
-        beforeEach(() => {
-            forum = new Forum({
-                core: {}
+            it('should retrieve clone of stored config', () => {
+                const expected = {};
+                expected[`a${Math.random()}b`] = `c${Math.random()}d`;
+                data.config = expected;
+                forum.config.should.not.equal(expected);
             });
-            data = utils.mapGet(forum);
         });
-        it('should return username from config', () => {
-            const expected = `c${Math.random()}d`;
-            data.config.core.username = expected;
-            forum.username.should.eql(expected);
-        });
-    });
-    describe('get important users', () => {
-        let forum = null,
-            data = null;
-        beforeEach(() => {
-            forum = new Forum({
-                core: {}
+        describe('get url', () => {
+            let forum = null,
+                data = null;
+            beforeEach(() => {
+                forum = new Forum({
+                    core: {}
+                });
+                data = utils.mapGet(forum);
             });
-            data = utils.mapGet(forum);
-        });
-        it('should store logged in user data', () => {
-            const expected = Math.random();
-            data.user = expected;
-            forum.user.should.equal(expected);
-        });
-        it('should store bot owner data', () => {
-            const expected = Math.random();
-            data.owner = expected;
-            forum.owner.should.equal(expected);
-        });
-    });
-    describe('get/set Commands', () => {
-        let forum = null,
-            data = null;
-        beforeEach(() => {
-            forum = new Forum({
-                core: {}
+            it('should return url from config', () => {
+                const expected = `c${Math.random()}d`;
+                data.config.core.forum = expected;
+                forum.url.should.eql(expected);
             });
-            data = utils.mapGet(forum);
         });
-        it('should set Commands', () => {
-            const expected = Math.random();
-            forum.Commands = expected;
-            data.commands.should.equal(expected);
+        describe('get username', () => {
+            let forum = null,
+                data = null;
+            beforeEach(() => {
+                forum = new Forum({
+                    core: {}
+                });
+                data = utils.mapGet(forum);
+            });
+            it('should return username from config', () => {
+                const expected = `c${Math.random()}d`;
+                data.config.core.username = expected;
+                forum.username.should.eql(expected);
+            });
         });
-        it('should get Commands', () => {
-            const expected = Math.random();
-            data.commands = expected;
-            forum.Commands.should.equal(expected);
+        describe('get important users', () => {
+            let forum = null,
+                data = null;
+            beforeEach(() => {
+                forum = new Forum({
+                    core: {}
+                });
+                data = utils.mapGet(forum);
+            });
+            it('should store logged in user data', () => {
+                const expected = Math.random();
+                data.user = expected;
+                forum.user.should.equal(expected);
+            });
+            it('should store bot owner data', () => {
+                const expected = Math.random();
+                data.owner = expected;
+                forum.owner.should.equal(expected);
+            });
+        });
+        describe('get/set Commands', () => {
+            let forum = null,
+                data = null;
+            beforeEach(() => {
+                forum = new Forum({
+                    core: {}
+                });
+                data = utils.mapGet(forum);
+            });
+            it('should set Commands', () => {
+                const expected = Math.random();
+                forum.Commands = expected;
+                data.commands.should.equal(expected);
+            });
+            it('should get Commands', () => {
+                const expected = Math.random();
+                data.commands = expected;
+                forum.Commands.should.equal(expected);
+            });
         });
     });
     describe('_validateCookies()', () => {
@@ -413,6 +415,17 @@ describe('providers/nodebb', () => {
                             'Cookie': cookies
                         }
                     }).should.be.true;
+                });
+            });
+            it('should register for websocket `pong` event', () => {
+                return forum.connectWebsocket().then(() => {
+                    socket.on.calledWith('pong').should.be.true;
+                });
+            });
+            it('should emit `log` on websocket pong event', () => {
+                socket.on = (evt, callback) => evt === 'pong' && callback(4242);
+                return forum.connectWebsocket().then(() => {
+                    forum.emit.calledWith('log', 'Ping exchanged with 4242ms latency').should.be.true;
                 });
             });
             it('should register for websocket `connect` event', () => {
@@ -727,16 +740,17 @@ describe('providers/nodebb', () => {
         });
     });
     describe('fetchObject', () => {
-        let forum = null,sandbox=null;
+        let forum = null,
+            sandbox = null;
         beforeEach(() => {
             forum = new Forum({
                 core: {}
             });
-            sandbox=sinon.sandbox.create();
-            sandbox.stub(forum,'_emit').resolves({});
+            sandbox = sinon.sandbox.create();
+            sandbox.stub(forum, '_emit').resolves({});
         });
         it('should use self._emit', () => {
-            return forum.fetchObject('','',()=>0).then(() => {
+            return forum.fetchObject('', '', () => 0).then(() => {
                 forum._emit.called.should.be.true;
             });
         });
@@ -752,7 +766,7 @@ describe('providers/nodebb', () => {
             const parser = sinon.spy();
             const expected = Math.random();
             forum._emit.resolves(expected);
-            return forum.fetchObject('','', parser).then(() => {
+            return forum.fetchObject('', '', parser).then(() => {
                 parser.calledWith(expected).should.be.true;
             });
         });
@@ -760,7 +774,7 @@ describe('providers/nodebb', () => {
             const expected = Math.random();
             const parser = sinon.stub().returns(expected);
             forum._emit.resolves(expected);
-            return forum.fetchObject('','', parser).should.become(expected);
+            return forum.fetchObject('', '', parser).should.become(expected);
         });
         it('should reject when websocket errors', () => {
             forum._emit.rejects('bad');
@@ -768,7 +782,7 @@ describe('providers/nodebb', () => {
         });
         it('should reject when parser throws', () => {
             const parser = sinon.stub().throws('bad');
-            return forum.fetchObject('','', parser).should.be.rejected;
+            return forum.fetchObject('', '', parser).should.be.rejected;
         });
     });
 });

@@ -95,7 +95,7 @@ describe('providers/nodebb/categor', () => {
                 spy = sinon.stub().resolves();
                 forum._emit.resolves({});
                 forum.Topic = {
-                    parseWithUserCategory: sinon.stub().resolves([])
+                    parseExtended: sinon.stub().resolves([])
                 };
             });
             it('should load topics via websocket `categories.loadMore`', () => {
@@ -151,7 +151,7 @@ describe('providers/nodebb/categor', () => {
                     topics: [expected]
                 });
                 return category.getAllTopics(spy).then(() => {
-                    forum.Topic.parseWithUserCategory.calledWith(expected).should.be.true;
+                    forum.Topic.parseExtended.calledWith(expected).should.be.true;
                 });
             });
             it('should pass expected values to progress fn', () => {
@@ -161,8 +161,8 @@ describe('providers/nodebb/categor', () => {
                 const topic = Math.random();
                 const categoryval = Math.random();
                 const user = Math.random();
-                forum.Topic.parseWithUserCategory.resolves([topic,user,categoryval]);
-                
+                forum.Topic.parseExtended.resolves([topic, user, categoryval]);
+
                 return category.getAllTopics(spy).then(() => {
                     spy.calledWith(topic, user, categoryval).should.be.true;
                 });
@@ -176,7 +176,7 @@ describe('providers/nodebb/categor', () => {
                     forum._emit.onFirstCall().resolves({
                         topics: [1]
                     });
-                    forum.Topic.parseWithUserCategory.rejects('bad');
+                    forum.Topic.parseExtended.rejects('bad');
                     return category.getAllTopics(spy).should.be.rejected;
                 });
                 it('should reject when progress fn rejects', () => {
@@ -199,7 +199,7 @@ describe('providers/nodebb/categor', () => {
                 spy = sinon.stub().resolves();
                 forum._emit.resolves({});
                 forum.Topic = {
-                    parseWithUserCategory: sinon.stub().resolves([])
+                    parseExtended: sinon.stub().resolves([])
                 };
             });
             it('should load topics via websocket `categories.loadMore`', () => {
@@ -249,13 +249,13 @@ describe('providers/nodebb/categor', () => {
                     spy.callCount.should.equal(10);
                 });
             });
-            it('should parse topic with `forum.Topic.parseWithUserCategory`', () => {
+            it('should parse topic with `forum.Topic.parseExtended`', () => {
                 const expected = Math.random();
                 forum._emit.onFirstCall().resolves({
                     topics: [expected]
                 });
                 return category.getRecentTopics(spy).then(() => {
-                    forum.Topic.parseWithUserCategory.calledWith(expected).should.be.true;
+                    forum.Topic.parseExtended.calledWith(expected).should.be.true;
                 });
             });
             it('should pass expected values to progress fn', () => {
@@ -265,7 +265,7 @@ describe('providers/nodebb/categor', () => {
                 const topic = Math.random();
                 const categoryval = Math.random();
                 const user = Math.random();
-                forum.Topic.parseWithUserCategory.resolves([topic, user,categoryval]);
+                forum.Topic.parseExtended.resolves([topic, user, categoryval]);
                 return category.getRecentTopics(spy).then(() => {
                     spy.calledWith(topic, user, categoryval).should.be.true;
                 });
@@ -275,11 +275,11 @@ describe('providers/nodebb/categor', () => {
                     forum._emit.rejects('bad');
                     return category.getRecentTopics(spy).should.be.rejected;
                 });
-                it('should reject when Topic.parseWithUserCategory rejects', () => {
+                it('should reject when Topic.parseExtended rejects', () => {
                     forum._emit.onFirstCall().resolves({
                         topics: [1]
                     });
-                    forum.Topic.parseWithUserCategory.rejects('bad');
+                    forum.Topic.parseExtended.rejects('bad');
                     return category.getRecentTopics(spy).should.be.rejected;
                 });
                 it('should reject when progress fn rejects', () => {

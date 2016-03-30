@@ -6,7 +6,7 @@ const utils = require('../../lib/utils');
  */
 exports.bindCategory = function bindCategory(forum) {
     function onEachTopic(eachTopic) {
-        return (data) => forum.Topic.parseWithUserCategory(data)
+        return (data) => forum.Topic.parseExtended(data)
             .then((parsed) => eachTopic(parsed[0], parsed[1], parsed[2]));
     }
     class Category {
