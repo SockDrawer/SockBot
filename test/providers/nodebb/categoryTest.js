@@ -161,7 +161,11 @@ describe('providers/nodebb/categor', () => {
                 const topic = Math.random();
                 const categoryval = Math.random();
                 const user = Math.random();
-                forum.Topic.parseExtended.resolves([topic, user, categoryval]);
+                forum.Topic.parseExtended.resolves({
+                    topic: topic,
+                    user: user,
+                    category: categoryval
+                });
 
                 return category.getAllTopics(spy).then(() => {
                     spy.calledWith(topic, user, categoryval).should.be.true;
@@ -265,7 +269,11 @@ describe('providers/nodebb/categor', () => {
                 const topic = Math.random();
                 const categoryval = Math.random();
                 const user = Math.random();
-                forum.Topic.parseExtended.resolves([topic, user, categoryval]);
+                forum.Topic.parseExtended.resolves({
+                    topic: topic,
+                    user: user,
+                    category: categoryval
+                });
                 return category.getRecentTopics(spy).then(() => {
                     spy.calledWith(topic, user, categoryval).should.be.true;
                 });

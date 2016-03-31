@@ -1,10 +1,9 @@
 'use strict';
+const debug = require('debug')('sockbot:providers:noderbb:notifications');
 const string = require('string');
 const utils = require('../../lib/utils');
 
 exports.bindNotification = function bindNotification(forum) {
-    const commandTest = new RegExp(`/(^|\\n)(!\\w+|@${forum.username})`);
-
     class Notification {
         /**
          * description
@@ -209,6 +208,7 @@ exports.bindNotification = function bindNotification(forum) {
          */
         static activate() {
             forum.socket.on('event:new_notification', notifyHandler);
+            forum.emit('log', 'Notifications Activated: Now listening for new notifications');
         }
 
         /**
@@ -217,6 +217,7 @@ exports.bindNotification = function bindNotification(forum) {
          */
         static deactivate() {
             forum.socket.off('event:new_notification', notifyHandler);
+            forum.emit('log', 'Notifications Deactivated: No longer listening for new notifications');
         }
     }
 
@@ -227,6 +228,7 @@ exports.bindNotification = function bindNotification(forum) {
     function notifyHandler(data) {
         const notification = Notification.parse(data);
         //TODO: apply ignore filtering, also rate limiting
+        debug(`Notification ${notification.id}: ${notification.label} received`);
         forum.emit(`notification:${notification.type}`, notification);
         forum.emit('notification', notification);
         return forum.Commands.get(notification).then((command) => command.execute());

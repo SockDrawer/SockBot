@@ -1,14 +1,30 @@
 'use strict';
+/**
+ * NodeBB provider module Topic class
+ * @module sockbot.providers.nodebb.Topic
+ * @author Accalia
+ * @license MIT
+ */
 const utils = require('../../lib/utils');
 
+/**
+ * Create a Topic class and bind it to a forum instance
+ *
+ * @param {Provider} forum A forum instance to bind to constructed Topic class
+ * @returns {User} A Topic class bound to the provided `forum` instance
+ */
 exports.bindTopic = function bindTopic(forum) {
     class Topic {
         /**
-         * Construct a topic object from a provided payload
+         * Construct a topic object from a provided payload.
          *
+         * This constructor is intended for private use only, if you need top construct a topic from payload data use
+         * `Topic.parse()` instead.
+         *
+         * @private
          * @class
          *
-         * @param {*} payload Serilaized topic representation retrieved from forum
+         * @param {*} payload Payload to construct the User object out of
          */
         constructor(payload) {
             payload = utils.parseJSON(payload);
@@ -28,7 +44,9 @@ exports.bindTopic = function bindTopic(forum) {
         /**
          * Forum specific ID for topic author
          *
-         * @type {*}
+         * @public
+         *
+         * @type {!number}
          */
         get authorId() {
             return utils.mapGet(this, 'authorId');
@@ -37,7 +55,9 @@ exports.bindTopic = function bindTopic(forum) {
         /**
          * Topic title
          *
-         * @type {string}
+         * @public
+         *
+         * @type {!string}
          */
         get title() {
             return utils.mapGet(this, 'title');
@@ -46,7 +66,9 @@ exports.bindTopic = function bindTopic(forum) {
         /**
          * DateTime that the topic was created
          *
-         * @type {Date}
+         * @public
+         *
+         * @type {!Date}
          */
         get posted() {
             return utils.mapGet(this, 'posted');
@@ -55,7 +77,9 @@ exports.bindTopic = function bindTopic(forum) {
         /**
          * DateTime that the topic was last replied to
          *
-         * @type {Date}
+         * @public
+         *
+         * @type {!Date}
          */
         get lastPosted() {
             return utils.mapGet(this, 'lastPosted');
@@ -64,7 +88,9 @@ exports.bindTopic = function bindTopic(forum) {
         /**
          * Forum Specific Topic Id
          *
-         * @type {*}
+         * @public
+         *
+         * @type {!number}
          */
         get id() {
             return utils.mapGet(this, 'id');
@@ -73,7 +99,9 @@ exports.bindTopic = function bindTopic(forum) {
         /**
          * Forum id of the opening post
          *
-         * @type {*}
+         * @public
+         *
+         * @type {!number}
          */
         get mainPostId() {
             return utils.mapGet(this, 'mainPostId');
@@ -81,6 +109,8 @@ exports.bindTopic = function bindTopic(forum) {
 
         /**
          * Count of posts in topic
+         *
+         * @public
          *
          * @type {number}
          */
@@ -90,6 +120,8 @@ exports.bindTopic = function bindTopic(forum) {
 
         /**
          * Retrieve the web URL for the topic
+         *
+         * @public
          *
          * @returns {Promise<string>} Resolves to the web URL for this topic
          *
@@ -103,6 +135,8 @@ exports.bindTopic = function bindTopic(forum) {
 
         /**
          * Reply to this topic with the given content
+         *
+         * @public
          *
          * @param {string} content Post Content
          * @returns {Promise<Post>} Resolves to the newly created Post
@@ -120,6 +154,30 @@ exports.bindTopic = function bindTopic(forum) {
                 .then((result) => forum.Post.parse(result));
         }
 
+        /**
+         * Proccess Post
+         *
+         * @typedef {PostProcessor}
+         * @function
+         *
+         * @param {Post} post Post to process
+         * @param {User} user User who posted `post`
+         * @param {Topic} topic Topic `post` is posted to
+         * @returns {Promise} A promise that fulfills when processing is complete
+         */
+
+        /**
+         * Apply a Promised based function to retrieved post data
+         *
+         * @private
+         *
+         * @param {string} data Post Content
+         * @param {PostProcessor} eachPost A function to process each post
+         * @returns {Promise} Resolves on completion
+         *
+         * @promise
+         * @reject {Error} An Error that occured while posting
+         */
         _forEachPost(data, eachPost) {
             const post = forum.Post.parse(data);
             const user = forum.User.parse(data.user);
@@ -129,6 +187,14 @@ exports.bindTopic = function bindTopic(forum) {
         /**
          * Retrieve all posts from this topic, passing each off to a provided iterator function.
          *
+         * @public
+         *
+         * @param {PostProcessor} eachPost A function to process retrieved posts.
+         * @returns {Promise<Topic>} Resolves to self on completion
+         *
+         * @promise
+         * @fulfill {Topic} Source Topic
+         * @reject {Error} An Error that occured while posting
          */
         getAllPosts(eachPost) {
             return new Promise((resolve, reject) => {
@@ -144,14 +210,22 @@ exports.bindTopic = function bindTopic(forum) {
                     idx += results.posts.length;
                     return utils.iterate(results.posts, (data) => this._forEachPost(data, eachPost))
                         .then(iterate).catch(reject);
-                }).catch((e) => reject(e));
+                }).catch((err) => reject(err));
                 iterate();
             });
         }
 
         /**
-         * description
+         * Retrieve most posts from this topic, passing each off to a provided iterator function.
          *
+         * @public
+         *
+         * @param {PostProcessor} eachPost A function to process retrieved posts.
+         * @returns {Promise<Topic>} Resolves to self on completion
+         *
+         * @promise
+         * @fulfill {Topic} Source Topic
+         * @reject {Error} An Error that occured while posting
          */
         getLatestPosts(eachPost) {
             return forum._emit('topics.loadMore', {
@@ -162,8 +236,16 @@ exports.bindTopic = function bindTopic(forum) {
         }
 
         /**
-         * description
+         * Mark the topic read up to a point
          *
+         * @public
+         *
+         * @param {[number]} postNumber Last read post. Omit to mark the entire topic read
+         * @returns {Promise<Topic>} Resolves to self on completion
+         *
+         * @promise
+         * @fulfill {Topic} Source Topic
+         * @reject {Error} An Error that occured while posting
          */
         markRead(postNumber) {
             if (postNumber) {
@@ -179,8 +261,15 @@ exports.bindTopic = function bindTopic(forum) {
         }
 
         /**
-         * description
+         * Watch the topic for new replies
          *
+         * @public
+         *
+         * @returns {Promise<Topic>} Resolves to self on completion
+         *
+         * @promise
+         * @fulfill {Topic} Source Topic
+         * @reject {Error} An Error that occured while posting
          */
         watch() {
             return forum._emit('topics.follow', this.id)
@@ -188,8 +277,15 @@ exports.bindTopic = function bindTopic(forum) {
         }
 
         /**
-         * description
+         * Stop watching the tipic for new replies
          *
+         * @public
+         *
+         * @returns {Promise<Topic>} Resolves to self on completion
+         *
+         * @promise
+         * @fulfill {Topic} Source Topic
+         * @reject {Error} An Error that occured while posting
          */
         unwatch() {
             return forum._emit('topics.toggleFollow', this.id)
@@ -203,24 +299,47 @@ exports.bindTopic = function bindTopic(forum) {
         }
 
         /**
-         * description
+         * Mute the topic to suppress notifications
          *
+         * @public
+         *
+         * @returns {Promise<Topic>} Resolves to self on completion
+         *
+         * @promise
+         * @fulfill {Topic} Source Topic
+         * @reject {Error} An Error that occured while posting
          */
         mute() {
             return Promise.resolve(this);
         }
 
         /**
-         * description
+         * Unmute the topic, allowing notifications to be generated again.
          *
+         * @public
+         *
+         * @returns {Promise<Topic>} Resolves to self on completion
+         *
+         * @promise
+         * @fulfill {Topic} Source Topic
+         * @reject {Error} An Error that occured while posting
          */
         unmute() {
             return Promise.resolve(this);
         }
 
         /**
-         * description
+         * Retrieve a topic by topic id
          *
+         * @static
+         * @public
+         *
+         * @param {!number} topicId Id of topic to retrieve
+         * @returns {Promise<Topic>} Retrieved topic
+         *
+         * @promise
+         * @fulfill {Topic} Retrieved Topic
+         * @reject {Error} An Error that occured while posting
          */
         static get(topicId) {
             return forum._emit('topics.getTopic', topicId)
@@ -228,20 +347,68 @@ exports.bindTopic = function bindTopic(forum) {
         }
 
         /**
-         * description
+         * Parse a topic from retrieved data
          *
+         * @public
+         *
+         * @param {*} payload Payload to parse into a topic
+         * @returns {Topic} Parsed topic
          */
         static parse(payload) {
             return new Topic(payload);
         }
 
+        /**
+         * @typedef {TopicExtended}
+         * @prop {Topic} topic Topic data
+         * @prop {User} user User data
+         * @prop {Category} category Category data
+         */
+
+        /**
+         * Parse a topic with embedded user and category information into respective objects
+         *
+         * @public
+         *
+         * @param {*} data Data to parse into a topic
+         * @returns {Promise<TopicExtended>} Parsed Results
+         *
+         * @promise
+         * @fulfill {TopicExtended} Parsed topic data
+         */
         static parseExtended(data) {
             const topic = forum.Topic.parse(data);
             const user = forum.User.parse(data.user);
             const category = forum.Category.parse(data.category);
-            return Promise.resolve([topic, user, category]);
+            return Promise.resolve({
+                topic: topic,
+                user: user,
+                category: category
+            });
         }
 
+        /**
+         * Proccess a Topic
+         *
+         * @typedef {TopicProcessor}
+         * @function
+         *
+         * @param {Topic} topic Topic to process
+         * @param {User} user User who started `topic`
+         * @param {Category} category Category `topic` is contained in
+         * @returns {Promise} A promise that fulfills when processing is complete
+         */
+
+        /**
+         * Retrieve, parse, and handle many topics
+         *
+         * @private
+         *
+         * @param {string} room The type of topic list to retrieve
+         * @param {object} query Additional query parameters to filter list on
+         * @param {TopicProcessor} eachTopic a function to process each retrieved topic
+         * @returns {Promise} A promise that resolves when processing is complete
+         */
         static _getMany(room, query, eachTopic) {
             return new Promise((resolve, reject) => {
                 query.after = 0;
@@ -251,7 +418,7 @@ exports.bindTopic = function bindTopic(forum) {
                     }
                     query.after += results.topics.length;
                     const each = (data) => Topic.parseExtended(data)
-                        .then((parsed) => eachTopic(parsed[0], parsed[1], parsed[2]));
+                        .then((parsed) => eachTopic(parsed.topic, parsed.user, parsed.category));
                     return utils.iterate(results.topics, each)
                         .then(iterate).catch(reject);
                 }).catch(reject);
@@ -259,10 +426,26 @@ exports.bindTopic = function bindTopic(forum) {
             });
         }
 
+        /**
+         * Get All Unread Topics
+         *
+         * @public
+         *
+         * @param {TopicProcessor} eachTopic A function to process each retrieved topic
+         * @returns {Promise} A promise that resolves when all topics have been processed
+         */
         static getUnreadTopics(eachTopic) {
             return Topic._getMany('topics.loadMoreUnreadTopics', {}, eachTopic);
         }
 
+        /**
+         * Get All Topics in order of most recent activity
+         *
+         * @public
+         *
+         * @param {TopicProcessor} eachTopic A function to process each retrieved topic
+         * @returns {Promise} A promise that resolves when all topics have been processed
+         */
         static getRecentTopics(eachTopic) {
             return Topic._getMany('topics.loadMoreFromSet', {
                 set: 'topics:recent'

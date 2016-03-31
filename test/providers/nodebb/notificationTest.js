@@ -24,6 +24,7 @@ describe('providers/nodebb/notification', () => {
         const Notification = testModule.bindNotification(forum);
         beforeEach(() => {
             forum._emit = sinon.stub().resolves();
+            forum.emit = sinon.stub();
         });
         describe('ctor()', () => {
             it('should store instance data in utils.storage', () => {
