@@ -1,14 +1,31 @@
 'use strict';
+/**
+ * NodeBB provider module User class
+ * @module sockbot.providers.nodebb.User
+ * @author Accalia
+ * @license MIT
+ */
+
 const utils = require('../../lib/utils');
 
+/**
+ * Create a Post class and bind it to a forum instance
+ *
+ * @param {Provider} forum A forum instance to bind to constructed Post class
+ * @returns {User} A Post class bound to the provided `forum` instance
+ */
 exports.bindPost = function bindPost(forum) {
     class Post {
         /**
-         * Construct a post object from a previously retrieved payload
+         * Construct a Post object from payload
          *
+         * This constructor is intended to be private use only, if you need to construct a post from payload data use
+         * `User.parse()` instead
+         *
+         * @private
          * @class
          *
-         * @param {*} payload Serialized post representation retrieved from forum
+         * @param {*} payload Payload to construct the Post object out of
          */
         constructor(payload) {
             payload = utils.parseJSON(payload);
@@ -23,9 +40,11 @@ exports.bindPost = function bindPost(forum) {
         }
 
         /**
-         * Forum specific ID for post author
+         * ID of the post author
          *
-         * @type {*}
+         * @public
+         *
+         * @type {!number}
          */
         get authorId() {
             return utils.mapGet(this, 'authorId');
@@ -34,6 +53,8 @@ exports.bindPost = function bindPost(forum) {
         /**
          * Raw content of the post, before any HTML transformation has been applied
          *
+         * @public
+         *
          * @type {string}
          */
         get content() {
@@ -41,8 +62,15 @@ exports.bindPost = function bindPost(forum) {
         }
 
         /**
-         * description
+         * Retrieve the HTML representation of the raw content of the post
          *
+         * @public
+         *
+         * @returns {Promise<string>} Resolves to the HTML markup for the post
+         *
+         * @promise
+         * @fulfill {string} The HTML markup for this post
+         * @reject {Error} An Error that occured while deleting
          */
         markup() {
             return Post.preview(this.content);
@@ -51,6 +79,8 @@ exports.bindPost = function bindPost(forum) {
         /**
          * DateTime that the post was posted
          *
+         * @public
+         *
          * @type {Date}
          */
         get posted() {
@@ -58,18 +88,22 @@ exports.bindPost = function bindPost(forum) {
         }
 
         /**
-         * Forum specific ID for post
+         * ID of the post
          *
-         * @type {*}
+         * @public
+         *
+         * @type {number}
          */
         get id() {
             return utils.mapGet(this, 'id');
         }
 
         /**
-         * Forum specific ID for topic that contains this post
+         * ID of the topic that contains this post
          *
-         * @type {*}
+         * @public
+         *
+         * @type {number}
          */
         get topicId() {
             return utils.mapGet(this, 'topicId');
@@ -77,6 +111,8 @@ exports.bindPost = function bindPost(forum) {
 
         /**
          * Retrieve the direct URL for this post
+         *
+         * @public
          *
          * @returns {Promise<string>} Resolves to the web URL for this post
          *
@@ -97,6 +133,8 @@ exports.bindPost = function bindPost(forum) {
         /**
          * Reply to this post with the given content
          *
+         * @public
+         *
          * @param {string} content Post content
          * @returns {Promise<Post>} Resolves to the newly created Post
          *
@@ -109,8 +147,13 @@ exports.bindPost = function bindPost(forum) {
         }
 
         /**
-         * Reply to this post with the given content
+         * Post a reply to a post with the given content
          *
+         * @public
+         * @static
+         *
+         * @param {string} topicId Topic Id to reply to
+         * @param {string} postId Post Id to reply to
          * @param {string} content Post content
          * @returns {Promise<Post>} Resolves to the newly created Post
          *
@@ -129,6 +172,8 @@ exports.bindPost = function bindPost(forum) {
 
         /**
          * Edit this post to contain new content
+         *
+         * @public
          *
          * @param {string} newContent New post content
          * @param {string} [reason] Post edit reason
@@ -156,6 +201,8 @@ exports.bindPost = function bindPost(forum) {
         /**
          * Append new content to this post
          *
+         * @public
+         *
          * @param {string} newContent New post content
          * @param {string} [reason] Post edit reason
          *
@@ -179,6 +226,18 @@ exports.bindPost = function bindPost(forum) {
                 .then((result) => Post.parse(result));
         }
 
+        /**
+         * Take action on a post
+         *
+         * @private
+         *
+         * @param {string} action Action Event to emit
+         * @returns {Promise<Post>} Resolves to self on completion
+         *
+         * @promise
+         * @fulfill Post The post upon which an action has been made
+         * @reject {Error} An Error that occured while deleting
+         */
         _postAction(action) {
             return forum._emit(action, {
                 pid: this.id,
@@ -188,6 +247,8 @@ exports.bindPost = function bindPost(forum) {
 
         /**
          * Delete this post
+         *
+         * @public
          *
          * @returns {Promise<Post>} Resolves to the deleted post
          *
@@ -202,6 +263,8 @@ exports.bindPost = function bindPost(forum) {
         /**
          * Undelete this post
          *
+         * @public
+         *
          * @returns {Promise<Post>} Resolves to the undeleted post
          *
          * @promise
@@ -212,6 +275,18 @@ exports.bindPost = function bindPost(forum) {
             return this._postAction('posts.restore');
         }
 
+        /**
+         * Take action on a post within a room
+         *
+         * @private
+         *
+         * @param {string} action Action Event to emit
+         * @returns {Promise<Post>} Resolves to self on completion
+         *
+         * @promise
+         * @fulfill Post The post upon which an action has been made
+         * @reject {Error} An Error that occured while deleting
+         */
         _roomAction(action) {
             return forum._emit(action, {
                 pid: this.id,
@@ -221,6 +296,8 @@ exports.bindPost = function bindPost(forum) {
 
         /**
          * Upvote this post
+         *
+         * @public
          *
          * @returns {Promise<Post>} Resolves to the upvoted post
          *
@@ -235,6 +312,8 @@ exports.bindPost = function bindPost(forum) {
         /**
          * Downvote this post
          *
+         * @public
+         *
          * @returns {Promise<Post>} Resolves to the downvoted post
          *
          * @promise
@@ -247,6 +326,8 @@ exports.bindPost = function bindPost(forum) {
 
         /**
          * Unvote this post
+         *
+         * @public
          *
          * @returns {Promise<Post>} Resolves to the unvoted post
          *
@@ -261,6 +342,8 @@ exports.bindPost = function bindPost(forum) {
         /**
          * Bookmark this post
          *
+         * @public
+         *
          * @returns {Promise<Post>} Resolves to the bookmarked post
          *
          * @promise
@@ -273,6 +356,8 @@ exports.bindPost = function bindPost(forum) {
 
         /**
          * Remove a bookmark from this post
+         *
+         * @public
          *
          * @returns {Promise<Post>} Resolves to the unbookmarked post
          *
@@ -287,6 +372,7 @@ exports.bindPost = function bindPost(forum) {
         /**
          * Retrieve a post identified by postId
          *
+         * @public
          * @static
          *
          * @param {*} postId Forum specific post id to retrieve
@@ -303,6 +389,7 @@ exports.bindPost = function bindPost(forum) {
         /**
          * Construct a post object from a previously retrieved payload
          *
+         * @public
          * @static
          *
          * @param {*} payload Serialized post representation retrieved from forum
@@ -313,7 +400,17 @@ exports.bindPost = function bindPost(forum) {
         }
 
         /**
-         * description
+         * Render the content to HTML as it would be rendered for a post
+         *
+         * @public
+         * @static
+         *
+         * @param {string} content Content to render HTML PReview for
+         * @returns {Promise<String>} Resolves to the rendered HTML
+         *
+         * @promise
+         * @fulfill {string} Rendered HTML for `content`
+         * @reject {Error} Any error that occurred rendering HTML for `content`
          *
          */
         static preview(content) {

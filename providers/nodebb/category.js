@@ -1,8 +1,17 @@
 'use strict';
+/**
+ * NodeBB provider module Category class
+ * @module sockbot.providers.nodebb.Category
+ * @author Accalia
+ * @license MIT
+ */
 const utils = require('../../lib/utils');
 
 /**
- * description
+ * Create a Category class and bind it to a forum instance
+ *
+ * @param {Provider} forum A forum instance to bind to constructed Category class
+ * @returns {Category} A Category class bound to the provided `forum` instance
  */
 exports.bindCategory = function bindCategory(forum) {
     function onEachTopic(eachTopic) {
@@ -11,8 +20,15 @@ exports.bindCategory = function bindCategory(forum) {
     }
     class Category {
         /**
-         * description
+         * Construct a category object from a provided payload.
          *
+         * This constructor is intended for private use only, if you need top construct a category from payload data use
+         * `Category.parse()` instead.
+         *
+         * @private
+         * @class
+         *
+         * @param {*} payload Payload to construct the Category object out of
          */
         constructor(payload) {
             payload = utils.parseJSON(payload);
