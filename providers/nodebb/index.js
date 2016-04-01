@@ -5,7 +5,7 @@
  * @author Accalia
  * @license MIT
  */
- 
+
 const debug = require('debug')('sockbot:provider:nodebb');
 const EventEmitter = require('events').EventEmitter;
 
@@ -256,12 +256,22 @@ class Forum extends EventEmitter {
      */
 
     /**
+     * Promising Function
+     *
+     * @typedef {promiseFunction}
+     * @function
+     *
+     * @returns {Promise} Resolves when function is complete
+     *
+     */
+
+    /**
      * Plugin Object
      *
      * @typedef {Plugin}
      *
-     * @property {function<Promise>} activate Activates plugin
-     * @property {function<Promise>} deactivate Deactivates plugin
+     * @property {promiseFunction} activate Activates plugin
+     * @property {promiseFunction} deactivate Deactivates plugin
      *
      */
 
@@ -360,9 +370,8 @@ class Forum extends EventEmitter {
                 results.shift();
                 if (results.length < 2) {
                     return resolve(results[0]);
-                } else {
-                    return resolve(results);
                 }
+                return resolve(results);
             });
             this.socket.emit.apply(this.socket, args);
         });

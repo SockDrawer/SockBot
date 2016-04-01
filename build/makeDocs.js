@@ -1,5 +1,8 @@
 'use strict';
 
+// this is a build file! no documentation here! ...... please?
+/* eslint-disable require-jsdoc */
+
 const async = require('async'),
     dmd = require('dmd'),
     fs = require('fs'),
@@ -8,14 +11,22 @@ const async = require('async'),
     mkdirp = require('mkdirp'),
     path = require('path');
 
-const documentableFiles = ['*.js', '!./gulpfile.js', '**/lib/**/*.js', '**/classes/**/*.js', '**/plugins/**/*.js',
-    '!node_modules/**', '!test/**', '**/providers/**/*.js'
+const docFiles = ['*.js', '!./gulpfile.js', '**/lib/**/*.js', '**/classes/**/*.js', '**/plugins/**/*.js',
+    '!node_modules/**', '**/providers/**/*.js', '!test/**/*.js'
 ];
-const documentationDest = path.join('docs', 'api');
+const docDest = path.join('docs', 'api');
+
+function log(msg) {
+    console.log(msg); //eslint-disable-line no-console
+}
+
+function warn(msg) {
+    console.warn(msg); //eslint-disable-line no-console
+}
 
 function processFile(file, complete) {
-    const dir = path.join(documentationDest, path.dirname(file));
-    const name = path.basename(file, '.js') + '.md';
+    const dir = path.join(docDest, path.dirname(file));
+    const name = `${path.basename(file, '.js') }.md`;
     mkdirp(dir, (err) => {
         if (err) {
             complete(err);
@@ -25,21 +36,20 @@ function processFile(file, complete) {
         const outFile = fs.createWriteStream(path.join(dir, name));
         inFile.pipe(jsdoc()).pipe(dmd()).pipe(outFile);
         outFile.on('finish', () => {
-            console.log('Generate markdown: ' + file); //eslint-disable-line no-console
+            log(`Generate markdown: ${file}`);
             complete();
         });
     });
 }
 
 function verifyDocumented(file, complete) {
-    fs.stat(file, function (e, stats) {
-        if (e) {
-            complete(e);
+    fs.stat(file, (err, stats) => {
+        if (err) {
+            complete(err);
         }
         if (stats.size === 0) {
-            const origFile = '.' + file.replace(/[.]md$/, '.js').slice(documentationDest.length);
-            console.warn('Verify: ' + origFile + ' has no documentation. ' + //eslint-disable-line no-console
-                'Consider adding documentation for this file.');
+            const origFile = `.${file.replace(/[.]md$/, '.js').slice(docDest.length)}`;
+            warn(`Verify: ${origFile} has no documentation. Consider adding documentation for this file.`);
             fs.unlink(file, complete);
             return;
         }
@@ -47,12 +57,11 @@ function verifyDocumented(file, complete) {
     });
 }
 
-function verifySourceExists(file, complete) {
-    const origFile = '.' + file.replace(/[.]md$/, '.js').slice(documentationDest.length);
-    fs.stat(origFile, (e) => {
-        if (e) {
-            console.warn('Verify: ' + origFile + ' has been removed. ' + //eslint-disable-line no-console
-                'Removing Documentation.');
+function verifyExists(file, complete) {
+    const origFile = `.${file.replace(/[.]md$/, '.js').slice(docDest.length)}`;
+    fs.stat(origFile, (err) => {
+        if (err) {
+            warn(`Verify: ${origFile} has been removed. Removing Documentation.`);
             fs.unlink(file, complete);
             return;
         }
@@ -60,25 +69,27 @@ function verifySourceExists(file, complete) {
     });
 }
 
-function verifyDocumentation(complete) {
-    glob(documentationDest + '/**/*.md', (e, files) => {
+function verifyDocs(complete) {
+    glob(`${docDest}/**/*.md`, (_, files) => {
         async.each(files, (file, next) => {
-            verifyDocumented(file, () => verifySourceExists(file, next));
+            verifyDocumented(file, () => verifyExists(file, next));
         }, complete);
     });
 }
 
-
 function generateDocs(complete) {
-    glob(documentableFiles, (e, files) => {
+    glob(docFiles, (_, files) => {
         async.each(files, processFile, complete);
     });
 }
 
-
-const JobNumber = process.env.TRAVIS_JOB_NUMBER,
-    PullRequestFlag = process.env.TRAVIS_PULL_REQUEST,
+const JobNumber = process.env.TRAVIS_JOB_NUMBER, //eslint-disable-line no-process-env
+    PullRequestFlag = process.env.TRAVIS_PULL_REQUEST, //eslint-disable-line no-process-env
     PullRequest = PullRequestFlag && PullRequestFlag !== 'false';
 if (!PullRequest && (!JobNumber || /[.]1$/.test(JobNumber))) {
-    generateDocs(() => verifyDocumentation(() => 0));
+    generateDocs(() => {
+        log('Documentation generated. Verifying docs');
+        return verifyDocs(() => log('Verification complete'));
+    });
 }
+/* eslint-enable require-jsdoc */

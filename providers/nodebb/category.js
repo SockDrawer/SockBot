@@ -14,6 +14,26 @@ const utils = require('../../lib/utils');
  * @returns {Category} A Category class bound to the provided `forum` instance
  */
 exports.bindCategory = function bindCategory(forum) {
+    /**
+     * Topic Processor
+     *
+     * @typedef {TopicProcesspr}
+     * @function
+     *
+     * @param {Topic} topic Topic to process
+     * @param {User} user Topic Opening User
+     * @param {Category} category The category `topic` belongs to
+     * @returns {Promise} Resolves on completion
+     */
+
+     /**
+      * Create a function to process topic data using a Topic Processor
+      *
+      * @private
+      *
+      * @param {TopicProcessor} eachTopic Function to process topics
+      * @returns {function} Internal topic processing function
+      */
     function onEachTopic(eachTopic) {
         return (data) => forum.Topic.parseExtended(data)
             .then((parsed) => eachTopic(parsed.topic, parsed.user, parsed.category));
@@ -46,72 +66,100 @@ exports.bindCategory = function bindCategory(forum) {
         }
 
         /**
-         * description
+         * Category Id
          *
+         * @public
+         *
+         * @type {number}
          */
         get id() {
             return utils.mapGet(this, 'id');
         }
 
         /**
-         * description
+         * Category Name
          *
+         * @public
+         *
+         * @type {string}
          */
         get name() {
             return utils.mapGet(this, 'name');
         }
 
         /**
-         * description
+         * Category description
          *
+         * @public
+         *
+         * @type {string}
          */
         get description() {
             return utils.mapGet(this, 'description');
         }
 
         /**
-         * description
+         * Parent Category Id
          *
+         * @public
+         *
+         * @type {number}
          */
         get parentId() {
             return utils.mapGet(this, 'parentId');
         }
 
         /**
-         * description
+         * Number of topics in this category
          *
+         * @public
+         *
+         * @type {number}
          */
         get topicCount() {
             return utils.mapGet(this, 'topicCount');
         }
 
         /**
-         * description
+         * Number of posts in this category
          *
+         * @public
+         *
+         * @type {number}
          */
         get postCount() {
             return utils.mapGet(this, 'postCount');
         }
 
         /**
-         * description
+         * Number of "recent" posts in this category
          *
+         * @public
+         *
+         * @type {number}
          */
         get recentPosts() {
             return utils.mapGet(this, 'recentPosts');
         }
 
         /**
-         * description
+         * The web URL of the category
          *
+         * @public
+         *
+         * @returns {Promise<string>} Resolves to the web URL         *
          */
         url() {
             return Promise.resolve(`${forum.url}/category/${utils.mapGet(this, 'url')}`);
         }
 
         /**
-         * description
+         * Get all Topics in the category
          *
+         * @public
+         *
+         * @param {TopicProcessor} eachTopic A function to process each topic
+         * @returns {Promise} Resolves when all topics have been processed
          */
         getAllTopics(eachTopic) {
             return new Promise((resolve, reject) => {
@@ -134,8 +182,12 @@ exports.bindCategory = function bindCategory(forum) {
         }
 
         /**
-         * description
+         * Get all recently active Topics in the category
          *
+         * @public
+         *
+         * @param {TopicProcessor} eachTopic A function to process each topic
+         * @returns {Promise} Resolves when all topics have been processed
          */
         getRecentTopics(eachTopic) {
             const payload = {
@@ -149,6 +201,14 @@ exports.bindCategory = function bindCategory(forum) {
                 .then(() => this);
         }
 
+        /**
+         * Apply an action to this category
+         *
+         * @private
+         *
+         * @param {string} action The action to perform
+         * @returns {Promise<Category>} Resolves to delf on completion
+         */
         _categoryAction(action) {
             const payload = {
                 cid: this.id
@@ -158,47 +218,72 @@ exports.bindCategory = function bindCategory(forum) {
         }
 
         /**
-         * description
+         * Watch this category for new activity
          *
+         * @public
+         *
+         * @returns {Promise<Category>} Resolves to self on completion
          */
         watch() {
             return this._categoryAction('categories.watch');
         }
 
         /**
-         * description
+         * Stop watching this category for new activity
          *
+         * @public
+         *
+         * @returns {Promise<Category>} Resolves to self on completion
          */
         unwatch() {
             return this._categoryAction('categories.ignore');
         }
 
         /**
-         * description
+         * Prevent this category from generating any notifications
          *
+         * This is not currently supported by NodeBB and is a noop
+         *
+         * @public
+         *
+         * @returns {Promise<Category>} Resolves to self on completion
          */
         mute() {
             return Promise.resolve(this);
         }
 
         /**
-         * description
+         * Allow this category to generate notifications
          *
+         * This is not currently supported by NodeBB and is a noop
+         *
+         * @public
+         *
+         * @returns {Promise<Category>} Resolves to self on completion
          */
         unmute() {
             return Promise.resolve(this);
         }
 
         /**
-         * description
+         * retrieve a category by Id
          *
+         * @public
+         *
+         * @param {number} categoryId Id of the category to retrieve
+         * @returns {Promise<Category>} Resolves to retrieved category
          */
         static get(categoryId) {
             return forum.fetchObject('categories.getCategory', categoryId, Category.parse);
         }
 
         /**
-         * description
+         * Parse a category from payload data
+         *
+         * @public
+         *
+         * @param {*} payload Data to parse as category
+         * @returns {Category} Parsed category
          *
          */
         static parse(payload) {

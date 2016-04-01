@@ -240,7 +240,7 @@ exports.bindTopic = function bindTopic(forum) {
          *
          * @public
          *
-         * @param {[number]} postNumber Last read post. Omit to mark the entire topic read
+         * @param {number} [postNumber] Last read post. Omit to mark the entire topic read
          * @returns {Promise<Topic>} Resolves to self on completion
          *
          * @promise
