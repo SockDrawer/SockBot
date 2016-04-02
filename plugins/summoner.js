@@ -7,7 +7,7 @@ module.exports = function summoner(forum, config) {
         'Yes master %name%, I shall appear as summoned.',
         'Yes mistress %name%, I shall appear as summoned.'
     ];
-
+    config = config || {}; // prevent nulls
     if (Array.isArray(config) && config.length > 0) {
         messages = config;
     } else if (Array.isArray(config.messages) && config.messages.length > 0) {
@@ -23,13 +23,9 @@ module.exports = function summoner(forum, config) {
      * @returns {Promise} Resolves when event is processed
      */
     function handler(notification) {
-        return Promise.all([notification.getPost(),
-                notification.getUser()
-            ])
-            .then((data) => {
-                const post = data[0],
-                    user = data[1],
-                    index = Math.floor(Math.random() * messages.length);
+        return notification.getUser()
+            .then((user) => {
+                const index = Math.floor(Math.random() * messages.length);
                 const message = messages[index].replace(/%(\w+)%/g, (_, key) => {
                     let value = user[key] || `%${key}%`;
                     if (typeof value !== 'string') {
@@ -37,8 +33,11 @@ module.exports = function summoner(forum, config) {
                     }
                     return value;
                 });
-                return post.reply(message);
-            }).catch((err) => forum.emit('error', err));
+                return forum.Post.reply(notification.topicId, notification.postId, message);
+            }).catch((err) => {
+                forum.emit('error', err);
+                return Promise.reject(err);
+            });
     }
 
     /**
