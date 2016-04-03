@@ -82,8 +82,7 @@ describe('lib/app', () => {
             };
             cfg.plugins[name] = true;
             testModule.loadPlugins(forum, cfg);
-            testModule.relativeRequire.calledWith('../plugins', name, require).should.be.false;
-
+            testModule.relativeRequire.calledWith('plugins', name, testModule.require).should.be.true;
         });
         it('should log message on plugin load', () => {
             const name = `name${Math.random()}`;
