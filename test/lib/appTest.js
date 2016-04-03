@@ -187,21 +187,19 @@ describe('lib/app', () => {
             DummyForum.activate.rejects('bad');
             return testModule.activateConfig(basicConfig).should.be.rejected;
         });
-        describe('events', () => {
-            it('should register for forum event `log`', () => {
-                return testModule.activateConfig(basicConfig).then(() => {
-                    instance.on.calledWith('log', testModule.log).should.be.true;
-                });
+        it('should register for forum event `log`', () => {
+            return testModule.activateConfig(basicConfig).then(() => {
+                instance.on.calledWith('log', testModule.log).should.be.true;
             });
-            it('should register for forum event `log`', () => {
-                return testModule.activateConfig(basicConfig).then(() => {
-                    instance.on.calledWith('error', testModule.error).should.be.true;
-                });
+        });
+        it('should register for forum event `log`', () => {
+            return testModule.activateConfig(basicConfig).then(() => {
+                instance.on.calledWith('error', testModule.error).should.be.true;
             });
-            it('should register for forum event `logExtended`', () => {
-                return testModule.activateConfig(basicConfig).then(() => {
-                    instance.on.calledWith('logExtended', utils.logExtended).should.be.true;
-                });
+        });
+        it('should register for forum event `logExtended`', () => {
+            return testModule.activateConfig(basicConfig).then(() => {
+                instance.on.calledWith('logExtended', utils.logExtended).should.be.true;
             });
         });
         describe('logging', () => {
