@@ -1,6 +1,6 @@
-SockBot 2.0
+SockBot 3.0
 ===========
-Sockbot - A rebuild of a sock puppet robot worthy of TheDailyWTF in EcmaScript 6.
+Sockbot - A sock puppet robot worthy of TheDailyWTF Written and testedin EcmaScript 6.
 
 Developers
 ==========
