@@ -12,6 +12,7 @@
  * Returns a plugin object bound to the provided forum provider
  *
  * @param {Provider} forum Active forum Provider
+ * @param {object|Array} config Plugin configuration
  * @returns {Plugin} An instance of the Summoner plugin
  */
 module.exports = function summoner(forum, config) {
