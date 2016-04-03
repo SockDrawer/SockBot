@@ -1,102 +1,335 @@
 'use strict';
-/*globals describe, it, before, beforeEach, after, afterEach*/
-/*eslint no-unused-expressions:0 */
 
-const chai = require('chai'),
-    sinon = require('sinon');
+const chai = require('chai');
+
+chai.use(require('chai-as-promised'));
+chai.use(require('chai-string'));
 chai.should();
-const spawner = require('child_process');
 
-// The thing we're testing
-const app = require('../../lib/app');
+const sinon = require('sinon');
+require('sinon-as-promised');
 
-describe('app.js', () => {
-    let hostProcess, cwd;
-    beforeEach(() => {
-        sinon.stub(spawner, 'spawn');
-        cwd = '/foo/bar/baz';
-        hostProcess = {
-            execPath: '/foo/bar/node',
-            execArgv: [],
-            argv: ['node', './lib/app.js'],
-            cwd: () => cwd
-        };
+const testModule = require('../../lib/app'),
+    config = require('../../lib/config'),
+    commands = require('../../lib/commands'),
+    utils = require('../../lib/utils');
+const path = require('path');
+const dirname = path.posix.resolve(__dirname, '../../lib');
+
+describe('lib/app', () => {
+    describe('relativeRequire()', () => {
+        it('should require relative to package.json file', () => {
+            const spy = sinon.spy();
+            const expected = `${dirname}/../foo/bar`;
+            testModule.relativeRequire('foo', 'bar', spy);
+            spy.calledWith(expected).should.be.true;
+        });
+        it('should require relative to config for relative path', () => {
+            const spy = sinon.spy();
+            config.basePath = '/bar/baz/';
+            const expected = '/bar/baz/foo';
+            testModule.relativeRequire('../ardvark', './foo', spy);
+            spy.calledWith(expected).should.be.true;
+        });
+        it('should require relative to config for walking relative path', () => {
+            const spy = sinon.spy();
+            config.basePath = '/bar/baz/';
+            const expected = '/bar/foo';
+            testModule.relativeRequire('../ardvark', '../foo', spy);
+            spy.calledWith(expected).should.be.true;
+        });
+        it('should require absolute for absolute path', () => {
+            const spy = sinon.spy();
+            const expected = '/foo/to/the/bar';
+            testModule.relativeRequire('../ardvark', '/foo/to/the/bar', spy);
+            spy.calledWith(expected).should.be.true;
+        });
+        it('should require module direct on ENOENT', () => {
+            const spy = sinon.stub();
+            spy.onFirstCall().throws(new Error('Cannot find module icky bad'));
+            testModule.relativeRequire('../ardvark', 'bar', spy);
+            spy.calledWith('bar').should.be.true;
+        });
+        it('should rethrow non ENOENT error', () => {
+            const spy = sinon.stub();
+            spy.throws(new Error('Pterodons!'));
+            chai.expect(() => testModule.relativeRequire('../ardvark', 'bar', spy)).to.throw('Pterodons!');
+        });
     });
-    afterEach(() => spawner.spawn.restore());
-    describe('respawn', () => {
-        it('should call child_process.spawn', () => {
-            app.respawn('./foo', [], hostProcess);
-            spawner.spawn.called.should.equal(true);
+    describe('loadPlugins()', () => {
+        let forum = null,
+            sandbox = null;
+        beforeEach(() => {
+            sandbox = sinon.sandbox.create();
+            sandbox.stub(testModule, 'relativeRequire');
+            sandbox.stub(testModule, 'log');
+            forum = {
+                addPlugin: sinon.stub()
+            };
         });
-        it('should respect process.execPath', () => {
-            const path = '/quuux/' + Math.random();
-            hostProcess.execPath = path;
-            app.respawn('./foo', [], hostProcess);
-            spawner.spawn.calledWith(path).should.equal(true);
+        afterEach(() => sandbox.restore());
+        it('should allow zero plugins', () => {
+            testModule.loadPlugins(forum, {
+                plugins: {}
+            });
+            testModule.relativeRequire.called.should.be.false;
         });
-        it('should set spawned process cwd', () => {
-            cwd += '/' + Math.random();
-            app.respawn('./foo', [], hostProcess);
-            const opts = spawner.spawn.firstCall.args[2];
-            opts.cwd.should.equal(cwd);
+        it('should load listed plugins', () => {
+            const name = `name${Math.random()}`;
+            const cfg = {
+                core: {},
+                plugins: {}
+            };
+            cfg.plugins[name] = true;
+            testModule.loadPlugins(forum, cfg);
+            testModule.relativeRequire.calledWith('../plugins', name, require).should.be.false;
+
         });
-        it('should set stdio inherit', () => {
-            app.respawn('./foo', [], hostProcess);
-            const opts = spawner.spawn.firstCall.args[2];
-            opts.stdio.should.equal('inherit');
+        it('should log message on plugin load', () => {
+            const name = `name${Math.random()}`;
+            const username = `user${Math.random()}`;
+            const cfg = {
+                core: {
+                    username: username
+                },
+                plugins: {}
+            };
+            cfg.plugins[name] = true;
+            testModule.loadPlugins(forum, cfg);
+            testModule.log.calledWith(`Loading plugin ${name} for ${username}`).should.equal.true;
         });
-        describe('arguments', () => {
-            it('should pass arguments as expected', () => {
-                const scriptArg = Math.random(),
-                    expected = ['--harmony', app.getFullPath('./foo/bar'), scriptArg];
-                hostProcess.argv.push(scriptArg);
-                app.respawn('./foo/bar', [], hostProcess);
-                const args = spawner.spawn.firstCall.args[1];
-                args.should.deep.equal(expected);
+        it('should add loaded plugin to forum', () => {
+            const cfg = Math.random();
+            const plugin = Math.random();
+            testModule.relativeRequire.returns(plugin);
+            testModule.loadPlugins(forum, {
+                core: {},
+                plugins: {
+                    alpha: cfg
+                }
             });
-            it('should add `--harmony` argument when no flags requested', () => {
-                app.respawn('./foo/bar', [], hostProcess);
-                const args = spawner.spawn.firstCall.args[1];
-                args.should.contain('--harmony');
+            forum.addPlugin.calledWith(plugin, cfg).should.be.true;
+        });
+    });
+    describe('activateConfig()', () => {
+        let sandbox = null,
+            instance = null,
+            basicConfig = null;
+        class DummyForum {
+            constructor(cfg) {
+                this.login = DummyForum.login;
+                this.activate = DummyForum.activate;
+                this.on = sinon.stub();
+                this.config = cfg;
+                instance = this; //eslint-disable-line consistent-this
+            }
+        }
+        beforeEach(() => {
+            sandbox = sinon.sandbox.create();
+            sandbox.stub(testModule, 'relativeRequire');
+            testModule.relativeRequire.returns(DummyForum);
+            sandbox.stub(testModule, 'loadPlugins');
+            sandbox.stub(testModule, 'log');
+            sandbox.stub(commands, 'bindCommands');
+            basicConfig = {
+                core: {
+                    provider: 'hi'
+                }
+            };
+            DummyForum.login = sinon.stub().resolves();
+            DummyForum.activate = sinon.stub().resolves();
+
+        });
+        afterEach(() => sandbox.restore());
+        it('should retrieve provider via relativeRequire', () => {
+            const name = `provider${Math.random()}`;
+            basicConfig.core.provider = name;
+            return testModule.activateConfig(basicConfig).then(() => {
+                testModule.relativeRequire.calledWith('providers', name).should.be.true;
             });
-            it('should add `--harmony` argument when flags ius falsey', () => {
-                app.respawn('./foo/bar', undefined, hostProcess);
-                const args = spawner.spawn.firstCall.args[1];
-                args.should.contain('--harmony');
+        });
+        it('should construct provider instance', () => {
+            return testModule.activateConfig(basicConfig).then(() => {
+                instance.should.be.instanceof(DummyForum);
             });
-            it('should pass script parameter argument in args', () => {
-                const script = '/bar/foo' + Math.random();
-                app.respawn(script, [], hostProcess);
-                const args = spawner.spawn.firstCall.args[1];
-                args.should.contain(app.getFullPath(script));
+        });
+        it('should construct provider instance with configuration information', () => {
+            return testModule.activateConfig(basicConfig).then(() => {
+                instance.config.should.equal(basicConfig);
             });
-            it('should pass argv arguments', () => {
-                const arg1 = '' + Math.random(),
-                    arg2 = '' + Math.random();
-                hostProcess.argv.push(arg1);
-                hostProcess.argv.push(arg2);
-                app.respawn('./lib/cli', [], hostProcess);
-                const args = spawner.spawn.firstCall.args[1];
-                args.should.contain(arg1);
-                args.should.contain(arg2);
+        });
+        it('should bind commands to instance', () => {
+            return testModule.activateConfig(basicConfig).then(() => {
+                commands.bindCommands.calledWith(instance).should.be.true;
             });
-            it('should not add `--harmony` argument when flags do not include `--harmony`', () => {
-                app.respawn('./foo/bar', ['--foo'], hostProcess);
-                const args = spawner.spawn.firstCall.args[1];
-                args.should.not.contain('--harmony');
+        });
+        it('should store bound commands on instance', () => {
+            const expected = Math.random();
+            commands.bindCommands.returns(expected);
+            return testModule.activateConfig(basicConfig).then(() => {
+                instance.Commands.should.equal(expected);
             });
-            it('should add `--foo` argument when flags include `--foo`', () => {
-                app.respawn('./foo/bar', ['--foo'], hostProcess);
-                const args = spawner.spawn.firstCall.args[1];
-                args.should.contain('--foo');
+        });
+        it('should login to instance', () => {
+            return testModule.activateConfig(basicConfig).then(() => {
+                instance.login.called.should.be.true;
             });
-            it('should not add `--foo` when requested and already present', () => {
-                const expected = ['--foo', app.getFullPath('./foo/bar')];
-                hostProcess.execArgv.push('--foo');
-                app.respawn('./foo/bar', ['--foo'], hostProcess);
-                const args = spawner.spawn.firstCall.args[1];
-                args.should.deep.equal(expected);
+        });
+        it('should activate instance', () => {
+            return testModule.activateConfig(basicConfig).then(() => {
+                instance.activate.called.should.be.true;
             });
+        });
+        it('should reject when insatnce.login rejects', () => {
+            DummyForum.login.rejects('bad');
+            return testModule.activateConfig(basicConfig).should.be.rejected;
+        });
+        it('should reject when instance.activate rejects', () => {
+            DummyForum.activate.rejects('bad');
+            return testModule.activateConfig(basicConfig).should.be.rejected;
+        });
+        describe('events', () => {
+            it('should register for forum event `log`', () => {
+                return testModule.activateConfig(basicConfig).then(() => {
+                    instance.on.calledWith('log', testModule.log).should.be.true;
+                });
+            });
+            it('should register for forum event `log`', () => {
+                return testModule.activateConfig(basicConfig).then(() => {
+                    instance.on.calledWith('error', testModule.error).should.be.true;
+                });
+            });
+            it('should register for forum event `logExtended`', () => {
+                return testModule.activateConfig(basicConfig).then(() => {
+                    instance.on.calledWith('logExtended', utils.logExtended).should.be.true;
+                });
+            });
+        });
+        describe('logging', () => {
+            it('should log provider name', () => {
+                const name = `provider${Math.random()}`;
+                const username = `user${Math.random()}`;
+                basicConfig.core.provider = name;
+                basicConfig.core.username = username;
+                return testModule.activateConfig(basicConfig).then(() => {
+                    testModule.log.calledWith(`Using provider ${name} for ${username}`).should.be.true;
+                });
+            });
+            it('should log ready for login', () => {
+                const username = `user${Math.random()}`;
+                basicConfig.core.username = username;
+                return testModule.activateConfig(basicConfig).then(() => {
+                    testModule.log.calledWith(`${username} ready for login`).should.be.true;
+                });
+            });
+            it('should log logged in', () => {
+                const username = `user${Math.random()}`;
+                basicConfig.core.username = username;
+                return testModule.activateConfig(basicConfig).then(() => {
+                    testModule.log.calledWith(`${username} login successful`).should.be.true;
+                });
+            });
+            it('should not log logged in on login failure', () => {
+                const username = `user${Math.random()}`;
+                basicConfig.core.username = username;
+                DummyForum.login.rejects('bad');
+                return testModule.activateConfig(basicConfig)
+                    .catch(() => 0)
+                    .then(() => {
+                        testModule.log.calledWith(`${username} login successful`).should.be.false;
+                    });
+            });
+            it('should log activated', () => {
+                const username = `user${Math.random()}`;
+                basicConfig.core.username = username;
+                return testModule.activateConfig(basicConfig).then(() => {
+                    testModule.log.calledWith(`${username} activated`).should.be.true;
+                });
+            });
+            it('should log activated', () => {
+                const username = `user${Math.random()}`;
+                basicConfig.core.username = username;
+                DummyForum.activate.rejects('bad');
+                return testModule.activateConfig(basicConfig)
+                    .catch(() => 0)
+                    .then(() => {
+                        testModule.log.calledWith(`${username} activated`).should.be.false;
+                    });
+            });
+        });
+    });
+    describe('_buildMessage()', () => {
+        let clock = null,
+            now = null;
+        beforeEach(() => {
+            now = Math.random() * 2e12;
+            clock = sinon.useFakeTimers(now);
+        });
+        afterEach(() => clock.restore());
+        it('should return a string', () => {
+            testModule._buildMessage().should.be.a('string');
+        });
+        it('should prefix timestamp to message', () => {
+            const prefix = `[${new Date(now).toISOString()}]`;
+            testModule._buildMessage('foo').should.startWith(prefix);
+        });
+        it('should join multiple arguments together', () => {
+            const contents = 'foo bar baz quux';
+            testModule._buildMessage('foo', 'bar', 'baz', 'quux').should.endWith(contents);
+        });
+        it('should serialize objects to JSON', () => {
+            const contents = '{\n\t"alpha": "one"\n}';
+            testModule._buildMessage({
+                alpha: 'one'
+            }).should.endWith(contents);
+        });
+    });
+    describe('log()', () => {
+        let sandbox = null;
+        beforeEach(() => {
+            sandbox = sinon.sandbox.create();
+            sandbox.stub(console, 'log');
+            sandbox.stub(testModule, '_buildMessage');
+        });
+        afterEach(() => sandbox.restore());
+        it('should pass arguments to _buildMessage', () => {
+            const one = 1,
+                two = 2,
+                three = 4,
+                four = 3,
+                five = 5;
+            testModule.log(one, two, three, four, five);
+            testModule._buildMessage.calledWith(one, two, three, four, five).should.be.true;
+        });
+        it('should log message to console.log', () => {
+            const message = `a${Math.random()}b`;
+            testModule._buildMessage.returns(message);
+            testModule.log();
+            console.log.calledWith(message).should.be.true; //eslint-disable-line no-console
+        });
+    });
+    describe('error()', () => {
+        let sandbox = null;
+        beforeEach(() => {
+            sandbox = sinon.sandbox.create();
+            sandbox.stub(console, 'error');
+            sandbox.stub(testModule, '_buildMessage');
+        });
+        afterEach(() => sandbox.restore());
+        it('should pass arguments to _buildMessage', () => {
+            const one = 1,
+                two = 2,
+                three = 4,
+                four = 3,
+                five = 5;
+            testModule.error(one, two, three, four, five);
+            testModule._buildMessage.calledWith(one, two, three, four, five).should.be.true;
+        });
+        it('should log message to console.log', () => {
+            const message = `a${Math.random()}b`;
+            testModule._buildMessage.returns(message);
+            testModule.error();
+            console.error.calledWith(message).should.be.true; //eslint-disable-line no-console
         });
     });
 });

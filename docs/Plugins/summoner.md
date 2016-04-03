@@ -12,30 +12,22 @@ will automatically place the topic on cooldown, to prevent abuse of the bot.
 
 ## Phrase Replacements
 Configured catch phrases can include portions of the discourse post that summoned the bot. The text
-replacements are pulled from the [discourse Post][post] object. Any key in the Post object may be used; if
-the value is not text it will be coerced to text before being substituted.
+replacements are pulled from the user data of the user that triggers this plugin.
 
-Text replacements are of the form `%key%`, and will be replaced with the value of the relative key in the 
-[post] that triggers the bot.
+Text replacements are of the form `%key%`, and will be replaced with the value of the relative key from the 
+user data that triggers the bot.
 
 For example, if the bot is summoned by user @joeRandom and the reply 
 `'@%username% has summoned me, and so I appear.'` is selected the text `%username%` will be replaced with
 the value of the `username` key in the post, resulting in the reply text of: 
 `'@joeRandom has summoned me, and so I appear.'`
 
-[post]: ../api/external/posts.md#external.module_posts.Post
 
 ## Configuration Options
 
 | Option     | Type           | Default                          |
 |------------|----------------|----------------------------------|
-| `cooldown` | Number         | `60,000`                         |
 | `messages` | List of String | See example configurations below |
-
-### `cooldown`
-
-This sets the amount of time (in milliseconds) that topics will be on cooldown before the bot will respond to
-another summon from a topic that the bot has already been summoned to. The default value is one minute.
 
 ### `messages`
 
@@ -52,13 +44,12 @@ and treated as this configuration option.
   core: 
     username: "someBotAccount"
     password: "someBotPassword"
+    owner: "yourUsername"
   plugins: 
     summoner: 
-      cooldown: 60000
-      messages: 
-        - "@%username% has summoned me, and so I appear."
-        - "Yes master %name%, I shall appear as summoned."
-        - "Yes mistress %name%, I shall appear as summoned."
+      - "@%username% has summoned me, and so I appear."
+      - "Yes master %name%, I shall appear as summoned."
+      - "Yes mistress %name%, I shall appear as summoned."
 ```
 
 *JSON*
@@ -66,7 +57,8 @@ and treated as this configuration option.
 {
     "core": {
         "username": "someBotAccount",
-        "password": "someBotPassword"
+        "password": "someBotPassword",
+        "owner": "yourUsername"
     },
     "plugins": {
         "summoner": {
@@ -89,6 +81,7 @@ Optionally only the messages list may be specified, accepting the default value 
   core: 
     username: "someBotAccount"
     password: "someBotPassword"
+    owner: "yourUsername"
   plugins: 
     summoner: 
       - "@%username% has summoned me, and so I appear."
@@ -101,7 +94,8 @@ Optionally only the messages list may be specified, accepting the default value 
 {
     "core": {
         "username": "someBotAccount",
-        "password": "someBotPassword"
+        "password": "someBotPassword",
+        "owner": "yourUsername"
     },
     "plugins": {
         "summoner": [

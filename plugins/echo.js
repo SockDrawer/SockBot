@@ -5,48 +5,49 @@
  * @author Accalia
  * @license MIT
  */
-let mBrowser;
-
 
 /**
- * Extended help message
- */
-exports.extendedHelp = 'Testing plugin that echos your posts back at you.\n\nFor more information see the' +
-    ' [full docs](https://sockbot.readthedocs.org/en/latest/Plugins/echo/)';
-
-/**
- * Prepare Plugin prior to login
+ * Plugin generation function.
  *
- * @param {*} plugConfig Plugin specific configuration
- * @param {Config} config Overall Bot Configuration
- * @param {externals.events.SockEvents} events EventEmitter used for the bot
- * @param {Browser} browser Web browser for communicating with discourse
- */
-exports.prepare = function (plugConfig, config, events, browser) {
-    mBrowser = browser;
-    events.onNotification('mentioned', exports.handler);
-    events.onNotification('replied', exports.handler);
-    events.onNotification('private_message', exports.handler);
-    events.registerHelp('echo', exports.extendedHelp, () => 0);
-};
-
-/**
- * Start the plugin after login
- */
-exports.start = function () {};
-
-/**
- * Stop the plugin prior to exit or reload
- */
-exports.stop = function () {};
-
-/**
- * Handle notifications
+ * Returns a plugin object bound to the provided forum provider
  *
- * @param {external.notifications.Notification} notification Notification recieved
- * @param {external.topics.Topic} topic Topic trigger post belongs to
- * @param {external.posts.CleanedPost} post Post that triggered notification
+ * @param {Provider} forum Active forum Provider
+ * @returns {Plugin} An instance of the Echo plugin
  */
-exports.handler = function handler(notification, topic, post) {
-    mBrowser.createPost(topic.id, post.id, post.cleaned, () => 0);
+exports.plugin = function plugin(forum) {
+    /**
+     * Echo the command contents back to the user
+     *
+     * @param {Command} command The command that contains the `!echo` command
+     * @returns {Promise} Resolves when processing is complete
+     */
+    function echo(command) {
+        return Promise.all([
+            command.getPost(),
+            command.getUser()
+        ]).then((data) => {
+            const post = data[0];
+            const user = data[1];
+            const content = (post.content || '').split('\n').map((line) => `> ${line}`);
+            content.unshift(`@${user.username} said:`);
+            command.reply(content.join('\n'));
+        });
+    }
+
+    /**
+     * Activate the plugin.
+     *
+     * Register the command `echo` to the forum instance this plugin is bound to
+     *
+     * @returns {Promise} Resolves when plugin is fully activated     *
+     */
+    function activate() {
+        return forum.Commands.add('echo', 'Simple testing command', echo);
+    }
+
+    return {
+        activate: activate,
+        deactivate: () => {},
+        _echo: echo // for testing!
+    };
 };

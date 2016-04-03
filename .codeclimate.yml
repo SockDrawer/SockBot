@@ -5,24 +5,13 @@ engines:
     config:
       languages:
       - javascript
-    exclude_fingerprints:
-      - 1d8d290e451d3458322376d96772519c # Test code false positive
-      - c7703b09a377ff4eca7e484798e5f093 # the other side of d3918e
-      - d3918e2fb50feeeb19d5f27b8c412ac8 # likes and autoreader positive, fixes applied genrated more warnings. let it lie.
-      - e0657835cc2ee807fdb3bbbe162abd69 # Messages.js filtering false positive
   eslint:
-    enabled: true
+    enabled: false # Temporary disable due to current nonsupport of eslint2.x
   fixme:
     enabled: true
 ratings:
   paths:
-  - "**.inc"
   - "**.js"
-  - "**.jsx"
-  - "**.module"
-  - "**.php"
-  - "**.py"
-  - "**.rb"
 exclude_paths:
 - test/**
 - external/**

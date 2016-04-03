@@ -1,27 +1,26 @@
 'use strict';
-/*globals describe, it, before, beforeEach, after, afterEach*/
-/*eslint no-unused-expressions:0 */
 
-const chai = require('chai'),
-    sinon = require('sinon');
-chai.should();
+const chai = require('chai');
+chai.use(require('chai-as-promised'));
 chai.use(require('chai-string'));
+chai.should();
 const expect = chai.expect;
 
-// The thing we're testing
-const commands = require('../../lib/commands'),
-    status = require('../../lib/commands/status'),
-    config = require('../../lib/config'),
-    SockBot = require('../../SockBot');
-const browser = require('../../lib/browser')();
-describe('commands', () => {
+const sinon = require('sinon');
+require('sinon-as-promised');
+
+const commands = require('../../lib/commands');
+const utils = require('../../lib/utils');
+
+describe('lib/config', () => {
     describe('exports', () => {
-        const fns = ['prepare', 'start', 'parseCommands', 'postPermissionDenied'],
+        const fns = ['bindCommands'],
             objs = ['internals'],
             vals = [];
+
         describe('should export expected functions:', () => {
             fns.forEach((fn) => {
-                it(fn + '()', () => expect(commands[fn]).to.be.a('function'));
+                it(`${fn}()`, () => expect(commands[fn]).to.be.a('function'));
             });
         });
         describe('should export expected objects', () => {
@@ -31,7 +30,7 @@ describe('commands', () => {
         });
         describe('should export expected values', () => {
             vals.forEach((val) => {
-                it(val, () => commands.should.have.key(val));
+                it(val, () => commands.should.have.any.key(val));
             });
         });
         it('should export only expected keys', () => {
@@ -39,533 +38,59 @@ describe('commands', () => {
         });
     });
     describe('internals', () => {
-        const fns = ['parseMentionCommand', 'parseShortCommand', 'registerCommand', 'registerHelp',
-                'commandProtect', 'getCommandHelps', 'cmdError', 'cmdHelp', 'cmdShutUp',
-                'shutdown'
+        before(() => commands.bindCommands({}));
+        const fns = ['Commands', 'Command', 'parseLine', 'getCommandHelps', 'cmdHelp', 'defaultHandler',
+                'onError', 'onComplete'
             ],
-            objs = ['mention', 'events', 'commands', 'helpMessages'],
+            objs = ['handlers', 'helpTopics'],
             vals = [];
-        describe('should include expected functions:', () => {
+
+        describe('should internalize expected functions:', () => {
             fns.forEach((fn) => {
-                it(fn + '()', () => expect(commands.internals[fn]).to.be.a('function'));
+                it(`${fn}()`, () => expect(commands.internals[fn]).to.be.a('function'));
             });
         });
-        describe('should include expected objects', () => {
+        describe('should internalize expected objects', () => {
             objs.forEach((obj) => {
-                it(obj, () => (typeof commands.internals[obj]).should.equal('object'));
+                it(obj, () => expect(commands.internals[obj]).to.be.a('object'));
             });
         });
-        describe('should include expected values', () => {
+        describe('should internalize expected values', () => {
             vals.forEach((val) => {
                 it(val, () => commands.internals.should.have.any.key(val));
             });
         });
-        it('should include only expected keys', () => {
+        it('should internalize only expected keys', () => {
             commands.internals.should.have.all.keys(fns.concat(objs, vals));
         });
-        describe('internals.getCommandHelps()', () => {
-            let cmds;
-            const getCommandHelps = commands.internals.getCommandHelps;
-            beforeEach(() => {
-                commands.internals.commands = {};
-                cmds = commands.internals.commands;
+    });
+    describe('internals.parseLine()', () => {
+        let parseLine;
+        before(() => {
+            commands.bindCommands({
+                username: 'fred'
             });
-            it('should return default text', () => {
-                const expected = 'Registered commands:',
-                    result = getCommandHelps();
-                result.should.equal(expected);
-            });
-            it('should return help for one command', () => {
-                cmds.help = {
-                    help: 'foobar'
-                };
-                const expected = 'Registered commands:\nhelp: foobar',
-                    result = getCommandHelps();
-                result.should.equal(expected);
-            });
-            it('should return sort commands', () => {
-                cmds.help = {
-                    help: 'foobar'
-                };
-                cmds.aaa = {
-                    help: 'bbb'
-                };
-                const expected = 'Registered commands:\naaa: bbb\nhelp: foobar',
-                    result = getCommandHelps();
-                result.should.equal(expected);
-            });
-            afterEach(() => commands.internals.commands = {});
+            parseLine = commands.internals.parseLine;
         });
-        describe('internals.cmdError', () => {
-            const cmdError = commands.internals.cmdError;
-            let sandbox, events;
-            before(() => {
-                commands.internals.commands = {};
-            });
-            beforeEach(() => {
-                sandbox = sinon.sandbox.create();
-                events = {
-                    on: sinon.spy(),
-                    emit: sinon.spy()
-                };
-                commands.internals.events = events;
-                sandbox.stub(browser, 'createPost');
-            });
-            afterEach(() => {
-                sandbox.restore();
-            });
-            it('should be registered as `command#ERROR` event', (done) => {
-                commands.prepare(events, () => {
-                    events.on.calledWith('command#ERROR', cmdError).should.be.true;
-                    done();
-                });
-            });
-            it('should not post on missing command post', () => {
-                cmdError({});
-                browser.createPost.called.should.be.false;
-            });
-            it('should post expected text', () => {
-                const expected = 'Command `foobar` is not recognized\n\nRegistered commands:\nhelp: print command ' +
-                    'help listing\nmute: Make the bot mute the topic this command is executed on\nshutup: tell me to ' +
-                    'shutup\nstatus: my current status\nunmute: Make the bot unmute the topic this command is ' +
-                    'executed on\nunwatch: Make the bot unwatch the topic this command is executed on\nwatch: Make ' +
-                    'the bot watch the topic this command is executed on';
-                cmdError({
-                    command: 'foobar',
-                    post: {
-                        'topic_id': 1,
-                        'post_number': 5
-                    }
-                });
-                browser.createPost.callCount.should.equal(1);
-                browser.createPost.calledWith(1, 5).should.be.true;
-                browser.createPost.lastCall.args[2].should.startWith(expected);
-            });
-            it('should pass callback to createPost', () => {
-                cmdError({
-                    command: 'foobar',
-                    post: {
-                        'topic_id': 1,
-                        'post_number': 5
-                    }
-                });
-                browser.createPost.lastCall.args[3].should.be.a('function');
-                browser.createPost.lastCall.args[3]().should.equal(0);
-            });
-        });
-        describe('internals.cmdHelp', () => {
-            const cmdHelp = commands.internals.cmdHelp;
-            let clock;
-            let sandbox, events;
-            beforeEach(() => {
-                commands.internals.commands = {};
-                commands.internals.helpMessages = {};
-                sandbox = sinon.sandbox.create();
-                clock = sandbox.useFakeTimers();
-                events = {
-                    on: sinon.spy(),
-                    emit: sinon.spy()
-                };
-                commands.internals.events = events;
-                sandbox.stub(browser, 'createPost');
-            });
-            afterEach(() => {
-                sandbox.restore();
-            });
-            it('should be registered as `command#help` event', (done) => {
-                commands.prepare(events, () => {
-                    clock.tick(0);
-                    events.on.calledWith('command#help', cmdHelp).should.be.true;
-                    done();
-                });
-            });
-            it('should not post on missing command post', () => {
-                cmdHelp({});
-                browser.createPost.called.should.be.false;
-            });
-            it('should post expected text', () => {
-                const expected = 'Registered commands:\nhelp: print command help listing\n' +
-                    'shutup: tell me to shutup\n\n* Help topic available.\n\nIssue the `help`' +
-                    ' command with an available help topic as a parameter to read additonal help';
-                commands.internals.commands.help = {
-                    help: 'print command help listing'
-                };
-                commands.internals.commands.shutup = {
-                    help: 'tell me to shutup'
-                };
-                cmdHelp({
-                    command: 'foobar',
-                    post: {
-                        'topic_id': 15,
-                        'post_number': 75
-                    }
-                });
-                browser.createPost.callCount.should.equal(1);
-                browser.createPost.calledWith(15, 75).should.be.true;
-                browser.createPost.lastCall.args[2].should.equal(expected);
-            });
-            it('should post expected text with help topics', () => {
-                const expected = 'Registered commands:\nhelp: print command help listing\n\n' +
-                    'Help Topics:\nshutup: Extended help topic\n\n* Help topic available.\n\n' +
-                    'Issue the `help` command with an available help topic as a parameter to ' +
-                    'read additonal help';
-                commands.internals.commands.help = {
-                    help: 'print command help listing'
-                };
-                commands.internals.helpMessages.shutup = 'tell me to shutup';
-                cmdHelp({
-                    command: 'foobar',
-                    post: {
-                        'topic_id': 15,
-                        'post_number': 75
-                    }
-                });
-                browser.createPost.callCount.should.equal(1);
-                browser.createPost.calledWith(15, 75).should.be.true;
-                browser.createPost.lastCall.args[2].should.equal(expected);
-            });
-            it('should pass callback to createPost', () => {
-                cmdHelp({
-                    command: 'foobar',
-                    post: {
-                        'topic_id': 1,
-                        'post_number': 5
-                    }
-                });
-                browser.createPost.lastCall.args[3].should.be.a('function');
-                browser.createPost.lastCall.args[3]().should.equal(0);
-            });
-
-            it('should indicate presence of help topic on command', () => {
-                const expected = 'Registered commands:\nhelp: print command help listing *\n\n' +
-                    '* Help topic available.\n\nIssue the `help` command with an available help ' +
-                    'topic as a parameter to read additonal help';
-                commands.internals.commands.help = {
-                    help: 'print command help listing'
-                };
-                commands.internals.helpMessages.help = 'foobar';
-                cmdHelp({
-                    command: 'foobar',
-                    post: {
-                        'topic_id': 15,
-                        'post_number': 75
-                    }
-                });
-                browser.createPost.callCount.should.equal(1);
-                browser.createPost.calledWith(15, 75).should.be.true;
-                browser.createPost.lastCall.args[2].should.equal(expected);
-            });
-            it('should pass callback to createPost', () => {
-                cmdHelp({
-                    command: 'foobar',
-                    post: {
-                        'topic_id': 1,
-                        'post_number': 5
-                    }
-                });
-                browser.createPost.lastCall.args[3].should.be.a('function');
-                browser.createPost.lastCall.args[3]().should.equal(0);
-            });
-            describe('with parameters', () => {
-                it('should post default text without parameters', () => {
-                    const expected = 'Registered commands:';
-                    cmdHelp({
-                        command: 'foobar',
-                        post: {
-                            'topic_id': 15,
-                            'post_number': 75
-                        }
-                    });
-                    browser.createPost.callCount.should.equal(1);
-                    browser.createPost.calledWith(15, 75).should.be.true;
-                    browser.createPost.lastCall.args[2].should.startWith(expected);
-                });
-                it('should post default text when called with empty parameters', () => {
-                    const expected = 'Registered commands:';
-                    cmdHelp({
-                        command: 'foobar',
-                        args: [],
-                        post: {
-                            'topic_id': 15,
-                            'post_number': 75
-                        }
-                    });
-                    browser.createPost.callCount.should.equal(1);
-                    browser.createPost.calledWith(15, 75).should.be.true;
-                    browser.createPost.lastCall.args[2].should.startWith(expected);
-                });
-                it('should post default text when called with unexpected parameters', () => {
-                    const expected = 'Registered commands:';
-                    cmdHelp({
-                        command: 'foobar',
-                        args: ['i', 'am', 'not', 'a', 'command'],
-                        post: {
-                            'topic_id': 15,
-                            'post_number': 75
-                        }
-                    });
-                    browser.createPost.callCount.should.equal(1);
-                    browser.createPost.calledWith(15, 75).should.be.true;
-                    browser.createPost.lastCall.args[2].should.startWith(expected);
-                });
-                it('should post extended help message one word command', () => {
-                    const expected = 'Help topic for `whosit`\n\nwhosit extended help' +
-                        '\n\nIssue the `help` command without any parameters to see all available commands';
-                    commands.internals.helpMessages.whosit = 'whosit extended help';
-                    cmdHelp({
-                        command: 'foobar',
-                        args: ['whosit'],
-                        post: {
-                            'topic_id': 15,
-                            'post_number': 75
-                        }
-                    });
-                    browser.createPost.callCount.should.equal(1);
-                    browser.createPost.calledWith(15, 75).should.be.true;
-                    browser.createPost.lastCall.args[2].should.equal(expected);
-                });
-                it('should post extended help message multi-word command', () => {
-                    const expected = 'Help topic for `who am i`';
-                    commands.internals.helpMessages['who am i'] = 'whosit extended help';
-                    cmdHelp({
-                        command: 'foobar',
-                        args: ['who', 'am', 'i'],
-                        post: {
-                            'topic_id': 15,
-                            'post_number': 75
-                        }
-                    });
-                    browser.createPost.callCount.should.equal(1);
-                    browser.createPost.calledWith(15, 75).should.be.true;
-                    browser.createPost.lastCall.args[2].should.startWith(expected);
-                });
-                it('should pass callback to createPost', () => {
-                    commands.internals.helpMessages['who am i'] = 'whosit extended help';
-                    cmdHelp({
-                        command: 'foobar',
-                        args: ['who', 'am', 'i'],
-                        post: {
-                            'topic_id': 1,
-                            'post_number': 5
-                        }
-                    });
-                    browser.createPost.lastCall.args[3].should.be.a('function');
-                    browser.createPost.lastCall.args[3]().should.equal(0);
-                });
-            });
-        });
-        describe('internals.cmdShutUp()', () => {
-            const cmdShutUp = commands.internals.cmdShutUp;
-            let sandbox;
-            beforeEach(() => {
-                sandbox = sinon.sandbox.create();
-                sandbox.stub(browser, 'createPost');
-                sandbox.stub(browser, 'createPrivateMessage');
-                sandbox.stub(commands.internals, 'shutdown');
-            });
-            afterEach(() => sandbox.restore());
-            describe('trust_level restrictions', () => {
-                [0, 1, 2, 3, 4, 5].forEach(trustLevel => {
-                    it('should reject command by trust_level ' + trustLevel + ' user', () => {
-                        const post = {
-                            'trust_level': trustLevel
-                        };
-                        cmdShutUp({
-                            post: post
-                        });
-                        browser.createPost.called.should.equal(true); // called on reject
-                    });
-                });
-                [6, 7, 8, 9].forEach(trustLevel => {
-                    it('should accept command by trust_level ' + trustLevel + ' user', () => {
-                        const post = {
-                            'trust_level': trustLevel
-                        };
-                        cmdShutUp({
-                            post: post
-                        });
-                        browser.createPrivateMessage.called.should.equal(true); // called on accept
-                    });
-                });
-            });
-            describe('reject message', () => {
-                it('should reply to topic command came from', () => {
-                    const post = {
-                        'trust_level': 0,
-                        'topic_id': Math.random(),
-                        'post_number': Math.random()
-                    };
-                    cmdShutUp({
-                        post: post
-                    });
-                    const args = browser.createPost.firstCall.args;
-                    args[0].should.equal(post.topic_id);
-                });
-                it('should reply to post command came from', () => {
-                    const post = {
-                        'trust_level': 0,
-                        'topic_id': Math.random(),
-                        'post_number': Math.random()
-                    };
-                    cmdShutUp({
-                        post: post
-                    });
-                    const args = browser.createPost.firstCall.args;
-                    args[1].should.equal(post.post_number);
-                });
-                it('should reply with expected text', () => {
-                    const post = {
-                            username: 'JohnnyGat',
-                            'trust_level': 0,
-                            'topic_id': Math.random(),
-                            'post_number': Math.random()
-                        },
-                        expected = 'I\'m sorry JohnnyGat, but I cannot comply.\n\n' +
-                        'You are not authorized to give me direct orders.\n\n' +
-                        'Please contact a member of the forum staff, or my owner, @accalia' +
-                        ', for assistance in this matter';
-                    config.core.owner = 'accalia';
-                    cmdShutUp({
-                        post: post
-                    });
-                    const args = browser.createPost.firstCall.args;
-                    args[2].should.equal(expected);
-                });
-                it('should provice posted callback', () => {
-                    const post = {
-                        'trust_level': 0,
-                        'topic_id': Math.random(),
-                        'post_number': Math.random()
-                    };
-                    config.core.owner = 'accalia';
-                    cmdShutUp({
-                        post: post
-                    });
-                    const args = browser.createPost.firstCall.args;
-                    args[3].should.be.a('function');
-                    args[3]().should.equal(0);
-                });
-            });
-            describe('accept message', () => {
-                it('should send PM to commanding user', () => {
-                    const post = {
-                        username: 'JohnnyGat',
-                        'trust_level': 8
-                    };
-                    cmdShutUp({
-                        post: post
-                    });
-                    const args = browser.createPrivateMessage.firstCall.args;
-                    args[0].should.contain('JohnnyGat');
-                });
-                it('should send PM to owning user', () => {
-                    const post = {
-                        username: 'JohnnyGat',
-                        'trust_level': 8
-                    };
-                    config.core.owner = 'accalia';
-                    cmdShutUp({
-                        post: post
-                    });
-                    const args = browser.createPrivateMessage.firstCall.args;
-                    args[0].should.contain('accalia');
-                });
-                it('should set expected title', () => {
-                    const post = {
-                        username: 'JohnnyGat',
-                        'trust_level': 8
-                    };
-                    cmdShutUp({
-                        post: post
-                    });
-                    const args = browser.createPrivateMessage.firstCall.args;
-                    args[1].should.equal('Complying with Shutup Request by @JohnnyGat');
-                });
-                it('should set expected PM body', () => {
-                    const post = {
-                            username: 'JohnnyGat',
-                            'trust_level': 8,
-                            url: Math.random(),
-                            raw: Math.random()
-                        },
-                        expected = post.url + '\n\n' + post.raw;
-                    cmdShutUp({
-                        post: post
-                    });
-                    const args = browser.createPrivateMessage.firstCall.args;
-                    args[2].should.equal(expected);
-                });
-                it('should set internals.shotdown as completion callback', () => {
-                    const post = {
-                        'trust_level': 8
-                    };
-                    cmdShutUp({
-                        post: post
-                    });
-                    const args = browser.createPrivateMessage.firstCall.args;
-                    args[3].should.equal(commands.internals.shutdown);
-                });
-            });
-        });
-        describe('shutdown()', () => {
-            const shutdown = commands.internals.shutdown;
-            let sandbox, emit;
-            beforeEach(() => {
-                sandbox = sinon.sandbox.create();
-                sandbox.useFakeTimers();
-                sandbox.stub(SockBot, 'stop');
-                emit = sinon.stub();
-                commands.internals.events = {
-                    emit: emit
-                };
-            });
-            afterEach(() => sandbox.restore());
-            it('should call SockBot.stop()', () => {
-                shutdown();
-                SockBot.stop.called.should.equal(true);
-            });
-            it('should emit warning on call', () => {
-                shutdown();
-                emit.calledWith('logWarning', 'Shutting up by order!').should.equal(true);
-            });
-            it('should emit warning after waiting', () => {
-                SockBot.stop.yields(null);
-                shutdown();
-                emit.calledWith('logWarning', 'that was a long wait....').should.equal(false);
-                sandbox.clock.tick(2.14e9); //fast forward ~24 days
-                emit.calledWith('logWarning', 'that was a long wait....').should.equal(true);
-            });
-            it('should emit start waiting again after waiting', () => {
-                SockBot.stop.yields(null);
-                shutdown();
-                sandbox.clock.tick(2.14e9); //fast forward ~24 days
-                emit.reset();
-                emit.calledWith('logWarning', 'that was a long wait....').should.equal(false);
-                sandbox.clock.tick(2.14e9); //fast forward ~24 days
-                emit.calledWith('logWarning', 'that was a long wait....').should.equal(true);
-
-            });
-        });
-        describe('internals.parseShortCommand()', () => {
-            const parseShortCommand = commands.internals.parseShortCommand;
+        describe('imperative commands', () => {
             describe('output object format', () => {
                 it('should match bare command', () => {
-                    parseShortCommand('!help').should.have.all.keys(['input', 'command', 'args', 'mention']);
+                    parseLine('!help').should.have.all.keys(['line', 'command', 'args', 'mention']);
                 });
                 it('should copy input into output object', () => {
-                    parseShortCommand('!help arg1 arg2').input.should.equal('!help arg1 arg2');
+                    parseLine('!help arg1 arg2').line.should.equal('!help arg1 arg2');
                 });
                 it('should set command in output object', () => {
-                    parseShortCommand('!help arg1 arg2').command.should.equal('help');
+                    parseLine('!help arg1 arg2').command.should.equal('help');
                 });
                 it('should normalize command case in output object', () => {
-                    parseShortCommand('!HELP arg1 arg2').command.should.equal('help');
+                    parseLine('!HELP arg1 arg2').command.should.equal('help');
                 });
                 it('should set args correctly', () => {
-                    parseShortCommand('!help arg1 arg2').args.should.deep.equal(['arg1', 'arg2']);
+                    parseLine('!help arg1 arg2').args.should.deep.equal(['arg1', 'arg2']);
                 });
                 it('should not set mention value', () => {
-                    expect(parseShortCommand('!help arg1 arg2').mention).to.equal(null);
+                    parseLine('!help arg1 arg2').mention.should.be.false;
                 });
             });
             describe('any space character should split args', () => {
@@ -573,143 +98,60 @@ describe('commands', () => {
                     '\u2005', '\u2006', '\u2007', '\u2008', '\u2009', '\u200a', '\u2028', '\u2029', '\u202f', '\u205f',
                     '\u3000'
                 ].forEach((space) => {
-                    let str = ('0000' + space.charCodeAt().toString(16));
-                    str = '\\u' + str.substring(str.length - 4);
-                    it(': ' + str, () => {
-                        const input = '!help' + space + 'arg1' + space + 'arg2';
-                        parseShortCommand(input).args.should.deep.equal(['arg1', 'arg2']);
+                    let str = `0000${space.charCodeAt().toString(16)}`;
+                    str = `\\u${str.substring(str.length - 4)}`;
+                    it(`: ${str}`, () => {
+                        const input = `!help${space}arg1${space}arg2`;
+                        parseLine(input).args.should.deep.equal(['arg1', 'arg2']);
                     });
                 });
             });
             it('should not match simple text', () => {
-                expect(parseShortCommand('simple text stuff')).to.equal(null);
+                expect(parseLine('simple text stuff')).to.equal(null);
             });
             it('should not match exclamation at end of text', () => {
-                expect(parseShortCommand('simple text stuff!')).to.equal(null);
+                expect(parseLine('simple text stuff!')).to.equal(null);
             });
             it('should not match exclamation in text', () => {
-                expect(parseShortCommand('simple! text stuff')).to.equal(null);
+                expect(parseLine('simple! text stuff')).to.equal(null);
             });
             it('should not match exclamation with text before', () => {
-                expect(parseShortCommand('si!mple text stuff')).to.equal(null);
+                expect(parseLine('si!mple text stuff')).to.equal(null);
             });
             it('should not match short command', () => {
-                expect(parseShortCommand('!cm text stuff')).to.equal(null);
+                expect(parseLine('!cm text stuff')).to.equal(null);
             });
             it('should not match really short command', () => {
-                expect(parseShortCommand('!c text stuff')).to.equal(null);
+                expect(parseLine('!c text stuff')).to.equal(null);
             });
             it('should match bare command', () => {
-                parseShortCommand('!help').command.should.equal('help');
+                parseLine('!help').command.should.equal('help');
             });
             it('should match command with args', () => {
-                const cmd = parseShortCommand('!help arg1 arg2');
+                const cmd = parseLine('!help arg1 arg2');
                 cmd.command.should.equal('help');
                 cmd.args.should.deep.equal(['arg1', 'arg2']);
             });
         });
-        describe('internals.commandProtect()', () => {
-            const commandProtect = commands.internals.commandProtect;
-            let cmds;
-            let sandbox, events;
-            before(() => {
-                commands.internals.commands = {};
-            });
-            beforeEach(() => {
-                sandbox = sinon.sandbox.create();
-                events = {
-                    emit: sinon.spy(),
-                    removeListener: sinon.spy()
-                };
-                commands.internals.events = events;
-                cmds = {};
-                commands.internals.commands = cmds;
-            });
-            afterEach(() => {
-                sandbox.restore();
-            });
-            it('should not trigger for incorrect prefix', () => {
-                commandProtect('postRecieved').should.be.false;
-            });
-            it('should not trigger for partial prefix', () => {
-                commandProtect('command#').should.be.false;
-            });
-            it('should trigger for proper command registration', () => {
-                const func = () => 0;
-                cmds.cmd = {
-                    handler: func
-                };
-                commandProtect('command#cmd', func).should.be.true;
-                events.removeListener.calledWith('cmd', func).should.be.false;
-                events.emit.calledWith('logWarning').should.be.false;
-            });
-            it('should reject command that is not already registered', () => {
-                const func = () => 0,
-                    err = 'Invalid command (cmd) registered! must register commands with onCommand()';
-                commandProtect('command#cmd', func);
-                events.removeListener.calledWith('command#cmd', func).should.be.true;
-                events.emit.calledWith('logWarning', err).should.be.true;
-            });
-            it('should reject command that is not properly registered', () => {
-                const func = () => 0,
-                    err = 'Invalid command (cmd1) registered! must register commands with onCommand()';
-                cmds.cmd1 = {
-                    handler: () => 0
-                };
-                commandProtect('command#cmd1', func);
-                events.removeListener.calledWith('command#cmd1', func).should.be.true;
-                events.emit.calledWith('logWarning', err).should.be.true;
-            });
-        });
-        describe('internals.parseMentionCommand()', () => {
-            const parseMentionCommand = commands.internals.parseMentionCommand;
-            let emit;
-            before((done) => {
-                config.core.username = 'foobar';
-                emit = sinon.spy();
-                commands.prepare({
-                    on: () => 0,
-                    emit: emit
-                }, () => {
-                    commands.start();
-                    done();
-                });
-            });
+        describe('mention commands', () => {
             describe('output object format', () => {
                 it('should match bare command', () => {
-                    parseMentionCommand('@foobar help').should.have.all.keys(['input', 'command', 'args', 'mention']);
+                    parseLine('@fred help').should.have.all.keys(['line', 'command', 'args', 'mention']);
                 });
-                it('should normalize input into output object', () => {
-                    parseMentionCommand('@foobar help arg1 arg2').input.should.equal('!help arg1 arg2');
-                });
-                it('should normalize input without arguments', () => {
-                    parseMentionCommand('@foobar help').input.should.equal('!help');
+                it('should copy input into output object', () => {
+                    parseLine('!help arg1 arg2').line.should.equal('!help arg1 arg2');
                 });
                 it('should set command in output object', () => {
-                    parseMentionCommand('@foobar help arg1 arg2').command.should.equal('help');
+                    parseLine('!help arg1 arg2').command.should.equal('help');
                 });
                 it('should normalize command case in output object', () => {
-                    parseMentionCommand('@foobar HELP arg1 arg2').command.should.equal('help');
+                    parseLine('!HELP arg1 arg2').command.should.equal('help');
                 });
                 it('should set args correctly', () => {
-                    parseMentionCommand('@foobar help arg1 arg2').args.should.deep.equal(['arg1', 'arg2']);
+                    parseLine('!help arg1 arg2').args.should.deep.equal(['arg1', 'arg2']);
                 });
-                it('should set mention value', () => {
-                    parseMentionCommand('@foobar help arg1 arg2').mention.should.equal('@foobar');
-                });
-            });
-            describe('mention case insensitive', () => {
-                it('@foobar', () => {
-                    expect(parseMentionCommand('@foobar help')).to.not.equal(null);
-                });
-                it('@FooBar', () => {
-                    expect(parseMentionCommand('@FooBar help')).to.not.equal(null);
-                });
-                it('@fOObAR', () => {
-                    expect(parseMentionCommand('@fOObAR help')).to.not.equal(null);
-                });
-                it('@FOOBAR', () => {
-                    expect(parseMentionCommand('@FOOBAR help')).to.not.equal(null);
+                it('should not set mention value', () => {
+                    parseLine('!help arg1 arg2').mention.should.be.false;
                 });
             });
             describe('any space character should split args', () => {
@@ -717,522 +159,783 @@ describe('commands', () => {
                     '\u2005', '\u2006', '\u2007', '\u2008', '\u2009', '\u200a', '\u2028', '\u2029', '\u202f', '\u205f',
                     '\u3000'
                 ].forEach((space) => {
-                    let str = ('0000' + space.charCodeAt().toString(16));
-                    str = '\\u' + str.substring(str.length - 4);
-                    it(': ' + str, () => {
-                        const input = '@foobar help' + space + 'arg1' + space + 'arg2';
-                        parseMentionCommand(input).args.should.deep.equal(['arg1', 'arg2']);
+                    let str = `0000${space.charCodeAt().toString(16)}`;
+                    str = `\\u${str.substring(str.length - 4)}`;
+                    it(`: ${str}`, () => {
+                        const input = `!help${space}arg1${space}arg2`;
+                        parseLine(input).args.should.deep.equal(['arg1', 'arg2']);
                     });
                 });
             });
             it('should not match simple text', () => {
-                expect(parseMentionCommand('simple text stuff')).to.equal(null);
+                expect(parseLine('simple text stuff')).to.equal(null);
             });
-            it('should not match embedded mention', () => {
-                expect(parseMentionCommand('simple @foobar text stuff!')).to.equal(null);
+            it('should not match exclamation at end of text', () => {
+                expect(parseLine('simple text stuff!')).to.equal(null);
             });
-            it('should not match embedded mention 2', () => {
-                expect(parseMentionCommand('simple@foobar text stuff')).to.equal(null);
+            it('should not match exclamation in text', () => {
+                expect(parseLine('simple! text stuff')).to.equal(null);
             });
-            it('should not match embedded mention 3', () => {
-                expect(parseMentionCommand('si@foobarmple text stuff')).to.equal(null);
+            it('should not match exclamation with text before', () => {
+                expect(parseLine('si!mple text stuff')).to.equal(null);
             });
             it('should not match short command', () => {
-                expect(parseMentionCommand('@foobar cm text stuff')).to.equal(null);
+                expect(parseLine('!cm text stuff')).to.equal(null);
             });
             it('should not match really short command', () => {
-                expect(parseMentionCommand('@foobar c text stuff')).to.equal(null);
-            });
-            it('should not match wrong mention', () => {
-                expect(parseMentionCommand('@foobaz simple text stuff')).to.equal(null);
+                expect(parseLine('!c text stuff')).to.equal(null);
             });
             it('should match bare command', () => {
-                parseMentionCommand('@foobar help').command.should.equal('help');
+                parseLine('!help').command.should.equal('help');
             });
             it('should match command with args', () => {
-                const cmd = parseMentionCommand('@foobar help arg1 arg2');
+                const cmd = parseLine('!help arg1 arg2');
                 cmd.command.should.equal('help');
                 cmd.args.should.deep.equal(['arg1', 'arg2']);
             });
         });
-        describe('internals.registerHelp()', () => {
-            const registerHelp = commands.internals.registerHelp,
-                spy = sinon.spy();
-            let sandbox, events;
-            beforeEach(() => {
-                sandbox = sinon.sandbox.create();
-                events = {
-                    on: sinon.spy(),
-                    emit: sinon.spy()
-                };
-                commands.internals.events = events;
-                commands.internals.commands = {};
-            });
-            afterEach(() => {
-                sandbox.restore();
-            });
-            describe('parameter validation', () => {
-                it('should require a callback', () => {
-                    expect(() => registerHelp()).to.throw('callback must be provided');
+        describe('mention commands', () => {
+            describe('output object format', () => {
+                it('should match bare command', () => {
+                    parseLine('@fred help').should.have.all.keys(['line', 'command', 'args', 'mention']);
                 });
-                it('should require callback to be a function', () => {
-                    expect(() => {
-                        registerHelp(undefined, undefined, 'not function');
-                    }).to.throw('callback must be provided');
+                it('should copy input into output object', () => {
+                    parseLine('@fred help arg1 arg2').line.should.equal('@fred help arg1 arg2');
                 });
-                it('should require `command`', () => {
-                    registerHelp(undefined, undefined, spy);
-                    spy.called.should.be.true;
-                    spy.lastCall.args[0].should.be.instanceOf(Error);
-                    spy.lastCall.args[0].message.should.equal('command must be provided');
+                it('should set command in output object', () => {
+                    parseLine('@fred help arg1 arg2').command.should.equal('help');
                 });
-                it('should require `command` to be string', () => {
-                    registerHelp(true, undefined, spy);
-                    spy.called.should.be.true;
-                    spy.lastCall.args[0].should.be.instanceOf(Error);
-                    spy.lastCall.args[0].message.should.equal('command must be provided');
+                it('should normalize command case in output object', () => {
+                    parseLine('@fred HELP arg1 arg2').command.should.equal('help');
                 });
-                it('should require `helptext`', () => {
-                    registerHelp('command', undefined, spy);
-                    spy.called.should.be.true;
-                    spy.lastCall.args[0].should.be.instanceOf(Error);
-                    spy.lastCall.args[0].message.should.equal('helptext must be provided');
+                it('should set args correctly', () => {
+                    parseLine('@fred help arg1 arg2').args.should.deep.equal(['arg1', 'arg2']);
                 });
-                it('should require `helptext` to be string', () => {
-                    registerHelp('command', true, spy);
-                    spy.called.should.be.true;
-                    spy.lastCall.args[0].should.be.instanceOf(Error);
-                    spy.lastCall.args[0].message.should.equal('helptext must be provided');
-                });
-                it('should call callback without error on help registration', () => {
-                    registerHelp('command', 'help', spy);
-                    spy.called.should.be.true;
-                    spy.lastCall.args.should.have.length(0);
+                it('should set mention value', () => {
+                    parseLine('@fred help arg1 arg2').mention.should.be.true;
                 });
             });
-            it('should add command to help Messages on registration', () => {
-                registerHelp('commandhelp', 'help', spy);
-                commands.internals.helpMessages.commandhelp.should.be.ok;
-            });
-            it('should log registration', () => {
-                const cmd = 'CMD' + Math.random();
-                registerHelp(cmd, 'help', spy);
-                events.emit.calledWith('logMessage', 'Extended help registered for: ' +
-                    cmd.toLowerCase()).should.be.true;
-            });
-            it('should warn on help overwrite', () => {
-                const cmd = 'CMD' + Math.random();
-                commands.internals.helpMessages[cmd.toLowerCase()] = 'foo';
-                registerHelp(cmd, 'help', spy);
-                events.emit.calledWith('logWarning', 'Overwriting existing extended help for: `' + cmd.toLowerCase() +
-                    '`!').should.be.true;
-            });
-        });
-        describe('internals.registerCommand()', () => {
-            const registerCommand = commands.internals.registerCommand,
-                spy = sinon.spy();
-            let sandbox, events;
-            beforeEach(() => {
-                sandbox = sinon.sandbox.create();
-                events = {
-                    on: sinon.spy(),
-                    emit: sinon.spy()
-                };
-                commands.internals.events = events;
-                commands.internals.commands = {};
-            });
-            afterEach(() => {
-                sandbox.restore();
-            });
-            describe('parameter validation', () => {
-                it('should require a callback', () => {
-                    expect(() => registerCommand()).to.throw('callback must be provided');
-                });
-                it('should require callback to be a function', () => {
-                    expect(() => {
-                        registerCommand(undefined, undefined, undefined, 'not function');
-                    }).to.throw('callback must be provided');
-                });
-                it('should require `command`', () => {
-                    registerCommand(undefined, undefined, undefined, spy);
-                    spy.called.should.be.true;
-                    spy.lastCall.args[0].should.be.instanceOf(Error);
-                    spy.lastCall.args[0].message.should.equal('command must be provided');
-                });
-                it('should require `command` to be string', () => {
-                    registerCommand(true, undefined, undefined, spy);
-                    spy.called.should.be.true;
-                    spy.lastCall.args[0].should.be.instanceOf(Error);
-                    spy.lastCall.args[0].message.should.equal('command must be provided');
-                });
-                it('should require `helpstring`', () => {
-                    registerCommand('command', undefined, undefined, spy);
-                    spy.called.should.be.true;
-                    spy.lastCall.args[0].should.be.instanceOf(Error);
-                    spy.lastCall.args[0].message.should.equal('helpstring must be provided');
-                });
-                it('should require `helpstring` to be string', () => {
-                    registerCommand('command', true, undefined, spy);
-                    spy.called.should.be.true;
-                    spy.lastCall.args[0].should.be.instanceOf(Error);
-                    spy.lastCall.args[0].message.should.equal('helpstring must be provided');
-                });
-                it('should require `handler`', () => {
-                    registerCommand('command', 'help', undefined, spy);
-                    spy.called.should.be.true;
-                    spy.lastCall.args[0].should.be.instanceOf(Error);
-                    spy.lastCall.args[0].message.should.equal('handler must be provided');
-                });
-                it('should require `handler` to be string', () => {
-                    registerCommand('command', 'help', true, spy);
-                    spy.called.should.be.true;
-                    spy.lastCall.args[0].should.be.instanceOf(Error);
-                    spy.lastCall.args[0].message.should.equal('handler must be provided');
-                });
-                it('should call callback without error on command registration', () => {
-                    registerCommand('command', 'help', () => 0, spy);
-                    spy.called.should.be.true;
-                    spy.lastCall.args.should.have.length(0);
+            describe('any space character should split args', () => {
+                [' ', '\f', '\t', '\v', '\u00a0', '\u1680', '\u180e', '\u2000', '\u2001', '\u2002', '\u2003', '\u2004',
+                    '\u2005', '\u2006', '\u2007', '\u2008', '\u2009', '\u200a', '\u2028', '\u2029', '\u202f', '\u205f',
+                    '\u3000'
+                ].forEach((space) => {
+                    let str = `0000${space.charCodeAt().toString(16)}`;
+                    str = `\\u${str.substring(str.length - 4)}`;
+                    it(`: ${str}`, () => {
+                        const input = `@fred${space}help${space}arg1${space}arg2`;
+                        parseLine(input).args.should.deep.equal(['arg1', 'arg2']);
+                    });
                 });
             });
-            it('should add command to command list on command registration', () => {
-                registerCommand('command', 'help', () => 0, spy);
-                commands.internals.commands.command.should.be.ok;
+            it('should not match simple text', () => {
+                expect(parseLine('simple text stuff')).to.equal(null);
             });
-            it('should add handler to command list on command registration', () => {
-                const func = () => 0;
-                registerCommand('command', 'help', func, spy);
-                commands.internals.commands.command.handler.should.equal(func);
+            it('should not match mention at end of text', () => {
+                expect(parseLine('simple text stuff @fred')).to.equal(null);
             });
-            it('should add handler to command list on command registration', () => {
-                const txt = 'help' + Math.random();
-                registerCommand('command', txt, () => 0, spy);
-                commands.internals.commands.command.help.should.equal(txt);
+            it('should not match mention in text', () => {
+                expect(parseLine('simple @fred  text stuff')).to.equal(null);
             });
-            it('should add command to event listeners', () => {
-                const func = () => 0;
-                registerCommand('command', 'help', func, spy);
-                events.on.calledWith('command#command', func).should.be.true;
+            it('should not match short command', () => {
+                expect(parseLine('@fred cm text stuff')).to.equal(null);
             });
-            it('should log registration', () => {
-                registerCommand('command', 'help', () => 0, spy);
-                events.emit.calledWith('logMessage', 'Command Registered: command: help').should.be.true;
+            it('should not match really short command', () => {
+                expect(parseLine('@fred c text stuff')).to.equal(null);
             });
-            describe('command conflict resolution', () => {
-                it('should prefix conflicting command with underscore', () => {
-                    const func = () => 0,
-                        name = '_command';
-                    commands.internals.commands.command = true;
-                    registerCommand('command', 'help', func, spy);
-                    commands.internals.commands[name].handler.should.equal(func);
-                    events.on.calledWith('command#_command', func).should.be.true;
-                });
-                it('should resolve multiply conflicting command with underscores', () => {
-                    const func = () => 0,
-                        name = '___command';
-                    commands.internals.commands[name.slice(3)] = true;
-                    commands.internals.commands[name.slice(2)] = true;
-                    commands.internals.commands[name.slice(1)] = true;
-                    registerCommand('command', 'help', func, spy);
-                    commands.internals.commands[name].handler.should.equal(func);
-                    events.on.calledWith('command#___command', func).should.be.true;
-                });
+            it('should not match wroing user mention command', () => {
+                expect(parseLine('@wilma c text stuff')).to.equal(null);
+            });
+            it('should match canse insensitive mention command', () => {
+                parseLine('@FRED help').command.should.equal('help');
+            });
+            it('should match bare command', () => {
+                parseLine('@fred help').command.should.equal('help');
+            });
+            it('should match command with args', () => {
+                const cmd = parseLine('@fred help arg1 arg2');
+                cmd.command.should.equal('help');
+                cmd.args.should.deep.equal(['arg1', 'arg2']);
             });
         });
     });
-    describe('start()', () => {
-        let sandbox, events;
+    describe('internals.onComplete()', () => {
+        let forum, onComplete;
         beforeEach(() => {
-            config.core.username = 'foo';
-            sandbox = sinon.sandbox.create();
-            events = {
-                emit: sinon.spy()
+            forum = {
+                Post: {
+                    reply: sinon.stub()
+                }
             };
-            commands.internals.events = events;
+            forum.Post.reply.resolves();
+            commands.bindCommands(forum);
+            onComplete = commands.internals.onComplete;
         });
-        afterEach(() => {
-            sandbox.restore();
+        it('should not attempt to post on no content', () => {
+            const command = {
+                commands: [{
+                    replyText: ''
+                }]
+            };
+            return onComplete(command)
+                .then(() => {
+                    forum.Post.reply.called.should.be.false;
+                });
         });
-        it('should produce expected mentionCommand regexp', () => {
-            commands.start();
-            commands.internals.mention.toString().should.equal('/^@foo\\s\\S{3,}(\\s|$)/i');
+        it('should not attempt to post on whitespace content', () => {
+            const command = {
+                commands: [{
+                    replyText: ' '
+                }]
+            };
+            return onComplete(command)
+                .then(() => {
+                    forum.Post.reply.called.should.be.false;
+                });
+        });
+        it('should post with content', () => {
+            const command = {
+                commands: [{
+                    replyText: 'foo'
+                }],
+                notification: {
+                    topicId: 45,
+                    postId: -7
+                }
+            };
+            return onComplete(command)
+                .then(() => {
+                    forum.Post.reply.calledWith(45, -7, 'foo').should.be.true;
+                });
+        });
+        it('should merge multiple command replies', () => {
+            const command = {
+                commands: [{
+                    replyText: 'foo'
+                }, {
+                    replyText: 'bar'
+                }],
+                notification: {
+                    topicId: 45,
+                    postId: -7
+                }
+            };
+            return onComplete(command)
+                .then(() => {
+                    forum.Post.reply.calledWith(45, -7, 'foo\n\n---\n\nbar').should.be.true;
+                });
+        });
+        it('should merge preseve whitespace in command replies', () => {
+            const command = {
+                commands: [{
+                    replyText: '\nfoo '
+                }, {
+                    replyText: '\tbar\n'
+                }],
+                notification: {
+                    topicId: 45,
+                    postId: -7
+                }
+            };
+            return onComplete(command)
+                .then(() => {
+                    forum.Post.reply.calledWith(45, -7, '\nfoo \n\n---\n\n\tbar\n').should.be.true;
+                });
+        });
+        it('should ignore blank command replies', () => {
+            const command = {
+                commands: [{
+                    replyText: '\n\t'
+                }, {
+                    replyText: 'foo'
+                }, {
+                    replyText: '\n'
+                }, {
+                    replyText: 'bar'
+                }, {
+                    replyText: ' '
+                }],
+                notification: {
+                    topicId: 45,
+                    postId: -7
+                }
+            };
+            return onComplete(command)
+                .then(() => {
+                    forum.Post.reply.calledWith(45, -7, 'foo\n\n---\n\nbar').should.be.true;
+                });
         });
     });
-    describe('prepareParser()', () => {
-        const prepare = commands.prepare;
-        let sandbox, events;
-        before(() => {
-            config.core.username = 'foo';
-        });
+    describe('internals.onError()', () => {
+        let forum = null,
+            onError = null;
         beforeEach(() => {
-            sandbox = sinon.sandbox.create();
-            events = {
-                on: sinon.spy(),
-                emit: sinon.spy()
+            forum = {
+                Post: {
+                    reply: sinon.stub()
+                }
             };
-            commands.internals.events = events;
+            forum.Post.reply.resolves();
+            commands.bindCommands(forum);
+            onError = commands.internals.onError;
         });
-        afterEach(() => {
-            sandbox.restore();
+        it('should post error message', () => {
+            return onError('a florgle wozzer was grutzed', {
+                notification: {
+                    topicId: 3.14,
+                    postId: 'hi'
+                }
+            }).then(() => {
+                forum.Post.reply.calledWith(3.14, 'hi', 'An unexpected error `a florgle wozzer was grutzed` ' +
+                    'occured and your commands could not be processed!').should.be.true;
+            });
         });
-        it('should call callback on completion', () => {
+    });
+    describe('internals.defaultHandler()', () => {
+        let forum = null,
+            defaultHandler = null;
+        beforeEach(() => {
+            forum = {};
+            commands.bindCommands(forum);
+            defaultHandler = commands.internals.defaultHandler;
+        });
+        it('should reply with message to imperative command', () => {
+            const command = {
+                command: 'kittens',
+                mention: false,
+                reply: sinon.spy()
+            };
+            return defaultHandler(command).then(() => {
+                command.reply.calledWith('Command `kittens` is not recognized').should.be.true;
+            });
+        });
+        it('should not reply with message to mention command', () => {
+            const command = {
+                command: 'kittens',
+                mention: true,
+                reply: sinon.spy()
+            };
+            return defaultHandler(command).then(() => {
+                command.reply.called.should.be.false;
+            });
+        });
+    });
+    describe('internals.cmdHelp', () => {
+        let forum = null,
+            cmdHelp = null;
+        beforeEach(() => {
+            forum = {
+                Post: {
+                    reply: sinon.stub()
+                }
+            };
+            forum.Post.reply.resolves();
+            commands.bindCommands(forum);
+            cmdHelp = commands.internals.cmdHelp;
+        });
+        it('should be registered as `command#help` event', () => {
+            commands.internals.handlers.help.handler.should.equal(cmdHelp);
+        });
+        it('should post expected text', () => {
+            const expected = 'Registered commands:\nhelp: print command help listing\n' +
+                'shutup: tell me to shutup\n\n* Help topic available.\n\nIssue the `help`' +
+                ' command with an available help topic as a parameter to read additonal help';
+            commands.internals.handlers.help = {
+                help: 'print command help listing'
+            };
+            commands.internals.handlers.shutup = {
+                help: 'tell me to shutup'
+            };
             const spy = sinon.spy();
-            prepare(events, spy);
-            spy.called.should.be.true;
-            spy.lastCall.args.should.deep.equal([]);
+            cmdHelp({
+                command: 'foobar',
+                reply: spy
+            });
+            spy.firstCall.args[0].should.equal(expected);
         });
-        it('should set events object', () => {
-            const spy = sinon.spy();
-            prepare(events, spy);
-            commands.internals.events.should.equal(events);
-        });
-        it('should produce register commandPotect as newListener listener', () => {
-            prepare(events, () => 0);
-            events.on.calledWith('newListener', commands.internals.commandProtect).should.be.true;
-        });
-        it('should produce register status.loadPlugin as loadPlugin listener', () => {
-            prepare(events, () => 0);
-            events.on.calledWith('loadPlugin', status.loadPlugin).should.be.true;
-        });
-    });
-    describe('parseCommands()', () => {
-        let parseShortCommand, parseMentionCommand, events, callbackSpy, clocks, sandbox;
-        beforeEach(() => {
-            sandbox = sinon.sandbox.create();
-            clocks = sandbox.useFakeTimers();
-            sandbox.stub(commands.internals, 'parseShortCommand');
-            sandbox.stub(commands.internals, 'parseMentionCommand');
-            parseShortCommand = commands.internals.parseShortCommand;
-            parseMentionCommand = commands.internals.parseMentionCommand;
-            events = {
-                emit: sinon.stub()
+        it('should post expected text with help topics', () => {
+            const expected = 'Registered commands:\nhelp: print command help listing\n\n' +
+                'Help Topics:\nshutup: Extended help topic\n\n* Help topic available.\n\n' +
+                'Issue the `help` command with an available help topic as a parameter to ' +
+                'read additonal help';
+            commands.internals.handlers.help = {
+                help: 'print command help listing'
             };
-            commands.internals.events = events;
-            callbackSpy = sinon.spy();
+            commands.internals.helpTopics.shutup = 'tell me to shutup';
+            const spy = sinon.spy();
+            cmdHelp({
+                command: 'foobar',
+                reply: spy
+            });
+            spy.firstCall.args[0].should.equal(expected);
         });
-        afterEach(() => {
-            sandbox.restore();
-            commands.internals.events = null;
-        });
-        describe('validations', () => {
-            it('should require callback', () => {
-                expect(() => commands.parseCommands({}, {}, null)).to.throw('callback must be supplied');
-                parseShortCommand.called.should.be.false;
-                parseMentionCommand.called.should.be.false;
-            });
-            it('should accept empty post', () => {
-                commands.parseCommands(null, null, callbackSpy);
-                callbackSpy.called.should.be.true;
-                callbackSpy.lastCall.args.should.deep.equal([null, []]);
-                parseShortCommand.called.should.be.false;
-                parseMentionCommand.called.should.be.false;
-            });
-            it('should accept blank post', () => {
-                commands.parseCommands({
-                    cleaned: ''
-                }, null, callbackSpy);
-                callbackSpy.called.should.be.true;
-                callbackSpy.lastCall.args.should.deep.equal([null, []]);
-                parseShortCommand.called.should.be.false;
-                parseMentionCommand.called.should.be.false;
-            });
-        });
-        describe('command logging', () => {
-            it('should emit logMessage on post containing command', () => {
-                const topic = Math.random();
-                parseShortCommand.returns({
-                    command: 'foobar'
-                });
-                events.emit.returns(true);
-                commands.parseCommands({
-                    cleaned: '!i am a little text short and stout'
-                }, topic, callbackSpy);
-                clocks.tick(0);
-                events.emit.calledWith('logMessage', 'executing command: foobar').should.equal(true);
-            });
-            it('should emit logMessage for each command on post containing multiple commands', () => {
-                parseShortCommand.onCall(0).returns({
-                    command: 'foobar'
-                });
-                parseShortCommand.returns({
-                    command: 'barbaz'
-                });
-                events.emit.returns(true);
-                commands.parseCommands({
-                    cleaned: '!i am a little\ntext short\n!and stout'
-                }, null, callbackSpy);
-                clocks.tick(0);
-                events.emit.calledWith('logMessage', 'executing command: foobar').should.equal(true);
-                events.emit.calledWith('logMessage', 'executing command: barbaz').should.equal(true);
-            });
-        });
-        describe('command event emitting', () => {
-            it('should not emit on non command post', () => {
-                commands.parseCommands({
-                    cleaned: 'i am a little text short and stout'
-                }, null, callbackSpy);
-                callbackSpy.called.should.be.true;
-                callbackSpy.lastCall.args.should.deep.equal([null, []]);
-                parseShortCommand.called.should.be.false;
-                parseMentionCommand.called.should.be.true;
-                events.emit.called.should.be.false;
-            });
-            it('should not emit on non command post 2', () => {
-                commands.parseCommands({
-                    cleaned: '!i am a little text short and stout'
-                }, null, callbackSpy);
-                callbackSpy.called.should.be.true;
-                callbackSpy.lastCall.args.should.deep.equal([null, []]);
-                parseShortCommand.called.should.be.true;
-                parseMentionCommand.called.should.be.false;
-                events.emit.called.should.be.false;
-            });
-            it('should emit on post containing command', () => {
-                const topic = Math.random();
-                parseShortCommand.returns({
-                    command: 'foobar'
-                });
-                events.emit.returns(true);
-                commands.parseCommands({
-                    cleaned: '!i am a little text short and stout'
-                }, topic, callbackSpy);
-                clocks.tick(0);
-                events.emit.called.should.be.true;
-                events.emit.lastCall.args.should.deep.equal(['command#foobar', {
-                    command: 'foobar',
-                    post: {
-                        cleaned: '!i am a little text short and stout'
-                    },
-                    topic: topic
-                }]);
-            });
-            it('should multi emit on post containing multiple commands', () => {
-                parseShortCommand.onCall(0).returns({
-                    command: 'foobar'
-                });
-                parseShortCommand.returns({
-                    command: 'barbaz'
-                });
-                events.emit.returns(true);
-                commands.parseCommands({
-                    cleaned: '!i am a little\ntext short\n!and stout'
-                }, null, callbackSpy);
-                clocks.tick(0);
-                events.emit.calledWith('command#foobar').should.be.true;
-                events.emit.calledWith('command#barbaz').should.be.true;
-            });
-        });
-        describe('unhandled commands', () => {
-            it('should not emit error on uhandled command from mention', () => {
-                parseShortCommand.returns({
-                    command: 'foobar',
-                    mention: true
-                });
-                events.emit.returns(false);
-                commands.parseCommands({
-                    cleaned: '!i am a little text short and stout'
-                }, null, callbackSpy);
-                clocks.tick(0);
-                events.emit.calledWith('command#ERROR').should.be.false;
-            });
-            it('should emit error on uhandled command', () => {
-                parseShortCommand.returns({
-                    command: 'foobar'
-                });
-                events.emit.returns(true)
-                    .onSecondCall().returns(false);
 
-                commands.parseCommands({
-                    cleaned: '!i am a little text short and stout'
-                }, null, callbackSpy);
-                clocks.tick(0);
-                events.emit.calledWith('command#ERROR').should.equal(true);
-                events.emit.calledWith('error').should.equal(false);
+        it('should indicate presence of help topic on command', () => {
+            const expected = 'Registered commands:\nhelp: print command help listing *\n\n' +
+                '* Help topic available.\n\nIssue the `help` command with an available help ' +
+                'topic as a parameter to read additonal help';
+            commands.internals.handlers.help = {
+                help: 'print command help listing'
+            };
+            commands.internals.helpTopics.help = 'foobar';
+            const spy = sinon.spy();
+            cmdHelp({
+                command: 'foobar',
+                reply: spy
             });
-            it('should emit global error on uhandled command error', () => {
-                parseShortCommand.returns({
-                    command: 'foobar'
+            spy.firstCall.args[0].should.equal(expected);
+        });
+        describe('with parameters', () => {
+            it('should post default text without parameters', () => {
+                const expected = 'Registered commands:';
+                const spy = sinon.spy();
+                cmdHelp({
+                    command: 'foobar',
+                    reply: spy
                 });
-                events.emit.returns(false);
-                commands.parseCommands({
-                    cleaned: '!i am a little text short and stout'
-                }, null, callbackSpy);
-                clocks.tick(0);
-                events.emit.calledWith('command#ERROR').should.equal(true);
-                events.emit.calledWith('error').should.equal(true);
+                spy.firstCall.args[0].should.startWith(expected);
+            });
+            it('should post default text when called with empty parameters', () => {
+                const expected = 'Registered commands:';
+                const spy = sinon.spy();
+                cmdHelp({
+                    command: 'foobar',
+                    args: [],
+                    reply: spy
+                });
+                spy.firstCall.args[0].should.startWith(expected);
+            });
+            it('should post default text when called with unexpected parameters', () => {
+                const expected = 'Registered commands:';
+
+                const spy = sinon.spy();
+                cmdHelp({
+                    command: 'foobar',
+
+                    args: ['i', 'am', 'not', 'a', 'command'],
+                    reply: spy
+                });
+                spy.firstCall.args[0].should.startWith(expected);
+            });
+            it('should post extended help message one word command', () => {
+                const expected = 'Help topic for `whosit`\n\nwhosit extended help' +
+                    '\n\nIssue the `help` command without any parameters to see all available commands';
+                commands.internals.helpTopics.whosit = 'whosit extended help';
+                const spy = sinon.spy();
+                cmdHelp({
+                    command: 'foobar',
+                    args: ['whosit'],
+                    reply: spy
+                });
+                spy.firstCall.args[0].should.equal(expected);
+            });
+            it('should post extended help message multi-word command', () => {
+                const expected = 'Help topic for `who am i`';
+                commands.internals.helpTopics['who am i'] = 'whosit extended help';
+                const spy = sinon.spy();
+                cmdHelp({
+                    command: 'foobar',
+                    args: ['who', 'am', 'i'],
+                    reply: spy
+                });
+                spy.firstCall.args[0].should.startWith(expected);
             });
         });
     });
-    describe('postPermissionDenied()', () => {
-        let sandbox;
+    describe('internals.getCommandHelps()', () => {
+        let cmds = null,
+            forum = null,
+            getCommandHelps = null;
         beforeEach(() => {
-            sandbox = sinon.sandbox.create();
-            sandbox.stub(browser, 'createPost');
+            forum = {};
+            commands.bindCommands(forum);
+            cmds = commands.internals.handlers;
+            Object.keys(cmds).forEach((key) => delete cmds[key]);
+            getCommandHelps = commands.internals.getCommandHelps;
         });
-        afterEach(() => sandbox.restore());
-        it('should call browser.createPost()', () => {
-            commands.postPermissionDenied({
-                post: {}
+        it('should return default text', () => {
+            const expected = 'Registered commands:',
+                result = getCommandHelps();
+            result.should.equal(expected);
+        });
+        it('should return help for one command', () => {
+            cmds.help = {
+                help: 'foobar'
+            };
+            const expected = 'Registered commands:\nhelp: foobar',
+                result = getCommandHelps();
+            result.should.equal(expected);
+        });
+        it('should return sort commands', () => {
+            cmds.help = {
+                help: 'foobar'
+            };
+            cmds.aaa = {
+                help: 'bbb'
+            };
+            const expected = 'Registered commands:\naaa: bbb\nhelp: foobar',
+                result = getCommandHelps();
+            result.should.equal(expected);
+        });
+    });
+    describe('Command', () => {
+        let forum = null,
+            Command = null,
+            handlers = null;
+        beforeEach(() => {
+            forum = {};
+            commands.bindCommands(forum);
+            Command = commands.internals.Command;
+            handlers = commands.internals.handlers;
+        });
+        describe('ctor()', () => {
+            it('should use utils.mapSet for storage', () => {
+                const command = new Command({}, {});
+                utils.mapGet(command).should.be.ok;
             });
-            browser.createPost.called.should.equal(true);
-        });
-        it('should reply to correct topic', () => {
-            const topicId = Math.random();
-            commands.postPermissionDenied({
-                post: {
-                    'topic_id': topicId
-                }
+            it('should store definition.line', () => {
+                const expected = `${Math.random()}${Math.random()}`;
+                const command = new Command({
+                    line: expected
+                }, {});
+                utils.mapGet(command).line.should.equal(expected);
             });
-            browser.createPost.firstCall.args[0].should.equal(topicId);
-        });
-        it('should reply to correct post', () => {
-            const postId = Math.random();
-            commands.postPermissionDenied({
-                post: {
-                    'post_number': postId
-                }
+            it('should store definition.command', () => {
+                const expected = `${Math.random()}${Math.random()}`;
+                const command = new Command({
+                    command: expected
+                }, {});
+                utils.mapGet(command).command.should.equal(expected);
             });
-            browser.createPost.firstCall.args[1].should.equal(postId);
-        });
-        it('should post expected message', () => {
-            const name = 'TEST' + Math.random();
-            const message = 'I\'m sorry ' + name + ', but I cannot comply.\n\n' +
-                'You are not authorized to give me direct orders.\n\n' +
-                'Please contact a member of the forum staff, or my owner, @' + config.core.owner +
-                ', for assistance in this matter';
-            commands.postPermissionDenied({
-                post: {
-                    username: name
-                }
+            it('should store definition.args', () => {
+                const expected = `${Math.random()}${Math.random()}`;
+                const command = new Command({
+                    args: expected
+                }, {});
+                utils.mapGet(command).args.should.equal(expected);
             });
-            browser.createPost.firstCall.args[2].should.equal(message);
+            it('should store definition.mention', () => {
+                const expected = `${Math.random()}${Math.random()}`;
+                const command = new Command({
+                    mention: expected
+                }, {});
+                utils.mapGet(command).mention.should.equal(expected);
+            });
+            it('should store default reply text', () => {
+                const command = new Command({}, {});
+                utils.mapGet(command).replyText.should.equal('');
+            });
+            it('should select defaultHandler for no command', () => {
+                const command = new Command({}, {});
+                utils.mapGet(command).handler.should.equal(commands.internals.defaultHandler);
+            });
+            it('should select defaultHandler for invalid command', () => {
+                const command = new Command({
+                    command: 'ook!'
+                }, {});
+                utils.mapGet(command).handler.should.equal(commands.internals.defaultHandler);
+            });
+            it('should select registered handler for valid command', () => {
+                const expected = sinon.spy();
+                handlers.ook = {
+                    handler: expected
+                };
+                const command = new Command({
+                    command: 'ook'
+                }, {});
+                utils.mapGet(command).handler.should.equal(expected);
+            });
+            it('should store a reference to parent Commands', () => {
+                const expected = sinon.spy();
+                const command = new Command({}, expected);
+                utils.mapGet(command).parent.should.equal(expected);
+            });
         });
-        it('should post custom trust exception message', () => {
-            const name = 'TEST' + Math.random();
-            const message = 'I\'m sorry ' + name + ', but I cannot comply.\n\n' +
-                'You are not authorized to give me direct orders.\n\n' +
-                'Please contact the flying spaghetti monster, or my owner, @' + config.core.owner +
-                ', for assistance in this matter';
-            commands.postPermissionDenied({
-                post: {
-                    username: name
-                }
-            }, 'the flying spaghetti monster');
-            browser.createPost.firstCall.args[2].should.equal(message);
+        describe('simple getters', () => {
+            let command, data;
+            beforeEach(() => {
+                command = new Command({}, {});
+                data = utils.mapGet(command);
+            });
+            ['line', 'command', 'mention', 'args', 'parent', 'replyText'].forEach((property) => {
+                it(`should allow get of ${property} from storage`, () => {
+                    const expected = Math.random();
+                    data[property] = expected;
+                    command[property].should.equal(expected);
+                });
+                it(`should disallow setting value to ${property}`, () => {
+                    expect(() => {
+                        command[property] = 'foo';
+                    }).to.throw();
+                });
+            });
         });
-        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].forEach((level) => {
-            it('should post Trust Level ' + level + ' message', () => {
-                const name = 'TEST' + Math.random();
-                const message = 'I\'m sorry ' + name + ', but I cannot comply.\n\n' +
-                    'You are not authorized to give me direct orders.\n\n' +
-                    'Please contact someone of Trust Level ' + level + ' or higher, or my owner, @' +
-                    config.core.owner + ', for assistance in this matter';
-                commands.postPermissionDenied({
-                    post: {
-                        username: name
-                    }
-                }, level);
-                browser.createPost.firstCall.args[2].should.equal(message);
+        describe('proxied getters', () => {
+            let command, parent;
+            beforeEach(() => {
+                parent = {
+                    getPost: sinon.stub(),
+                    getTopic: sinon.stub(),
+                    getUser: sinon.stub()
+                };
+                command = new Command({}, parent);
+            });
+            it('should proxy getPost() to parent.getPost()', () => {
+                const expected = Math.random();
+                parent.getPost.returns(expected);
+                command.getPost().should.equal(expected);
+                parent.getPost.called.should.be.true;
+            });
+            it('should proxy getTopic() to parent.getTopic()', () => {
+                const expected = Math.random();
+                parent.getTopic.returns(expected);
+                command.getTopic().should.equal(expected);
+                parent.getTopic.called.should.be.true;
+            });
+            it('should proxy getUser() to parent.getUser()', () => {
+                const expected = Math.random();
+                parent.getUser.returns(expected);
+                command.getUser().should.equal(expected);
+                parent.getUser.called.should.be.true;
+            });
+        });
+        describe('reply()', () => {
+            let command, data;
+            beforeEach(() => {
+                command = new Command({}, {});
+                data = utils.mapGet(command);
+            });
+            it('should set replyText property', () => {
+                const expected = `a${Math.random()}b`;
+                command.reply(expected);
+                data.replyText.should.equal(expected);
+            });
+        });
+        describe('execute()', () => {
+            let command, data;
+            beforeEach(() => {
+                command = new Command({}, {});
+                data = utils.mapGet(command);
+            });
+            it('should set replyText property', () => {
+                const expected = Math.random();
+                const spy = sinon.stub().resolves(expected);
+                data.handler = spy;
+                return command.execute().should.become(expected);
+            });
+        });
+    });
+    describe('Commands', () => {
+        let forum, Commands;
+        beforeEach(() => {
+            forum = {};
+            commands.bindCommands(forum);
+            Commands = commands.internals.Commands;
+        });
+        describe('ctor()', () => {
+            it('should use utils.mapSet for storage', () => {
+                const command = new Commands({}, '');
+                utils.mapGet(command).should.be.ok;
+            });
+            it('should store notification parameter', () => {
+                const expected = `${Math.random()}${Math.random()}`;
+                const command = new Commands(expected, '');
+                utils.mapGet(command).notification.should.equal(expected);
+            });
+            it('should store postbody parameter', () => {
+                const expected = `${Math.random()}${Math.random()}`;
+                const command = new Commands({}, expected);
+                utils.mapGet(command).postBody.should.equal(expected);
+            });
+            it('should store commands array', () => {
+                const expected = '';
+                const command = new Commands({}, expected);
+                utils.mapGet(command).commands.should.be.an('Array');
+            });
+            it('should store parsed commands', () => {
+                const expected = '!123\n!456';
+                const command = new Commands({}, expected);
+                utils.mapGet(command).commands.should.have.length(2);
+            });
+        });
+        describe('simple getters', () => {
+            let command, data;
+            beforeEach(() => {
+                command = new Commands({}, '');
+                data = utils.mapGet(command);
+            });
+            ['notification', 'commands'].forEach((property) => {
+                it(`should allow get of ${property} from storage`, () => {
+                    const expected = Math.random();
+                    data[property] = expected;
+                    command[property].should.equal(expected);
+                });
+                it(`should disallow setting value to ${property}`, () => {
+                    expect(() => {
+                        command[property] = 'foo';
+                    }).to.throw();
+                });
+            });
+        });
+        describe('cached getters', () => {
+            [
+                ['getPost', 'Post', 'post', 'postId'],
+                ['getTopic', 'Topic', 'topic', 'topicId'],
+                ['getUser', 'User', 'user', 'userId']
+            ].forEach((config) => {
+                const method = config[0],
+                    object = config[1],
+                    store = config[2],
+                    param = config[3];
+                let command, spy, data, notification;
+                beforeEach(() => {
+                    notification = {};
+                    command = new Commands(notification, '');
+                    spy = sinon.stub().resolves();
+                    forum[object] = {
+                        get: spy
+                    };
+                    data = utils.mapGet(command);
+                });
+                it(`should resolve to cached ${object} when set`, () => {
+                    const expected = Math.random();
+                    data[store] = expected;
+                    return command[method]().then((item) => {
+                        item.should.equal(expected);
+                        spy.called.should.be.false;
+                    });
+                });
+                it(`should request ${store} by notification ${param}`, () => {
+                    const id = Math.random();
+                    notification[param] = id;
+                    expect(data[store]).to.be.not.ok;
+                    return command[method]().then(() => {
+                        spy.calledWith(id).should.be.true;
+                    });
+                });
+                it(`should resolve to fetched ${object}`, () => {
+                    const expected = Math.random();
+                    spy.resolves(expected);
+                    return command[method]().should.become(expected);
+                });
+                it(`should cache fetched ${object}`, () => {
+                    const expected = Math.random();
+                    spy.resolves(expected);
+                    return command[method]().then(() => {
+                        data[store].should.equal(expected);
+                    });
+                });
+            });
+        });
+        describe('execute()', () => {
+            let command, data;
+            beforeEach(() => {
+                command = new Commands({}, '');
+                data = utils.mapGet(command);
+            });
+            it('should resolve to executing instance', () => {
+                return command.execute().should.become(command);
+            });
+            it('should execute contained commands', () => {
+                const spy = sinon.stub().resolves();
+                const cmd = {
+                    execute: spy
+                };
+                data.commands = [cmd, cmd, cmd, cmd];
+                return command.execute().then(() => {
+                    spy.callCount.should.equal(4);
+                });
+            });
+            it('should post command results', () => {
+                forum.Post = {
+                    reply: sinon.stub().resolves()
+                };
+                const expected = 'foo';
+                data.notification.postId = 1;
+                data.notification.topicId = 50;
+                data.commands = [{
+                    execute: sinon.stub().resolves(),
+                    replyText: expected
+                }];
+                return command.execute().then(() => {
+                    forum.Post.reply.calledWith(50, 1, expected).should.be.true;
+                });
+            });
+            it('should execute onError when any command rejects', () => {
+                forum.Post = {
+                    reply: sinon.stub().resolves()
+                };
+                const spy = sinon.stub().resolves();
+                const rejector = sinon.stub().rejects('bad');
+                data.notification.postId = 1;
+                data.notification.topicId = 50;
+                data.commands = [{
+                    execute: spy
+                }, {
+                    execute: rejector
+                }, {
+                    execute: spy
+                }];
+                return command.execute().then(() => {
+                    forum.Post.reply.calledWith(50,
+                        1,
+                        'An unexpected error `Error: bad` occured and your commands' +
+                        ' could not be processed!').should.be.true;
+                });
+            });
+            it('should emit error when onError rejects', () => {
+                forum.Post = {
+                    reply: sinon.stub().rejects('badbad')
+                };
+                forum.emit = sinon.spy();
+                data.notification.postId = 1;
+                data.notification.topicId = 50;
+                data.commands = [{
+                    execute: sinon.stub().rejects('bad')
+                }];
+                return command.execute().then(() => {
+                    forum.emit.calledWith('logError').should.be.true;
+                });
+            });
+        });
+        describe('static get()', () => {
+            it('should use notification.getText()', () => {
+                const notification = {
+                    getText: sinon.stub().resolves('<div>content</div>')
+                };
+                return Commands.get(notification).then(() => {
+                    notification.getText.called.should.be.true;
+                });
+            });
+            it('should store notification in result', () => {
+                const notification = {
+                    getText: sinon.stub().resolves('<div>content</div>')
+                };
+                return Commands.get(notification).then((command) => {
+                    command.notification.should.equal(notification);
+                });
+            });
+            it('should store parsed text in result', () => {
+                const notification = {
+                    getText: sinon.stub().resolves('<div>content</div>')
+                };
+                return Commands.get(notification).then((command) => {
+                    utils.mapGet(command, 'postBody').should.equal('content');
+                });
+            });
+        });
+        describe('static add()', () => {
+            beforeEach(() => commands.bindCommands({}));
+            it('should add command to helpers', () => {
+                const cmd = `a${Math.random()}a`,
+                    text = `b${Math.random()}b`,
+                    handler = sinon.spy();
+                expect(commands.internals.handlers[cmd]).to.be.not.ok;
+                commands.internals.Commands.add(cmd, text, handler);
+                commands.internals.handlers[cmd].should.eql({
+                    handler: handler,
+                    help: text
+                });
             });
         });
     });

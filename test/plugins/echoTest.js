@@ -1,84 +1,86 @@
 'use strict';
-/*globals describe, it*/
 
-const chai = require('chai'),
-    sinon = require('sinon');
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+
+chai.use(chaiAsPromised);
 chai.should();
-const expect = chai.expect;
 
-const echo = require('../../plugins/echo');
-describe('echo', () => {
-    it('should export prepare()', () => {
-        expect(echo.prepare).to.be.a('function');
-    });
-    it('should export start()', () => {
-        expect(echo.start).to.be.a('function');
-    });
-    it('should export stop()', () => {
-        expect(echo.stop).to.be.a('function');
-    });
-    it('should export handler()', () => {
-        expect(echo.handler).to.be.a('function');
-    });
-    it('should have start() as a stub function', () => {
-        expect(echo.start).to.not.throw();
-    });
-    it('should have stop() as a stub function', () => {
-        expect(echo.stop).to.not.throw();
-    });
-    describe('prepare()', () => {
-        it('should register notification listener for `mentioned`', () => {
-            const spy = sinon.spy();
-            echo.prepare(undefined, undefined, {
-                onNotification: spy,
-                registerHelp: sinon.spy()
-            }, undefined);
-            spy.calledWith('mentioned', echo.handler).should.be.true;
+const sinon = require('sinon');
+require('sinon-as-promised');
+
+const testModule = require('../../plugins/echo');
+
+describe('plugins/echo', () => {
+    describe('module', () => {
+        it('should export plugin function', () => {
+            testModule.plugin.should.be.a('function');
         });
-        it('should register notification listener for `replied`', () => {
-            const spy = sinon.spy();
-            echo.prepare(undefined, undefined, {
-                onNotification: spy,
-                registerHelp: sinon.spy()
-            }, undefined);
-            spy.calledWith('replied', echo.handler).should.be.true;
+        it('should return an object', () => {
+            testModule.plugin().should.be.an('object');
         });
-        it('should register notification listener for `private_message`', () => {
-            const spy = sinon.spy();
-            echo.prepare(undefined, undefined, {
-                onNotification: spy,
-                registerHelp: sinon.spy()
-            }, undefined);
-            spy.calledWith('private_message', echo.handler).should.be.true;
+        it('should return an object with an activate function', () => {
+            testModule.plugin().activate.should.be.a('function');
         });
-        it('should register extended help', () => {
-            const evts = {
-                onNotification: sinon.spy(),
-                registerHelp: sinon.spy()
+        it('should return an object with a deactivate function', () => {
+            testModule.plugin().deactivate.should.be.a('function');
+        });
+        it('should return an object with an _echo function', () => {
+            testModule.plugin()._echo.should.be.a('function');
+        });
+    });
+    describe('plugin', () => {
+        let plugin = null,
+            forum = null,
+            command = null;
+        beforeEach(() => {
+            forum = {
+                Commands: {
+                    add: sinon.stub().resolves()
+                }
             };
-            echo.prepare({}, {}, evts);
-            evts.registerHelp.calledWith('echo', echo.extendedHelp).should.be.true;
-            expect(evts.registerHelp.firstCall.args[2]).to.be.a('function');
-            expect(evts.registerHelp.firstCall.args[2]()).to.equal(0);
+            plugin = testModule.plugin(forum);
+            command = {
+                getPost: sinon.stub().resolves({}),
+                getUser: sinon.stub().resolves({}),
+                reply: sinon.stub()
+            };
         });
-    });
-    describe('handler()', () => {
-        it('should create post from clean data', () => {
-            const spy = sinon.stub();
-            spy.yields(null);
-            echo.prepare(undefined, undefined, {
-                onNotification: () => 0,
-                registerHelp: sinon.spy()
-            }, {
-                createPost: spy
+        it('should register command on activate', () => {
+            return plugin.activate().then(() => {
+                forum.Commands.add.calledWith('echo', 'Simple testing command', plugin._echo).should.be.true;
             });
-            echo.handler(undefined, {
-                id: 3.1415
-            }, {
-                id: 4324,
-                cleaned: 'this is a post!'
+        });
+        it('should reject activation when Commands.add rejects', () => {
+            forum.Commands.add.rejects('bad');
+            return plugin.activate().should.be.rejected;
+        });
+        it('should noop on deactivate', () => {
+            return plugin.deactivate();
+        });
+        describe('echo()', () => {
+            it('should retrieve post data', () => {
+                return plugin._echo(command).then(() => {
+                    command.getPost.called.should.be.true;
+                });
             });
-            spy.calledWith(3.1415, 4324, 'this is a post!').should.be.true;
+            it('should retrieve user data', () => {
+                return plugin._echo(command).then(() => {
+                    command.getUser.called.should.be.true;
+                });
+            });
+            it('should reply with expected text', () => {
+                command.getPost.resolves({
+                    content: 'I am a teapot, short and stout.'
+                });
+                command.getUser.resolves({
+                    username: 'Testy_McTesterson'
+                });
+                return plugin._echo(command).then(() => {
+                    command.reply.calledWith('@Testy_McTesterson said:\n' +
+                        '> I am a teapot, short and stout.').should.be.true;
+                });
+            });
         });
     });
 });

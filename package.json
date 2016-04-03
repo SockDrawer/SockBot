@@ -1,7 +1,7 @@
 {
   "name": "sockbot",
-  "version": "2.13.5",
-  "releaseName": "Frisky Fishnet",
+  "version": "3.0.0-BETA1",
+  "releaseName": "Alpha Alpaca",
   "description": "A sockpuppet bot to use on http://what.thedailywtf.com.",
   "repository": "https://github.com/SockDrawer/SockBot",
   "license": "MIT",
@@ -14,44 +14,44 @@
     "url": "https://github.com/SockDrawer/SockBot/issues",
     "email": "support@sockdrawer.io"
   },
-  "main": "./SockBot.js",
   "bin": "./lib/app.js",
   "engines": {
-    "node": ">=0.11",
-    "iojs": ">=1.7"
+    "node": ">=4.0"
   },
   "dependencies": {
-    "async": "^1.5.2",
-    "filesize": "^3.2.0",
-    "js-yaml": "^3.5.2",
-    "knuth-shuffle": "^1.0.1",
-    "later": "^1.2.0",
+    "debug": "^2.2.0",
+    "js-yaml": "^3.5.4",
     "request": "^2.69.0",
-    "xregexp": "^3.0.0",
-    "yargs": "^3.32.0"
+    "sanitize-html": "^1.11.4",
+    "socket.io-client": "^1.4.5",
+    "string": "^3.3.1",
+    "yargs": "^4.2.0"
   },
   "devDependencies": {
     "blns": "^2.0.2",
     "chai": "^3.5.0",
-    "chai-string": "^1.1.6",
+    "chai-as-promised": "^5.3.0",
+    "chai-string": "^1.2.0",
     "codeclimate-test-reporter": "^0.3.1",
-    "coveralls": "^2.11.6",
-    "gulp": "^3.9.0",
-    "gulp-eslint": "^1.1.1",
-    "gulp-git": "^1.7.0",
-    "gulp-istanbul": "^0.10.3",
-    "gulp-jsdoc-to-markdown": "^1.2.1",
-    "gulp-mocha": "^2.1.3",
-    "gulp-rename": "^1.2.2",
+    "dmd": "^1.3.10",
+    "eslint": "^2.5.3",
+    "glob-all": "^3.0.1",
+    "istanbul": "^0.4.2",
+    "jsdoc-parse": "^1.2.7",
+    "mkdirp": "^0.5.1",
+    "mocha": "^2.4.5",
     "sinon": "^1.17.3",
+    "sinon-as-promised": "^4.0.0",
     "sinon-chai": "^2.8.0"
   },
   "scripts": {
     "start": "node lib/app.js",
-    "lint": "node --harmony --harmony_arrow_functions node_modules/gulp/bin/gulp.js lint",
-    "test": "node --harmony --harmony_arrow_functions node_modules/gulp/bin/gulp.js test",
-    "gulp": "node --harmony --harmony_arrow_functions node_modules/gulp/bin/gulp.js",
-    "istanbul": "node --harmony --harmony_arrow_functions node_modules/istanbul-harmony/lib/cli.js cover node_modules/gulp-mocha/node_modules/mocha/bin/_mocha -- --recursive -R dot",
-    "mocha": "node --harmony --harmony_arrow_functions node_modules/.bin/_mocha --recursive -R dot"
+    "lint": "eslint .",
+    "pretest": "istanbul cover node_modules/mocha/bin/_mocha --print both -x 'external/**' -x 'build/**' --include-all-sources -- --recursive -R spec",
+    "test": "istanbul check-coverage coverage/coverage.json",
+    "istanbul": "istanbul cover node_modules/mocha/bin/_mocha --print both -x 'external/**' -x 'build/**' --include-all-sources -- --recursive -R dot",
+    "mocha": "mocha --recursive -R dot",
+    "buildDocs": "node build/makeDocs.js",
+    "pushDocs": "bash build/sendDocs.sh"
   }
 }

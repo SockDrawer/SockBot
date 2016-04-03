@@ -1,106 +1,78 @@
 'use strict';
 /**
- * Summoner plugin
- *
- * Watches for @mentions and replies with a canned response
- *
+ * Example plugin, replies to mentions with random quips.
  * @module summoner
  * @author Accalia
  * @license MIT
  */
 
-const internals = {
-    browser: null,
-    configuration: exports.defaultConfig,
-    timeouts: {},
-    interval: null,
-    events: null
-};
-exports.internals = internals;
-
 /**
- * Default plugin configuration
+ * Plugin generation function.
+ *
+ * Returns a plugin object bound to the provided forum provider
+ *
+ * @param {Provider} forum Active forum Provider
+ * @param {object|Array} config Plugin configuration
+ * @returns {Plugin} An instance of the Summoner plugin
  */
-exports.defaultConfig = {
-    /**
-     * Required delay before posting another reply in the same topic.
-     *
-     * @default
-     * @type {Number}
-     */
-    cooldown: 60 * 1000,
-    /**
-     * Messages to select reply from.
-     *
-     * @default
-     * @type {string[]}
-     */
-    messages: [
+module.exports = function summoner(forum, config) {
+
+    let messages = [
         '@%username% has summoned me, and so I appear.',
         'Yes master %name%, I shall appear as summoned.',
         'Yes mistress %name%, I shall appear as summoned.'
-    ],
+    ];
+    config = config || {}; // prevent nulls
+    if (Array.isArray(config) && config.length > 0) {
+        messages = config;
+    } else if (Array.isArray(config.messages) && config.messages.length > 0) {
+        messages = config.messages;
+    }
+
     /**
-     * Extended help message
+     * Handle a mention notification.
+     *
+     * Choose a random message and reply with it
+     *
+     * @param {Notification} notification Notification event to handle
+     * @returns {Promise} Resolves when event is processed
      */
-    extendedHelp: 'Respond to @mentions with a randomly selected preconfigured phrase.\n\nFor more information see ' +
-        'the [full docs](https://sockbot.readthedocs.org/en/latest/Plugins/summoner/)'
-};
-
-/**
- * Respond to @mentions
- *
- * @param {external.notifications.Notification} _ Notification recieved (ignored)
- * @param {external.topics.Topic} topic Topic trigger post belongs to
- * @param {external.posts.CleanedPost} post Post that triggered notification
- */
-exports.mentionHandler = function mentionHandler(_, topic, post) {
-    const now = Date.now();
-    if (internals.timeouts[topic.id] && internals.timeouts[topic.id] > now) {
-        return;
+    function handler(notification) {
+        return notification.getUser()
+            .then((user) => {
+                const index = Math.floor(Math.random() * messages.length);
+                const message = messages[index].replace(/%(\w+)%/g, (_, key) => {
+                    let value = user[key] || `%${key}%`;
+                    if (typeof value !== 'string') {
+                        value = `%${key}%`;
+                    }
+                    return value;
+                });
+                return forum.Post.reply(notification.topicId, notification.postId, message);
+            }).catch((err) => {
+                forum.emit('error', err);
+                return Promise.reject(err);
+            });
     }
-    const index = Math.floor(Math.random() * internals.configuration.messages.length),
-        reply = internals.configuration.messages[index].replace(/%(\w+)%/g, (__, key) => {
-            let value = post[key] || '%' + key + '%';
-            if (typeof value !== 'string') {
-                value = JSON.stringify(value);
-            }
-            return value;
-        }).replace(/(^|\W)@(\w+)\b/g, '$1<a class="mention">@&zwj;$2</a>');
-    internals.timeouts[topic.id] = now + internals.configuration.cooldown;
-    internals.browser.createPost(topic.id, post.post_number, reply, () => 0);
-};
 
-/**
- * Prepare Plugin prior to login
- *
- * @param {*} plugConfig Plugin specific configuration
- * @param {Config} config Overall Bot Configuration
- * @param {externals.events.SockEvents} events EventEmitter used for the bot
- * @param {Browser} browser Web browser for communicating with discourse
- */
-exports.prepare = function prepare(plugConfig, config, events, browser) {
-    if (Array.isArray(plugConfig)) {
-        plugConfig = {
-            messages: plugConfig
-        };
+    /**
+     * Activate the plugin
+     */
+    function activate() {
+        forum.on('notification:mention', handler);
     }
-    if (plugConfig === null || typeof plugConfig !== 'object') {
-        plugConfig = {};
+
+    /**
+     * Deactivate the plugin
+     */
+    function deactivate() {
+        forum.off('notification:mention', handler);
     }
-    internals.events = events;
-    internals.browser = browser;
-    internals.configuration = config.mergeObjects(true, exports.defaultConfig, plugConfig);
-    events.onNotification('mentioned', exports.mentionHandler);
-    events.registerHelp('summoner', internals.extendedHelp, () => 0);
+
+    return {
+        activate: activate,
+        deactivate: deactivate,
+        handler: handler,
+        messages: messages
+    };
 };
-
-/**
- * Start the plugin after login
- */
-exports.start = function start() {};
-
-/**
- * Stop the plugin prior to exit or reload
- */
-exports.stop = function stop() {};

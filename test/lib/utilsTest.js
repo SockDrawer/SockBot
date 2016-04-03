@@ -1,28 +1,28 @@
 'use strict';
-/*globals describe, it, before, beforeEach, after, afterEach*/
-/*eslint no-unused-expressions:0 */
 
-const fs = require('fs');
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
 
-const chai = require('chai'),
-    sinon = require('sinon');
+chai.use(chaiAsPromised);
 chai.should();
 const expect = chai.expect;
 
-// The thing we're testing
-const utils = require('../../lib/utils'),
-    config = require('../../lib/config');
+const sinon = require('sinon');
+require('sinon-as-promised');
 
-describe('utils', () => {
+const utils = require('../../lib/utils');
+
+describe('lib/utils', () => {
     describe('exports', () => {
-        const fns = ['uuid', 'log', 'warn', 'error', 'addTimestamp', 'mergeObjects', 'mergeInner', 'cloneData',
-                'filterIgnored', 'filterIgnoredOnPost', 'filterIgnoredOnTopic', 'logExtended'
+        const fns = ['logExtended', 'cloneData', 'mergeInner', 'mergeObjects', 'mapGet', 'mapSet',
+                'parseJSON', 'iterate', 'htmlToRaw'
             ],
-            objs = ['internals'],
-            vals = [];
+            objs = [],
+            vals = ['storage'];
+
         describe('should export expected functions:', () => {
             fns.forEach((fn) => {
-                it(fn + '()', () => expect(utils[fn]).to.be.a('function'));
+                it(`${fn}()`, () => expect(utils[fn]).to.be.a('function'));
             });
         });
         describe('should export expected objects', () => {
@@ -32,84 +32,197 @@ describe('utils', () => {
         });
         describe('should export expected values', () => {
             vals.forEach((val) => {
-                it(val, () => utils.should.have.key(val));
+                it(val, () => utils.should.have.any.key(val));
             });
         });
         it('should export only expected keys', () => {
             utils.should.have.all.keys(fns.concat(objs, vals));
         });
     });
-    describe('uuid()', () => {
-        it('should generate correct format', () => {
-            const uuid = utils.uuid();
-            uuid.should.match(/^[\da-f]{8}-[\da-f]{4}-4[\da-f]{3}-[\da-f]{4}-[\da-f]{12}$/);
-        });
-    });
-    describe('addTimestamp()', () => {
-        it('should add correct format time format', () => {
-            const message = utils.addTimestamp('message');
-            message.should.match(/^\[\d{2}:\d{2}:\d{2}\] message$/);
-        });
-        describe('should accept any object', () => {
-            [4, 9.2, false, undefined, null, [1, 2], {
-                a: 5
-            }, {
-                a: [1, {
-                    b: 5
-                }]
-            }].forEach((test) => {
-                const result = utils.addTimestamp(test),
-                    expected = JSON.stringify(test, null, '    ');
-                it('should accept input: ' + test, () => result.should.contain(expected));
+    describe('htmlToRaw()', () => {
+        const tests = [
+            ['div tag', '<div>content</div>', 'content'],
+            ['div tag missing close tag', '<div>content', 'content'],
+            ['div tag missing open tag', 'content</div>', 'content'],
+            ['blockquote tag', '<blockquote>content</blockquote>', ''],
+            ['blockquote tag missing close tag', '<blockquote>content', ''],
+            ['blockquote tag missing open tag', 'content</blockquote>', 'content'],
+            ['code tag', '<code>content</code>', ''],
+            ['code tag missing close tag', '<code>content', ''],
+            ['code tag missing open tag', 'content</code>', 'content']
+        ];
+        tests.forEach((test) => {
+            const description = test[0],
+                content = test[1],
+                expected = test[2];
+            it(description, () => {
+                const actual = utils.htmlToRaw(content);
+                expect(actual).to.equal(expected);
             });
         });
     });
-    describe('log()', () => {
-        it('should call console.log()', () => {
-            /* eslint-disable no-console */
-            const log = console.log;
-            try {
-                console.log = sinon.spy();
-                utils.log('message');
-                console.log.called.should.be.true;
-                console.log.lastCall.args.should.have.length(1);
-                console.log.lastCall.args[0].should.match(/^\[\d{2}:\d{2}:\d{2}\] message$/);
-            } finally {
-                console.log = log;
-            }
-            /* eslint-enable no-console */
+    describe('iterate()', () => {
+        it('should resolve on empty input', () => {
+            return utils.iterate([]).should.eventually.resolve;
+        });
+        it('should resolve on null input', () => {
+            return utils.iterate(null).should.eventually.resolve;
+        });
+        it('should pass value to iterator', () => {
+            const spy = sinon.stub().resolves();
+            const value = Math.random();
+            return utils.iterate([value], spy).then(() => {
+                expect(spy.calledWith(value)).to.equal(true);
+            });
+        });
+        it('should stop iteration on reject', () => {
+            const spy = sinon.stub().resolves();
+            spy.onCall(2).rejects('bad');
+            return utils.iterate([0, 1, 2, 3, 4, 5], spy)
+                .catch(() => true)
+                .then(() => {
+                    expect(spy.callCount).to.equal(3);
+                });
+        });
+        it('should reject when iteration function rejects', () => {
+            const spy = sinon.stub().rejects('bad');
+            return utils.iterate([0], spy).should.eventually.reject;
         });
     });
-    describe('warn()', () => {
-        it('should call console.warn()', () => {
-            /* eslint-disable no-console */
-            const warn = console.warn;
-            try {
-                console.warn = sinon.spy();
-                utils.warn('message');
-                console.warn.called.should.be.true;
-                console.warn.lastCall.args.should.have.length(1);
-                console.warn.lastCall.args[0].should.match(/^\[\d{2}:\d{2}:\d{2}\] message$/);
-            } finally {
-                console.warn = warn;
-            }
-            /* eslint-enable no-console */
+    describe('parseJSON()', () => {
+        describe('argument is required', () => {
+            it('should throw when no input provided', () => {
+                expect(() => utils.parseJSON()).to.throw('[[invalid-argument:required]]');
+            });
+            it('should throw when undefined input provided', () => {
+                expect(() => utils.parseJSON(undefined)).to.throw('[[invalid-argument:required]]');
+            });
+            it('should throw when null input provided', () => {
+                expect(() => utils.parseJSON(null)).to.throw('[[invalid-argument:required]]');
+            });
+            it('should throw when zero input provided', () => {
+                expect(() => utils.parseJSON(0)).to.throw('[[invalid-argument:required]]');
+            });
+            it('should throw when empty string input provided', () => {
+                expect(() => utils.parseJSON('')).to.throw('[[invalid-argument:required]]');
+            });
+            it('should throw when false input provided', () => {
+                expect(() => utils.parseJSON(false)).to.throw('[[invalid-argument:required]]');
+            });
+            it('should throw when NaN input provided', () => {
+                expect(() => utils.parseJSON(NaN)).to.throw('[[invalid-argument:required]]');
+            });
+        });
+        describe('parsed object test', () => {
+            it('should reject Number', () => {
+                expect(() => utils.parseJSON('5')).to
+                    .throw('[[invalid-argument:expected object but received number]]');
+            });
+            it('should reject String', () => {
+                expect(() => utils.parseJSON('"foo"')).to
+                    .throw('[[invalid-argument:expected object but received string]]');
+            });
+            it('should reject Boolean', () => {
+                expect(() => utils.parseJSON('true')).to
+                    .throw('[[invalid-argument:expected object but received boolean]]');
+            });
+            it('should reject null', () => {
+                expect(() => utils.parseJSON('null')).to
+                    .throw('[[invalid-argument:expected object but received null]]');
+            });
+            it('should accept object', () => {
+                expect(() => utils.parseJSON('{}')).to.not.throw();
+            });
+            it('should accept array', () => {
+                expect(() => utils.parseJSON('[]')).to.not.throw();
+            });
+        });
+        it('should reject invalid JSON', () => {
+            expect(() => utils.parseJSON('"unclosed string')).to
+                .throw('[[invalid-json:Unexpected end of input]]');
+        });
+        it('should parse input correctly', () => {
+            const input = '[{"alpha":true,"beta":{"gamma":"false"}},5.9,{}]';
+            const expected = [{
+                alpha: true,
+                beta: {
+                    gamma: 'false'
+                }
+            }, 5.9, {}];
+            utils.parseJSON(input).should.deep.equal(expected);
+        });
+        it('should accept valid object', () => {
+            const expected = {
+                alpha: true,
+                beta: {
+                    gamma: 'false'
+                }
+            };
+            utils.parseJSON(expected).should.equal(expected);
         });
     });
-    describe('error()', () => {
-        it('should call console.error()', () => {
-            /* eslint-disable no-console */
-            const error = console.error;
-            try {
-                console.error = sinon.spy();
-                utils.error('message');
-                console.error.called.should.be.true;
-                console.error.lastCall.args.should.have.length(1);
-                console.error.lastCall.args[0].should.match(/^\[\d{2}:\d{2}:\d{2}\] message$/);
-            } finally {
-                console.error = error;
-            }
-            /* eslint-enable no-console */
+    describe('mapGet()', () => {
+        it('should default value for unstored object', () => {
+            const obj = new Object();
+            expect(utils.storage.get(obj)).to.equal(undefined);
+            utils.mapGet(obj).should.eql({});
+        });
+        it('should return stored object', () => {
+            const obj = new Object();
+            const expected = new Object();
+            utils.storage.set(obj, expected);
+            expect(utils.storage.get(obj)).to.equal(expected);
+        });
+        it('should default value for unstored object key', () => {
+            const obj = new Object();
+            const key = Math.random();
+            expect(utils.storage.get(obj)).to.equal(undefined);
+            expect(utils.mapGet(obj, key)).to.equal(undefined);
+        });
+        it('should return stored object key', () => {
+            const obj = new Object(),
+                key = Math.random(),
+                expected = Math.random(),
+                value = {};
+            value[key] = expected;
+            utils.storage.set(obj, value);
+            expect(utils.mapGet(obj, key)).to.equal(expected);
+        });
+    });
+    describe('mapSet()', () => {
+        it('should generate stored object on set', () => {
+            const obj = new Object(),
+                key = Math.random(),
+                value = Math.random(),
+                expected = {};
+            expected[key] = value;
+            expect(utils.storage.get(obj)).to.equal(undefined);
+            utils.mapSet(obj, key, value);
+            expect(utils.storage.get(obj)).to.deep.equal(expected);
+        });
+        it('should set provided object on set', () => {
+            const obj = new Object(),
+                key = Math.random(),
+                value = Math.random(),
+                expected = {};
+            expected[key] = value;
+            expect(utils.storage.get(obj)).to.equal(undefined);
+            utils.mapSet(obj, expected);
+            expect(utils.storage.get(obj)).to.equal(expected);
+        });
+        it('should add key to existing object', () => {
+            const obj = new Object(),
+                key = Math.random(),
+                value = Math.random(),
+                expected = {
+                    foo: 'bar'
+                };
+            expected[key] = value;
+            utils.storage.set(obj, {
+                foo: 'bar'
+            });
+            utils.mapSet(obj, expected);
+            expect(utils.storage.get(obj)).to.equal(expected);
         });
     });
     describe('cloneData()', () => {
@@ -117,7 +230,7 @@ describe('utils', () => {
         it('should throw on attempt to clone undefined', () => expect(cloneData(undefined)).to.equal(undefined));
         describe('simple data structures tests', () => {
             [null, false, true, 0, 1, -1, 1e100, Math.PI, Math.E, '', 'a', 'a longer string'].forEach((test) => {
-                it('should clone to self: ' + JSON.stringify(test), () => expect(cloneData(test)).to.equal(test));
+                it(`should clone to self: ${JSON.stringify(test)}`, () => expect(cloneData(test)).to.equal(test));
             });
         });
         it('should clone array', () => {
@@ -129,12 +242,12 @@ describe('utils', () => {
         });
         it('should clone object', () => {
             const orig = {
-                    a: 1,
-                    b: 2
+                    alpha: 1,
+                    beta: 2
                 },
                 result = cloneData(orig);
             result.should.deep.equal(orig);
-            result.c = 3;
+            result.gamma = 3;
             result.should.not.deep.equal(orig);
         });
     });
@@ -142,19 +255,19 @@ describe('utils', () => {
         const mergeInner = utils.mergeInner;
         describe('should reject non object base', () => {
             [undefined, null, false, 0, '', []].forEach((base) => {
-                it(': ' + JSON.stringify(base), () => expect(() => mergeInner(base)).to.throw('base must be object'));
+                it(`: ${JSON.stringify(base)}`, () => expect(() => mergeInner(base)).to.throw('base must be object'));
             });
         });
         describe('should reject non object mixin', () => {
             [undefined, null, false, 0, '', []].forEach((mixin) => {
-                it(': ' + JSON.stringify(mixin), () => {
+                it(`: ${JSON.stringify(mixin)}`, () => {
                     expect(() => mergeInner({}, mixin)).to.throw('mixin must be object');
                 });
             });
         });
         it('should accept empty base object', () => {
             const mixin = {
-                    a: 1
+                    alpha: 1
                 },
                 base = {};
             expect(() => mergeInner(base, mixin)).to.not.throw();
@@ -162,7 +275,7 @@ describe('utils', () => {
         });
         it('should accept null mixin key value', () => {
             const mixin = {
-                    a: null
+                    alpha: null
                 },
                 base = {};
             expect(() => mergeInner(base, mixin)).to.not.throw();
@@ -170,7 +283,7 @@ describe('utils', () => {
         });
         it('should accept empty mixin object', () => {
             const base = {
-                    a: 1
+                    alpha: 1
                 },
                 mixin = {};
             expect(() => mergeInner(base, mixin)).to.not.throw();
@@ -178,8 +291,8 @@ describe('utils', () => {
         });
         it('should accept merge missing base object', () => {
             const mixin = {
-                    a: {
-                        b: 1
+                    alpha: {
+                        beta: 1
                     }
                 },
                 base = {};
@@ -188,31 +301,31 @@ describe('utils', () => {
         });
         it('should merge objects with no overlap', () => {
             const base = {
-                    a: 1
+                    alpha: 1
                 },
                 mixin = {
-                    b: 2
+                    beta: 2
                 },
                 expected = {
-                    a: 1,
-                    b: 2
+                    alpha: 1,
+                    beta: 2
                 };
             mergeInner(base, mixin);
             base.should.deep.equal(expected);
         });
         it('should merge objects with overlap', () => {
             const base = {
-                    a: 1,
-                    b: 3
+                    alpha: 1,
+                    beta: 3
                 },
                 mixin = {
-                    b: 2,
-                    c: 3
+                    beta: 2,
+                    gamma: 3
                 },
                 expected = {
-                    a: 1,
-                    b: 2,
-                    c: 3
+                    alpha: 1,
+                    beta: 2,
+                    gamma: 3
                 };
             mergeInner(base, mixin);
             base.should.deep.equal(expected);
@@ -220,75 +333,75 @@ describe('utils', () => {
         describe('array concatenation/merging tests', () => {
             it('should concatenate arrays', () => {
                 const base = {
-                        a: [1]
+                        alpha: [1]
                     },
                     mixin = {
-                        a: [2]
+                        alpha: [2]
                     },
                     expected = {
-                        a: [1, 2]
+                        alpha: [1, 2]
                     };
                 mergeInner(base, mixin);
                 base.should.deep.equal(expected);
             });
             it('should merge arrays', () => {
                 const base = {
-                        a: [1]
+                        alpha: [1]
                     },
                     mixin = {
-                        a: [2]
+                        alpha: [2]
                     },
                     expected = {
-                        a: [2]
+                        alpha: [2]
                     };
                 mergeInner(base, mixin, true);
                 base.should.deep.equal(expected);
             });
             it('should not overwrite array', () => {
                 const base = {
-                        a: [1]
+                        alpha: [1]
                     },
                     mixin = {
-                        b: [2]
+                        beta: [2]
                     },
                     expected = {
-                        a: [1],
-                        b: [2]
+                        alpha: [1],
+                        beta: [2]
                     };
                 mergeInner(base, mixin);
                 base.should.deep.equal(expected);
             });
             it('should not overwrite array', () => {
                 const base = {
-                        a: [1]
+                        alpha: [1]
                     },
                     mixin = {
-                        b: [2]
+                        beta: [2]
                     },
                     expected = {
-                        a: [1],
-                        b: [2]
+                        alpha: [1],
+                        beta: [2]
                     };
                 mergeInner(base, mixin, true);
                 base.should.deep.equal(expected);
             });
             it('should concatenate arrays recursively', () => {
                 const base = {
-                        a: [1],
-                        b: {
-                            c: [1]
+                        alpha: [1],
+                        beta: {
+                            gamma: [1]
                         }
                     },
                     mixin = {
-                        a: [2],
-                        b: {
-                            c: [2]
+                        alpha: [2],
+                        beta: {
+                            gamma: [2]
                         }
                     },
                     expected = {
-                        a: [1, 2],
-                        b: {
-                            c: [1, 2]
+                        alpha: [1, 2],
+                        beta: {
+                            gamma: [1, 2]
                         }
                     };
                 mergeInner(base, mixin);
@@ -296,21 +409,21 @@ describe('utils', () => {
             });
             it('should merge arrays recursively', () => {
                 const base = {
-                        a: [1],
-                        b: {
-                            c: [1]
+                        alpha: [1],
+                        beta: {
+                            gamma: [1]
                         }
                     },
                     mixin = {
-                        a: [2],
-                        b: {
-                            c: [2]
+                        alpha: [2],
+                        beta: {
+                            gamma: [2]
                         }
                     },
                     expected = {
-                        a: [2],
-                        b: {
-                            c: [2]
+                        alpha: [2],
+                        beta: {
+                            gamma: [2]
                         }
                     };
                 mergeInner(base, mixin, true);
@@ -318,48 +431,48 @@ describe('utils', () => {
             });
             it('should not overwrite arrays recursively', () => {
                 const base = {
-                        a: [1],
-                        b: {
-                            c: [1]
+                        alpha: [1],
+                        beta: {
+                            gamma: [1]
                         }
                     },
                     mixin = {
-                        d: [2],
-                        b: {
-                            e: [2]
+                        delta: [2],
+                        beta: {
+                            epsilon: [2]
                         }
                     },
                     expected = {
-                        a: [1],
-                        b: {
-                            c: [1],
-                            e: [2]
+                        alpha: [1],
+                        beta: {
+                            gamma: [1],
+                            epsilon: [2]
                         },
-                        d: [2]
+                        delta: [2]
                     };
                 mergeInner(base, mixin);
                 base.should.deep.equal(expected);
             });
             it('should not overwrite arrays recursively', () => {
                 const base = {
-                        a: [1],
-                        b: {
-                            c: [1]
+                        alpha: [1],
+                        beta: {
+                            gamma: [1]
                         }
                     },
                     mixin = {
-                        d: [2],
-                        b: {
-                            e: [2]
+                        delta: [2],
+                        beta: {
+                            epsilon: [2]
                         }
                     },
                     expected = {
-                        a: [1],
-                        b: {
-                            c: [1],
-                            e: [2]
+                        alpha: [1],
+                        beta: {
+                            gamma: [1],
+                            epsilon: [2]
                         },
-                        d: [2]
+                        delta: [2]
                     };
                 mergeInner(base, mixin, true);
                 base.should.deep.equal(expected);
@@ -367,45 +480,45 @@ describe('utils', () => {
         });
         it('should replace non-array with array', () => {
             const base = {
-                    a: {}
+                    alpha: {}
                 },
                 mixin = {
-                    a: [2]
+                    alpha: [2]
                 },
                 expected = {
-                    a: [2]
+                    alpha: [2]
                 };
             mergeInner(base, mixin);
             base.should.deep.equal(expected);
         });
         it('should replace array with non-array', () => {
             const base = {
-                    a: [1]
+                    alpha: [1]
                 },
                 mixin = {
-                    a: {}
+                    alpha: {}
                 },
                 expected = {
-                    a: {}
+                    alpha: {}
                 };
             mergeInner(base, mixin);
             base.should.deep.equal(expected);
         });
         it('should merge inner objects', () => {
             const base = {
-                    a: {
-                        b: [1]
+                    alpha: {
+                        beta: [1]
                     }
                 },
                 mixin = {
-                    a: {
-                        c: false
+                    alpha: {
+                        gamma: false
                     }
                 },
                 expected = {
-                    a: {
-                        b: [1],
-                        c: false
+                    alpha: {
+                        beta: [1],
+                        gamma: false
                     }
                 };
             mergeInner(base, mixin);
@@ -413,10 +526,10 @@ describe('utils', () => {
         });
         it('should not merge prototype', () => {
             const base = {
-                    a: null
+                    alpha: null
                 },
                 expected = {
-                    a: null
+                    alpha: null
                 };
             mergeInner(base, /object/);
             base.should.deep.equal(expected);
@@ -482,429 +595,18 @@ describe('utils', () => {
             mergeObjects(true, base, mixin).should.deep.equal(expected);
         });
     });
-    describe('message filters', () => {
-        describe('filterIgnoredOnPost()', () => {
-            const filterIgnoredOnPost = utils.filterIgnoredOnPost;
-            let timers;
-            before(() => timers = sinon.useFakeTimers());
-            afterEach(() => utils.internals.cooldownTimers = {});
-            after(() => timers.restore());
-            describe('Basic trust levels', () => {
-                it('should ignore TL0 user', () => {
-                    const post = {
-                            'trust_level': 0
-                        },
-                        spy = sinon.spy();
-                    filterIgnoredOnPost(post, spy);
-                    spy.called.should.be.false;
-                    timers.tick(0);
-                    spy.calledWith('ignore', 'Poster is TL0').should.be.true;
-                });
-                [1, 2, 3].forEach((level) =>
-                    it('should accept TL' + level + ' user', () => {
-                        const user = 'USER' + Math.ceil(1000 + Math.random() * 5000),
-                            post = {
-                                'trust_level': level,
-                                username: user
-                            },
-                            spy = sinon.spy();
-                        filterIgnoredOnPost(post, spy);
-                        spy.called.should.be.false;
-                        timers.tick(0);
-                        spy.calledWith(null, 'POST OK').should.be.true;
-                    }));
-                [4, 5, 6, 7, 8, 9].forEach((level) => it('should accept TL' + level + ' user', () => {
-                    const user = 'USER' + Math.ceil(1000 + Math.random() * 5000),
-                        post = {
-                            username: user,
-                            'trust_level': level
-                        },
-                        spy = sinon.spy();
-                    filterIgnoredOnPost(post, spy);
-                    spy.called.should.be.false;
-                    timers.tick(0);
-                    spy.calledWith(null, 'Poster is TL4+').should.be.true;
-                }));
-            });
-            describe('ignored users', () => {
-                [1, 2, 3].forEach((level) => it('should ignore TL' + level + ' user on ignore list', () => {
-                    const user = 'USER' + Math.ceil(1000 + Math.random() * 5000),
-                        post = {
-                            'trust_level': level,
-                            username: user
-                        },
-                        spy = sinon.spy();
-                    config.core.ignoreUsers.push(user);
-                    filterIgnoredOnPost(post, spy);
-                    config.core.ignoreUsers.pop();
-                    spy.called.should.be.false;
-                    timers.tick(0);
-                    spy.calledWith('ignore', 'Post Creator Ignored').should.be.true;
-                }));
-                [4, 5, 6, 7, 8, 9].forEach((level) => {
-                    it('should accept TL' + level + ' user on ignore list', () => {
-                        const user = 'USER' + Math.ceil(1000 + Math.random() * 5000),
-                            post = {
-                                username: user,
-                                'trust_level': level
-                            },
-                            spy = sinon.spy();
-                        config.core.ignoreUsers.push(user);
-                        filterIgnoredOnPost(post, spy);
-                        config.core.ignoreUsers.pop();
-                        spy.called.should.be.false;
-                        timers.tick(0);
-                        spy.calledWith(null, 'Poster is TL4+').should.be.true;
-                    });
-                });
-            });
-            describe('trust_level 1 users', () => {
-                it('should place TL1 user on cooldown', () => {
-                    const user = 'USER' + Math.ceil(1000 + Math.random() * 5000),
-                        post = {
-                            'trust_level': 1,
-                            username: user
-                        },
-                        target = Date.now() + config.core.cooldownPeriod,
-                        spy = sinon.spy();
-                    filterIgnoredOnPost(post, spy);
-                    utils.internals.cooldownTimers[user].should.equal(target);
-                    spy.called.should.be.false;
-                    timers.tick(0);
-                    spy.calledWith(null, 'POST OK').should.be.true;
-                });
-                it('should ignore TL1 user on cooldown', () => {
-                    const user = 'USER' + Math.ceil(1000 + Math.random() * 5000),
-                        post = {
-                            'trust_level': 1,
-                            username: user
-                        },
-                        spy = sinon.spy();
-                    utils.internals.cooldownTimers[user] = Number.MAX_SAFE_INTEGER;
-                    filterIgnoredOnPost(post, spy);
-                    spy.called.should.be.false;
-                    timers.tick(0);
-                    spy.calledWith('ignore', 'Poster is TL1 on Cooldown').should.be.true;
-                });
-                it('should not extend cooldown for TL1 user on cooldown', () => {
-                    const user = 'USER' + Math.ceil(1000 + Math.random() * 5000),
-                        post = {
-                            'trust_level': 1,
-                            username: user
-                        },
-                        now = Date.now() + 1 * 60 * 1000,
-                        spy = sinon.spy();
-                    utils.internals.cooldownTimers[user] = now;
-                    filterIgnoredOnPost(post, spy);
-                    utils.internals.cooldownTimers[user].should.equal(now);
-                    spy.called.should.be.false;
-                    timers.tick(0);
-                    spy.calledWith('ignore', 'Poster is TL1 on Cooldown').should.be.true;
-                });
-            });
-            describe('primary_group_name: bot users', () => {
-                [1, 2, 3].forEach((level) => it('should reject TL' + level + ' bot user', () => {
-                    const post = {
-                            'trust_level': level,
-                            'primary_group_name': 'bots'
-                        },
-                        spy = sinon.spy();
-                    filterIgnoredOnPost(post, spy);
-                    spy.called.should.be.false;
-                    timers.tick(0);
-                    spy.calledWith('ignore', 'Poster is a Bot').should.be.true;
-                }));
-                [4, 5, 6, 7, 8, 9].forEach((level) => it('should accept TL' + level + ' bot user', () => {
-                    const post = {
-                            'trust_level': level,
-                            'primary_group_name': 'bots'
-                        },
-                        spy = sinon.spy();
-                    filterIgnoredOnPost(post, spy);
-                    spy.called.should.be.false;
-                    timers.tick(0);
-                    spy.calledWith(null, 'Poster is TL4+').should.be.true;
-                }));
-            });
-        });
-        describe('filterIgnoredOnTopic()', () => {
-            const filterIgnoredOnTopic = utils.filterIgnoredOnTopic;
-            let timers;
-            before(() => timers = sinon.useFakeTimers());
-            after(() => timers.restore());
-            it('should accept empty topic', () => {
-                const topic = {},
-                    spy = sinon.spy();
-                filterIgnoredOnTopic(topic, spy);
-                spy.called.should.be.false;
-                timers.tick(0);
-                spy.calledWith(null, 'TOPIC OK').should.be.true;
-            });
-            it('should ignore post in ignoredCategory', () => {
-                const category = Math.ceil(5000 + Math.random() * 5000),
-                    topic = {
-                        'category_id': category
-                    },
-                    spy = sinon.spy();
-                config.core.ignoreCategories.push(category);
-                filterIgnoredOnTopic(topic, spy);
-                config.core.ignoreCategories.pop();
-                spy.called.should.be.false;
-                timers.tick(0);
-                spy.calledWith('ignore', 'Topic Category Ignored').should.be.true;
-            });
-            it('should accept post not in ignoredCategory', () => {
-                const category = Math.ceil(5000 + Math.random() * 5000),
-                    topic = {
-                        'category_id': category + 2
-                    },
-                    spy = sinon.spy();
-                config.core.ignoreCategories.push(category);
-                filterIgnoredOnTopic(topic, spy);
-                config.core.ignoreCategories.pop();
-                spy.called.should.be.false;
-                timers.tick(0);
-                spy.calledWith(null, 'TOPIC OK').should.be.true;
-            });
-            it('should ignore post in muted topic', () => {
-                const topic = {
-                        details: {
-                            'notification_level': 0,
-                            'created_by': {
-                                username: 'none'
-                            }
-                        }
-                    },
-                    spy = sinon.spy();
-                filterIgnoredOnTopic(topic, spy);
-                spy.called.should.be.false;
-                timers.tick(0);
-                spy.calledWith('ignore', 'Topic Was Muted').should.be.true;
-            });
-            it('should accept post in regular topic', () => {
-                const topic = {
-                        details: {
-                            'notification_level': 1,
-                            'created_by': {
-                                username: 'none'
-                            }
-                        }
-                    },
-                    spy = sinon.spy();
-                filterIgnoredOnTopic(topic, spy);
-                spy.called.should.be.false;
-                timers.tick(0);
-                spy.calledWith(null, 'TOPIC OK').should.be.true;
-            });
-            it('should ignore post in restricted topic', () => {
-                const username = 'USER' + Math.random(),
-                    topic = {
-                        details: {
-                            'created_by': {
-                                username: username
-                            }
-                        }
-                    },
-                    spy = sinon.spy();
-                config.core.ignoreUsers.push(username);
-                filterIgnoredOnTopic(topic, spy);
-                config.core.ignoreUsers.pop();
-                spy.called.should.be.false;
-                timers.tick(0);
-                spy.calledWith('ignore', 'Topic Creator Ignored').should.be.true;
-            });
-        });
-        describe('filterIgnored()', () => {
-            const filterIgnored = utils.filterIgnored;
-            let sandbox;
-            beforeEach(() => {
-                sandbox = sinon.sandbox.create();
-                sandbox.stub(utils, 'filterIgnoredOnPost');
-                sandbox.stub(utils, 'filterIgnoredOnTopic');
-                sandbox.stub(utils, 'warn');
-            });
-            afterEach(() => {
-                sandbox.restore();
-            });
-            it('should filter using filterIgnoredOnPost', () => {
-                utils.filterIgnoredOnPost.yields(null);
-                utils.filterIgnoredOnTopic.yields(null);
-                filterIgnored({}, {}, () => {});
-                utils.filterIgnoredOnPost.called.should.be.true;
-            });
-            it('should filter using filterIgnoredOnTopic', () => {
-                utils.filterIgnoredOnPost.yields(null);
-                utils.filterIgnoredOnTopic.yields(null);
-                filterIgnored({}, {}, () => {});
-                utils.filterIgnoredOnTopic.called.should.be.true;
-            });
-            it('should accept when filters yield no errror', () => {
-                utils.filterIgnoredOnPost.yields(null, 'POST OK');
-                utils.filterIgnoredOnTopic.yields(null, 'TOPIC OK');
-                const spy = sinon.spy();
-                filterIgnored({}, {}, spy);
-                spy.lastCall.args.should.deep.equal([null]);
-            });
-            it('should accept when post filter yields error', () => {
-                utils.filterIgnoredOnPost.yields('ignore', 'POST NOT OK');
-                utils.filterIgnoredOnTopic.yields(null, 'TOPIC OK');
-                const spy = sinon.spy();
-                filterIgnored({}, {}, spy);
-                spy.lastCall.args.should.deep.equal(['ignore']);
-                utils.warn.called.should.be.true;
-                utils.warn.lastCall.args.should.deep.equal(['Post #undefined Ignored: POST NOT OK']);
-            });
-            it('should accept when topic filter yields error', () => {
-                utils.filterIgnoredOnPost.yields(null, 'POST OK');
-                utils.filterIgnoredOnTopic.yields('ignore', 'TOPIC NOT OK');
-                const spy = sinon.spy();
-                filterIgnored({}, {}, spy);
-                spy.lastCall.args.should.deep.equal(['ignore']);
-                utils.warn.called.should.be.true;
-                utils.warn.lastCall.args.should.deep.equal(['Post #undefined Ignored: POST OK, TOPIC NOT OK']);
-            });
-        });
-    });
     describe('logExtended()', () => {
-        let sandbox;
-        beforeEach(() => {
-            sandbox = sinon.sandbox.create();
-            sandbox.stub(fs, 'write');
-            fs.write.yields();
-            sandbox.stub(fs, 'appendFile');
-            fs.appendFile.yields();
-            sandbox.stub(utils, 'error');
-            sandbox.useFakeTimers(1455075316497);
-            config.core.extendedLogLevel = 10;
-            config.core.extendedLog = 'stderr';
+        it('should not throw error with zero params', () => {
+            expect(() => utils.logExtended()).to.not.throw();
         });
-        afterEach(() => {
-            sandbox.restore();
+        it('should not throw error with one param', () => {
+            expect(() => utils.logExtended('level')).to.not.throw();
         });
-        describe('Log Level Triggering', () => {
-            it('should not log when config log level is 0', () => {
-                config.core.extendedLogLevel = 0;
-                utils.logExtended(0, 'testing');
-                fs.write.called.should.equal(false);
-            });
-            it('should not log when log level is greater than config log level', () => {
-                utils.logExtended(100, 'testing');
-                fs.write.called.should.equal(false);
-                fs.appendFile.called.should.equal(false);
-                utils.error.called.should.equal(false);
-            });
-            it('should log when log level is equal to config log level', () => {
-                utils.logExtended(10, 'testing');
-                fs.write.called.should.equal(true);
-            });
-            it('should log when log level is less than config log level', () => {
-                utils.logExtended(1, 'testing');
-                fs.write.called.should.equal(true);
-            });
+        it('should not throw error with two params', () => {
+            expect(() => utils.logExtended('level', 'message')).to.not.throw();
         });
-        describe('Log Destinations', () => {
-            it('should log to stdout when destination is `stdout`', () => {
-                config.core.extendedLog = 'stdout';
-                utils.logExtended(0, 'testing');
-                fs.write.called.should.equal(true);
-                fs.appendFile.called.should.equal(false);
-                fs.write.firstCall.args[0].should.equal(1);
-            });
-            it('should log to stdout when destination is `STDOUT`', () => {
-                config.core.extendedLog = 'STDOUT';
-                utils.logExtended(0, 'testing');
-                fs.write.called.should.equal(true);
-                fs.appendFile.called.should.equal(false);
-                fs.write.firstCall.args[0].should.equal(1);
-            });
-            it('should log to stdout when destination is `stderr`', () => {
-                config.core.extendedLog = 'stderr';
-                utils.logExtended(0, 'testing');
-                fs.write.called.should.equal(true);
-                fs.appendFile.called.should.equal(false);
-                fs.write.firstCall.args[0].should.equal(2);
-            });
-            it('should log to stdout when destination is `STDERR`', () => {
-                config.core.extendedLog = 'STDERR';
-                utils.logExtended(0, 'testing');
-                fs.write.called.should.equal(true);
-                fs.appendFile.called.should.equal(false);
-                fs.write.firstCall.args[0].should.equal(2);
-            });
-            it('should log to provided fd when destination is numeric', () => {
-                const fd = Math.ceil(Math.random() * 1000);
-                config.core.extendedLog = fd;
-                utils.logExtended(0, 'testing');
-                fs.write.called.should.equal(true);
-                fs.appendFile.called.should.equal(false);
-                fs.write.firstCall.args[0].should.equal(fd);
-            });
-            it('should log to fileame when destination is not numeric', () => {
-                const fd = '/tmp/log_' + Math.ceil(Math.random() * 1000);
-                config.core.extendedLog = fd;
-                utils.logExtended(0, 'testing');
-                fs.write.called.should.equal(false);
-                fs.appendFile.called.should.equal(true);
-                fs.appendFile.firstCall.args[0].should.equal(fd);
-            });
-        });
-        describe('error handling', () => {
-            it('should log error when fs.write errors', () => {
-                const expected = 'Extended Log Error: i am a scary error!';
-                fs.write.yields(new Error('i am a scary error!'));
-                utils.logExtended(0, 'testing');
-                utils.error.firstCall.args[0].should.equal(expected);
-            });
-            it('should log error when fs.appendFile errors', () => {
-                const expected = 'Extended Log Error: i am not a scary error!';
-                config.core.extendedLog = 'foo';
-                fs.appendFile.yields(new Error('i am not a scary error!'));
-                utils.logExtended(0, 'testing');
-                utils.error.firstCall.args[0].should.equal(expected);
-            });
-        });
-        describe('output', () => {
-            it('should produce expected output for simple message', () => {
-                const expected = '0 : 2016-02-10T03:35:16.497Z : message';
-                utils.logExtended(0, 'message');
-                fs.write.firstCall.args[1].should.equal(expected);
-            });
-            it('should produce expected output for complex message', () => {
-                const expected = '0 : 2016-02-10T03:35:16.497Z : [object Object]';
-                utils.logExtended(0, {});
-                fs.write.firstCall.args[1].should.equal(expected);
-            });
-            it('should produce expected output for numeric extra data', () => {
-                const expected = '1 : 2016-02-10T03:35:16.497Z : message : 42';
-                utils.logExtended(1, 'message', 42);
-                fs.write.firstCall.args[1].should.equal(expected);
-            });
-            it('should produce expected output for string extra data', () => {
-                const expected = '2 : 2016-02-10T03:35:16.497Z : message : "42"';
-                utils.logExtended(2, 'message', '42');
-                fs.write.firstCall.args[1].should.equal(expected);
-            });
-            it('should produce expected output for array extra data', () => {
-                const expected = '3 : 2016-02-10T03:35:16.497Z : message : [1,2,3]';
-                utils.logExtended(3, 'message', [1, 2, 3]);
-                fs.write.firstCall.args[1].should.equal(expected);
-            });
-            it('should produce expected output for object extra data', () => {
-                const expected = '4 : 2016-02-10T03:35:16.497Z : message : {"a":1}';
-                utils.logExtended(4, 'message', {
-                    a: 1
-                });
-                fs.write.firstCall.args[1].should.equal(expected);
-            });
-            it('should produce expected output for object extra data', () => {
-                const expected = '5 : 2016-02-10T03:35:16.497Z : message : {"a":1,"b":[1,2,3],"c":"foobar"}';
-                utils.logExtended(5, 'message', {
-                    a: 1,
-                    b: [1, 2, 3],
-                    c: 'foobar'
-                });
-                fs.write.firstCall.args[1].should.equal(expected);
-            });
+        it('should not throw error with three params', () => {
+            expect(() => utils.logExtended('level', 'message', 'data')).to.not.throw();
         });
     });
 });

@@ -1,4 +1,5 @@
 <a name="module_echo"></a>
+
 ## echo
 Example plugin, echos your words back at you.
 
@@ -6,49 +7,47 @@ Example plugin, echos your words back at you.
 **License**: MIT  
 
 * [echo](#module_echo)
-    * [.extendedHelp](#module_echo.extendedHelp)
-    * [.prepare(plugConfig, config, events, browser)](#module_echo.prepare)
-    * [.start()](#module_echo.start)
-    * [.stop()](#module_echo.stop)
-    * [.handler(notification, topic, post)](#module_echo.handler)
+    * [.plugin(forum)](#module_echo.plugin) ⇒ <code>Plugin</code>
+        * [~echo(command)](#module_echo.plugin..echo) ⇒ <code>Promise</code>
+        * [~activate()](#module_echo.plugin..activate) ⇒ <code>Promise</code>
 
-<a name="module_echo.extendedHelp"></a>
-### echo.extendedHelp
-Extended help message
+<a name="module_echo.plugin"></a>
 
-**Kind**: static property of <code>[echo](#module_echo)</code>  
-<a name="module_echo.prepare"></a>
-### echo.prepare(plugConfig, config, events, browser)
-Prepare Plugin prior to login
+### echo.plugin(forum) ⇒ <code>Plugin</code>
+Plugin generation function.
+
+Returns a plugin object bound to the provided forum provider
 
 **Kind**: static method of <code>[echo](#module_echo)</code>  
+**Returns**: <code>Plugin</code> - An instance of the Echo plugin  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| plugConfig | <code>\*</code> | Plugin specific configuration |
-| config | <code>Config</code> | Overall Bot Configuration |
-| events | <code>externals.events.SockEvents</code> | EventEmitter used for the bot |
-| browser | <code>Browser</code> | Web browser for communicating with discourse |
+| forum | <code>Provider</code> | Active forum Provider |
 
-<a name="module_echo.start"></a>
-### echo.start()
-Start the plugin after login
 
-**Kind**: static method of <code>[echo](#module_echo)</code>  
-<a name="module_echo.stop"></a>
-### echo.stop()
-Stop the plugin prior to exit or reload
+* [.plugin(forum)](#module_echo.plugin) ⇒ <code>Plugin</code>
+    * [~echo(command)](#module_echo.plugin..echo) ⇒ <code>Promise</code>
+    * [~activate()](#module_echo.plugin..activate) ⇒ <code>Promise</code>
 
-**Kind**: static method of <code>[echo](#module_echo)</code>  
-<a name="module_echo.handler"></a>
-### echo.handler(notification, topic, post)
-Handle notifications
+<a name="module_echo.plugin..echo"></a>
 
-**Kind**: static method of <code>[echo](#module_echo)</code>  
+#### plugin~echo(command) ⇒ <code>Promise</code>
+Echo the command contents back to the user
+
+**Kind**: inner method of <code>[plugin](#module_echo.plugin)</code>  
+**Returns**: <code>Promise</code> - Resolves when processing is complete  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| notification | <code>external.notifications.Notification</code> | Notification recieved |
-| topic | <code>external.topics.Topic</code> | Topic trigger post belongs to |
-| post | <code>external.posts.CleanedPost</code> | Post that triggered notification |
+| command | <code>Command</code> | The command that contains the `!echo` command |
 
+<a name="module_echo.plugin..activate"></a>
+
+#### plugin~activate() ⇒ <code>Promise</code>
+Activate the plugin.
+
+Register the command `echo` to the forum instance this plugin is bound to
+
+**Kind**: inner method of <code>[plugin](#module_echo.plugin)</code>  
+**Returns**: <code>Promise</code> - Resolves when plugin is fully activated     *  

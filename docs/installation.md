@@ -1,20 +1,17 @@
 # Installation
 
-SockBot is written entirely in JavaScript using ES6 syntax. As such it is compatible with Node.js >= 0.11 and 
-io.js >= 1.7. Sockbot is tested on Linux against several versions of each environment and should function 
+SockBot is written entirely in JavaScript using ES6 syntax. As such it is compatible with Node.js >= 4.0.
+Sockbot is tested on Linux against several versions of each environment and should function 
 correctly on Windows and Mac as well.
 
 ## Environment setup
 
-Sockbot requires a recent version of either io.js or Node.js with working `npm` to function.
+Sockbot requires a recent version of Node.js with working `npm` to function.
 
 Required software:
 
-* Node.js version 0.11 or greater (version 0.12.5 or greater recommended)
+* Node.js version 4.0 or greater (version 5.0 or greater recommended)
 
-*or*
-
-* io.js version 1.7 or greater (version 2.4 or greater recommended)
 
 ## Installation
 
@@ -43,10 +40,10 @@ After downloading a release extract the archive to a folder on your machine to c
 SockBot can also be installed via npm, for integration with another project or to install SockBot globally
 for a machine.
 
-To install sockbot via npm execute the following command in your terminal located in the folder you wish to 
-install SockBot into.
+It is recommended to install sockbot globally via NPM if you have sufficient access. This will put the `sockbot` 
+binary in your path for conveniant access.
 ```
-npm install sockbot
+npm install -g sockbot
 ```
 
 [npm]: https://www.npmjs.com/package/sockbot
@@ -83,6 +80,7 @@ replies to messages with the contents on the message received and is useful for 
 core:
   username: someBotAccount
   password: someBotPassword
+  owner: yourUsername
 plugins:
   echo: true
 ```
@@ -91,6 +89,16 @@ plugins:
 
 ## Running the bot
 
+### For Production installs
+For production installs where sockbot was installed globally execute the `sockbot` binary and provide the path to a 
+configuration file
+
+For example:
+```
+$ sockbot config.yml
+```
+
+### For Dev installs
 Once a configuration file has been created it's time to start the bot! For this section we will assume that
 the configuration file is named `config.yml` and is placed in the same folder as SockBot proper.
 
@@ -103,33 +111,26 @@ npm start config.yml
 SockBot can also be started directly from the command line without using npm. To start SockBot this way
 execute the appropriate command below in the folder that SockBot is installed to.
 
-For Node.js
 ```
-node --harmony SockBot.js config.yml
-```
-
-For io.js
-```
-iojs --harmony_arrow_functions SockBot.js config.yml
+node lib/app config.yml
 ```
 
 Note: On some platforms e.g. Ubuntu, the `node` binary may installed as `nodejs`; this to avoid clashing with
 an older `node` package that existed in the repositories before Node.js was added.
 
-At this point the bot should start and connect to Discourse. If all goes well SockBot should produce output
+At this point the bot should start and connect to your forum. If all goes well SockBot should produce output
 similar to the example below.
 ```
-accalia@sockdrawer:~/workspace/SockBot $ npm start config.yml
-
-> sockbot@2.0.0 start /home/ubuntu/workspace/SockBot
-> node --harmony --harmony_arrow_functions SockBot.js "config.yml"
-
-[17:22:38] Command Registered: help: print command help listing
-[17:22:38] Plugin `echo` Loaded
-[17:22:39] SockBot `SockAdept` Started
-[17:22:39] Polling Messages
-[17:22:39] Polling Notifications
-[17:22:42] Polling Messages
+accalia_de_elementia@sockdrawer:~/workspace $ sockbot config.yml
+[2016-04-03T17:18:08.528Z] Starting Sockbot 3.0.0 - Alpha Alpaca
+[2016-04-03T17:18:08.545Z] Loaded configuration file: config.yml
+[2016-04-03T17:18:08.545Z] Activating logon: sockbot
+[2016-04-03T17:18:08.883Z] Using provider nodebb for sockbot
+[2016-04-03T17:18:08.886Z] Loading plugin echo for sockbot
+[2016-04-03T17:18:08.887Z] sockbot ready for login
+[2016-04-03T17:18:10.955Z] sockbot login successful
+[2016-04-03T17:18:11.335Z] Notifications Activated: Now listening for new notifications
+[2016-04-03T17:18:11.335Z] sockbot activated
 ```
 
 Proper function can be tested by sending a message to the bot account or by mentioning the bot account.

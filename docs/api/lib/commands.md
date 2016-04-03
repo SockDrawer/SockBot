@@ -1,209 +1,294 @@
-<a name="module_commands"></a>
+<a name="sockbot.lib.module_commands"></a>
+
 ## commands
-Command Parser for SockBot2.0
+NodeBB provider module User class
 
 **Author:** Accalia  
 **License**: MIT  
 
-* [commands](#module_commands)
+* [commands](#sockbot.lib.module_commands)
     * _static_
-        * [.prepare(events, callback)](#module_commands.prepare)
-        * [.start()](#module_commands.start)
-        * [.parseCommands(post, topic, callback)](#module_commands.parseCommands)
+        * [.bindCommands(forum)](#sockbot.lib.module_commands.bindCommands) ⇒ <code>Commands</code>
+            * [~handlers](#sockbot.lib.module_commands.bindCommands..handlers)
+            * [~helpTopics](#sockbot.lib.module_commands.bindCommands..helpTopics)
     * _inner_
-        * [~parseShortCommand(line)](#module_commands..parseShortCommand) ⇒ <code>command</code>
-        * [~parseMentionCommand(line)](#module_commands..parseMentionCommand) ⇒ <code>command</code>
-        * [~getCommandHelps()](#module_commands..getCommandHelps) ⇒ <code>string</code>
-        * [~cmdError(command)](#module_commands..cmdError)
-        * [~shutdown()](#module_commands..shutdown)
-        * [~cmdShutUp(command)](#module_commands..cmdShutUp)
-        * [~cmdHelp(command)](#module_commands..cmdHelp)
-        * [~registerCommand(command, helpstring, handler, callback)](#module_commands..registerCommand) ⇒ <code>undefined</code>
-        * [~registerHelp(command, helptext, callback)](#module_commands..registerHelp) ⇒ <code>undefined</code>
-        * [~commandProtect(event, handler)](#module_commands..commandProtect) ⇒ <code>boolean</code>
-        * [~command](#module_commands..command) : <code>object</code>
-        * [~completedCallback](#module_commands..completedCallback)
-        * [~parseCallback](#module_commands..parseCallback)
-        * [~commandHandler](#module_commands..commandHandler)
+        * [~Command](#sockbot.lib.module_commands..Command)
+            * [new Command(definition, parent)](#new_sockbot.lib.module_commands..Command_new)
+            * [.line](#sockbot.lib.module_commands..Command+line) : <code>string</code>
+            * [.command](#sockbot.lib.module_commands..Command+command) : <code>string</code>
+            * [.mention](#sockbot.lib.module_commands..Command+mention) : <code>boolean</code>
+            * [.args](#sockbot.lib.module_commands..Command+args) : <code>Array.&lt;string&gt;</code>
+            * [.parent](#sockbot.lib.module_commands..Command+parent) : <code>Commands</code>
+            * [.replyText](#sockbot.lib.module_commands..Command+replyText) : <code>string</code>
+            * [.execute()](#sockbot.lib.module_commands..Command+execute) ⇒ <code>Promise</code>
+            * [.getPost()](#sockbot.lib.module_commands..Command+getPost) ⇒ <code>Promise.&lt;Post&gt;</code>
+            * [.getTopic()](#sockbot.lib.module_commands..Command+getTopic) ⇒ <code>Promise.&lt;Topic&gt;</code>
+            * [.getUser()](#sockbot.lib.module_commands..Command+getUser) ⇒ <code>Promise.&lt;User&gt;</code>
+            * [.reply(content)](#sockbot.lib.module_commands..Command+reply)
+        * [~Commands](#sockbot.lib.module_commands..Commands)
+            * [new Commands(notification, postBody)](#new_sockbot.lib.module_commands..Commands_new)
+            * _instance_
+                * [.notification](#sockbot.lib.module_commands..Commands+notification) : <code>Notification</code>
+                * [.commands](#sockbot.lib.module_commands..Commands+commands) : <code>Array.&lt;Command&gt;</code>
+                * [.getPost()](#sockbot.lib.module_commands..Commands+getPost) ⇒ <code>Promise.&lt;Post&gt;</code>
+                * [.getTopic()](#sockbot.lib.module_commands..Commands+getTopic) ⇒ <code>Promise.&lt;Topic&gt;</code>
+                * [.getUser()](#sockbot.lib.module_commands..Commands+getUser) ⇒ <code>Promise.&lt;User&gt;</code>
+                * [.execute()](#sockbot.lib.module_commands..Commands+execute) ⇒ <code>Promise.&lt;Commands&gt;</code>
+            * _static_
+                * [.get(notification)](#sockbot.lib.module_commands..Commands.get) ⇒ <code>Promise.&lt;Commands&gt;</code>
+                * [.add(command, helpText, handler)](#sockbot.lib.module_commands..Commands.add) ⇒ <code>Promise</code>
 
-<a name="module_commands.prepare"></a>
-### commands.prepare(events, callback)
-Perpare the command parser
+<a name="sockbot.lib.module_commands.bindCommands"></a>
 
-Needs to be called to set the internals of the parser after reading config file.
+### commands.bindCommands(forum) ⇒ <code>Commands</code>
+Create a Commands class and bind it to a forum instance.
 
-**Kind**: static method of <code>[commands](#module_commands)</code>  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| events | <code>EventEmitter</code> | EventEmitter that will be core comms for SockBot |
-| callback | <code>completedCallback</code> | Completion callback |
-
-<a name="module_commands.start"></a>
-### commands.start()
-Start the command parser after bot login
-
-**Kind**: static method of <code>[commands](#module_commands)</code>  
-<a name="module_commands.parseCommands"></a>
-### commands.parseCommands(post, topic, callback)
-Parse commands from post and emit command events
-
-**Kind**: static method of <code>[commands](#module_commands)</code>  
+**Kind**: static method of <code>[commands](#sockbot.lib.module_commands)</code>  
+**Returns**: <code>Commands</code> - A Commands class bound to the provided `forum` instance  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| post | <code>external.posts.CleanedPost</code> | Post to parse commands from |
-| topic | <code>external.topics.Topic</code> | Topic comamnd belongs to |
-| callback | <code>parseCallback</code> | CompletionCallback |
+| forum | <code>Provider</code> | A forum Provider instance to bind to constructed Commands class |
 
-<a name="module_commands..parseShortCommand"></a>
-### commands~parseShortCommand(line) ⇒ <code>command</code>
-Parse a short command from input line
 
-**Kind**: inner method of <code>[commands](#module_commands)</code>  
-**Returns**: <code>command</code> - Parsed command  
+* [.bindCommands(forum)](#sockbot.lib.module_commands.bindCommands) ⇒ <code>Commands</code>
+    * [~handlers](#sockbot.lib.module_commands.bindCommands..handlers)
+    * [~helpTopics](#sockbot.lib.module_commands.bindCommands..helpTopics)
 
-| Param | Type | Description |
-| --- | --- | --- |
-| line | <code>string</code> | Input line to parse |
+<a name="sockbot.lib.module_commands.bindCommands..handlers"></a>
 
-<a name="module_commands..parseMentionCommand"></a>
-### commands~parseMentionCommand(line) ⇒ <code>command</code>
-Parse a mention command from input line
+#### bindCommands~handlers
+Command Handlers
 
-**Kind**: inner method of <code>[commands](#module_commands)</code>  
-**Returns**: <code>command</code> - Parsed command  
+**Kind**: inner constant of <code>[bindCommands](#sockbot.lib.module_commands.bindCommands)</code>  
+**Default**: <code>{&quot;help&quot;:&quot;&quot;}</code>  
+<a name="sockbot.lib.module_commands.bindCommands..helpTopics"></a>
 
-| Param | Type | Description |
-| --- | --- | --- |
-| line | <code>string</code> | Input line to parse |
+#### bindCommands~helpTopics
+Extended help topics
 
-<a name="module_commands..getCommandHelps"></a>
-### commands~getCommandHelps() ⇒ <code>string</code>
-Get a list of commands that are registered withg the bot
+**Kind**: inner constant of <code>[bindCommands](#sockbot.lib.module_commands.bindCommands)</code>  
+<a name="sockbot.lib.module_commands..Command"></a>
 
-**Kind**: inner method of <code>[commands](#module_commands)</code>  
-**Returns**: <code>string</code> - command list for posting  
-<a name="module_commands..cmdError"></a>
-### commands~cmdError(command)
-Replies on unhandled command with helptext
+### commands~Command
+Command Class. Represents a single command within a post
 
-**Kind**: inner method of <code>[commands](#module_commands)</code>  
+**Kind**: inner class of <code>[commands](#sockbot.lib.module_commands)</code>  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| command | <code>command</code> | Unhandled command |
+* [~Command](#sockbot.lib.module_commands..Command)
+    * [new Command(definition, parent)](#new_sockbot.lib.module_commands..Command_new)
+    * [.line](#sockbot.lib.module_commands..Command+line) : <code>string</code>
+    * [.command](#sockbot.lib.module_commands..Command+command) : <code>string</code>
+    * [.mention](#sockbot.lib.module_commands..Command+mention) : <code>boolean</code>
+    * [.args](#sockbot.lib.module_commands..Command+args) : <code>Array.&lt;string&gt;</code>
+    * [.parent](#sockbot.lib.module_commands..Command+parent) : <code>Commands</code>
+    * [.replyText](#sockbot.lib.module_commands..Command+replyText) : <code>string</code>
+    * [.execute()](#sockbot.lib.module_commands..Command+execute) ⇒ <code>Promise</code>
+    * [.getPost()](#sockbot.lib.module_commands..Command+getPost) ⇒ <code>Promise.&lt;Post&gt;</code>
+    * [.getTopic()](#sockbot.lib.module_commands..Command+getTopic) ⇒ <code>Promise.&lt;Topic&gt;</code>
+    * [.getUser()](#sockbot.lib.module_commands..Command+getUser) ⇒ <code>Promise.&lt;User&gt;</code>
+    * [.reply(content)](#sockbot.lib.module_commands..Command+reply)
 
-<a name="module_commands..shutdown"></a>
-### commands~shutdown()
-Actually perform the bot termination. Do not terminate process, just bot.
+<a name="new_sockbot.lib.module_commands..Command_new"></a>
 
-**Kind**: inner method of <code>[commands](#module_commands)</code>  
-<a name="module_commands..cmdShutUp"></a>
-### commands~cmdShutUp(command)
-Shut the bot up until manually restarted
+#### new Command(definition, parent)
+Create a Command from a defintiton
 
-**Kind**: inner method of <code>[commands](#module_commands)</code>  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| command | <code>command</code> | the shut up command |
+| definition | <code>object</code> | Parsed Command defintition |
+| parent | <code>Commands</code> | Commands instnace that created this Command |
 
-<a name="module_commands..cmdHelp"></a>
-### commands~cmdHelp(command)
-Reply with help to the command !help
+<a name="sockbot.lib.module_commands..Command+line"></a>
 
-**Kind**: inner method of <code>[commands](#module_commands)</code>  
+#### command.line : <code>string</code>
+Full Command line definition
 
-| Param | Type | Description |
-| --- | --- | --- |
-| command | <code>command</code> | help command |
+**Kind**: instance property of <code>[Command](#sockbot.lib.module_commands..Command)</code>  
+**Access:** public  
+<a name="sockbot.lib.module_commands..Command+command"></a>
 
-<a name="module_commands..registerCommand"></a>
-### commands~registerCommand(command, helpstring, handler, callback) ⇒ <code>undefined</code>
-Register a command
+#### command.command : <code>string</code>
+Command name
 
-will be added to core EventEmitter as .onCommand()
+**Kind**: instance property of <code>[Command](#sockbot.lib.module_commands..Command)</code>  
+**Access:** public  
+<a name="sockbot.lib.module_commands..Command+mention"></a>
 
-**Kind**: inner method of <code>[commands](#module_commands)</code>  
-**Returns**: <code>undefined</code> - No return value  
+#### command.mention : <code>boolean</code>
+Is Command a mention command?
 
-| Param | Type | Description |
-| --- | --- | --- |
-| command | <code>string</code> | Command to handle |
-| helpstring | <code>string</code> | One line helpstring describing command |
-| handler | <code>commandHandler</code> | Function to handle the command |
-| callback | <code>completedCallback</code> | Completion callback |
+**Kind**: instance property of <code>[Command](#sockbot.lib.module_commands..Command)</code>  
+**Access:** public  
+<a name="sockbot.lib.module_commands..Command+args"></a>
 
-<a name="module_commands..registerHelp"></a>
-### commands~registerHelp(command, helptext, callback) ⇒ <code>undefined</code>
-Register extended help
+#### command.args : <code>Array.&lt;string&gt;</code>
+Command arguments
 
-will be added to core EventEmitter as .registerHelp()
+**Kind**: instance property of <code>[Command](#sockbot.lib.module_commands..Command)</code>  
+**Access:** public  
+<a name="sockbot.lib.module_commands..Command+parent"></a>
 
-**Kind**: inner method of <code>[commands](#module_commands)</code>  
-**Returns**: <code>undefined</code> - No return value  
+#### command.parent : <code>Commands</code>
+Parent Commands object
 
-| Param | Type | Description |
-| --- | --- | --- |
-| command | <code>string</code> | Command or topic to register help for |
-| helptext | <code>string</code> | Extended help text |
-| callback | <code>completedCallback</code> | Completion callback |
+**Kind**: instance property of <code>[Command](#sockbot.lib.module_commands..Command)</code>  
+**Access:** public  
+<a name="sockbot.lib.module_commands..Command+replyText"></a>
 
-<a name="module_commands..commandProtect"></a>
-### commands~commandProtect(event, handler) ⇒ <code>boolean</code>
-Watch for unauthorized commands and reject them
+#### command.replyText : <code>string</code>
+Text to post as a reply to the command
 
-**Kind**: inner method of <code>[commands](#module_commands)</code>  
-**Returns**: <code>boolean</code> - Flag wether event was of intrest to function  
+**Kind**: instance property of <code>[Command](#sockbot.lib.module_commands..Command)</code>  
+**Access:** public  
+<a name="sockbot.lib.module_commands..Command+execute"></a>
 
-| Param | Type | Description |
-| --- | --- | --- |
-| event | <code>string</code> | Event that is registered |
-| handler | <code>function</code> | Event Handler |
+#### command.execute() ⇒ <code>Promise</code>
+Execute the command handler for this command
 
-<a name="module_commands..command"></a>
-### commands~command : <code>object</code>
-Parsed Command Data
+**Kind**: instance method of <code>[Command](#sockbot.lib.module_commands..Command)</code>  
+**Returns**: <code>Promise</code> - Resolves when command has fully executed  
+**Access:** public  
+<a name="sockbot.lib.module_commands..Command+getPost"></a>
 
-**Kind**: inner typedef of <code>[commands](#module_commands)</code>  
+#### command.getPost() ⇒ <code>Promise.&lt;Post&gt;</code>
+Get Full Post the command refers to
 
-| Param | Type | Description |
-| --- | --- | --- |
-| input | <code>string</code> | Raw Command Input |
-| command | <code>string</code> | Command name |
-| args | <code>Array.&lt;string&gt;</code> | Command arguments |
-| mention | <code>string</code> | Mention text that was included in command |
-| post | <code>external.posts.CleanedPost</code> | Post that triggered the command |
+**Kind**: instance method of <code>[Command](#sockbot.lib.module_commands..Command)</code>  
+**Returns**: <code>Promise.&lt;Post&gt;</code> - Resolves to retrieved Post  
+**Access:** public  
+<a name="sockbot.lib.module_commands..Command+getTopic"></a>
 
-<a name="module_commands..completedCallback"></a>
-### commands~completedCallback
-Completion Callback
+#### command.getTopic() ⇒ <code>Promise.&lt;Topic&gt;</code>
+Get Topic command was posted to
 
-**Kind**: inner typedef of <code>[commands](#module_commands)</code>  
+**Kind**: instance method of <code>[Command](#sockbot.lib.module_commands..Command)</code>  
+**Returns**: <code>Promise.&lt;Topic&gt;</code> - Resolves to retrieved Topic  
+**Access:** public  
+<a name="sockbot.lib.module_commands..Command+getUser"></a>
 
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [err] | <code>Exception</code> | <code></code> | Error encountered processing request |
+#### command.getUser() ⇒ <code>Promise.&lt;User&gt;</code>
+Get User who posted the command
 
-<a name="module_commands..parseCallback"></a>
-### commands~parseCallback
-Parse Completion Callback
+**Kind**: instance method of <code>[Command](#sockbot.lib.module_commands..Command)</code>  
+**Returns**: <code>Promise.&lt;User&gt;</code> - Resolved to retrieved User  
+**Access:** public  
+<a name="sockbot.lib.module_commands..Command+reply"></a>
 
-**Kind**: inner typedef of <code>[commands](#module_commands)</code>  
+#### command.reply(content)
+Reply to command with content
 
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [err] | <code>Exception</code> | <code></code> | Error encountered processing request |
-| commands | <code>Array.&lt;command&gt;</code> |  | Parsed Commands |
-
-<a name="module_commands..commandHandler"></a>
-### commands~commandHandler
-Command handler
-
-**Kind**: inner typedef of <code>[commands](#module_commands)</code>  
+**Kind**: instance method of <code>[Command](#sockbot.lib.module_commands..Command)</code>  
+**Access:** public  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| command | <code>command</code> | Command to handle |
+| content | <code>string</code> | Content to reply with |
+
+<a name="sockbot.lib.module_commands..Commands"></a>
+
+### commands~Commands
+Commands class. Represents all commands for a Notification
+
+**Kind**: inner class of <code>[commands](#sockbot.lib.module_commands)</code>  
+**Access:** public  
+
+* [~Commands](#sockbot.lib.module_commands..Commands)
+    * [new Commands(notification, postBody)](#new_sockbot.lib.module_commands..Commands_new)
+    * _instance_
+        * [.notification](#sockbot.lib.module_commands..Commands+notification) : <code>Notification</code>
+        * [.commands](#sockbot.lib.module_commands..Commands+commands) : <code>Array.&lt;Command&gt;</code>
+        * [.getPost()](#sockbot.lib.module_commands..Commands+getPost) ⇒ <code>Promise.&lt;Post&gt;</code>
+        * [.getTopic()](#sockbot.lib.module_commands..Commands+getTopic) ⇒ <code>Promise.&lt;Topic&gt;</code>
+        * [.getUser()](#sockbot.lib.module_commands..Commands+getUser) ⇒ <code>Promise.&lt;User&gt;</code>
+        * [.execute()](#sockbot.lib.module_commands..Commands+execute) ⇒ <code>Promise.&lt;Commands&gt;</code>
+    * _static_
+        * [.get(notification)](#sockbot.lib.module_commands..Commands.get) ⇒ <code>Promise.&lt;Commands&gt;</code>
+        * [.add(command, helpText, handler)](#sockbot.lib.module_commands..Commands.add) ⇒ <code>Promise</code>
+
+<a name="new_sockbot.lib.module_commands..Commands_new"></a>
+
+#### new Commands(notification, postBody)
+Construct a Commands object from notification
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| notification | <code>Notification</code> | Notification that contains commands |
+| postBody | <code>string</code> | Raw Content of post containing commands |
+
+<a name="sockbot.lib.module_commands..Commands+notification"></a>
+
+#### commands.notification : <code>Notification</code>
+Notification that created this Commands object
+
+**Kind**: instance property of <code>[Commands](#sockbot.lib.module_commands..Commands)</code>  
+**Access:** public  
+<a name="sockbot.lib.module_commands..Commands+commands"></a>
+
+#### commands.commands : <code>Array.&lt;Command&gt;</code>
+Commands contained in this Commands object
+
+**Kind**: instance property of <code>[Commands](#sockbot.lib.module_commands..Commands)</code>  
+**Access:** public  
+<a name="sockbot.lib.module_commands..Commands+getPost"></a>
+
+#### commands.getPost() ⇒ <code>Promise.&lt;Post&gt;</code>
+Get the Post this Commands object referrs to
+
+**Kind**: instance method of <code>[Commands](#sockbot.lib.module_commands..Commands)</code>  
+**Returns**: <code>Promise.&lt;Post&gt;</code> - Resolves to the retrieved Post  
+**Access:** public  
+<a name="sockbot.lib.module_commands..Commands+getTopic"></a>
+
+#### commands.getTopic() ⇒ <code>Promise.&lt;Topic&gt;</code>
+Get the Topic this Commands object referrs to
+
+**Kind**: instance method of <code>[Commands](#sockbot.lib.module_commands..Commands)</code>  
+**Returns**: <code>Promise.&lt;Topic&gt;</code> - Resolves to the retrieved Topic  
+**Access:** public  
+<a name="sockbot.lib.module_commands..Commands+getUser"></a>
+
+#### commands.getUser() ⇒ <code>Promise.&lt;User&gt;</code>
+Get the user who sent these commands
+
+**Kind**: instance method of <code>[Commands](#sockbot.lib.module_commands..Commands)</code>  
+**Returns**: <code>Promise.&lt;User&gt;</code> - Resolved to the retrieved User  
+**Access:** public  
+<a name="sockbot.lib.module_commands..Commands+execute"></a>
+
+#### commands.execute() ⇒ <code>Promise.&lt;Commands&gt;</code>
+Execute the commands this object contains
+
+**Kind**: instance method of <code>[Commands](#sockbot.lib.module_commands..Commands)</code>  
+**Returns**: <code>Promise.&lt;Commands&gt;</code> - Resolves to self when all commands have been processed  
+**Access:** public  
+<a name="sockbot.lib.module_commands..Commands.get"></a>
+
+#### Commands.get(notification) ⇒ <code>Promise.&lt;Commands&gt;</code>
+Get Commands from a notification
+
+**Kind**: static method of <code>[Commands](#sockbot.lib.module_commands..Commands)</code>  
+**Returns**: <code>Promise.&lt;Commands&gt;</code> - Resolves to parsed commands  
+**Access:** public  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| notification | <code>Notification</code> | Notification to get commands for |
+
+<a name="sockbot.lib.module_commands..Commands.add"></a>
+
+#### Commands.add(command, helpText, handler) ⇒ <code>Promise</code>
+Add a command to this forum instance
+
+**Kind**: static method of <code>[Commands](#sockbot.lib.module_commands..Commands)</code>  
+**Returns**: <code>Promise</code> - Resolves when command has been added  
+**Access:** public  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| command | <code>string</code> | Command to be added |
+| helpText | <code>string</code> | Short help text for command |
+| handler | <code>CommandHandler</code> | Function to handle the command |
 
