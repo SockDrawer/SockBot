@@ -1,5 +1,19 @@
 'use strict';
+/**
+ * Example plugin, replies to mentions with random quips.
+ * @module summoner
+ * @author Accalia
+ * @license MIT
+ */
 
+/**
+ * Plugin generation function.
+ *
+ * Returns a plugin object bound to the provided forum provider
+ *
+ * @param {Provider} forum Active forum Provider
+ * @returns {Plugin} An instance of the Summoner plugin
+ */
 module.exports = function summoner(forum, config) {
 
     let messages = [

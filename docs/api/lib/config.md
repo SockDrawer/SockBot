@@ -80,6 +80,7 @@ Default configuration options
 
 * [defaultConfig](#defaultConfig) : <code>object</code>
     * [.core](#defaultConfig.core) : <code>object</code>
+        * [.provider](#defaultConfig.core.provider)
         * [.username](#defaultConfig.core.username) : <code>string</code>
         * [.password](#defaultConfig.core.password) : <code>string</code>
         * [.owner](#defaultConfig.core.owner) : <code>string</code>
@@ -94,11 +95,18 @@ Core configuration options
 **Kind**: static property of <code>[defaultConfig](#defaultConfig)</code>  
 
 * [.core](#defaultConfig.core) : <code>object</code>
+    * [.provider](#defaultConfig.core.provider)
     * [.username](#defaultConfig.core.username) : <code>string</code>
     * [.password](#defaultConfig.core.password) : <code>string</code>
     * [.owner](#defaultConfig.core.owner) : <code>string</code>
     * [.forum](#defaultConfig.core.forum) : <code>string</code>
 
+<a name="defaultConfig.core.provider"></a>
+
+#### core.provider
+Foum Provider
+
+**Kind**: static property of <code>[core](#defaultConfig.core)</code>  
 <a name="defaultConfig.core.username"></a>
 
 #### core.username : <code>string</code>
