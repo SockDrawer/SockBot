@@ -4,7 +4,7 @@ node_js:
 - '4.3'
 - '4.4'
 - '5.9'
-- '5.'
+- '5.10'
 before_script:
 - rm -rf ./coverage
 - git config credential.helper "store --file=.git/credentials"
@@ -15,7 +15,7 @@ script:
 after_script:
 - npm run buildDocs && npm run pushDocs
 - test -e ./coverage/lcov.info && < ./coverage/lcov.info ./node_modules/.bin/coveralls
-- test -e ./coverage/lcov.info && < ./coverage/lcov.info ./node_modules/.bin/codeclimate-test-reporter 
+- test -e ./coverage/lcov.info && < ./coverage/lcov.info ./node_modules/.bin/codeclimate-test-reporter
 branches:
   only:
   - master
