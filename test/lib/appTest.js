@@ -257,10 +257,10 @@ describe('lib/app', () => {
     });
     describe('_buildMessage()', () => {
         let clock = null,
-            now = null;
+            theTime = null;
         beforeEach(() => {
-            now = Math.random() * 2e12;
-            clock = sinon.useFakeTimers(now);
+            theTime = Math.random() * 2e12;
+            clock = sinon.useFakeTimers(theTime);
         });
         afterEach(() => clock.restore());
         it('should return a string', () => {
