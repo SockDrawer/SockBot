@@ -199,7 +199,7 @@ class Forum extends EventEmitter {
                     return resolve();
                 });
             }))
-            .then(() => Promise.resolve(this));
+            .then(() => this);
     }
 
     /**
