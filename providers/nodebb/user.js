@@ -184,7 +184,6 @@ exports.bindUser = function bindUser(forum) {
          * @reject {Error} An Error that occured while processing
          */
         follow() {
-            debug(`following user ${this.id}`);
             return forum._emit('user.follow', {
                 uid: this.id
             }).then(() => this);
@@ -202,7 +201,6 @@ exports.bindUser = function bindUser(forum) {
          * @reject {Error} An Error that occured while processing
          */
         unfollow() {
-            debug(`unfollowing user ${this.id}`);
             return forum._emit('user.unfollow', {
                 uid: this.id
             }).then(() => this);
