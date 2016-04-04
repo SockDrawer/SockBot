@@ -82,8 +82,7 @@ describe('lib/app', () => {
             };
             cfg.plugins[name] = true;
             testModule.loadPlugins(forum, cfg);
-            testModule.relativeRequire.calledWith('../plugins', name, require).should.be.false;
-
+            testModule.relativeRequire.calledWith('plugins', name, testModule.require).should.be.true;
         });
         it('should log message on plugin load', () => {
             const name = `name${Math.random()}`;
@@ -188,21 +187,19 @@ describe('lib/app', () => {
             DummyForum.activate.rejects('bad');
             return testModule.activateConfig(basicConfig).should.be.rejected;
         });
-        describe('events', () => {
-            it('should register for forum event `log`', () => {
-                return testModule.activateConfig(basicConfig).then(() => {
-                    instance.on.calledWith('log', testModule.log).should.be.true;
-                });
+        it('should register for forum event `log`', () => {
+            return testModule.activateConfig(basicConfig).then(() => {
+                instance.on.calledWith('log', testModule.log).should.be.true;
             });
-            it('should register for forum event `log`', () => {
-                return testModule.activateConfig(basicConfig).then(() => {
-                    instance.on.calledWith('error', testModule.error).should.be.true;
-                });
+        });
+        it('should register for forum event `log`', () => {
+            return testModule.activateConfig(basicConfig).then(() => {
+                instance.on.calledWith('error', testModule.error).should.be.true;
             });
-            it('should register for forum event `logExtended`', () => {
-                return testModule.activateConfig(basicConfig).then(() => {
-                    instance.on.calledWith('logExtended', utils.logExtended).should.be.true;
-                });
+        });
+        it('should register for forum event `logExtended`', () => {
+            return testModule.activateConfig(basicConfig).then(() => {
+                instance.on.calledWith('logExtended', utils.logExtended).should.be.true;
             });
         });
         describe('logging', () => {
@@ -260,17 +257,17 @@ describe('lib/app', () => {
     });
     describe('_buildMessage()', () => {
         let clock = null,
-            now = null;
+            theTime = null;
         beforeEach(() => {
-            now = Math.random() * 2e12;
-            clock = sinon.useFakeTimers(now);
+            theTime = Math.random() * 2e12;
+            clock = sinon.useFakeTimers(theTime);
         });
         afterEach(() => clock.restore());
         it('should return a string', () => {
             testModule._buildMessage().should.be.a('string');
         });
         it('should prefix timestamp to message', () => {
-            const prefix = `[${new Date(now).toISOString()}]`;
+            const prefix = `[${new Date(theTime).toISOString()}]`;
             testModule._buildMessage('foo').should.startWith(prefix);
         });
         it('should join multiple arguments together', () => {

@@ -139,67 +139,6 @@ describe('lib/config', () => {
                     parseLine('@fred help').should.have.all.keys(['line', 'command', 'args', 'mention']);
                 });
                 it('should copy input into output object', () => {
-                    parseLine('!help arg1 arg2').line.should.equal('!help arg1 arg2');
-                });
-                it('should set command in output object', () => {
-                    parseLine('!help arg1 arg2').command.should.equal('help');
-                });
-                it('should normalize command case in output object', () => {
-                    parseLine('!HELP arg1 arg2').command.should.equal('help');
-                });
-                it('should set args correctly', () => {
-                    parseLine('!help arg1 arg2').args.should.deep.equal(['arg1', 'arg2']);
-                });
-                it('should not set mention value', () => {
-                    parseLine('!help arg1 arg2').mention.should.be.false;
-                });
-            });
-            describe('any space character should split args', () => {
-                [' ', '\f', '\t', '\v', '\u00a0', '\u1680', '\u180e', '\u2000', '\u2001', '\u2002', '\u2003', '\u2004',
-                    '\u2005', '\u2006', '\u2007', '\u2008', '\u2009', '\u200a', '\u2028', '\u2029', '\u202f', '\u205f',
-                    '\u3000'
-                ].forEach((space) => {
-                    let str = `0000${space.charCodeAt().toString(16)}`;
-                    str = `\\u${str.substring(str.length - 4)}`;
-                    it(`: ${str}`, () => {
-                        const input = `!help${space}arg1${space}arg2`;
-                        parseLine(input).args.should.deep.equal(['arg1', 'arg2']);
-                    });
-                });
-            });
-            it('should not match simple text', () => {
-                expect(parseLine('simple text stuff')).to.equal(null);
-            });
-            it('should not match exclamation at end of text', () => {
-                expect(parseLine('simple text stuff!')).to.equal(null);
-            });
-            it('should not match exclamation in text', () => {
-                expect(parseLine('simple! text stuff')).to.equal(null);
-            });
-            it('should not match exclamation with text before', () => {
-                expect(parseLine('si!mple text stuff')).to.equal(null);
-            });
-            it('should not match short command', () => {
-                expect(parseLine('!cm text stuff')).to.equal(null);
-            });
-            it('should not match really short command', () => {
-                expect(parseLine('!c text stuff')).to.equal(null);
-            });
-            it('should match bare command', () => {
-                parseLine('!help').command.should.equal('help');
-            });
-            it('should match command with args', () => {
-                const cmd = parseLine('!help arg1 arg2');
-                cmd.command.should.equal('help');
-                cmd.args.should.deep.equal(['arg1', 'arg2']);
-            });
-        });
-        describe('mention commands', () => {
-            describe('output object format', () => {
-                it('should match bare command', () => {
-                    parseLine('@fred help').should.have.all.keys(['line', 'command', 'args', 'mention']);
-                });
-                it('should copy input into output object', () => {
                     parseLine('@fred help arg1 arg2').line.should.equal('@fred help arg1 arg2');
                 });
                 it('should set command in output object', () => {

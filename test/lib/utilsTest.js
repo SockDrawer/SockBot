@@ -429,7 +429,7 @@ describe('lib/utils', () => {
                 mergeInner(base, mixin, true);
                 base.should.deep.equal(expected);
             });
-            it('should not overwrite arrays recursively', () => {
+            it('should overwrite arrays recursively', () => {
                 const base = {
                         alpha: [1],
                         beta: {
@@ -439,42 +439,17 @@ describe('lib/utils', () => {
                     mixin = {
                         delta: [2],
                         beta: {
-                            epsilon: [2]
+                            gamma: [2]
                         }
                     },
                     expected = {
                         alpha: [1],
                         beta: {
-                            gamma: [1],
-                            epsilon: [2]
+                            gamma: [1, 2]
                         },
                         delta: [2]
                     };
-                mergeInner(base, mixin);
-                base.should.deep.equal(expected);
-            });
-            it('should not overwrite arrays recursively', () => {
-                const base = {
-                        alpha: [1],
-                        beta: {
-                            gamma: [1]
-                        }
-                    },
-                    mixin = {
-                        delta: [2],
-                        beta: {
-                            epsilon: [2]
-                        }
-                    },
-                    expected = {
-                        alpha: [1],
-                        beta: {
-                            gamma: [1],
-                            epsilon: [2]
-                        },
-                        delta: [2]
-                    };
-                mergeInner(base, mixin, true);
+                mergeInner(base, mixin, false);
                 base.should.deep.equal(expected);
             });
         });
