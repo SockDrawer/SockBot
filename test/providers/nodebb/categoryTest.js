@@ -79,6 +79,12 @@ describe('providers/nodebb/categor', () => {
                 data = utils.mapGet(category);
             });
             it('should resolve to expected value', () => {
+                const expected = 'theForum/category/theCategorySlug';
+                forum.url = 'theForum';
+                data.url = 'theCategorySlug';
+                return category.url().should.become(expected);
+            });
+            it('should resolve to randomized expected value', () => {
                 const partA = `a${Math.random()}b`,
                     partB = `c${Math.random()}d`,
                     expected = `${partA}/category/${partB}`;
