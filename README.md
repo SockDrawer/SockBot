@@ -14,9 +14,9 @@
 [![Stories in Progress](https://badge.waffle.io/sockdrawer/sockbot.png?label=in%20progress&title=In%20Progress)](https://waffle.io/sockdrawer/sockbot)
 
 
-SockBot 2.0
+SockBot 3.0
 ===========
-Sockbot - A rebuild of a sock puppet robot worthy of TheDailyWTF in EcmaScript 6.
+Sockbot - A sock puppet robot worthy of TheDailyWTF in EcmaScript 6.
 
 So how do I run this thing anyway?
 ===========
@@ -51,14 +51,4 @@ what.thedailywtf.com.
 This bot should not be used without the forum owners consent, and any use of this bot should be immediately 
 discontinued at the request of the forum owners or moderators. SockBot is not intended for any ill purposes, and the 
 designers of SockBot can not be held liable for abuses of the technology, or any software derived from it.
-
-Special Thanks
-==============
-For hosting the forum and allowing our bots to flourish:<br />
-[@apapadimoulis](http://what.thedailywtf.com/users/apapadimoulis)<br />
-[@PJH](http://what.thedailywtf.com/users/PJH)<br />
-[@boomzilla](http://what.thedailywtf.com/users/boomzilla)
-
-For telling us that it couldn't be done:
-[@Codinghorror](http://what.thedailywtf.com/users/Codinghorror)
 
