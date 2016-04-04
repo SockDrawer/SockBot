@@ -268,17 +268,17 @@ describe('lib/app', () => {
         });
         it('should prefix timestamp to message', () => {
             const prefix = `[${new Date(theTime).toISOString()}]`;
-            testModule._buildMessage('foo').should.startWith(prefix);
+            testModule._buildMessage(['foo']).should.startWith(prefix);
         });
         it('should join multiple arguments together', () => {
             const contents = 'foo bar baz quux';
-            testModule._buildMessage('foo', 'bar', 'baz', 'quux').should.endWith(contents);
+            testModule._buildMessage(['foo', 'bar', 'baz', 'quux']).should.endWith(contents);
         });
         it('should serialize objects to JSON', () => {
             const contents = '{\n\t"alpha": "one"\n}';
-            testModule._buildMessage({
+            testModule._buildMessage([{
                 alpha: 'one'
-            }).should.endWith(contents);
+            }]).should.endWith(contents);
         });
     });
     describe('log()', () => {
@@ -296,7 +296,8 @@ describe('lib/app', () => {
                 four = 3,
                 five = 5;
             testModule.log(one, two, three, four, five);
-            testModule._buildMessage.calledWith(one, two, three, four, five).should.be.true;
+            const args = Array.prototype.slice.apply(testModule._buildMessage.firstCall.args[0]);
+            args.should.eql([one, two, three, four, five]);
         });
         it('should log message to console.log', () => {
             const message = `a${Math.random()}b`;
@@ -320,7 +321,8 @@ describe('lib/app', () => {
                 four = 3,
                 five = 5;
             testModule.error(one, two, three, four, five);
-            testModule._buildMessage.calledWith(one, two, three, four, five).should.be.true;
+            const args = Array.prototype.slice.apply(testModule._buildMessage.firstCall.args[0]);
+            args.should.eql([one, two, three, four, five]);
         });
         it('should log message to console.log', () => {
             const message = `a${Math.random()}b`;
