@@ -33,11 +33,7 @@ describe('plugins/echo', () => {
         });
     });
     describe('messages', () => {
-        const defaults = [
-            '@%username% has summoned me, and so I appear.',
-            'Yes master %name%, I shall appear as summoned.',
-            'Yes mistress %name%, I shall appear as summoned.'
-        ];
+        const defaults = testModule.defaultMessages;
         it('should use default messages with no provided messages', () => {
             testModule().messages.should.eql(defaults);
         });

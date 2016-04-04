@@ -6,6 +6,15 @@
  * @license MIT
  */
 
+const utils = require('../lib/utils');
+
+const defaultMessages = [
+    '@%username% has summoned me, and so I appear.',
+    'Yes master %name%, I shall appear as summoned.',
+    'Yes mistress %name%, I shall appear as summoned.'
+];
+
+
 /**
  * Plugin generation function.
  *
@@ -16,12 +25,7 @@
  * @returns {Plugin} An instance of the Summoner plugin
  */
 module.exports = function summoner(forum, config) {
-
-    let messages = [
-        '@%username% has summoned me, and so I appear.',
-        'Yes master %name%, I shall appear as summoned.',
-        'Yes mistress %name%, I shall appear as summoned.'
-    ];
+    let messages = utils.cloneData(defaultMessages);
     config = config || {}; // prevent nulls
     if (Array.isArray(config) && config.length > 0) {
         messages = config;
@@ -76,3 +80,4 @@ module.exports = function summoner(forum, config) {
         messages: messages
     };
 };
+module.exports.defaultMessages = defaultMessages;
