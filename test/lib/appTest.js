@@ -267,7 +267,7 @@ describe('lib/app', () => {
             testModule._buildMessage().should.be.a('string');
         });
         it('should prefix timestamp to message', () => {
-            const prefix = `[${new Date(now).toISOString()}]`;
+            const prefix = `[${new Date(theTime).toISOString()}]`;
             testModule._buildMessage('foo').should.startWith(prefix);
         });
         it('should join multiple arguments together', () => {
