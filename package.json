@@ -1,6 +1,6 @@
 {
   "name": "sockbot",
-  "version": "3.0.0-BETA1",
+  "version": "3.0.0",
   "releaseName": "Alpha Alpaca",
   "description": "A sockpuppet bot to use on http://what.thedailywtf.com.",
   "repository": "https://github.com/SockDrawer/SockBot",
