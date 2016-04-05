@@ -20,7 +20,9 @@ describe('providers/nodebb/notification', () => {
         testModule.bindNotification({}).should.be.a('function');
     });
     describe('Post', () => {
-        const forum = {};
+        const forum = {
+            username: `username${Math.random()}`
+        };
         const Notification = testModule.bindNotification(forum);
         beforeEach(() => {
             forum._emit = sinon.stub().resolves();
@@ -91,15 +93,31 @@ describe('providers/nodebb/notification', () => {
                 });
                 it('should switch to `mention` for mentions', () => {
                     const notification = new Notification({
-                        bodyShort: '[[mentions:user_mentioned_you_in'
+                        bodyShort: '[[mentions:user_mentioned_you_in',
+                        bodyLong: `this is for @${forum.username} `
                     });
                     utils.mapGet(notification, 'type').should.equal('mention');
                 });
                 it('should switch to `mention` case insentitively', () => {
                     const notification = new Notification({
-                        bodyShort: '[[mEnTiOnS:UsEr_mEnTiOnEd_yOu_iN'
+                        bodyShort: '[[mEnTiOnS:UsEr_mEnTiOnEd_yOu_iN',
+                        bodyLong: `this is for @${forum.username}`
                     });
                     utils.mapGet(notification, 'type').should.equal('mention');
+                });
+                it('should switch to `group_mention` for group mentions', () => {
+                    const notification = new Notification({
+                        bodyShort: '[[mentions:user_mentioned_you_in',
+                        bodyLong: 'this is for @bots'
+                    });
+                    utils.mapGet(notification, 'type').should.equal('group_mention');
+                });
+                it('should switch to `group_mention` case insentitively', () => {
+                    const notification = new Notification({
+                        bodyShort: '[[mEnTiOnS:UsEr_mEnTiOnEd_yOu_iN',
+                        bodyLong: 'this is for @bots '
+                    });
+                    utils.mapGet(notification, 'type').should.equal('group_mention');
                 });
             });
             describe('subtype', () => {
@@ -356,16 +374,32 @@ describe('providers/nodebb/notification', () => {
                     utils.mapGet(notification, 'type').should.equal('reply');
                 });
                 it('should switch to `mention` for mentions', () => {
-                    const notification = Notification.parse({
-                        bodyShort: '[[mentions:user_mentioned_you_in'
+                    const notification = new Notification({
+                        bodyShort: '[[mentions:user_mentioned_you_in',
+                        bodyLong: `this is for @${forum.username} `
                     });
                     utils.mapGet(notification, 'type').should.equal('mention');
                 });
                 it('should switch to `mention` case insentitively', () => {
-                    const notification = Notification.parse({
-                        bodyShort: '[[mEnTiOnS:UsEr_mEnTiOnEd_yOu_iN'
+                    const notification = new Notification({
+                        bodyShort: '[[mEnTiOnS:UsEr_mEnTiOnEd_yOu_iN',
+                        bodyLong: `this is for @${forum.username}`
                     });
                     utils.mapGet(notification, 'type').should.equal('mention');
+                });
+                it('should switch to `group_mention` for group mentions', () => {
+                    const notification = new Notification({
+                        bodyShort: '[[mentions:user_mentioned_you_in',
+                        bodyLong: 'this is for @bots'
+                    });
+                    utils.mapGet(notification, 'type').should.equal('group_mention');
+                });
+                it('should switch to `groupmention` case insentitively', () => {
+                    const notification = new Notification({
+                        bodyShort: '[[mEnTiOnS:UsEr_mEnTiOnEd_yOu_iN',
+                        bodyLong: 'this is for @bots '
+                    });
+                    utils.mapGet(notification, 'type').should.equal('group_mention');
                 });
             });
             describe('subtype', () => {
