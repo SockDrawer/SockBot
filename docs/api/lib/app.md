@@ -1,7 +1,7 @@
 ## Functions
 
 <dl>
-<dt><a href="#_buildMessage">_buildMessage(...message)</a> ⇒ <code>string</code></dt>
+<dt><a href="#_buildMessage">_buildMessage(args)</a> ⇒ <code>string</code></dt>
 <dd><p>Construct a stringified message to log</p>
 </dd>
 <dt><a href="#log">log(...message)</a></dt>
@@ -23,7 +23,7 @@
 
 <a name="_buildMessage"></a>
 
-## _buildMessage(...message) ⇒ <code>string</code>
+## _buildMessage(args) ⇒ <code>string</code>
 Construct a stringified message to log
 
 **Kind**: global function  
@@ -31,7 +31,7 @@ Construct a stringified message to log
 
 | Param | Type | Description |
 | --- | --- | --- |
-| ...message | <code>\*</code> | Item to stringify and log |
+| args | <code>Array.&lt;\*&gt;</code> | Item to stringify and log |
 
 <a name="log"></a>
 
