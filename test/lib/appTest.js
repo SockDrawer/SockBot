@@ -277,7 +277,7 @@ describe('lib/app', () => {
 
         it('should accept `arguments` object as input', () => {
             let args = null;
-            (function argumentExtractor() {
+            (function argExtractor() {
                 args = arguments;
             })('foo', 'bar', 'baz', 'xyzzy');
             const contents = 'foo bar baz xyzzy';
