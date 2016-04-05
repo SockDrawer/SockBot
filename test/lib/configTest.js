@@ -106,77 +106,107 @@ describe('lib/config', () => {
     });
 
     describe('validateConfig()', () => {
-        it('should throw error for missing username', () => {
-            expect(() => config.validateConfig({
+        let testConfig = null;
+        beforeEach(() => {
+            testConfig = {
                 core: {
-                    username: undefined,
+                    username: 'username',
                     password: 'password',
                     owner: 'owner'
+                },
+                plugins: {
+                    foo: true
                 }
-            })).to.throw('A valid username must be specified');
+            };
+        });
+        it('should throw error for missing core configuration', () => {
+            delete testConfig.core;
+            expect(() => config.validateConfig(testConfig))
+                .to.throw('Missing configuration section: core');
+        });
+        it('should throw error for empty core configuration', () => {
+            testConfig.core = {};
+            expect(() => config.validateConfig(testConfig))
+                .to.throw('Configuration section core has no configuration items');
+        });
+        it('should throw error for missing plugins configuration', () => {
+            delete testConfig.plugins;
+            expect(() => config.validateConfig(testConfig))
+                .to.throw('Missing configuration section: plugins');
+        });
+        it('should throw error for empty plugins configuration', () => {
+            testConfig.plugins = {};
+            expect(() => config.validateConfig(testConfig))
+                .to.throw('Configuration section plugins has no configuration items');
+        });
+        it('should throw error for missing username', () => {
+            delete testConfig.core.username;
+            expect(() => config.validateConfig(testConfig))
+                .to.throw('A valid username must be specified');
         });
         it('should throw error for empty username', () => {
-            expect(() => config.validateConfig({
-                core: {
-                    username: '',
-                    password: 'password',
-                    owner: 'owner'
-                }
-            })).to.throw('A valid username must be specified');
+            testConfig.core.username = '';
+            expect(() => config.validateConfig(testConfig))
+                .to.throw('A valid username must be specified');
+        });
+        it('should throw error for wrong username type', () => {
+            testConfig.core.username = Math.random();
+            expect(() => config.validateConfig(testConfig))
+                .to.throw('A valid username must be specified');
         });
         it('should throw error for missing password', () => {
-            expect(() => config.validateConfig({
-                core: {
-                    username: 'username',
-                    password: undefined,
-                    owner: 'owner'
-                }
-            })).to.throw('A valid password must be specified');
+            delete testConfig.core.password;
+            expect(() => config.validateConfig(testConfig))
+                .to.throw('A valid password must be specified');
         });
         it('should throw error for empty password', () => {
-            expect(() => config.validateConfig({
-                core: {
-                    username: 'username',
-                    password: '',
-                    owner: 'owner'
-                }
-            })).to.throw('A valid password must be specified');
+            testConfig.core.password = '';
+            expect(() => config.validateConfig(testConfig))
+                .to.throw('A valid password must be specified');
+        });
+        it('should throw error for wrong password type', () => {
+            testConfig.core.password = Math.random();
+            expect(() => config.validateConfig(testConfig))
+                .to.throw('A valid password must be specified');
         });
         it('should throw error for missing owner', () => {
-            expect(() => config.validateConfig({
-                core: {
-                    username: 'username',
-                    password: 'password',
-                    owner: undefined
-                }
-            })).to.throw('A valid owner must be specified');
+            delete testConfig.core.owner;
+            expect(() => config.validateConfig(testConfig))
+                .to.throw('A valid owner must be specified');
         });
         it('should throw error for empty owner', () => {
-            expect(() => config.validateConfig({
-                core: {
-                    username: 'username',
-                    password: 'password',
-                    owner: ''
-                }
-            })).to.throw('A valid owner must be specified');
+            testConfig.core.owner = '';
+            expect(() => config.validateConfig(testConfig))
+                .to.throw('A valid owner must be specified');
         });
-        it('should throw error for missing username', () => {
-            expect(() => config.validateConfig({
-                core: {
-                    username: undefined,
-                    password: 'password',
-                    owner: 'owner'
-                }
-            })).to.throw('A valid username must be specified');
+        it('should throw error for wrong owner type', () => {
+            testConfig.core.owner = Math.random();
+            expect(() => config.validateConfig(testConfig))
+                .to.throw('A valid owner must be specified');
+        });
+        it('should throw multiple messages for multiple errors', () => {
+            testConfig.core.username = Math.random();
+            testConfig.core.password = Math.random();
+            testConfig.core.owner = Math.random();
+            expect(() => config.validateConfig(testConfig))
+                .to.throw('A valid username must be specified\n' +
+                    'A valid password must be specified\nA valid owner must be specified');
+        });
+        it('should throw multiple messages for multiple missing sections', () => {
+            delete testConfig.core;
+            testConfig.plugins = {};
+            expect(() => config.validateConfig(testConfig))
+                .to.throw('Missing configuration section: core\n' +
+                    'Configuration section plugins has no configuration items');
+        });
+        it('should not validate core settings with invalid config section', () => {
+            delete testConfig.core.username;
+            testConfig.plugins = {};
+            expect(() => config.validateConfig(testConfig))
+                .to.throw('Configuration section plugins has no configuration items');
         });
         it('should accept valid config', () => {
-            expect(() => config.validateConfig({
-                core: {
-                    username: 'username',
-                    password: 'password',
-                    owner: 'owner'
-                }
-            })).to.not.throw();
+            expect(() => config.validateConfig(testConfig)).to.not.throw();
         });
     });
     describe('load()', () => {
