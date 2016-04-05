@@ -274,6 +274,15 @@ describe('lib/app', () => {
             const contents = 'foo bar baz quux';
             testModule._buildMessage(['foo', 'bar', 'baz', 'quux']).should.endWith(contents);
         });
+
+        it('should accept `arguments` object as input', () => {
+            let args = null;
+            (function argumentExtractor() {
+                args = arguments;
+            })('foo', 'bar', 'baz', 'xyzzy');
+            const contents = 'foo bar baz xyzzy';
+            testModule._buildMessage(args).should.endWith(contents);
+        });
         it('should serialize objects to JSON', () => {
             const contents = '{\n\t"alpha": "one"\n}';
             testModule._buildMessage([{
