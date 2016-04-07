@@ -63,16 +63,18 @@ describe('lib/app', () => {
             sandbox = sinon.sandbox.create();
             sandbox.stub(testModule, 'relativeRequire');
             sandbox.stub(testModule, 'log');
+            sandbox.stub(testModule, 'error');
             forum = {
-                addPlugin: sinon.stub()
+                addPlugin: sinon.stub().resolves()
             };
         });
         afterEach(() => sandbox.restore());
         it('should allow zero plugins', () => {
-            testModule.loadPlugins(forum, {
+            return testModule.loadPlugins(forum, {
                 plugins: {}
+            }).then(() => {
+                testModule.relativeRequire.called.should.be.false;
             });
-            testModule.relativeRequire.called.should.be.false;
         });
         it('should load listed plugins', () => {
             const name = `name${Math.random()}`;
@@ -81,8 +83,9 @@ describe('lib/app', () => {
                 plugins: {}
             };
             cfg.plugins[name] = true;
-            testModule.loadPlugins(forum, cfg);
-            testModule.relativeRequire.calledWith('plugins', name, testModule.require).should.be.true;
+            return testModule.loadPlugins(forum, cfg).then(() => {
+                testModule.relativeRequire.calledWith('plugins', name, testModule.require).should.be.true;
+            });
         });
         it('should log message on plugin load', () => {
             const name = `name${Math.random()}`;
@@ -94,20 +97,62 @@ describe('lib/app', () => {
                 plugins: {}
             };
             cfg.plugins[name] = true;
-            testModule.loadPlugins(forum, cfg);
-            testModule.log.calledWith(`Loading plugin ${name} for ${username}`).should.equal.true;
+            return testModule.loadPlugins(forum, cfg).then(() => {
+                testModule.log.calledWith(`Loading plugin ${name} for ${username}`).should.equal.true;
+            });
         });
         it('should add loaded plugin to forum', () => {
             const cfg = Math.random();
             const plugin = Math.random();
             testModule.relativeRequire.returns(plugin);
-            testModule.loadPlugins(forum, {
+            return testModule.loadPlugins(forum, {
                 core: {},
                 plugins: {
                     alpha: cfg
                 }
+            }).then(() => {
+                forum.addPlugin.calledWith(plugin, cfg).should.be.true;
             });
-            forum.addPlugin.calledWith(plugin, cfg).should.be.true;
+        });
+        it('should reject when forum.addPlugin rejects', () => {
+            const cfg = Math.random();
+            const plugin = Math.random();
+            testModule.relativeRequire.returns(plugin);
+            forum.addPlugin.rejects('bad');
+            return testModule.loadPlugins(forum, {
+                core: {},
+                plugins: {
+                    alpha: cfg
+                }
+            }).should.be.rejected;
+        });
+        it('should log error when forum.addPlugin rejects', () => {
+            const cfg = Math.random();
+            const plugin = Math.random();
+            testModule.relativeRequire.returns(plugin);
+            forum.addPlugin.rejects('bad');
+            return testModule.loadPlugins(forum, {
+                core: {},
+                plugins: {
+                    alpha: cfg
+                }
+            }).catch(() => {
+                testModule.error.calledWith('Plugin alpha failed to load with error: Error: bad').should.be.true;
+            });
+        });
+
+        it('should reject with error from forum.addPlugin when rejecting', () => {
+            const cfg = Math.random();
+            const plugin = Math.random();
+            testModule.relativeRequire.returns(plugin);
+            const error = new Error('boogy boo!');
+            forum.addPlugin.rejects(error);
+            return testModule.loadPlugins(forum, {
+                core: {},
+                plugins: {
+                    alpha: cfg
+                }
+            }).should.be.rejectedWith(error);
         });
     });
     describe('activateConfig()', () => {
@@ -127,7 +172,7 @@ describe('lib/app', () => {
             sandbox = sinon.sandbox.create();
             sandbox.stub(testModule, 'relativeRequire');
             testModule.relativeRequire.returns(DummyForum);
-            sandbox.stub(testModule, 'loadPlugins');
+            sandbox.stub(testModule, 'loadPlugins').resolves();
             sandbox.stub(testModule, 'log');
             sandbox.stub(commands, 'bindCommands');
             basicConfig = {
@@ -178,6 +223,10 @@ describe('lib/app', () => {
             return testModule.activateConfig(basicConfig).then(() => {
                 instance.activate.called.should.be.true;
             });
+        });
+        it('should reject when exports.loadPlugins rejects', () => {
+            testModule.loadPlugins.rejects('bad');
+            return testModule.activateConfig(basicConfig).should.be.rejected;
         });
         it('should reject when insatnce.login rejects', () => {
             DummyForum.login.rejects('bad');
