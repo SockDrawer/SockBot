@@ -1,15 +1,11 @@
-[![Build Status](https://travis-ci.org/SockDrawer/SockBot.svg?branch=master)](https://travis-ci.org/SockDrawer/SockBot)
-[![Coverage Status](https://coveralls.io/repos/SockDrawer/SockBot/badge.svg?branch=master)](https://coveralls.io/r/SockDrawer/SockBot?branch=master)
-[![Docs Status](https://readthedocs.org/projects/sockbot/badge/?version=latest)](http://sockbot.readthedocs.org/)
-
 [![Code Climate](https://codeclimate.com/github/SockDrawer/SockBot/badges/gpa.svg)](https://codeclimate.com/github/SockDrawer/SockBot)
 [![Test Coverage](https://codeclimate.com/github/SockDrawer/SockBot/badges/coverage.svg)](https://codeclimate.com/github/SockDrawer/SockBot/coverage)
 [![Issue Count](https://codeclimate.com/github/SockDrawer/SockBot/badges/issue_count.svg)](https://codeclimate.com/github/SockDrawer/SockBot)
-
+[![Build Status](https://travis-ci.org/SockDrawer/SockBot.svg?branch=master)](https://travis-ci.org/SockDrawer/SockBot)
+[![Docs Status](https://readthedocs.org/projects/sockbot/badge/?version=latest)](http://sockbot.readthedocs.org/) <br/>
 [![Dependency Status](https://david-dm.org/SockDrawer/SockBot/master.svg)](https://david-dm.org/SockDrawer/SockBot/master)
 [![devDependency Status](https://david-dm.org/SockDrawer/SockBot/master/dev-status.svg)](https://david-dm.org/SockDrawer/SockBot/master#info=devDependencies)
-[![optionalDependency Status](https://david-dm.org/SockDrawer/SockBot/master/optional-status.svg)](https://david-dm.org/SockDrawer/SockBot/master#info=optionalDependencies)
-
+[![optionalDependency Status](https://david-dm.org/SockDrawer/SockBot/master/optional-status.svg)](https://david-dm.org/SockDrawer/SockBot/master#info=optionalDependencies) <br/>
 [![Stories in Ready](https://badge.waffle.io/sockdrawer/sockbot.png?label=ready&title=Ready)](https://waffle.io/sockdrawer/sockbot)
 [![Stories in Progress](https://badge.waffle.io/sockdrawer/sockbot.png?label=in%20progress&title=In%20Progress)](https://waffle.io/sockdrawer/sockbot)
 
