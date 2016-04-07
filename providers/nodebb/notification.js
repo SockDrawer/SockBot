@@ -16,6 +16,9 @@ const utils = require('../../lib/utils');
  * @returns {Notification} A Notification class bound to the provided `forum` instance
  */
 exports.bindNotification = function bindNotification(forum) {
+
+    const mentionTester = new RegExp(`(^|\\s)@${forum.username}(\\s|$)`, 'i');
+    
     /**
      * Notification types enum
      *
@@ -35,18 +38,23 @@ exports.bindNotification = function bindNotification(forum) {
          * This constructor is intended to be private use only, if you need to construct a notification from payload
          * data use `Notification.parse()` instead
          *
-         * @private
+         * @public
          * @class
          *
          * @param {*} payload Payload to construct the Notification object out of
          */
         constructor(payload) {
             payload = utils.parseJSON(payload);
+            const body = string(payload.bodyLong || '').unescapeHTML().s;
             let type = 'notification';
             if (/^\[\[notifications:user_posted_to/i.test(payload.bodyShort)) {
                 type = 'reply';
             } else if (/^\[\[mentions:user_mentioned_you_in/i.test(payload.bodyShort)) {
-                type = 'mention';
+                if (mentionTester.test(body)) {
+                    type = 'mention';
+                } else {
+                    type = 'group_mention';
+                }
             }
 
             const subtype = (/^\[\[\w+:(\w+)/.exec(payload.bodyShort) || [])[1] || '';
@@ -55,7 +63,7 @@ exports.bindNotification = function bindNotification(forum) {
                 type: type,
                 subtype: subtype,
                 label: payload.bodyShort,
-                body: string(payload.bodyLong || '').unescapeHTML().s,
+                body: body,
                 id: payload.nid,
                 postId: payload.pid,
                 topicId: payload.tid,

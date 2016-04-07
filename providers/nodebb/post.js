@@ -22,7 +22,7 @@ exports.bindPost = function bindPost(forum) {
          * This constructor is intended to be private use only, if you need to construct a post from payload data use
          * `User.parse()` instead
          *
-         * @private
+         * @public
          * @class
          *
          * @param {*} payload Payload to construct the Post object out of

@@ -285,7 +285,9 @@ describe('providers/nodebb', () => {
             sandbox = sinon.sandbox.create();
             sandbox.stub(forum, '_verifyCookies');
             sandbox.stub(forum, '_getConfig').resolves({});
-            sandbox.stub(request, 'post').yields(null, null, '""');
+            sandbox.stub(request, 'post').yields(null, {
+                statusCode: 200
+            }, '""');
         });
         afterEach(() => sandbox.restore());
         it('should retrieve config via _getConfig', () => {
@@ -358,6 +360,12 @@ describe('providers/nodebb', () => {
         });
         it('should reject when request.post fails', () => {
             request.post.yields('bad');
+            return forum.login().should.be.rejected;
+        });
+        it('should reject when request.post yields 4xx status code', () => {
+            request.post.yields(null, {
+                statusCode: 403
+            }, 'bad');
             return forum.login().should.be.rejected;
         });
     });

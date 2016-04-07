@@ -190,10 +190,14 @@ class Forum extends EventEmitter {
                         remember: 'off',
                         returnTo: this.url
                     }
-                }, (loginError) => {
+                }, (loginError, response, reason) => {
                     if (loginError) {
                         debug(`Login failed for reason: ${loginError}`);
                         return reject(loginError);
+                    }
+                    if (response.statusCode >= 400) {
+                        debug(`Login failed for reason: ${reason}`);
+                        return reject(reason);
                     }
                     debug('complete post login data');
                     return resolve();
