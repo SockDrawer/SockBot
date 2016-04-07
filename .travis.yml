@@ -10,7 +10,6 @@ before_script:
 - git config credential.helper "store --file=.git/credentials"
 - echo "https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@github.com" > .git/credentials
 script:
-- npm run lint
 - npm test
 after_script:
 - npm run buildDocs && npm run pushDocs

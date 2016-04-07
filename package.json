@@ -47,7 +47,9 @@
   "scripts": {
     "start": "node lib/app.js",
     "lint": "eslint .",
-    "pretest": "istanbul cover node_modules/mocha/bin/_mocha --print both -x 'external/**' -x 'build/**' --include-all-sources -- --recursive -R spec",
+    "preistanbulspec": "npm run lint",
+    "istanbulspec": "istanbul cover node_modules/mocha/bin/_mocha --print both -x 'external/**' -x 'build/**' --include-all-sources -- --recursive -R spec",
+    "pretest": "npm run istanbulspec",
     "test": "istanbul check-coverage coverage/coverage.json",
     "istanbul": "istanbul cover node_modules/mocha/bin/_mocha --print both -x 'external/**' -x 'build/**' --include-all-sources -- --recursive -R dot",
     "mocha": "mocha --recursive -R dot",
