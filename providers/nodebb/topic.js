@@ -21,7 +21,7 @@ exports.bindTopic = function bindTopic(forum) {
          * This constructor is intended for private use only, if you need top construct a topic from payload data use
          * `Topic.parse()` instead.
          *
-         * @private
+         * @public
          * @class
          *
          * @param {*} payload Payload to construct the User object out of

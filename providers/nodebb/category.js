@@ -45,7 +45,7 @@ exports.bindCategory = function bindCategory(forum) {
          * This constructor is intended for private use only, if you need top construct a category from payload data use
          * `Category.parse()` instead.
          *
-         * @private
+         * @public
          * @class
          *
          * @param {*} payload Payload to construct the Category object out of

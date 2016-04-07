@@ -38,7 +38,7 @@ exports.bindNotification = function bindNotification(forum) {
          * This constructor is intended to be private use only, if you need to construct a notification from payload
          * data use `Notification.parse()` instead
          *
-         * @private
+         * @public
          * @class
          *
          * @param {*} payload Payload to construct the Notification object out of
