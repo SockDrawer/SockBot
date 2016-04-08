@@ -414,24 +414,41 @@ describe('lib/app', () => {
         });
     });
     describe('getUserAgent()', () => {
-        const originalName = packageInfo.name,
-            originalVersion = packageInfo.version;
-        let name = null,
-            version = null;
+        let username = null,
+            owner = null,
+            ua = null;
         beforeEach(() => {
-            name = `name${Math.random()}`;
-            packageInfo.name = name;
-            version = `1.0.0-TEST${Math.random()}`;
-            packageInfo.version = version;
+            username = `username${Math.random()}`;
+            owner = `owner${Math.random()}`;
+            ua = testModule.getUserAgent({
+                core: {
+                    username: username,
+                    owner: owner
+                }
+            });
         });
-        afterEach(() => {
-            packageInfo.name = originalName;
-            packageInfo.version = originalVersion;
-        });
-        it('should retrun a string', () => {
+        it('should return a string', () => {
             testModule.getUserAgent({
                 core: {}
             }).should.be.a('string');
+        });
+        it('should startWith package name/version', () => {
+            ua.indexOf(`${packageInfo.name}/${packageInfo.version}`).should.equal(0);
+        });
+        it('should contain OS platform/architecture', () => {
+            ua.indexOf(`${process.platform} ${process.arch}`).should.be.greaterThan(0);
+        });
+        it('should contain nodejs version', () => {
+            ua.indexOf(`nodejs v${process.versions.node}`).should.be.greaterThan(0);
+        });
+        it('should contain v8 version', () => {
+            ua.indexOf(`v8 v${process.versions.v8}`).should.be.greaterThan(0);
+        });
+        it('should contain username info', () => {
+            ua.indexOf(`user:${username}`).should.be.greaterThan(0);
+        });
+        it('should contain owner information', () => {
+            ua.indexOf(`owner:${owner}`).should.be.greaterThan(0);
         });
     });
 });
