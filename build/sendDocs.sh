@@ -1,10 +1,12 @@
 #!/bin/bash
 
-if [[ "$TRAVIS_PULL_REQUEST" -eq "true" ]]; then
+if [[ "$TRAVIS_PULL_REQUEST" = "true" ]]; then
+    echo "$TRAVIS_PULL_REQUEST: Not pushing docs for pull request"
     exit 0; # nothing to do here, it's a PR
 fi
 
 if [[ "$TRAVIS_JOB_NUMBER" != *.1 ]]; then
+    echo "$TRAVIS_JOB_NUMBER: Not Primary Job, Not pushing docs"
     exit 0; # Nothing to see here folks!
 fi
 
