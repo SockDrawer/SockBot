@@ -32,7 +32,7 @@ class Forum extends EventEmitter {
      * @class
      *
      * @param {object} config Bot configuration data
-     * @param {string} useragent Useragentto use for all requests 
+     * @param {string} useragent Useragentto use for all requests
      */
     constructor(config, useragent) {
         super();
