@@ -10,6 +10,7 @@ const sinon = require('sinon');
 require('sinon-as-promised');
 
 const testModule = require('../../lib/app'),
+    packageInfo = require('../../package.json'),
     config = require('../../lib/config'),
     commands = require('../../lib/commands'),
     utils = require('../../lib/utils');
@@ -160,17 +161,19 @@ describe('lib/app', () => {
             instance = null,
             basicConfig = null;
         class DummyForum {
-            constructor(cfg) {
+            constructor(cfg, ua) {
                 this.login = DummyForum.login;
                 this.activate = DummyForum.activate;
                 this.on = sinon.stub();
                 this.config = cfg;
+                this.ua = ua;
                 instance = this; //eslint-disable-line consistent-this
             }
         }
         beforeEach(() => {
             sandbox = sinon.sandbox.create();
             sandbox.stub(testModule, 'relativeRequire');
+            sandbox.stub(testModule, 'getUserAgent');
             testModule.relativeRequire.returns(DummyForum);
             sandbox.stub(testModule, 'loadPlugins').resolves();
             sandbox.stub(testModule, 'log');
@@ -200,6 +203,27 @@ describe('lib/app', () => {
         it('should construct provider instance with configuration information', () => {
             return testModule.activateConfig(basicConfig).then(() => {
                 instance.config.should.equal(basicConfig);
+            });
+        });
+        it('should get useragent information via testModule.getUserAgent', () => {
+            const expected = `a${Math.random()}b`;
+            testModule.getUserAgent.returns(expected);
+            return testModule.activateConfig(basicConfig).then(() => {
+                testModule.getUserAgent.called.should.be.true;
+            });
+        });
+        it('should call testModule.getUserAgent with configuration information', () => {
+            const cfg = JSON.parse(JSON.stringify(basicConfig));
+            cfg.estTag = Math.random();
+            return testModule.activateConfig(cfg).then(() => {
+                testModule.getUserAgent.calledWith(cfg).should.be.true;
+            });
+        });
+        it('should construct provider instance with useragent information', () => {
+            const expected = `a${Math.random()}b`;
+            testModule.getUserAgent.returns(expected);
+            return testModule.activateConfig(basicConfig).then(() => {
+                instance.ua.should.equal(expected);
             });
         });
         it('should bind commands to instance', () => {
@@ -388,5 +412,13 @@ describe('lib/app', () => {
             testModule.error();
             console.error.calledWith(message).should.be.true; //eslint-disable-line no-console
         });
+    });
+    describe('getUserAgent()', () => {
+        const name = packageInfo.name,
+            version = packageInfo.version;
+        afterEach(() => {
+            packageInfo.name = name;
+            packageInfo.version = version;
+        })
     });
 });

@@ -32,11 +32,13 @@ class Forum extends EventEmitter {
      * @class
      *
      * @param {object} config Bot configuration data
+     * @param {string} useragent Useragentto use for all requests 
      */
-    constructor(config) {
+    constructor(config, useragent) {
         super();
         utils.mapSet(this, {
-            config: config
+            config: config,
+            useragent: useragent
         });
         this.Post = postModule.bindPost(this);
         this.Topic = topicModule.bindTopic(this);
@@ -55,6 +57,17 @@ class Forum extends EventEmitter {
      */
     get config() {
         return JSON.parse(JSON.stringify(utils.mapGet(this, 'config')));
+    }
+
+    /**
+     * Useragent used by the instance
+     *
+     * @public
+     *
+     * @type {string}
+     */
+    get useragent() {
+        return utils.mapGet(this, 'useragent');
     }
 
     /**
@@ -147,7 +160,10 @@ class Forum extends EventEmitter {
             debug('begin configuration fetch for CSRF token');
             request.get({
                 url: `${this.url}/api/config`,
-                jar: this._cookiejar
+                jar: this._cookiejar,
+                headers: {
+                    'User-Agent': this.useragent
+                }
             }, (err, _, data) => {
                 if (err) {
                     debug('failed configuration fetch for CSRF token');
@@ -182,6 +198,7 @@ class Forum extends EventEmitter {
                     url: `${this.url}/login`,
                     jar: this._cookiejar,
                     headers: {
+                        'User-Agent': this.useragent,
                         'x-csrf-token': config.csrf_token
                     },
                     form: {
@@ -225,6 +242,7 @@ class Forum extends EventEmitter {
             const cookies = this._cookiejar.getCookieString(this.url);
             this.socket = Forum.io(this.url, {
                 extraHeaders: {
+                    'User-Agent': this.useragent,
                     'Cookie': cookies
                 }
             });

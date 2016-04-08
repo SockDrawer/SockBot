@@ -39,6 +39,11 @@ describe('providers/nodebb', () => {
             const forum = new Forum(expected);
             utils.mapGet(forum).config.should.equal(expected);
         });
+        it('should store useragent in utils.storage', () => {
+            const expected = Math.random();
+            const forum = new Forum({}, expected);
+            utils.mapGet(forum).useragent.should.equal(expected);
+        });
         it('should set plugin store to empty array', () => {
             const forum = new Forum({});
             forum._plugins.should.eql([]);
@@ -110,6 +115,21 @@ describe('providers/nodebb', () => {
                 expected[`a${Math.random()}b`] = `c${Math.random()}d`;
                 data.config = expected;
                 forum.config.should.not.equal(expected);
+            });
+        });
+        describe('get useragent', () => {
+            let forum = null,
+                data = null;
+            beforeEach(() => {
+                forum = new Forum({
+                    core: {}
+                }, '');
+                data = utils.mapGet(forum);
+            });
+            it('should retrieve stored useragent', () => {
+                const expected = `c${Math.random()}d`;
+                data.useragent = expected;
+                forum.useragent.should.eql(expected);
             });
         });
         describe('get url', () => {
@@ -235,16 +255,44 @@ describe('providers/nodebb', () => {
                 forum._verifyCookies.called.should.be.true;
             });
         });
-        it('should request config', () => {
+        it('should request config url', () => {
+            const base = `a${Math.random()}b`;
+            const url = `${base}/api/config`;
+            data.config.core.forum = base;
+            return forum._getConfig().then(() => {
+                request.get.firstCall.args[0].url.should.equal(url);
+            });
+        });
+        it('should request config with cookiejar', () => {
+            const jar = `a${Math.random()}b`;
+            forum._cookiejar = jar;
+            return forum._getConfig().then(() => {
+                request.get.firstCall.args[0].jar.should.equal(jar);
+            });
+        });
+        it('should request config with useragent', () => {
+            const agent = `a${Math.random()}b`;
+            data.useragent = agent;
+            return forum._getConfig().then(() => {
+                request.get.firstCall.args[0].headers.should.eql({
+                    'User-Agent': agent
+                });
+            });
+        });
+        it('should request config as expected', () => {
             const base = `a${Math.random()}b`;
             const url = `${base}/api/config`;
             const cookiejar = Math.random();
             data.config.core.forum = base;
+            data.useragent = 'a';
             forum._cookiejar = cookiejar;
             return forum._getConfig().then(() => {
                 request.get.calledWith({
                     url: url,
-                    jar: cookiejar
+                    jar: cookiejar,
+                    headers: {
+                        'User-Agent': 'a'
+                    }
                 }).should.be.true;
             });
         });
@@ -329,7 +377,28 @@ describe('providers/nodebb', () => {
             });
             return forum.login().then(() => {
                 const posted = request.post.firstCall.args[0];
+                posted.headers['x-csrf-token'].should.equal(expected);
+            });
+        });
+        it('should use useragent header', () => {
+            const expected = `a${Math.random()}b`;
+            data.useragent = expected;
+            return forum.login().then(() => {
+                const posted = request.post.firstCall.args[0];
+                posted.headers['User-Agent'].should.equal(expected);
+            });
+        });
+        it('should use expected headers', () => {
+            const expected = `a${Math.random()}b`;
+            const agent = `c${Math.random()}d`;
+            data.useragent = agent;
+            forum._getConfig.resolves({
+                'csrf_token': expected
+            });
+            return forum.login().then(() => {
+                const posted = request.post.firstCall.args[0];
                 posted.headers.should.eql({
+                    'User-Agent': agent,
                     'x-csrf-token': expected
                 });
             });
@@ -413,13 +482,30 @@ describe('providers/nodebb', () => {
                 });
             });
             it('should pass cookies to websocket for forum', () => {
+                const cookies = `cookies${Math.random()}`;
+                forum._cookiejar.getCookieString.returns(cookies);
+                return forum.connectWebsocket().then(() => {
+                    Forum.io.firstCall.args[1].extraHeaders.Cookie.should.equal(cookies);
+                });
+            });
+            it('should pass useragent to websocket for forum', () => {
+                const agent = `a${Math.random()}b`;
+                data.useragent = agent;
+                return forum.connectWebsocket().then(() => {
+                    Forum.io.firstCall.args[1].extraHeaders['User-Agent'].should.equal(agent);
+                });
+            });
+            it('should pass headers to websocket for forum', () => {
                 const url = `a${Math.random()}b`;
+                const agent = `c${Math.random()}d`;
                 const cookies = `cookies${Math.random()}`;
                 forum._cookiejar.getCookieString.returns(cookies);
                 data.config.core.forum = url;
+                data.useragent = agent;
                 return forum.connectWebsocket().then(() => {
                     Forum.io.calledWith(url, {
                         extraHeaders: {
+                            'User-Agent': agent,
                             'Cookie': cookies
                         }
                     }).should.be.true;
