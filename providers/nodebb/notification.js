@@ -18,7 +18,7 @@ const utils = require('../../lib/utils');
 exports.bindNotification = function bindNotification(forum) {
 
     const mentionTester = new RegExp(`(^|\\s)@${forum.username}(\\s|$)`, 'i');
-    
+
     /**
      * Notification types enum
      *
@@ -31,6 +31,13 @@ exports.bindNotification = function bindNotification(forum) {
         mention: 'mention'
     };
 
+    /**
+     * Notification Class
+     *
+     * Represents a forum notification
+     *
+     * @public
+     */
     class Notification {
         /**
          * Construct a Notification object from payload

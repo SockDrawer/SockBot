@@ -14,6 +14,14 @@ const utils = require('../../lib/utils');
  * @returns {User} A Topic class bound to the provided `forum` instance
  */
 exports.bindTopic = function bindTopic(forum) {
+    /**
+     * Topic Class
+     *
+     * Represends a forum topic
+     *
+     * @public
+     *
+     */
     class Topic {
         /**
          * Construct a topic object from a provided payload.
@@ -21,7 +29,7 @@ exports.bindTopic = function bindTopic(forum) {
          * This constructor is intended for private use only, if you need top construct a topic from payload data use
          * `Topic.parse()` instead.
          *
-         * @public
+         * @private
          * @class
          *
          * @param {*} payload Payload to construct the User object out of
