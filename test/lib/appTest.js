@@ -414,11 +414,24 @@ describe('lib/app', () => {
         });
     });
     describe('getUserAgent()', () => {
-        const name = packageInfo.name,
-            version = packageInfo.version;
-        afterEach(() => {
+        const originalName = packageInfo.name,
+            originalVersion = packageInfo.version;
+        let name = null,
+            version = null;
+        beforeEach(() => {
+            name = `name${Math.random()}`;
             packageInfo.name = name;
+            version = `1.0.0-TEST${Math.random()}`;
             packageInfo.version = version;
-        })
+        });
+        afterEach(() => {
+            packageInfo.name = originalName;
+            packageInfo.version = originalVersion;
+        });
+        it('should retrun a string', () => {
+            testModule.getUserAgent({
+                core: {}
+            }).should.be.a('string');
+        });
     });
 });
