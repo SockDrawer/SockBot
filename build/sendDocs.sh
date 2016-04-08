@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ "$TRAVIS_PULL_REQUEST" -eq "true" ]]; then
-    echo "Not pushing docs for pull request"
+    echo "$TRAVIS_PULL_REQUEST: Not pushing docs for pull request"
     exit 0; # nothing to do here, it's a PR
 fi
 
