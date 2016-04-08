@@ -57,7 +57,7 @@ Create a forum connector instance
 | Param | Type | Description |
 | --- | --- | --- |
 | config | <code>object</code> | Bot configuration data |
-| useragent | <code>string</code> | Useragentto use for all requests |
+| useragent | <code>string</code> | Useragent to use for all requests |
 
 <a name="sockbot.providers.module_nodebb..Forum+config"></a>
 
