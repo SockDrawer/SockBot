@@ -1,6 +1,9 @@
 ## Functions
 
 <dl>
+<dt><a href="#getUserAgent">getUserAgent(cfg)</a> ⇒ <code>strung</code></dt>
+<dd><p>Construct a useragent for sockbot to use</p>
+</dd>
 <dt><a href="#_buildMessage">_buildMessage(args)</a> ⇒ <code>string</code></dt>
 <dd><p>Construct a stringified message to log</p>
 </dd>
@@ -20,6 +23,18 @@
 <dd><p>Activate a loaded configuration.</p>
 </dd>
 </dl>
+
+<a name="getUserAgent"></a>
+
+## getUserAgent(cfg) ⇒ <code>strung</code>
+Construct a useragent for sockbot to use
+
+**Kind**: global function  
+**Returns**: <code>strung</code> - User-Agent to use for a forum instance  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| cfg | <code>object</code> | Instance Configuration to construct User Agent for |
 
 <a name="_buildMessage"></a>
 
