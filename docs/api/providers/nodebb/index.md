@@ -8,8 +8,9 @@ NodeBB provider module
 
 * [nodebb](#sockbot.providers.module_nodebb)
     * [~Forum](#sockbot.providers.module_nodebb..Forum)
-        * [new Forum(config)](#new_sockbot.providers.module_nodebb..Forum_new)
+        * [new Forum(config, useragent)](#new_sockbot.providers.module_nodebb..Forum_new)
         * [.config](#sockbot.providers.module_nodebb..Forum+config) : <code>object</code>
+        * [.useragent](#sockbot.providers.module_nodebb..Forum+useragent) : <code>string</code>
         * [.url](#sockbot.providers.module_nodebb..Forum+url) : <code>string</code>
         * [.username](#sockbot.providers.module_nodebb..Forum+username)
         * [.user](#sockbot.providers.module_nodebb..Forum+user) : <code>User</code>
@@ -32,8 +33,9 @@ Connects to a NodeBB foru
 **Kind**: inner class of <code>[nodebb](#sockbot.providers.module_nodebb)</code>  
 
 * [~Forum](#sockbot.providers.module_nodebb..Forum)
-    * [new Forum(config)](#new_sockbot.providers.module_nodebb..Forum_new)
+    * [new Forum(config, useragent)](#new_sockbot.providers.module_nodebb..Forum_new)
     * [.config](#sockbot.providers.module_nodebb..Forum+config) : <code>object</code>
+    * [.useragent](#sockbot.providers.module_nodebb..Forum+useragent) : <code>string</code>
     * [.url](#sockbot.providers.module_nodebb..Forum+url) : <code>string</code>
     * [.username](#sockbot.providers.module_nodebb..Forum+username)
     * [.user](#sockbot.providers.module_nodebb..Forum+user) : <code>User</code>
@@ -48,18 +50,26 @@ Connects to a NodeBB foru
 
 <a name="new_sockbot.providers.module_nodebb..Forum_new"></a>
 
-#### new Forum(config)
+#### new Forum(config, useragent)
 Create a forum connector instance
 
 
 | Param | Type | Description |
 | --- | --- | --- |
 | config | <code>object</code> | Bot configuration data |
+| useragent | <code>string</code> | Useragentto use for all requests |
 
 <a name="sockbot.providers.module_nodebb..Forum+config"></a>
 
 #### forum.config : <code>object</code>
 Bot instance configuration
+
+**Kind**: instance property of <code>[Forum](#sockbot.providers.module_nodebb..Forum)</code>  
+**Access:** public  
+<a name="sockbot.providers.module_nodebb..Forum+useragent"></a>
+
+#### forum.useragent : <code>string</code>
+Useragent used by the instance
 
 **Kind**: instance property of <code>[Forum](#sockbot.providers.module_nodebb..Forum)</code>  
 **Access:** public  
