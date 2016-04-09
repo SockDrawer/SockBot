@@ -237,9 +237,9 @@ describe('lib/config', () => {
                 commands: [{
                     replyText: 'foo'
                 }],
-                notification: {
-                    topicId: 45,
-                    postId: -7
+                ids: {
+                    topic: 45,
+                    post: -7
                 }
             };
             return onComplete(command)
@@ -254,9 +254,9 @@ describe('lib/config', () => {
                 }, {
                     replyText: 'bar'
                 }],
-                notification: {
-                    topicId: 45,
-                    postId: -7
+                ids: {
+                    topic: 45,
+                    post: -7
                 }
             };
             return onComplete(command)
@@ -271,9 +271,9 @@ describe('lib/config', () => {
                 }, {
                     replyText: '\tbar\n'
                 }],
-                notification: {
-                    topicId: 45,
-                    postId: -7
+                ids: {
+                    topic: 45,
+                    post: -7
                 }
             };
             return onComplete(command)
@@ -294,9 +294,9 @@ describe('lib/config', () => {
                 }, {
                     replyText: ' '
                 }],
-                notification: {
-                    topicId: 45,
-                    postId: -7
+                ids: {
+                    topic: 45,
+                    post: -7
                 }
             };
             return onComplete(command)
@@ -320,9 +320,9 @@ describe('lib/config', () => {
         });
         it('should post error message', () => {
             return onError('a florgle wozzer was grutzed', {
-                notification: {
-                    topicId: 3.14,
-                    postId: 'hi'
+                ids: {
+                    topic: 3.14,
+                    post: 'hi'
                 }
             }).then(() => {
                 forum.Post.reply.calledWith(3.14, 'hi', 'An unexpected error `a florgle wozzer was grutzed` ' +
@@ -676,10 +676,10 @@ describe('lib/config', () => {
                 const command = new Commands({}, '');
                 utils.mapGet(command).should.be.ok;
             });
-            it('should store notification parameter', () => {
+            it('should store ids parameter', () => {
                 const expected = `${Math.random()}${Math.random()}`;
                 const command = new Commands(expected, '');
-                utils.mapGet(command).notification.should.equal(expected);
+                utils.mapGet(command).ids.should.equal(expected);
             });
             it('should store postbody parameter', () => {
                 const expected = `${Math.random()}${Math.random()}`;
@@ -703,7 +703,7 @@ describe('lib/config', () => {
                 command = new Commands({}, '');
                 data = utils.mapGet(command);
             });
-            ['notification', 'commands'].forEach((property) => {
+            ['ids', 'commands'].forEach((property) => {
                 it(`should allow get of ${property} from storage`, () => {
                     const expected = Math.random();
                     data[property] = expected;
@@ -718,14 +718,13 @@ describe('lib/config', () => {
         });
         describe('cached getters', () => {
             [
-                ['getPost', 'Post', 'post', 'postId'],
-                ['getTopic', 'Topic', 'topic', 'topicId'],
-                ['getUser', 'User', 'user', 'userId']
+                ['getPost', 'Post', 'post'],
+                ['getTopic', 'Topic', 'topic'],
+                ['getUser', 'User', 'user']
             ].forEach((config) => {
                 const method = config[0],
                     object = config[1],
-                    store = config[2],
-                    param = config[3];
+                    store = config[2];
                 let command, spy, data, notification;
                 beforeEach(() => {
                     notification = {};
@@ -744,9 +743,9 @@ describe('lib/config', () => {
                         spy.called.should.be.false;
                     });
                 });
-                it(`should request ${store} by notification ${param}`, () => {
+                it(`should request ${store} by notification ${store}`, () => {
                     const id = Math.random();
-                    notification[param] = id;
+                    notification[store] = id;
                     expect(data[store]).to.be.not.ok;
                     return command[method]().then(() => {
                         spy.calledWith(id).should.be.true;
@@ -790,8 +789,8 @@ describe('lib/config', () => {
                     reply: sinon.stub().resolves()
                 };
                 const expected = 'foo';
-                data.notification.postId = 1;
-                data.notification.topicId = 50;
+                data.ids.post = 1;
+                data.ids.topic = 50;
                 data.commands = [{
                     execute: sinon.stub().resolves(),
                     replyText: expected
@@ -806,8 +805,8 @@ describe('lib/config', () => {
                 };
                 const spy = sinon.stub().resolves();
                 const rejector = sinon.stub().rejects('bad');
-                data.notification.postId = 1;
-                data.notification.topicId = 50;
+                data.ids.post = 1;
+                data.ids.topic = 50;
                 data.commands = [{
                     execute: spy
                 }, {
@@ -827,8 +826,8 @@ describe('lib/config', () => {
                     reply: sinon.stub().rejects('badbad')
                 };
                 forum.emit = sinon.spy();
-                data.notification.postId = 1;
-                data.notification.topicId = 50;
+                data.ids.post = 1;
+                data.ids.topic = 50;
                 data.commands = [{
                     execute: sinon.stub().rejects('bad')
                 }];
@@ -839,11 +838,12 @@ describe('lib/config', () => {
         });
         describe('static get()', () => {
             it('should store notification in result', () => {
-                const notification = {
-                    getText: sinon.stub().resolves('<div>content</div>')
+                const ids = {
+                    a: 1,
+                    b: 'c'
                 };
-                return Commands.get(notification).then((command) => {
-                    command.notification.should.equal(notification);
+                return Commands.get(ids).then((command) => {
+                    command.ids.should.equal(ids);
                 });
             });
             it('should store text in result', () => {
