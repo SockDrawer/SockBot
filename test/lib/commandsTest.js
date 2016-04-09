@@ -838,14 +838,6 @@ describe('lib/config', () => {
             });
         });
         describe('static get()', () => {
-            it('should use notification.getText()', () => {
-                const notification = {
-                    getText: sinon.stub().resolves('<div>content</div>')
-                };
-                return Commands.get(notification).then(() => {
-                    notification.getText.called.should.be.true;
-                });
-            });
             it('should store notification in result', () => {
                 const notification = {
                     getText: sinon.stub().resolves('<div>content</div>')
@@ -854,11 +846,9 @@ describe('lib/config', () => {
                     command.notification.should.equal(notification);
                 });
             });
-            it('should store parsed text in result', () => {
-                const notification = {
-                    getText: sinon.stub().resolves('<div>content</div>')
-                };
-                return Commands.get(notification).then((command) => {
+            it('should store text in result', () => {
+                const notification = {};
+                return Commands.get(notification, '<div>content</div>').then((command) => {
                     utils.mapGet(command, 'postBody').should.equal('content');
                 });
             });

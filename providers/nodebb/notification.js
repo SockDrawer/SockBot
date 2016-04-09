@@ -374,7 +374,9 @@ exports.bindNotification = function bindNotification(forum) {
         debug(`Notification ${notification.id}: ${notification.label} received`);
         forum.emit(`notification:${notification.type}`, notification);
         forum.emit('notification', notification);
-        return forum.Commands.get(notification).then((command) => command.execute());
+        return notification.getText()
+            .then((postData) => forum.Commands.get(notification, postData))
+            .then((command) => command.execute());
     }
 
     return Notification;
