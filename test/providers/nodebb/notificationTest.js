@@ -592,7 +592,7 @@ describe('providers/nodebb/notification', () => {
                         user: user,
                         room: -1
                     });
-                    args[1].should.eql(text);;
+                    args[1].should.eql(text);
                     args.length.should.eql(2);
                 });
             });
