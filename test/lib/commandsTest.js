@@ -839,8 +839,8 @@ describe('lib/config', () => {
         describe('static get()', () => {
             it('should store notification in result', () => {
                 const ids = {
-                    a: 1,
-                    b: 'c'
+                    alpha: 1,
+                    beta: 'c'
                 };
                 return Commands.get(ids).then((command) => {
                     command.ids.should.equal(ids);
