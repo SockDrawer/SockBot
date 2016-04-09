@@ -541,8 +541,12 @@ describe('providers/nodebb/notification', () => {
         describe('internal notifyHandler()', () => {
             let sandbox = null,
                 notifier = null,
+                command = null,
                 notifyHandler = null;
             beforeEach(() => {
+                command = {
+                    execute: sinon.stub().resolves()
+                };
                 notifier = {
                     getText: sinon.stub().resolves()
                 };
@@ -553,7 +557,7 @@ describe('providers/nodebb/notification', () => {
                 };
                 forum.emit = sinon.spy();
                 forum.Commands = {
-                    get: sinon.stub().resolves()
+                    get: sinon.stub().resolves(command)
                 };
                 Notification.activate();
                 notifyHandler = forum.socket.on.firstCall.args[1];
@@ -561,19 +565,35 @@ describe('providers/nodebb/notification', () => {
             afterEach(() => sandbox.restore());
             it('should parse notification with `Notification.parse`', () => {
                 const expected = Math.random();
-                notifyHandler(expected);
-                Notification.parse.calledWith(expected).should.be.true;
+                return notifyHandler(expected).then(() => {
+                    Notification.parse.calledWith(expected).should.be.true;
+                });
             });
             it('should get text from notification with `notification.getText()`', () => {
                 const expected = Math.random();
-                notifyHandler(expected);
-                notifier.getText.called.should.be.true;
+                return notifyHandler(expected).then(() => {
+                    notifier.getText.called.should.be.true;
+                });
             });
             it('should parse commands with `forum.Commands.get`', () => {
-                const text = Math.random();
+                const text = Math.random(),
+                    post = Math.random(),
+                    topic = Math.random(),
+                    user = Math.random();
+                notifier.postId = post;
+                notifier.topicId = topic;
+                notifier.userId = user;
                 notifier.getText.resolves(text);
-                notifyHandler(7).then(() => {
-                    forum.Commands.get.calledWith(notifier, text).should.be.true;
+                return notifyHandler(7).then(() => {
+                    const args = forum.Commands.get.firstCall.args;
+                    args[0].should.eql({
+                        post: post,
+                        topic: topic,
+                        user: user,
+                        room: -1
+                    });
+                    args[1].should.eql(text);;
+                    args.length.should.eql(2);
                 });
             });
             it('should execute parsed commands', () => {
@@ -587,13 +607,15 @@ describe('providers/nodebb/notification', () => {
             });
             it('should emit specific notification event', () => {
                 notifier.type = `a${Math.random()}b`;
-                notifyHandler(5);
-                forum.emit.calledWith(`notification:${notifier.type}`, notifier).should.be.true;
+                return notifyHandler(5).then(() => {
+                    forum.emit.calledWith(`notification:${notifier.type}`, notifier).should.be.true;
+                });
             });
             it('should emit general notification event', () => {
                 notifier.type = `a${Math.random()}b`;
-                notifyHandler(5);
-                forum.emit.calledWith('notification', notifier).should.be.true;
+                return notifyHandler(5).then(() => {
+                    forum.emit.calledWith('notification', notifier).should.be.true;
+                });
             });
         });
     });
