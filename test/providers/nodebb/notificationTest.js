@@ -586,16 +586,14 @@ describe('providers/nodebb/notification', () => {
                 });
             });
             it('should emit specific notification event', () => {
-                notifier.type;
-                `a${Math.random()}b`;
+                notifier.type = `a${Math.random()}b`;
                 notifyHandler(5);
                 forum.emit.calledWith(`notification:${notifier.type}`, notifier).should.be.true;
             });
             it('should emit general notification event', () => {
-                notifier.type;
-                `a${Math.random()}b`;
+                notifier.type = `a${Math.random()}b`;
                 notifyHandler(5);
-                forum.emit.calledWith(`notification`, notifier).should.be.true;
+                forum.emit.calledWith('notification', notifier).should.be.true;
             });
         });
     });
