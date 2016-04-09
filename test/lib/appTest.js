@@ -451,4 +451,34 @@ describe('lib/app', () => {
             ua.indexOf(`owner:${owner}`).should.be.greaterThan(0);
         });
     });
+    describe('ponyError()', () => {
+        let sandbox = null;
+        beforeEach(() => {
+            sandbox = sinon.sandbox.create();
+            sandbox.stub(testModule, 'error');
+        });
+        afterEach(() => sandbox.restore());
+        it('should log error via exports.error', () => {
+            testModule.ponyError();
+            testModule.error.called.should.be.true;
+        });
+        it('should log error with prefix', () => {
+            const prefix = `a${Math.random()}b`;
+            testModule.ponyError(prefix);
+            const lines = testModule.error.firstCall.args[0].split('\n');
+            lines[lines.length - 1].should.startWith(`A-derp! ${prefix}`);
+        });
+        it('should log string error as message', () => {
+            const message = `a${Math.random()}b`;
+            testModule.ponyError(undefined, message);
+            const lines = testModule.error.firstCall.args[0].split('\n');
+            lines[lines.length - 1].should.endWith(message);
+        });
+        it('should log exception error as message', () => {
+            const message = `a${Math.random()}b`;
+            testModule.ponyError(undefined, new Error(message));
+            const lines = testModule.error.firstCall.args[0].split('\n');
+            lines[lines.length - 1].should.endWith(message);
+        });
+    });
 });
