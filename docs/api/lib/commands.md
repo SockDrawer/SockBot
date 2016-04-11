@@ -26,7 +26,7 @@ NodeBB provider module User class
             * [.getUser()](#sockbot.lib.module_commands..Command+getUser) ⇒ <code>Promise.&lt;User&gt;</code>
             * [.reply(content)](#sockbot.lib.module_commands..Command+reply)
         * [~Commands](#sockbot.lib.module_commands..Commands)
-            * [new Commands(ids, postBody)](#new_sockbot.lib.module_commands..Commands_new)
+            * [new Commands(ids, postBody, handler)](#new_sockbot.lib.module_commands..Commands_new)
             * _instance_
                 * [.ids](#sockbot.lib.module_commands..Commands+ids) : <code>Ids</code>
                 * [.commands](#sockbot.lib.module_commands..Commands+commands) : <code>Array.&lt;Command&gt;</code>
@@ -35,7 +35,7 @@ NodeBB provider module User class
                 * [.getUser()](#sockbot.lib.module_commands..Commands+getUser) ⇒ <code>Promise.&lt;User&gt;</code>
                 * [.execute()](#sockbot.lib.module_commands..Commands+execute) ⇒ <code>Promise.&lt;Commands&gt;</code>
             * _static_
-                * [.get(notification, postBody)](#sockbot.lib.module_commands..Commands.get) ⇒ <code>Promise.&lt;Commands&gt;</code>
+                * [.get(notification, postBody, handler)](#sockbot.lib.module_commands..Commands.get) ⇒ <code>Promise.&lt;Commands&gt;</code>
                 * [.add(command, helpText, handler)](#sockbot.lib.module_commands..Commands.add) ⇒ <code>Promise</code>
 
 <a name="sockbot.lib.module_commands.bindCommands"></a>
@@ -195,7 +195,7 @@ Commands class. Represents all commands for a Notification
 **Access:** public  
 
 * [~Commands](#sockbot.lib.module_commands..Commands)
-    * [new Commands(ids, postBody)](#new_sockbot.lib.module_commands..Commands_new)
+    * [new Commands(ids, postBody, handler)](#new_sockbot.lib.module_commands..Commands_new)
     * _instance_
         * [.ids](#sockbot.lib.module_commands..Commands+ids) : <code>Ids</code>
         * [.commands](#sockbot.lib.module_commands..Commands+commands) : <code>Array.&lt;Command&gt;</code>
@@ -204,12 +204,12 @@ Commands class. Represents all commands for a Notification
         * [.getUser()](#sockbot.lib.module_commands..Commands+getUser) ⇒ <code>Promise.&lt;User&gt;</code>
         * [.execute()](#sockbot.lib.module_commands..Commands+execute) ⇒ <code>Promise.&lt;Commands&gt;</code>
     * _static_
-        * [.get(notification, postBody)](#sockbot.lib.module_commands..Commands.get) ⇒ <code>Promise.&lt;Commands&gt;</code>
+        * [.get(notification, postBody, handler)](#sockbot.lib.module_commands..Commands.get) ⇒ <code>Promise.&lt;Commands&gt;</code>
         * [.add(command, helpText, handler)](#sockbot.lib.module_commands..Commands.add) ⇒ <code>Promise</code>
 
 <a name="new_sockbot.lib.module_commands..Commands_new"></a>
 
-#### new Commands(ids, postBody)
+#### new Commands(ids, postBody, handler)
 Construct a Commands object from notification
 
 
@@ -217,6 +217,7 @@ Construct a Commands object from notification
 | --- | --- | --- |
 | ids | <code>Ids</code> | Useful Ids |
 | postBody | <code>string</code> | Raw Content of post containing commands |
+| handler | <code>ReplyHandler</code> | Reply handler |
 
 <a name="sockbot.lib.module_commands..Commands+ids"></a>
 
@@ -266,7 +267,7 @@ Execute the commands this object contains
 **Access:** public  
 <a name="sockbot.lib.module_commands..Commands.get"></a>
 
-#### Commands.get(notification, postBody) ⇒ <code>Promise.&lt;Commands&gt;</code>
+#### Commands.get(notification, postBody, handler) ⇒ <code>Promise.&lt;Commands&gt;</code>
 Get Commands from a notification
 
 **Kind**: static method of <code>[Commands](#sockbot.lib.module_commands..Commands)</code>  
@@ -277,6 +278,7 @@ Get Commands from a notification
 | --- | --- | --- |
 | notification | <code>Notification</code> | Notification to get commands for |
 | postBody | <code>string</code> | Post Body to parse for commands |
+| handler | <code>ReplyHandler</code> | Reply function for commands |
 
 <a name="sockbot.lib.module_commands..Commands.add"></a>
 
