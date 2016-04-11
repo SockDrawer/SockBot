@@ -199,8 +199,9 @@ describe('lib/config', () => {
         });
     });
     describe('internals.onComplete()', () => {
-        let forum, onComplete;
+        let forum, onComplete, spy;
         beforeEach(() => {
+            spy = sinon.stub().resolves();
             forum = {
                 Post: {
                     reply: sinon.stub()
@@ -214,22 +215,24 @@ describe('lib/config', () => {
             const command = {
                 commands: [{
                     replyText: ''
-                }]
+                }],
+                _replyFn: spy
             };
             return onComplete(command)
                 .then(() => {
-                    forum.Post.reply.called.should.be.false;
+                    spy.called.should.be.false;
                 });
         });
         it('should not attempt to post on whitespace content', () => {
             const command = {
                 commands: [{
                     replyText: ' '
-                }]
+                }],
+                _replyFn: spy
             };
             return onComplete(command)
                 .then(() => {
-                    forum.Post.reply.called.should.be.false;
+                    spy.called.should.be.false;
                 });
         });
         it('should post with content', () => {
@@ -240,11 +243,12 @@ describe('lib/config', () => {
                 ids: {
                     topic: 45,
                     post: -7
-                }
+                },
+                _replyFn: spy
             };
             return onComplete(command)
                 .then(() => {
-                    forum.Post.reply.calledWith(45, -7, 'foo').should.be.true;
+                    spy.calledWith('foo').should.be.true;
                 });
         });
         it('should merge multiple command replies', () => {
@@ -257,11 +261,12 @@ describe('lib/config', () => {
                 ids: {
                     topic: 45,
                     post: -7
-                }
+                },
+                _replyFn: spy
             };
             return onComplete(command)
                 .then(() => {
-                    forum.Post.reply.calledWith(45, -7, 'foo\n\n---\n\nbar').should.be.true;
+                    spy.calledWith('foo\n\n---\n\nbar').should.be.true;
                 });
         });
         it('should merge preseve whitespace in command replies', () => {
@@ -274,11 +279,12 @@ describe('lib/config', () => {
                 ids: {
                     topic: 45,
                     post: -7
-                }
+                },
+                _replyFn: spy
             };
             return onComplete(command)
                 .then(() => {
-                    forum.Post.reply.calledWith(45, -7, '\nfoo \n\n---\n\n\tbar\n').should.be.true;
+                    spy.calledWith( '\nfoo \n\n---\n\n\tbar\n').should.be.true;
                 });
         });
         it('should ignore blank command replies', () => {
@@ -297,11 +303,12 @@ describe('lib/config', () => {
                 ids: {
                     topic: 45,
                     post: -7
-                }
+                },
+                _replyFn: spy
             };
             return onComplete(command)
                 .then(() => {
-                    forum.Post.reply.calledWith(45, -7, 'foo\n\n---\n\nbar').should.be.true;
+                    spy.calledWith('foo\n\n---\n\nbar').should.be.true;
                 });
         });
     });
@@ -703,7 +710,7 @@ describe('lib/config', () => {
                 command = new Commands({}, '');
                 data = utils.mapGet(command);
             });
-            ['ids', 'commands'].forEach((property) => {
+            ['ids', 'commands', '_replyFn'].forEach((property) => {
                 it(`should allow get of ${property} from storage`, () => {
                     const expected = Math.random();
                     data[property] = expected;
@@ -795,8 +802,9 @@ describe('lib/config', () => {
                     execute: sinon.stub().resolves(),
                     replyText: expected
                 }];
+                data._replyFn = sinon.stub().resolves();
                 return command.execute().then(() => {
-                    forum.Post.reply.calledWith(50, 1, expected).should.be.true;
+                    data._replyFn.calledWith(expected).should.be.true;
                 });
             });
             it('should execute onError when any command rejects', () => {

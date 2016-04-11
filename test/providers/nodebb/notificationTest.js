@@ -559,6 +559,9 @@ describe('providers/nodebb/notification', () => {
                 forum.Commands = {
                     get: sinon.stub().resolves(command)
                 };
+                forum.Post = {
+                    reply: sinon.stub().resolves()
+                };
                 Notification.activate();
                 notifyHandler = forum.socket.on.firstCall.args[1];
             });
@@ -593,7 +596,26 @@ describe('providers/nodebb/notification', () => {
                         room: -1
                     });
                     args[1].should.eql(text);
-                    args.length.should.eql(2);
+                    args[2].should.be.a('function');
+                    args.length.should.eql(3);
+                });
+            });
+            it('should provide valid ReplyHandler to `forum.Commands.get`', () => {
+                const text = Math.random(),
+                    post = Math.random(),
+                    topic = Math.random(),
+                    user = Math.random();
+                notifier.postId = post;
+                notifier.topicId = topic;
+                notifier.userId = user;
+                notifier.getText.resolves(text);
+                return notifyHandler(7).then(() => {
+                    const args = forum.Commands.get.firstCall.args;
+                    const handler = args[2];
+                    const content = `a${Math.random()}g`;
+                    return handler(content).then(() => {
+                        forum.Post.reply.calledWith(topic, post, content).should.be.true;
+                    });
                 });
             });
             it('should execute parsed commands', () => {
