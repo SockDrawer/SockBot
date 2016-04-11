@@ -1,7 +1,7 @@
 ## Functions
 
 <dl>
-<dt><a href="#getUserAgent">getUserAgent(cfg)</a> ⇒ <code>strung</code></dt>
+<dt><a href="#getUserAgent">getUserAgent(cfg)</a> ⇒ <code>string</code></dt>
 <dd><p>Construct a useragent for sockbot to use</p>
 </dd>
 <dt><a href="#_buildMessage">_buildMessage(args)</a> ⇒ <code>string</code></dt>
@@ -26,11 +26,11 @@
 
 <a name="getUserAgent"></a>
 
-## getUserAgent(cfg) ⇒ <code>strung</code>
+## getUserAgent(cfg) ⇒ <code>string</code>
 Construct a useragent for sockbot to use
 
 **Kind**: global function  
-**Returns**: <code>strung</code> - User-Agent to use for a forum instance  
+**Returns**: <code>string</code> - User-Agent to use for a forum instance  
 
 | Param | Type | Description |
 | --- | --- | --- |
