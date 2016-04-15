@@ -149,6 +149,12 @@ exports.bindChat = function bindChat(forum) {
             return;
         }
         const message = ChatRoom.Message.parse(payload.message);
+        forum.Commands.get({
+            post: -1,
+            topic: -1,
+            user: message.user.id,
+            room: message.room
+        }, message.content, (content) => message.reply(content));
         forum.emit('chatMessage', message);
     }
     return ChatRoom;
