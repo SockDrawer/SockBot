@@ -13,7 +13,7 @@ exports.bindChat = function bindChat(forum) {
                 room: payload.roomId,
                 from: forum.User.parse(payload.fromUser),
                 sent: new Date(payload.timestamp),
-                self: payload.self === 0
+                self: payload.self === 1
             };
             utils.mapSet(this, values);
         }
@@ -134,7 +134,7 @@ exports.bindChat = function bindChat(forum) {
             forum.socket.off('event:chats.receive', handleChat);
         }
         static get(roomId) {
-            return forum._emit('module.chats.loadRoom', {
+            return forum._emit('modules.chats.loadRoom', {
                 roomId: roomId
             }).then((data) => ChatRoom.parse(data));
         }
@@ -146,16 +146,19 @@ exports.bindChat = function bindChat(forum) {
 
     function handleChat(payload) {
         if (!payload.message) {
-            return;
+            return null;
         }
         const message = ChatRoom.Message.parse(payload.message);
-        forum.Commands.get({
+
+        forum.emit('chatMessage', message);
+        const ids = {
             post: -1,
             topic: -1,
             user: message.user.id,
             room: message.room
-        }, message.content, (content) => message.reply(content));
-        forum.emit('chatMessage', message);
+        };
+        return forum.Commands.get(ids, message.content, (content) => message.reply(content))
+            .then((command) => command.execute());
     }
     return ChatRoom;
 };
