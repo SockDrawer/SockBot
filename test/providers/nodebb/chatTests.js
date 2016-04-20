@@ -870,7 +870,7 @@ describe('providers/nodebb/chat', () => {
             ChatRoom = null;
         beforeEach(() => {
             message = {
-                user: {
+                from: {
                     id: Math.random()
                 },
                 room: Math.random(),
@@ -905,7 +905,7 @@ describe('providers/nodebb/chat', () => {
         });
         it('should emit `chatMessage` event', () => {
             const expected = {
-                user: {
+                from: {
                     id: Math.random()
                 }
             };
@@ -927,7 +927,7 @@ describe('providers/nodebb/chat', () => {
             const roomId = Math.random();
             message.room = roomId;
             const userId = Math.random();
-            message.user.id = userId;
+            message.from.id = userId;
             return handleChat({
                 message: 1
             }).then(() => {

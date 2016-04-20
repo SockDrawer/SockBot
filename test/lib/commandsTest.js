@@ -284,7 +284,7 @@ describe('lib/config', () => {
             };
             return onComplete(command)
                 .then(() => {
-                    spy.calledWith( '\nfoo \n\n---\n\n\tbar\n').should.be.true;
+                    spy.calledWith('\nfoo \n\n---\n\n\tbar\n').should.be.true;
                 });
         });
         it('should ignore blank command replies', () => {
@@ -326,13 +326,16 @@ describe('lib/config', () => {
             onError = commands.internals.onError;
         });
         it('should post error message', () => {
+            const spy = sinon.stub().resolves();
             return onError('a florgle wozzer was grutzed', {
                 ids: {
                     topic: 3.14,
                     post: 'hi'
-                }
+                },
+                _replyFn: spy
             }).then(() => {
-                forum.Post.reply.calledWith(3.14, 'hi', 'An unexpected error `a florgle wozzer was grutzed` ' +
+                forum.Post.reply.called.should.be.false;
+                spy.calledWith('An unexpected error `a florgle wozzer was grutzed` ' +
                     'occured and your commands could not be processed!').should.be.true;
             });
         });
@@ -811,10 +814,12 @@ describe('lib/config', () => {
                 forum.Post = {
                     reply: sinon.stub().resolves()
                 };
+                forum.emit = sinon.spy();
                 const spy = sinon.stub().resolves();
                 const rejector = sinon.stub().rejects('bad');
                 data.ids.post = 1;
                 data.ids.topic = 50;
+                data._replyFn = sinon.stub().resolves();
                 data.commands = [{
                     execute: spy
                 }, {
@@ -823,9 +828,8 @@ describe('lib/config', () => {
                     execute: spy
                 }];
                 return command.execute().then(() => {
-                    forum.Post.reply.calledWith(50,
-                        1,
-                        'An unexpected error `Error: bad` occured and your commands' +
+                    forum.Post.reply.called.should.be.false;
+                    data._replyFn.calledWith('An unexpected error `Error: bad` occured and your commands' +
                         ' could not be processed!').should.be.true;
                 });
             });
