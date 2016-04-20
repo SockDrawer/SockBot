@@ -16,7 +16,7 @@ describe('providers/nodebb/notification', () => {
     it('should export bindNotification()', () => {
         testModule.bindNotification.should.be.a('function');
     });
-    it('should return a class on call to bindPost()', () => {
+    it('should return a class on call to bindNotification()', () => {
         testModule.bindNotification({}).should.be.a('function');
     });
     describe('Post', () => {
