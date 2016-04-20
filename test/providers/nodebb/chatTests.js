@@ -969,9 +969,7 @@ describe('providers/nodebb/chat', () => {
             });
         });
         it('should abort execution when input does not contain a message', () => {
-            chai.expect(handleChat({})).to.equal(null);
-            forum.emit.called.should.be.false;
-            forum.Commands.get.called.should.be.false;
+            return handleChat({}).should.be.rejectedWith('Event payload did not include chat message');
         });
         it('should throw when Message.parse throws', () => {
             const expected = new Error('bad');
