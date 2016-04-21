@@ -339,6 +339,28 @@ describe('lib/config', () => {
                     'occured and your commands could not be processed!').should.be.true;
             });
         });
+        it('should post error message from exception', () => {
+            const spy = sinon.stub().resolves();
+            const err = new Error('a florgle wozzer was grutzed');
+            return onError(err, {
+                _replyFn: spy
+            }).then(() => {
+                forum.Post.reply.called.should.be.false;
+                spy.calledWith('An unexpected error `a florgle wozzer was grutzed` ' +
+                    'occured and your commands could not be processed!').should.be.true;
+            });
+        });
+        it('should post [object Object] from random object', () => {
+            const spy = sinon.stub().resolves();
+            const err = {};
+            return onError(err, {
+                _replyFn: spy
+            }).then(() => {
+                forum.Post.reply.called.should.be.false;
+                spy.calledWith('An unexpected error `[object Object]` ' +
+                    'occured and your commands could not be processed!').should.be.true;
+            });
+        });
     });
     describe('internals.defaultHandler()', () => {
         let forum = null,
@@ -725,6 +747,16 @@ describe('lib/config', () => {
                     }).to.throw();
                 });
             });
+            it('should allow get of text from storage', () => {
+                const expected = Math.random();
+                data.postBody = expected;
+                command.text.should.equal(expected);
+            });
+            it('should disallow setting value to text', () => {
+                expect(() => {
+                    command.text = 'foo';
+                }).to.throw();
+            });
         });
         describe('cached getters', () => {
             [
@@ -829,7 +861,7 @@ describe('lib/config', () => {
                 }];
                 return command.execute().then(() => {
                     forum.Post.reply.called.should.be.false;
-                    data._replyFn.calledWith('An unexpected error `Error: bad` occured and your commands' +
+                    data._replyFn.calledWith('An unexpected error `bad` occured and your commands' +
                         ' could not be processed!').should.be.true;
                 });
             });
