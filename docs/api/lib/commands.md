@@ -30,6 +30,7 @@ NodeBB provider module User class
             * _instance_
                 * [.ids](#sockbot.lib.module_commands..Commands+ids) : <code>Ids</code>
                 * [.commands](#sockbot.lib.module_commands..Commands+commands) : <code>Array.&lt;Command&gt;</code>
+                * [.text](#sockbot.lib.module_commands..Commands+text) : <code>string</code>
                 * [.getPost()](#sockbot.lib.module_commands..Commands+getPost) ⇒ <code>Promise.&lt;Post&gt;</code>
                 * [.getTopic()](#sockbot.lib.module_commands..Commands+getTopic) ⇒ <code>Promise.&lt;Topic&gt;</code>
                 * [.getUser()](#sockbot.lib.module_commands..Commands+getUser) ⇒ <code>Promise.&lt;User&gt;</code>
@@ -199,6 +200,7 @@ Commands class. Represents all commands for a Notification
     * _instance_
         * [.ids](#sockbot.lib.module_commands..Commands+ids) : <code>Ids</code>
         * [.commands](#sockbot.lib.module_commands..Commands+commands) : <code>Array.&lt;Command&gt;</code>
+        * [.text](#sockbot.lib.module_commands..Commands+text) : <code>string</code>
         * [.getPost()](#sockbot.lib.module_commands..Commands+getPost) ⇒ <code>Promise.&lt;Post&gt;</code>
         * [.getTopic()](#sockbot.lib.module_commands..Commands+getTopic) ⇒ <code>Promise.&lt;Topic&gt;</code>
         * [.getUser()](#sockbot.lib.module_commands..Commands+getUser) ⇒ <code>Promise.&lt;User&gt;</code>
@@ -230,6 +232,13 @@ Ids relevant to this Commands object
 
 #### commands.commands : <code>Array.&lt;Command&gt;</code>
 Commands contained in this Commands object
+
+**Kind**: instance property of <code>[Commands](#sockbot.lib.module_commands..Commands)</code>  
+**Access:** public  
+<a name="sockbot.lib.module_commands..Commands+text"></a>
+
+#### commands.text : <code>string</code>
+Text this Commands object parsed
 
 **Kind**: instance property of <code>[Commands](#sockbot.lib.module_commands..Commands)</code>  
 **Access:** public  
