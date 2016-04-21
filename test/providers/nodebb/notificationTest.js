@@ -16,7 +16,7 @@ describe('providers/nodebb/notification', () => {
     it('should export bindNotification()', () => {
         testModule.bindNotification.should.be.a('function');
     });
-    it('should return a class on call to bindPost()', () => {
+    it('should return a class on call to bindNotification()', () => {
         testModule.bindNotification({}).should.be.a('function');
     });
     describe('Post', () => {
@@ -540,16 +540,27 @@ describe('providers/nodebb/notification', () => {
         });
         describe('internal notifyHandler()', () => {
             let sandbox = null,
+                notifier = null,
+                command = null,
                 notifyHandler = null;
             beforeEach(() => {
+                command = {
+                    execute: sinon.stub().resolves()
+                };
+                notifier = {
+                    getText: sinon.stub().resolves()
+                };
                 sandbox = sinon.sandbox.create();
-                sandbox.stub(Notification, 'parse').resolves();
+                sandbox.stub(Notification, 'parse').returns(notifier);
                 forum.socket = {
                     on: sinon.spy()
                 };
                 forum.emit = sinon.spy();
                 forum.Commands = {
-                    get: sinon.stub().resolves()
+                    get: sinon.stub().resolves(command)
+                };
+                forum.Post = {
+                    reply: sinon.stub().resolves()
                 };
                 Notification.activate();
                 notifyHandler = forum.socket.on.firstCall.args[1];
@@ -557,14 +568,55 @@ describe('providers/nodebb/notification', () => {
             afterEach(() => sandbox.restore());
             it('should parse notification with `Notification.parse`', () => {
                 const expected = Math.random();
-                notifyHandler(expected);
-                Notification.parse.calledWith(expected).should.be.true;
+                return notifyHandler(expected).then(() => {
+                    Notification.parse.calledWith(expected).should.be.true;
+                });
+            });
+            it('should get text from notification with `notification.getText()`', () => {
+                const expected = Math.random();
+                return notifyHandler(expected).then(() => {
+                    notifier.getText.called.should.be.true;
+                });
             });
             it('should parse commands with `forum.Commands.get`', () => {
-                const expected = Math.random();
-                Notification.parse.returns(expected);
-                notifyHandler(expected);
-                forum.Commands.get.calledWith(expected).should.be.true;
+                const text = Math.random(),
+                    post = Math.random(),
+                    topic = Math.random(),
+                    user = Math.random();
+                notifier.postId = post;
+                notifier.topicId = topic;
+                notifier.userId = user;
+                notifier.getText.resolves(text);
+                return notifyHandler(7).then(() => {
+                    const args = forum.Commands.get.firstCall.args;
+                    args[0].should.eql({
+                        post: post,
+                        topic: topic,
+                        user: user,
+                        room: -1
+                    });
+                    args[1].should.eql(text);
+                    args[2].should.be.a('function');
+                    args.length.should.eql(3);
+                });
+            });
+            it('should provide valid ReplyHandler to `forum.Commands.get`', () => {
+                const text = Math.random(),
+                    post = Math.random(),
+                    topic = Math.random(),
+                    user = Math.random();
+                notifier.postId = post;
+                notifier.topicId = topic;
+                notifier.userId = user;
+                notifier.getText.resolves(text);
+                return notifyHandler(7).then(() => {
+                    const args = forum.Commands.get.firstCall.args;
+                    const handler = args[2];
+                    const content = `a${Math.random()}g`;
+                    return handler(content).then(() => {
+                        forum.Post.reply.calledWith(topic, post, content).should.be.true;
+                    });
+                });
             });
             it('should execute parsed commands', () => {
                 const spy = sinon.spy();
@@ -576,20 +628,16 @@ describe('providers/nodebb/notification', () => {
                 });
             });
             it('should emit specific notification event', () => {
-                const expected = {
-                    type: `a${Math.random()}b`
-                };
-                Notification.parse.returns(expected);
-                notifyHandler(5);
-                forum.emit.calledWith(`notification:${expected.type}`, expected).should.be.true;
+                notifier.type = `a${Math.random()}b`;
+                return notifyHandler(5).then(() => {
+                    forum.emit.calledWith(`notification:${notifier.type}`, notifier).should.be.true;
+                });
             });
             it('should emit general notification event', () => {
-                const expected = {
-                    type: `a${Math.random()}b`
-                };
-                Notification.parse.returns(expected);
-                notifyHandler(5);
-                forum.emit.calledWith('notification', expected).should.be.true;
+                notifier.type = `a${Math.random()}b`;
+                return notifyHandler(5).then(() => {
+                    forum.emit.calledWith('notification', notifier).should.be.true;
+                });
             });
         });
     });

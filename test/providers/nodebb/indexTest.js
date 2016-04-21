@@ -14,6 +14,7 @@ const Forum = require('../../../providers/nodebb'),
     topicModule = require('../../../providers/nodebb/topic'),
     categoryModule = require('../../../providers/nodebb/category'),
     userModule = require('../../../providers/nodebb/user'),
+    chatModule = require('../../../providers/nodebb/chat'),
     notifyModule = require('../../../providers/nodebb/notification');
 const utils = require('../../../lib/utils');
 
@@ -31,6 +32,7 @@ describe('providers/nodebb', () => {
             sandbox.stub(topicModule, 'bindTopic');
             sandbox.stub(categoryModule, 'bindCategory');
             sandbox.stub(userModule, 'bindUser');
+            sandbox.stub(chatModule, 'bindChat');
             sandbox.stub(notifyModule, 'bindNotification');
         });
         afterEach(() => sandbox.restore());
@@ -92,6 +94,15 @@ describe('providers/nodebb', () => {
             const expected = Math.random();
             notifyModule.bindNotification.returns(expected);
             new Forum().Notification.should.equal(expected);
+        });
+        it('should use Chat.bindChat to generate Chat object', () => {
+            const forum = new Forum({});
+            chatModule.bindChat.calledWith(forum).should.be.true;
+        });
+        it('should store Notification object in this.Notification', () => {
+            const expected = Math.random();
+            chatModule.bindChat.returns(expected);
+            new Forum().Chat.should.equal(expected);
         });
     });
     describe('getters', () => {
@@ -659,6 +670,7 @@ describe('providers/nodebb', () => {
             data = utils.mapGet(forum);
             sandbox.stub(forum.User, 'getByName').resolves({});
             sandbox.stub(forum.Notification, 'activate');
+            sandbox.stub(forum.Chat, 'activate');
             sandbox.stub(forum, 'connectWebsocket').resolves();
         });
         afterEach(() => sandbox.restore());
@@ -700,6 +712,11 @@ describe('providers/nodebb', () => {
                 forum.Notification.activate.called.should.be.true;
             });
         });
+        it('should activate chats', () => {
+            return forum.activate().then(() => {
+                forum.Chat.activate.called.should.be.true;
+            });
+        });
         it('should activate plugins', () => {
             const spy1 = sinon.stub().resolves(),
                 spy2 = sinon.stub().resolves();
@@ -733,6 +750,10 @@ describe('providers/nodebb', () => {
                 forum.Notification.activate.throws('bad');
                 return forum.activate().should.be.rejected;
             });
+            it('should reject when notification activation throw', () => {
+                forum.Chat.activate.throws('bad');
+                return forum.activate().should.be.rejected;
+            });
             it('should reject when plugin activation rejects', () => {
                 forum._plugins = [{
                     activate: sinon.stub().rejects('bad')
@@ -750,11 +771,17 @@ describe('providers/nodebb', () => {
                 core: {}
             });
             sandbox.stub(forum.Notification, 'deactivate');
+            sandbox.stub(forum.Chat, 'deactivate');
         });
         afterEach(() => sandbox.restore());
         it('should deactivate notifications', () => {
             return forum.deactivate().then(() => {
                 forum.Notification.deactivate.called.should.be.true;
+            });
+        });
+        it('should deactivate chat', () => {
+            return forum.deactivate().then(() => {
+                forum.Chat.deactivate.called.should.be.true;
             });
         });
         it('should deactivate plugins', () => {
@@ -773,11 +800,15 @@ describe('providers/nodebb', () => {
         it('should resolve to self', () => {
             return forum.deactivate().should.become(forum);
         });
-        it('should reject when notification activation throw', () => {
+        it('should reject when notification deactivation throw', () => {
             forum.Notification.deactivate.throws('bad');
             return forum.deactivate().should.be.rejected;
         });
-        it('should reject when plugin activation rejects', () => {
+        it('should reject when chat deactivation throw', () => {
+            forum.Chat.deactivate.throws('bad');
+            return forum.deactivate().should.be.rejected;
+        });
+        it('should reject when plugin deactivation rejects', () => {
             forum._plugins = [{
                 deactivate: sinon.stub().rejects('bad')
             }];
