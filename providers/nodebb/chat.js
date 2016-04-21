@@ -264,6 +264,26 @@ exports.bindChat = function bindChat(forum) {
         }
 
         /**
+         * Apply an operation to a list of users
+         * 
+         * @private
+         * 
+         * @param {string} action Action to apply
+         * @param {User|User[]} users List of users to apply action to
+         * @returns {Promise} resolves when action has been applied to all users
+         */
+        _applyToUsers(action, users) {
+            if (!Array.isArray(users)) {
+                users = [users];
+            }
+            return Promise.all(
+                users.map((user) => forum._emit(action, {
+                    roomId: this.id,
+                    username: user.username
+                })));
+        }
+
+        /**
          * Add a list of users to the chatroom
          *
          * @public
@@ -272,14 +292,7 @@ exports.bindChat = function bindChat(forum) {
          * @returns {Promise} Resolves when all users have been added to the chatroom
          */
         addUsers(users) {
-            if (!Array.isArray(users)) {
-                users = [users];
-            }
-            return Promise.all(
-                users.map((user) => forum._emit('modules.chats.addUserToRoom', {
-                    roomId: this.id,
-                    username: user.username
-                })));
+            return this._applyToUsers('modules.chats.addUserToRoom', users);
         }
 
         /**
@@ -291,14 +304,7 @@ exports.bindChat = function bindChat(forum) {
          * @returns {Promsie} Resos when users have been removed from the chatroom
          */
         removeUsers(users) {
-            if (!Array.isArray(users)) {
-                users = [users];
-            }
-            return Promise.all(
-                users.map((user) => forum._emit('modules.chats.removeUserFromRoom', {
-                    roomId: this.id,
-                    username: user.username
-                })));
+            return this._applyToUsers('modules.chats.removeUserFromRoom', users);
         }
 
         /**
