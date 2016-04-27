@@ -50,4 +50,4 @@ Activate the plugin.
 Register the command `echo` to the forum instance this plugin is bound to
 
 **Kind**: inner method of <code>[plugin](#module_echo.plugin)</code>  
-**Returns**: <code>Promise</code> - Resolves when plugin is fully activated     *  
+**Returns**: <code>Promise</code> - Resolves when plugin is fully activated  
