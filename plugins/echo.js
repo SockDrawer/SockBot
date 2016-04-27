@@ -35,7 +35,7 @@ exports.plugin = function plugin(forum) {
      *
      * Register the command `echo` to the forum instance this plugin is bound to
      *
-     * @returns {Promise} Resolves when plugin is fully activated     *
+     * @returns {Promise} Resolves when plugin is fully activated
      */
     function activate() {
         return forum.Commands.add('echo', 'Simple testing command', echo);
