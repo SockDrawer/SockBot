@@ -38,6 +38,15 @@ exports.bindCategory = function bindCategory(forum) {
         return (data) => forum.Topic.parseExtended(data)
             .then((parsed) => eachTopic(parsed.topic, parsed.user, parsed.category));
     }
+
+    /**
+     * Category Class
+     *
+     * Represents a forum category.
+     *
+     * @public
+     *
+     */
     class Category {
         /**
          * Construct a category object from a provided payload.

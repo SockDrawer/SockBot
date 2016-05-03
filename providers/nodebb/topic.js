@@ -14,6 +14,14 @@ const utils = require('../../lib/utils');
  * @returns {User} A Topic class bound to the provided `forum` instance
  */
 exports.bindTopic = function bindTopic(forum) {
+    /**
+     * Topic Class
+     *
+     * Represends a forum topic
+     *
+     * @public
+     *
+     */
     class Topic {
         /**
          * Construct a topic object from a provided payload.

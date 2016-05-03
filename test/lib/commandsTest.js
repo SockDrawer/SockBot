@@ -199,8 +199,9 @@ describe('lib/config', () => {
         });
     });
     describe('internals.onComplete()', () => {
-        let forum, onComplete;
+        let forum, onComplete, spy;
         beforeEach(() => {
+            spy = sinon.stub().resolves();
             forum = {
                 Post: {
                     reply: sinon.stub()
@@ -214,22 +215,24 @@ describe('lib/config', () => {
             const command = {
                 commands: [{
                     replyText: ''
-                }]
+                }],
+                _replyFn: spy
             };
             return onComplete(command)
                 .then(() => {
-                    forum.Post.reply.called.should.be.false;
+                    spy.called.should.be.false;
                 });
         });
         it('should not attempt to post on whitespace content', () => {
             const command = {
                 commands: [{
                     replyText: ' '
-                }]
+                }],
+                _replyFn: spy
             };
             return onComplete(command)
                 .then(() => {
-                    forum.Post.reply.called.should.be.false;
+                    spy.called.should.be.false;
                 });
         });
         it('should post with content', () => {
@@ -237,14 +240,15 @@ describe('lib/config', () => {
                 commands: [{
                     replyText: 'foo'
                 }],
-                notification: {
-                    topicId: 45,
-                    postId: -7
-                }
+                ids: {
+                    topic: 45,
+                    post: -7
+                },
+                _replyFn: spy
             };
             return onComplete(command)
                 .then(() => {
-                    forum.Post.reply.calledWith(45, -7, 'foo').should.be.true;
+                    spy.calledWith('foo').should.be.true;
                 });
         });
         it('should merge multiple command replies', () => {
@@ -254,14 +258,15 @@ describe('lib/config', () => {
                 }, {
                     replyText: 'bar'
                 }],
-                notification: {
-                    topicId: 45,
-                    postId: -7
-                }
+                ids: {
+                    topic: 45,
+                    post: -7
+                },
+                _replyFn: spy
             };
             return onComplete(command)
                 .then(() => {
-                    forum.Post.reply.calledWith(45, -7, 'foo\n\n---\n\nbar').should.be.true;
+                    spy.calledWith('foo\n\n---\n\nbar').should.be.true;
                 });
         });
         it('should merge preseve whitespace in command replies', () => {
@@ -271,14 +276,15 @@ describe('lib/config', () => {
                 }, {
                     replyText: '\tbar\n'
                 }],
-                notification: {
-                    topicId: 45,
-                    postId: -7
-                }
+                ids: {
+                    topic: 45,
+                    post: -7
+                },
+                _replyFn: spy
             };
             return onComplete(command)
                 .then(() => {
-                    forum.Post.reply.calledWith(45, -7, '\nfoo \n\n---\n\n\tbar\n').should.be.true;
+                    spy.calledWith('\nfoo \n\n---\n\n\tbar\n').should.be.true;
                 });
         });
         it('should ignore blank command replies', () => {
@@ -294,14 +300,15 @@ describe('lib/config', () => {
                 }, {
                     replyText: ' '
                 }],
-                notification: {
-                    topicId: 45,
-                    postId: -7
-                }
+                ids: {
+                    topic: 45,
+                    post: -7
+                },
+                _replyFn: spy
             };
             return onComplete(command)
                 .then(() => {
-                    forum.Post.reply.calledWith(45, -7, 'foo\n\n---\n\nbar').should.be.true;
+                    spy.calledWith('foo\n\n---\n\nbar').should.be.true;
                 });
         });
     });
@@ -319,13 +326,38 @@ describe('lib/config', () => {
             onError = commands.internals.onError;
         });
         it('should post error message', () => {
+            const spy = sinon.stub().resolves();
             return onError('a florgle wozzer was grutzed', {
-                notification: {
-                    topicId: 3.14,
-                    postId: 'hi'
-                }
+                ids: {
+                    topic: 3.14,
+                    post: 'hi'
+                },
+                _replyFn: spy
             }).then(() => {
-                forum.Post.reply.calledWith(3.14, 'hi', 'An unexpected error `a florgle wozzer was grutzed` ' +
+                forum.Post.reply.called.should.be.false;
+                spy.calledWith('An unexpected error `a florgle wozzer was grutzed` ' +
+                    'occured and your commands could not be processed!').should.be.true;
+            });
+        });
+        it('should post error message from exception', () => {
+            const spy = sinon.stub().resolves();
+            const err = new Error('a florgle wozzer was grutzed');
+            return onError(err, {
+                _replyFn: spy
+            }).then(() => {
+                forum.Post.reply.called.should.be.false;
+                spy.calledWith('An unexpected error `a florgle wozzer was grutzed` ' +
+                    'occured and your commands could not be processed!').should.be.true;
+            });
+        });
+        it('should post [object Object] from random object', () => {
+            const spy = sinon.stub().resolves();
+            const err = {};
+            return onError(err, {
+                _replyFn: spy
+            }).then(() => {
+                forum.Post.reply.called.should.be.false;
+                spy.calledWith('An unexpected error `[object Object]` ' +
                     'occured and your commands could not be processed!').should.be.true;
             });
         });
@@ -676,10 +708,10 @@ describe('lib/config', () => {
                 const command = new Commands({}, '');
                 utils.mapGet(command).should.be.ok;
             });
-            it('should store notification parameter', () => {
+            it('should store ids parameter', () => {
                 const expected = `${Math.random()}${Math.random()}`;
                 const command = new Commands(expected, '');
-                utils.mapGet(command).notification.should.equal(expected);
+                utils.mapGet(command).ids.should.equal(expected);
             });
             it('should store postbody parameter', () => {
                 const expected = `${Math.random()}${Math.random()}`;
@@ -703,7 +735,7 @@ describe('lib/config', () => {
                 command = new Commands({}, '');
                 data = utils.mapGet(command);
             });
-            ['notification', 'commands'].forEach((property) => {
+            ['ids', 'commands', '_replyFn'].forEach((property) => {
                 it(`should allow get of ${property} from storage`, () => {
                     const expected = Math.random();
                     data[property] = expected;
@@ -715,17 +747,26 @@ describe('lib/config', () => {
                     }).to.throw();
                 });
             });
+            it('should allow get of text from storage', () => {
+                const expected = Math.random();
+                data.postBody = expected;
+                command.text.should.equal(expected);
+            });
+            it('should disallow setting value to text', () => {
+                expect(() => {
+                    command.text = 'foo';
+                }).to.throw();
+            });
         });
         describe('cached getters', () => {
             [
-                ['getPost', 'Post', 'post', 'postId'],
-                ['getTopic', 'Topic', 'topic', 'topicId'],
-                ['getUser', 'User', 'user', 'userId']
+                ['getPost', 'Post', 'post'],
+                ['getTopic', 'Topic', 'topic'],
+                ['getUser', 'User', 'user']
             ].forEach((config) => {
                 const method = config[0],
                     object = config[1],
-                    store = config[2],
-                    param = config[3];
+                    store = config[2];
                 let command, spy, data, notification;
                 beforeEach(() => {
                     notification = {};
@@ -744,9 +785,9 @@ describe('lib/config', () => {
                         spy.called.should.be.false;
                     });
                 });
-                it(`should request ${store} by notification ${param}`, () => {
+                it(`should request ${store} by notification ${store}`, () => {
                     const id = Math.random();
-                    notification[param] = id;
+                    notification[store] = id;
                     expect(data[store]).to.be.not.ok;
                     return command[method]().then(() => {
                         spy.calledWith(id).should.be.true;
@@ -790,24 +831,27 @@ describe('lib/config', () => {
                     reply: sinon.stub().resolves()
                 };
                 const expected = 'foo';
-                data.notification.postId = 1;
-                data.notification.topicId = 50;
+                data.ids.post = 1;
+                data.ids.topic = 50;
                 data.commands = [{
                     execute: sinon.stub().resolves(),
                     replyText: expected
                 }];
+                data._replyFn = sinon.stub().resolves();
                 return command.execute().then(() => {
-                    forum.Post.reply.calledWith(50, 1, expected).should.be.true;
+                    data._replyFn.calledWith(expected).should.be.true;
                 });
             });
             it('should execute onError when any command rejects', () => {
                 forum.Post = {
                     reply: sinon.stub().resolves()
                 };
+                forum.emit = sinon.spy();
                 const spy = sinon.stub().resolves();
                 const rejector = sinon.stub().rejects('bad');
-                data.notification.postId = 1;
-                data.notification.topicId = 50;
+                data.ids.post = 1;
+                data.ids.topic = 50;
+                data._replyFn = sinon.stub().resolves();
                 data.commands = [{
                     execute: spy
                 }, {
@@ -816,9 +860,8 @@ describe('lib/config', () => {
                     execute: spy
                 }];
                 return command.execute().then(() => {
-                    forum.Post.reply.calledWith(50,
-                        1,
-                        'An unexpected error `Error: bad` occured and your commands' +
+                    forum.Post.reply.called.should.be.false;
+                    data._replyFn.calledWith('An unexpected error `bad` occured and your commands' +
                         ' could not be processed!').should.be.true;
                 });
             });
@@ -827,8 +870,8 @@ describe('lib/config', () => {
                     reply: sinon.stub().rejects('badbad')
                 };
                 forum.emit = sinon.spy();
-                data.notification.postId = 1;
-                data.notification.topicId = 50;
+                data.ids.post = 1;
+                data.ids.topic = 50;
                 data.commands = [{
                     execute: sinon.stub().rejects('bad')
                 }];
@@ -838,27 +881,18 @@ describe('lib/config', () => {
             });
         });
         describe('static get()', () => {
-            it('should use notification.getText()', () => {
-                const notification = {
-                    getText: sinon.stub().resolves('<div>content</div>')
-                };
-                return Commands.get(notification).then(() => {
-                    notification.getText.called.should.be.true;
-                });
-            });
             it('should store notification in result', () => {
-                const notification = {
-                    getText: sinon.stub().resolves('<div>content</div>')
+                const ids = {
+                    alpha: 1,
+                    beta: 'c'
                 };
-                return Commands.get(notification).then((command) => {
-                    command.notification.should.equal(notification);
+                return Commands.get(ids).then((command) => {
+                    command.ids.should.equal(ids);
                 });
             });
-            it('should store parsed text in result', () => {
-                const notification = {
-                    getText: sinon.stub().resolves('<div>content</div>')
-                };
-                return Commands.get(notification).then((command) => {
+            it('should store text in result', () => {
+                const notification = {};
+                return Commands.get(notification, '<div>content</div>').then((command) => {
                     utils.mapGet(command, 'postBody').should.equal('content');
                 });
             });

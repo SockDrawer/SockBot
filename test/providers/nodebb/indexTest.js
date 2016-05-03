@@ -14,6 +14,7 @@ const Forum = require('../../../providers/nodebb'),
     topicModule = require('../../../providers/nodebb/topic'),
     categoryModule = require('../../../providers/nodebb/category'),
     userModule = require('../../../providers/nodebb/user'),
+    chatModule = require('../../../providers/nodebb/chat'),
     notifyModule = require('../../../providers/nodebb/notification');
 const utils = require('../../../lib/utils');
 
@@ -31,6 +32,7 @@ describe('providers/nodebb', () => {
             sandbox.stub(topicModule, 'bindTopic');
             sandbox.stub(categoryModule, 'bindCategory');
             sandbox.stub(userModule, 'bindUser');
+            sandbox.stub(chatModule, 'bindChat');
             sandbox.stub(notifyModule, 'bindNotification');
         });
         afterEach(() => sandbox.restore());
@@ -38,6 +40,11 @@ describe('providers/nodebb', () => {
             const expected = Math.random();
             const forum = new Forum(expected);
             utils.mapGet(forum).config.should.equal(expected);
+        });
+        it('should store useragent in utils.storage', () => {
+            const expected = Math.random();
+            const forum = new Forum({}, expected);
+            utils.mapGet(forum).useragent.should.equal(expected);
         });
         it('should set plugin store to empty array', () => {
             const forum = new Forum({});
@@ -88,6 +95,15 @@ describe('providers/nodebb', () => {
             notifyModule.bindNotification.returns(expected);
             new Forum().Notification.should.equal(expected);
         });
+        it('should use Chat.bindChat to generate Chat object', () => {
+            const forum = new Forum({});
+            chatModule.bindChat.calledWith(forum).should.be.true;
+        });
+        it('should store Notification object in this.Notification', () => {
+            const expected = Math.random();
+            chatModule.bindChat.returns(expected);
+            new Forum().Chat.should.equal(expected);
+        });
     });
     describe('getters', () => {
         describe('get config', () => {
@@ -110,6 +126,21 @@ describe('providers/nodebb', () => {
                 expected[`a${Math.random()}b`] = `c${Math.random()}d`;
                 data.config = expected;
                 forum.config.should.not.equal(expected);
+            });
+        });
+        describe('get useragent', () => {
+            let forum = null,
+                data = null;
+            beforeEach(() => {
+                forum = new Forum({
+                    core: {}
+                }, '');
+                data = utils.mapGet(forum);
+            });
+            it('should retrieve stored useragent', () => {
+                const expected = `c${Math.random()}d`;
+                data.useragent = expected;
+                forum.useragent.should.eql(expected);
             });
         });
         describe('get url', () => {
@@ -235,16 +266,44 @@ describe('providers/nodebb', () => {
                 forum._verifyCookies.called.should.be.true;
             });
         });
-        it('should request config', () => {
+        it('should request config url', () => {
+            const base = `a${Math.random()}b`;
+            const url = `${base}/api/config`;
+            data.config.core.forum = base;
+            return forum._getConfig().then(() => {
+                request.get.firstCall.args[0].url.should.equal(url);
+            });
+        });
+        it('should request config with cookiejar', () => {
+            const jar = `a${Math.random()}b`;
+            forum._cookiejar = jar;
+            return forum._getConfig().then(() => {
+                request.get.firstCall.args[0].jar.should.equal(jar);
+            });
+        });
+        it('should request config with useragent', () => {
+            const agent = `a${Math.random()}b`;
+            data.useragent = agent;
+            return forum._getConfig().then(() => {
+                request.get.firstCall.args[0].headers.should.eql({
+                    'User-Agent': agent
+                });
+            });
+        });
+        it('should request config as expected', () => {
             const base = `a${Math.random()}b`;
             const url = `${base}/api/config`;
             const cookiejar = Math.random();
             data.config.core.forum = base;
+            data.useragent = 'a';
             forum._cookiejar = cookiejar;
             return forum._getConfig().then(() => {
                 request.get.calledWith({
                     url: url,
-                    jar: cookiejar
+                    jar: cookiejar,
+                    headers: {
+                        'User-Agent': 'a'
+                    }
                 }).should.be.true;
             });
         });
@@ -329,7 +388,28 @@ describe('providers/nodebb', () => {
             });
             return forum.login().then(() => {
                 const posted = request.post.firstCall.args[0];
+                posted.headers['x-csrf-token'].should.equal(expected);
+            });
+        });
+        it('should use useragent header', () => {
+            const expected = `a${Math.random()}b`;
+            data.useragent = expected;
+            return forum.login().then(() => {
+                const posted = request.post.firstCall.args[0];
+                posted.headers['User-Agent'].should.equal(expected);
+            });
+        });
+        it('should use expected headers', () => {
+            const expected = `a${Math.random()}b`;
+            const agent = `c${Math.random()}d`;
+            data.useragent = agent;
+            forum._getConfig.resolves({
+                'csrf_token': expected
+            });
+            return forum.login().then(() => {
+                const posted = request.post.firstCall.args[0];
                 posted.headers.should.eql({
+                    'User-Agent': agent,
                     'x-csrf-token': expected
                 });
             });
@@ -413,13 +493,30 @@ describe('providers/nodebb', () => {
                 });
             });
             it('should pass cookies to websocket for forum', () => {
+                const cookies = `cookies${Math.random()}`;
+                forum._cookiejar.getCookieString.returns(cookies);
+                return forum.connectWebsocket().then(() => {
+                    Forum.io.firstCall.args[1].extraHeaders.Cookie.should.equal(cookies);
+                });
+            });
+            it('should pass useragent to websocket for forum', () => {
+                const agent = `a${Math.random()}b`;
+                data.useragent = agent;
+                return forum.connectWebsocket().then(() => {
+                    Forum.io.firstCall.args[1].extraHeaders['User-Agent'].should.equal(agent);
+                });
+            });
+            it('should pass headers to websocket for forum', () => {
                 const url = `a${Math.random()}b`;
+                const agent = `c${Math.random()}d`;
                 const cookies = `cookies${Math.random()}`;
                 forum._cookiejar.getCookieString.returns(cookies);
                 data.config.core.forum = url;
+                data.useragent = agent;
                 return forum.connectWebsocket().then(() => {
                     Forum.io.calledWith(url, {
                         extraHeaders: {
+                            'User-Agent': agent,
                             'Cookie': cookies
                         }
                     }).should.be.true;
@@ -573,6 +670,7 @@ describe('providers/nodebb', () => {
             data = utils.mapGet(forum);
             sandbox.stub(forum.User, 'getByName').resolves({});
             sandbox.stub(forum.Notification, 'activate');
+            sandbox.stub(forum.Chat, 'activate');
             sandbox.stub(forum, 'connectWebsocket').resolves();
         });
         afterEach(() => sandbox.restore());
@@ -614,6 +712,11 @@ describe('providers/nodebb', () => {
                 forum.Notification.activate.called.should.be.true;
             });
         });
+        it('should activate chats', () => {
+            return forum.activate().then(() => {
+                forum.Chat.activate.called.should.be.true;
+            });
+        });
         it('should activate plugins', () => {
             const spy1 = sinon.stub().resolves(),
                 spy2 = sinon.stub().resolves();
@@ -647,6 +750,10 @@ describe('providers/nodebb', () => {
                 forum.Notification.activate.throws('bad');
                 return forum.activate().should.be.rejected;
             });
+            it('should reject when notification activation throw', () => {
+                forum.Chat.activate.throws('bad');
+                return forum.activate().should.be.rejected;
+            });
             it('should reject when plugin activation rejects', () => {
                 forum._plugins = [{
                     activate: sinon.stub().rejects('bad')
@@ -664,11 +771,17 @@ describe('providers/nodebb', () => {
                 core: {}
             });
             sandbox.stub(forum.Notification, 'deactivate');
+            sandbox.stub(forum.Chat, 'deactivate');
         });
         afterEach(() => sandbox.restore());
         it('should deactivate notifications', () => {
             return forum.deactivate().then(() => {
                 forum.Notification.deactivate.called.should.be.true;
+            });
+        });
+        it('should deactivate chat', () => {
+            return forum.deactivate().then(() => {
+                forum.Chat.deactivate.called.should.be.true;
             });
         });
         it('should deactivate plugins', () => {
@@ -687,11 +800,15 @@ describe('providers/nodebb', () => {
         it('should resolve to self', () => {
             return forum.deactivate().should.become(forum);
         });
-        it('should reject when notification activation throw', () => {
+        it('should reject when notification deactivation throw', () => {
             forum.Notification.deactivate.throws('bad');
             return forum.deactivate().should.be.rejected;
         });
-        it('should reject when plugin activation rejects', () => {
+        it('should reject when chat deactivation throw', () => {
+            forum.Chat.deactivate.throws('bad');
+            return forum.deactivate().should.be.rejected;
+        });
+        it('should reject when plugin deactivation rejects', () => {
             forum._plugins = [{
                 deactivate: sinon.stub().rejects('bad')
             }];

@@ -1,6 +1,9 @@
 ## Functions
 
 <dl>
+<dt><a href="#getUserAgent">getUserAgent(cfg)</a> ⇒ <code>string</code></dt>
+<dd><p>Construct a useragent for sockbot to use</p>
+</dd>
 <dt><a href="#_buildMessage">_buildMessage(args)</a> ⇒ <code>string</code></dt>
 <dd><p>Construct a stringified message to log</p>
 </dd>
@@ -13,13 +16,25 @@
 <dt><a href="#relativeRequire">relativeRequire(relativePath, module, requireIt)</a> ⇒ <code>object</code> | <code>function</code></dt>
 <dd><p>Load a module relative to a local path, or relative to loaded config file</p>
 </dd>
-<dt><a href="#loadPlugins">loadPlugins(forumInstance, botConfig)</a></dt>
+<dt><a href="#loadPlugins">loadPlugins(forumInstance, botConfig)</a> ⇒ <code>Promise</code></dt>
 <dd><p>Load plugins for forum instance</p>
 </dd>
 <dt><a href="#activateConfig">activateConfig(botConfig)</a> ⇒ <code>Promise</code></dt>
 <dd><p>Activate a loaded configuration.</p>
 </dd>
 </dl>
+
+<a name="getUserAgent"></a>
+
+## getUserAgent(cfg) ⇒ <code>string</code>
+Construct a useragent for sockbot to use
+
+**Kind**: global function  
+**Returns**: <code>string</code> - User-Agent to use for a forum instance  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| cfg | <code>object</code> | Instance Configuration to construct User Agent for |
 
 <a name="_buildMessage"></a>
 
@@ -71,10 +86,11 @@ Load a module relative to a local path, or relative to loaded config file
 
 <a name="loadPlugins"></a>
 
-## loadPlugins(forumInstance, botConfig)
+## loadPlugins(forumInstance, botConfig) ⇒ <code>Promise</code>
 Load plugins for forum instance
 
 **Kind**: global function  
+**Returns**: <code>Promise</code> - Resolves when plugins have been loaded  
 
 | Param | Type | Description |
 | --- | --- | --- |

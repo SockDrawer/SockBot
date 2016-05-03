@@ -4,6 +4,7 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 
 chai.use(chaiAsPromised);
+chai.use(require('chai-string'));
 chai.should();
 const expect = chai.expect;
 
@@ -138,8 +139,13 @@ describe('lib/utils', () => {
             });
         });
         it('should reject invalid JSON', () => {
-            expect(() => utils.parseJSON('"unclosed string')).to
-                .throw('[[invalid-json:Unexpected end of input]]');
+            let error = null;
+            try {
+                utils.parseJSON('"unclosed string');
+            } catch (err) {
+                error = err.message;
+            }
+            error.should.startWith('[[invalid-json:Unexpected end of ');
         });
         it('should parse input correctly', () => {
             const input = '[{"alpha":true,"beta":{"gamma":"false"}},5.9,{}]';

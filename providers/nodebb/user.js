@@ -5,7 +5,7 @@
  * @author Accalia
  * @license MIT
  */
- 
+
 const utils = require('../../lib/utils');
 const debug = require('debug')('sockbot:provider:nodebb:user');
 
@@ -16,6 +16,13 @@ const debug = require('debug')('sockbot:provider:nodebb:user');
  * @returns {User} A User class bound to the provided `forum` instance
  */
 exports.bindUser = function bindUser(forum) {
+    /**
+     * User Class
+     *
+     * Represents a forum user
+     *
+     * @public
+     */
     class User {
         /**
          * Construct a User object from payload

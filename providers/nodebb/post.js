@@ -15,12 +15,19 @@ const utils = require('../../lib/utils');
  * @returns {User} A Post class bound to the provided `forum` instance
  */
 exports.bindPost = function bindPost(forum) {
+    /**
+     * Post Class
+     *
+     * Represents a forum post
+     *
+     * @public
+     */
     class Post {
         /**
          * Construct a Post object from payload
          *
          * This constructor is intended to be private use only, if you need to construct a post from payload data use
-         * `User.parse()` instead
+         * `Post.parse()` instead
          *
          * @public
          * @class

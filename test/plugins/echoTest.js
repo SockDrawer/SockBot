@@ -43,6 +43,7 @@ describe('plugins/echo', () => {
             command = {
                 getPost: sinon.stub().resolves({}),
                 getUser: sinon.stub().resolves({}),
+                parent:{},
                 reply: sinon.stub()
             };
         });
@@ -59,9 +60,9 @@ describe('plugins/echo', () => {
             return plugin.deactivate();
         });
         describe('echo()', () => {
-            it('should retrieve post data', () => {
+            it('should not retrieve post data', () => {
                 return plugin._echo(command).then(() => {
-                    command.getPost.called.should.be.true;
+                    command.getPost.called.should.be.false;
                 });
             });
             it('should retrieve user data', () => {
@@ -70,9 +71,7 @@ describe('plugins/echo', () => {
                 });
             });
             it('should reply with expected text', () => {
-                command.getPost.resolves({
-                    content: 'I am a teapot, short and stout.'
-                });
+                command.parent.text = 'I am a teapot, short and stout.';
                 command.getUser.resolves({
                     username: 'Testy_McTesterson'
                 });

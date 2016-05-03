@@ -17,7 +17,8 @@ const utils = require('../../lib/utils'),
     topicModule = require('./topic'),
     categoryModule = require('./category'),
     userModule = require('./user'),
-    notifications = require('./notification');
+    notifications = require('./notification'),
+    chatModule = require('./chat');
 
 /**
  * Forum connector
@@ -32,17 +33,20 @@ class Forum extends EventEmitter {
      * @class
      *
      * @param {object} config Bot configuration data
+     * @param {string} useragent Useragent to use for all requests
      */
-    constructor(config) {
+    constructor(config, useragent) {
         super();
         utils.mapSet(this, {
-            config: config
+            config: config,
+            useragent: useragent
         });
         this.Post = postModule.bindPost(this);
         this.Topic = topicModule.bindTopic(this);
         this.Category = categoryModule.bindCategory(this);
         this.User = userModule.bindUser(this);
         this.Notification = notifications.bindNotification(this);
+        this.Chat = chatModule.bindChat(this);
         this._plugins = [];
     }
 
@@ -55,6 +59,17 @@ class Forum extends EventEmitter {
      */
     get config() {
         return JSON.parse(JSON.stringify(utils.mapGet(this, 'config')));
+    }
+
+    /**
+     * Useragent used by the instance
+     *
+     * @public
+     *
+     * @type {string}
+     */
+    get useragent() {
+        return utils.mapGet(this, 'useragent');
     }
 
     /**
@@ -147,7 +162,10 @@ class Forum extends EventEmitter {
             debug('begin configuration fetch for CSRF token');
             request.get({
                 url: `${this.url}/api/config`,
-                jar: this._cookiejar
+                jar: this._cookiejar,
+                headers: {
+                    'User-Agent': this.useragent
+                }
             }, (err, _, data) => {
                 if (err) {
                     debug('failed configuration fetch for CSRF token');
@@ -182,6 +200,7 @@ class Forum extends EventEmitter {
                     url: `${this.url}/login`,
                     jar: this._cookiejar,
                     headers: {
+                        'User-Agent': this.useragent,
                         'x-csrf-token': config.csrf_token
                     },
                     form: {
@@ -225,6 +244,7 @@ class Forum extends EventEmitter {
             const cookies = this._cookiejar.getCookieString(this.url);
             this.socket = Forum.io(this.url, {
                 extraHeaders: {
+                    'User-Agent': this.useragent,
                     'Cookie': cookies
                 }
             });
@@ -330,6 +350,7 @@ class Forum extends EventEmitter {
             })
             .then(() => {
                 this.Notification.activate();
+                this.Chat.activate();
                 return Promise.all(this._plugins.map((plugin) => plugin.activate()));
             })
             .then(() => this);
@@ -343,6 +364,7 @@ class Forum extends EventEmitter {
     deactivate() {
         const promiser = (resolve, reject) => {
             this.Notification.deactivate();
+            this.Chat.deactivate();
             return Promise.all(this._plugins.map((plugin) => plugin.deactivate()))
                 .then(resolve)
                 .catch(reject);
