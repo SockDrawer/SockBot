@@ -30,7 +30,7 @@ exports.bindUser = function bindUser(forum) {
          * This constructor is intended to be private use only, if you need to construct a user from payload data use
          * `User.parse()` instead
          *
-         * @private
+         * @public
          * @class
          *
          * @param {*} payload Payload to construct the User object out of

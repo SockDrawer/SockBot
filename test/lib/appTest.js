@@ -141,7 +141,6 @@ describe('lib/app', () => {
                 testModule.error.calledWith('Plugin alpha failed to load with error: Error: bad').should.be.true;
             });
         });
-
         it('should reject with error from forum.addPlugin when rejecting', () => {
             const cfg = Math.random();
             const plugin = Math.random();
