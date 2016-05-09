@@ -1,5 +1,7 @@
 'use strict';
 
+const string = require('string');
+
 /**
  * Generate a permalink for a post
  *
@@ -59,4 +61,140 @@ exports.quoteText = function quoteText(text, quotedUser, contextUrl, contextTitl
         parts.unshift(attribution);
     }
     return parts.join('\n');
+};
+
+/**
+ * Generate a hyperlink
+ *
+ * @param {!string} url URL to link to
+ * @param {string} linkText Link Text to display
+ * @returns {string} Linkified url
+ */
+exports.link = function link(url, linkText) {
+    return `[${linkText || 'Click Me.'}](${url})`;
+};
+
+/**
+ * Generate an image
+ *
+ * @param {!string} url Image URL
+ * @param {string} titleText Title text to display
+ * @returns {string} Image incantation
+ */
+exports.image = function image(url, titleText) {
+    if (!titleText) {
+        const parts = url.split('/');
+        titleText = parts[parts.length - 1];
+    }
+    return `![${titleText}](${url} "${titleText.replace(/"/g, '')}")`;
+};
+
+/**
+ * Spoiler something
+ *
+ * @param {!string} body Spoiler body
+ * @param {string} title spoiler title to display
+ * @returns {string} spoilered text
+ */
+exports.spoiler = function spoiler(body, title) {
+    return `<details><summary>${title || 'SPOILER!'}</summary>${body}</details>`;
+};
+
+/**
+ * Format text as bold.
+ *
+ * @param {!string} text Input text
+ * @returns {string} Bolded Text
+ */
+
+exports.bold = function bold(text) {
+    return `**${text.replace(/^\s+|\s+$/g, '')}**`;
+};
+
+/**
+ * Format text as italic.
+ *
+ * @param {!string} text Input text
+ * @returns {string} Italiced Text
+ */
+
+exports.italic = function italic(text) {
+    return `*${text.replace(/^\s+|\s+$/g, '')}*`;
+};
+
+/**
+ * Format text as bold italic.
+ *
+ * @param {!string} text Input text
+ * @returns {string} Bolded and italiced Text
+ */
+
+exports.bolditalic = function bolditalic(text) {
+    return `***${text.replace(/^\s+|\s+$/g, '')}***`;
+};
+
+/**
+ * Format text as a first level header.
+ *
+ * @param {!string} text Header text
+ * @returns {string} Headered Text
+ */
+
+exports.header1 = function header1(text) {
+    return `# ${text}`;
+};
+
+/**
+ * Format text as a second level header.
+ *
+ * @param {!string} text Header text
+ * @returns {string} Headered Text
+ */
+
+exports.header2 = function header2(text) {
+    return `## ${text}`;
+};
+
+/**
+ * Format text as a third level header.
+ *
+ * @param {!string} text Header text
+ * @returns {string} Headered Text
+ */
+
+exports.header3 = function header3(text) {
+    return `### ${text}`;
+};
+
+/**
+ * Format text as a fourth level header.
+ *
+ * @param {!string} text Header text
+ * @returns {string} Headered Text
+ */
+
+exports.header4 = function header4(text) {
+    return `#### ${text}`;
+};
+
+/**
+ * Format text as a fifth level header.
+ *
+ * @param {!string} text Header text
+ * @returns {string} Headered Text
+ */
+
+exports.header5 = function header5(text) {
+    return `##### ${text}`;
+};
+
+/**
+ * Format text as a sixth level header.
+ *
+ * @param {!string} text Header text
+ * @returns {string} Headered Text
+ */
+
+exports.header6 = function header6(text) {
+    return `###### ${text}`;
 };
