@@ -14,8 +14,8 @@ exports.urlForPost = function postLink(postId) {
  * Generate a link for a topic
  *
  * @param {!number} topicId Id of the topic to url
- * @param {string} topicSlug Slug of the topic to url
- * @param {number} postIndex Index of the post to url to in topic
+ * @param {string} [topicSlug] Slug of the topic to url
+ * @param {number} [postIndex] Index of the post to url to in topic
  * @returns {string} Absolute URL for topic
  */
 exports.urlForTopic = function linkTopic(topicId, topicSlug, postIndex) {
@@ -34,6 +34,15 @@ exports.urlForTopic = function linkTopic(topicId, topicSlug, postIndex) {
     return url.replace(/\/*$/, '');
 };
 
+/**
+ * Turn input text into a forum quote
+ *
+ * @param {!string} text Text to quote
+ * @param {string} [quotedUser] User who said the quote
+ * @param {string} [contextUrl] Url to the quoted post
+ * @param {string} [contextTitle] Title of the quote context link
+ * @returns {string} quoted text, with attribution if username provided
+ */
 exports.quoteText = function quoteText(text, quotedUser, contextUrl, contextTitle) {
     const parts = text.split(/\n/).map((line) => `> ${line}`);
     if (quotedUser) {
