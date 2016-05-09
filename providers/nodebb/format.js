@@ -2,7 +2,7 @@
 
 /**
  * Generate a permalink for a post
- * 
+ *
  * @param {!number} postId Id or the post to url
  * @returns {string} Absolute URL for post
  */
@@ -12,7 +12,7 @@ exports.urlForPost = function postLink(postId) {
 
 /**
  * Generate a link for a topic
- * 
+ *
  * @param {!number} topicId Id of the topic to url
  * @param {string} topicSlug Slug of the topic to url
  * @param {number} postIndex Index of the post to url to in topic
@@ -32,4 +32,22 @@ exports.urlForTopic = function linkTopic(topicId, topicSlug, postIndex) {
     }
     const url = `/topic/${topicId}/${topicSlug}/${postIndex}`;
     return url.replace(/\/*$/, '');
+};
+
+exports.quoteText = function quoteText(text, quotedUser, contextUrl, contextTitle) {
+    const parts = text.split(/\n/).map((line) => `> ${line}`);
+    if (quotedUser) {
+        let attribution = `@${quotedUser}`;
+        if (contextUrl) {
+            if (contextTitle) {
+                attribution += ` said in [${contextTitle}](${contextUrl}):`;
+            } else {
+                attribution += ` [said](${contextUrl}):`;
+            }
+        } else {
+            attribution += ' said:';
+        }
+        parts.unshift(attribution);
+    }
+    return parts.join('\n');
 };
