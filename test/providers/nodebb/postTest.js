@@ -108,64 +108,29 @@ describe('providers/nodebb/post', () => {
             beforeEach(() => {
                 post = new Post({});
                 data = utils.mapGet(post);
-                forum._emit = sinon.stub().resolves();
-                forum.Topic = {
-                    get: sinon.stub().resolves({
-                        url: sinon.stub()
-                    })
+                forum.Format = {
+                    urlForPost: sinon.stub()
                 };
             });
-            it('should get topic via Topic.get()', () => {
-                return post.url().then(() => {
-                    forum.Topic.get.called.should.be.true;
-                });
+            it('should return a promise', () => {
+                chai.expect(post.url()).to.be.an.instanceOf(Promise);
             });
-            it('should pass topic id to Topic.get()', () => {
+            it('should pass postId to urlForPost', () => {
                 const expected = Math.random();
-                data.topicId = expected;
+                data.id = expected;
                 return post.url().then(() => {
-                    forum.Topic.get.calledWith(expected).should.be.true;
+                    forum.Format.urlForPost.calledWith(expected).should.be.true;
                 });
             });
-            it('should get post index via `post.getPidIndex`', () => {
-                return post.url().then(() => {
-                    forum._emit.calledWith('posts.getPidIndex').should.be.true;
-                });
+            it('should resolve to result of urlForPost', () => {
+                const expected = `/url/for/post/${Math.random()}`;
+                forum.Format.urlForPost.returns(expected);
+                return post.url().should.become(expected);
             });
-            it('should pass post id and topicId to `post.getPidIndex`', () => {
-                const id = Math.random();
-                const topicId = Math.random();
-                data.id = id;
-                data.topicId = topicId;
-                return post.url().then(() => {
-                    forum._emit.calledWith('posts.getPidIndex', {
-                        pid: id,
-                        tid: topicId
-                    }).should.be.true;
-                });
-            });
-            it('should reject if Topic.get() rejects', () => {
-                forum.Topic.get.rejects('bad');
-                return post.url().should.be.rejected;
-            });
-            it('should reject if retrieved topic.url()', () => {
-                forum.Topic.get.resolves({
-                    url: sinon.stub().rejects('bad')
-                });
-                return post.url().should.be.rejected;
-            });
-            it('should reject if `posts.getPidIndex` rejects', () => {
-                forum._emit.rejects('bad');
-                return post.url().should.be.rejected;
-            });
-            it('should construct expected URL', () => {
-                const topicUrl = `a${Math.random()}b`;
-                const postNumber = `c${Math.random()}d`;
-                forum._emit.resolves(postNumber);
-                forum.Topic.get.resolves({
-                    url: sinon.stub().resolves(topicUrl)
-                });
-                return post.url().should.become(`${topicUrl}/${postNumber}`);
+            it('should reject when urlForPost throws', () => {
+                const error = new Error(`/url/for/post/${Math.random()}`);
+                forum.Format.urlForPost.throws(error);
+                return post.url().should.be.rejectedWith(error);
             });
         });
         describe('reply()', () => {
