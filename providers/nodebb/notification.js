@@ -54,9 +54,9 @@ exports.bindNotification = function bindNotification(forum) {
             payload = utils.parseJSON(payload);
             const body = string(payload.bodyLong || '').unescapeHTML().s;
             let type = 'notification';
-            if (/^\[\[notifications:user_posted_to/i.test(payload.bodyShort)) {
+            if (/^\[\[\w+:user_posted_to/i.test(payload.bodyShort)) {
                 type = 'reply';
-            } else if (/^\[\[mentions:user_mentioned_you_in/i.test(payload.bodyShort)) {
+            } else if (/^\[\[\w+:user_mentioned_you_in/i.test(payload.bodyShort)) {
                 if (mentionTester.test(body)) {
                     type = 'mention';
                 } else {
@@ -372,6 +372,7 @@ exports.bindNotification = function bindNotification(forum) {
         const notification = Notification.parse(data);
         //TODO: apply ignore filtering, also rate limiting
         debug(`Notification ${notification.id}: ${notification.label} received`);
+        debug(`Emitting events: 'notification' and 'notification:${notification.type}'`);
         forum.emit(`notification:${notification.type}`, notification);
         forum.emit('notification', notification);
         const ids = {

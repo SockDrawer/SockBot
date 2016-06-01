@@ -128,13 +128,9 @@ exports.bindPost = function bindPost(forum) {
          * @reject {Error} An Error that occured while retreiving post URL
          */
         url() {
-            return Promise.all([
-                forum.Topic.get(this.topicId).then((topic) => topic.url()),
-                forum._emit('posts.getPidIndex', {
-                    pid: this.id,
-                    tid: this.topicId
-                })
-            ]).then((results) => `${results[0]}/${results[1]}`);
+            return new Promise((resolve) => {
+                resolve(forum.Format.urlForPost(this.id));
+            });
         }
 
         /**
