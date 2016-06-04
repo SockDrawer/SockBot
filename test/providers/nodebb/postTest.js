@@ -139,33 +139,33 @@ describe('providers/nodebb/post', () => {
                 sandbox = null;
             beforeEach(() => {
                 sandbox = sinon.sandbox.create();
-                sandbox.stub(Post, 'reply').resolves();
+                sandbox.stub(Post, '_retryReply').resolves();
                 post = new Post({});
                 data = utils.mapGet(post);
             });
             afterEach(() => sandbox.restore());
-            it('should proxy to Post.reply()', () => {
+            it('should proxy to Post._retryReply()', () => {
                 return post.reply('').then(() => {
-                    Post.reply.called.should.be.true;
+                    Post._retryReply.called.should.be.true;
                 });
             });
-            it('should pass post id, topicId and content to Post.reply()', () => {
+            it('should pass post id, topicId and content to Post._retryReply()', () => {
                 const id = Math.random();
                 const topicId = Math.random();
                 const content = `a${Math.random()}b`;
                 data.id = id;
                 data.topicId = topicId;
                 return post.reply(content).then(() => {
-                    Post.reply.calledWith(topicId, id, content).should.be.true;
+                    Post._retryReply.calledWith(topicId, id, content, 5).should.be.true;
                 });
             });
             it('should resolve to results of Post.reply()', () => {
                 const expected = Math.random();
-                Post.reply.resolves(expected);
+                Post._retryReply.resolves(expected);
                 return post.reply('').should.become(expected);
             });
-            it('should resolve to results of Post.reply()', () => {
-                Post.reply.rejects('bad');
+            it('should resolve to results of Post._retryReply()', () => {
+                Post._retryReply.rejects('bad');
                 return post.reply('').should.be.rejected;
             });
         });
@@ -551,10 +551,47 @@ describe('providers/nodebb/post', () => {
             });
         });
         describe('functions', () => {
+
             describe('reply()', () => {
                 let sandbox = null;
                 beforeEach(() => {
                     sandbox = sinon.sandbox.create();
+                    sandbox.stub(Post, '_retryReply').resolves();
+                });
+                afterEach(() => sandbox.restore());
+                it('should proxy to Post._retryReply()', () => {
+                    return Post.reply('').then(() => {
+                        Post._retryReply.called.should.be.true;
+                    });
+                });
+                it('should pass post id, topicId and content to Post._retryReply()', () => {
+                    const id = Math.random();
+                    const topicId = Math.random();
+                    const content = `a${Math.random()}b`;
+                    return Post.reply(topicId, id, content).then(() => {
+                        Post._retryReply.calledWith(topicId, id, content, 5).should.be.true;
+                    });
+                });
+                it('should resolve to results of Post.reply()', () => {
+                    const expected = Math.random();
+                    Post._retryReply.resolves(expected);
+                    return Post.reply(1, 2, '').should.become(expected);
+                });
+                it('should resolve to results of Post._retryReply()', () => {
+                    Post._retryReply.rejects('bad');
+                    return Post.reply(1, 2, '').should.be.rejected;
+                });
+            });
+            describe('_retryDelay()', () => {
+                it('should return expected delay', () => {
+                    Post._retryDelay().should.equal(10 * 1000);
+                });
+            });
+            describe('_retryReply()', () => {
+                let sandbox = null;
+                beforeEach(() => {
+                    sandbox = sinon.sandbox.create();
+                    sandbox.stub(Post, '_retryDelay').returns(5);
                     sandbox.stub(Post, 'parse').resolves();
                     forum._emit = sinon.stub().resolves();
                 });
@@ -575,6 +612,7 @@ describe('providers/nodebb/post', () => {
                             lock: false,
                             content: content
                         }).should.be.true;
+                        forum._emit.callCount.should.equal(1);
                     });
                 });
                 it('should reject if `posts.reply` rejects', () => {
@@ -592,6 +630,33 @@ describe('providers/nodebb/post', () => {
                     const expected = Math.random();
                     Post.parse.resolves(expected);
                     return Post.reply(1, 2, '').should.become(expected);
+                });
+                it('should retry when first request failes with rate limit error', () => {
+                    forum._emit.onFirstCall().rejects({
+                        message: '[[error:too-many-posts'
+                    });
+                    return Post.reply(1, 2, '').then(() => {
+                        forum._emit.callCount.should.equal(2);
+                    });
+                });
+                it('should retry when first request failes with rate limit error', () => {
+                    forum._emit.rejects({
+                        message: '[[error:too-many-posts'
+                    });
+                    return Post.reply(1, 2, '').then(() => {
+                        chai.assert.fail('should not have resolved');
+                    }, () => {
+                        forum._emit.callCount.should.equal(5);
+                    });
+                });
+                it('should call _retryDelay() to determine wait time', () => {
+                    forum._emit.onFirstCall().rejects({
+                        message: '[[error:too-many-posts'
+                    });
+                    return Post.reply(1, 2, '').then(() => {
+                        forum._emit.callCount.should.equal(2);
+                        Post._retryDelay.called.should.be.true;
+                    });
                 });
             });
             describe('get()', () => {
