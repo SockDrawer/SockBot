@@ -621,6 +621,34 @@ describe('lib/config', () => {
                 const command = new Command({}, expected);
                 utils.mapGet(command).parent.should.equal(expected);
             });
+            it('should set executable for unknown imperative command', () => {
+                const command = new Command({
+                    mention: false,
+                    command: 'ook!'
+                }, {});
+                utils.mapGet(command).executable.should.be.true;
+            });
+            it('should set executable for known imperative command', () => {
+                const command = new Command({
+                    mention: false,
+                    command: 'help'
+                }, {});
+                utils.mapGet(command).executable.should.be.true;
+            });
+            it('should not set executable for unknown mention command', () => {
+                const command = new Command({
+                    mention: true,
+                    command: 'ook!'
+                }, {});
+                utils.mapGet(command).executable.should.be.false;
+            });
+            it('should set executable for known mention command', () => {
+                const command = new Command({
+                    mention: true,
+                    command: 'help'
+                }, {});
+                utils.mapGet(command).executable.should.be.true;
+            });
         });
         describe('simple getters', () => {
             let command, data;
@@ -628,7 +656,7 @@ describe('lib/config', () => {
                 command = new Command({}, {});
                 data = utils.mapGet(command);
             });
-            ['line', 'command', 'mention', 'args', 'parent', 'replyText'].forEach((property) => {
+            ['line', 'command', 'mention', 'args', 'parent', 'replyText', 'executable'].forEach((property) => {
                 it(`should allow get of ${property} from storage`, () => {
                     const expected = Math.random();
                     data[property] = expected;
@@ -688,18 +716,31 @@ describe('lib/config', () => {
                 command = new Command({}, {});
                 data = utils.mapGet(command);
             });
-            it('should set replyText property', () => {
-                const expected = Math.random();
-                const spy = sinon.stub().resolves(expected);
+            it('should execute executable command', () => {
+                const spy = sinon.stub().resolves();
                 data.handler = spy;
-                return command.execute().should.become(expected);
+                data.executable = true;
+                return command.execute().then(() => {
+                    spy.called.should.be.true;
+                });
+            });
+            it('should bypass execution for non-executable command', () => {
+                const spy = sinon.stub().resolves();
+                data.handler = spy;
+                data.executable = false;
+                return command.execute().then(() => {
+                    spy.called.should.be.false;
+                });
             });
         });
     });
     describe('Commands', () => {
-        let forum, Commands;
+        let forum, Commands, username;
         beforeEach(() => {
-            forum = {};
+            username = `fred_${Math.random()}`;
+            forum = {
+                username: username
+            };
             commands.bindCommands(forum);
             Commands = commands.internals.Commands;
         });
@@ -727,6 +768,21 @@ describe('lib/config', () => {
                 const expected = '!123\n!456';
                 const command = new Commands({}, expected);
                 utils.mapGet(command).commands.should.have.length(2);
+            });
+            it('should store parsed commands', () => {
+                const expected = '!123\n!456';
+                const command = new Commands({}, expected);
+                utils.mapGet(command).commands.should.have.length(2);
+            });
+            it('should store parsed mention commands', () => {
+                const expected = `@${username} help`;
+                const command = new Commands({}, expected);
+                utils.mapGet(command).commands.should.have.length(1);
+            });
+            it('should ignore unknown mention commands', () => {
+                const expected = `@${username} NOT_A_COMMAND_${Math.random()}`;
+                const command = new Commands({}, expected);
+                utils.mapGet(command).commands.should.have.length(0);
             });
         });
         describe('simple getters', () => {
