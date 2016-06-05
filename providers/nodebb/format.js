@@ -1,7 +1,5 @@
 'use strict';
 
-const string = require('string');
-
 /**
  * Generate a permalink for a post
  *
