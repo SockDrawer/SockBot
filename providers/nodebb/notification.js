@@ -370,11 +370,8 @@ exports.bindNotification = function bindNotification(forum) {
      */
     function notifyHandler(data) {
         const notification = Notification.parse(data);
-        //TODO: apply ignore filtering, also rate limiting
         debug(`Notification ${notification.id}: ${notification.label} received`);
-        debug(`Emitting events: 'notification' and 'notification:${notification.type}'`);
-        forum.emit(`notification:${notification.type}`, notification);
-        forum.emit('notification', notification);
+
         const ids = {
             post: notification.postId,
             topic: notification.topicId,
@@ -384,7 +381,15 @@ exports.bindNotification = function bindNotification(forum) {
         return notification.getText()
             .then((postData) => forum.Commands.get(ids,
                 postData, (content) => forum.Post.reply(notification.topicId, notification.postId, content)))
-            .then((command) => command.execute());
+            .then((commands) => {
+                if (commands.commands.length === 0) {
+                    debug(`Emitting events: 'notification' and 'notification:${notification.type}'`);
+                    forum.emit(`notification:${notification.type}`, notification);
+                    forum.emit('notification', notification);
+                }
+                return commands;
+            })
+            .then((commands) => commands.execute());
     }
 
     return Notification;

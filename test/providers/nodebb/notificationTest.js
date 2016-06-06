@@ -541,10 +541,11 @@ describe('providers/nodebb/notification', () => {
         describe('internal notifyHandler()', () => {
             let sandbox = null,
                 notifier = null,
-                command = null,
+                commands = null,
                 notifyHandler = null;
             beforeEach(() => {
-                command = {
+                commands = {
+                    commands: [1],
                     execute: sinon.stub().resolves()
                 };
                 notifier = {
@@ -557,7 +558,7 @@ describe('providers/nodebb/notification', () => {
                 };
                 forum.emit = sinon.spy();
                 forum.Commands = {
-                    get: sinon.stub().resolves(command)
+                    get: sinon.stub().resolves(commands)
                 };
                 forum.Post = {
                     reply: sinon.stub().resolves()
@@ -621,22 +622,39 @@ describe('providers/nodebb/notification', () => {
             it('should execute parsed commands', () => {
                 const spy = sinon.spy();
                 forum.Commands.get.resolves({
+                    commands: [1],
                     execute: spy
                 });
                 return notifyHandler(5).then(() => {
                     spy.called.should.be.true;
                 });
             });
-            it('should emit specific notification event', () => {
+            it('should emit specific notification event when no commands in post', () => {
+                commands.commands = [];
                 notifier.type = `a${Math.random()}b`;
                 return notifyHandler(5).then(() => {
                     forum.emit.calledWith(`notification:${notifier.type}`, notifier).should.be.true;
                 });
             });
-            it('should emit general notification event', () => {
+            it('should not emit specific notification event when commands in post', () => {
+                commands.commands = [1, 2, 3];
+                notifier.type = `a${Math.random()}b`;
+                return notifyHandler(5).then(() => {
+                    forum.emit.calledWith(`notification:${notifier.type}`, notifier).should.be.false;
+                });
+            });
+            it('should emit general notification event when no commands in post', () => {
+                commands.commands = [];
                 notifier.type = `a${Math.random()}b`;
                 return notifyHandler(5).then(() => {
                     forum.emit.calledWith('notification', notifier).should.be.true;
+                });
+            });
+            it('should not emit general notification event when commands in post', () => {
+                commands.commands = [1, 2, 3, 4];
+                notifier.type = `a${Math.random()}b`;
+                return notifyHandler(5).then(() => {
+                    forum.emit.calledWith('notification', notifier).should.be.false;
                 });
             });
         });

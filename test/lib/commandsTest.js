@@ -621,6 +621,34 @@ describe('lib/config', () => {
                 const command = new Command({}, expected);
                 utils.mapGet(command).parent.should.equal(expected);
             });
+            it('should set executable for unknown imperative command', () => {
+                const command = new Command({
+                    mention: false,
+                    command: 'ook!'
+                }, {});
+                utils.mapGet(command).executable.should.be.true;
+            });
+            it('should set executable for known imperative command', () => {
+                const command = new Command({
+                    mention: false,
+                    command: 'help'
+                }, {});
+                utils.mapGet(command).executable.should.be.true;
+            });
+            it('should not set executable for unknown mention command', () => {
+                const command = new Command({
+                    mention: true,
+                    command: 'ook!'
+                }, {});
+                utils.mapGet(command).executable.should.be.false;
+            });
+            it('should set executable for known mention command', () => {
+                const command = new Command({
+                    mention: true,
+                    command: 'help'
+                }, {});
+                utils.mapGet(command).executable.should.be.true;
+            });
         });
         describe('simple getters', () => {
             let command, data;
@@ -628,7 +656,7 @@ describe('lib/config', () => {
                 command = new Command({}, {});
                 data = utils.mapGet(command);
             });
-            ['line', 'command', 'mention', 'args', 'parent', 'replyText'].forEach((property) => {
+            ['line', 'command', 'mention', 'args', 'parent', 'replyText', 'executable'].forEach((property) => {
                 it(`should allow get of ${property} from storage`, () => {
                     const expected = Math.random();
                     data[property] = expected;
@@ -688,18 +716,31 @@ describe('lib/config', () => {
                 command = new Command({}, {});
                 data = utils.mapGet(command);
             });
-            it('should set replyText property', () => {
-                const expected = Math.random();
-                const spy = sinon.stub().resolves(expected);
+            it('should execute executable command', () => {
+                const spy = sinon.stub().resolves();
                 data.handler = spy;
-                return command.execute().should.become(expected);
+                data.executable = true;
+                return command.execute().then(() => {
+                    spy.called.should.be.true;
+                });
+            });
+            it('should bypass execution for non-executable command', () => {
+                const spy = sinon.stub().resolves();
+                data.handler = spy;
+                data.executable = false;
+                return command.execute().then(() => {
+                    spy.called.should.be.false;
+                });
             });
         });
     });
     describe('Commands', () => {
-        let forum, Commands;
+        let forum, Commands, username;
         beforeEach(() => {
-            forum = {};
+            username = `fred_${Math.random()}`;
+            forum = {
+                username: username
+            };
             commands.bindCommands(forum);
             Commands = commands.internals.Commands;
         });
@@ -727,6 +768,21 @@ describe('lib/config', () => {
                 const expected = '!123\n!456';
                 const command = new Commands({}, expected);
                 utils.mapGet(command).commands.should.have.length(2);
+            });
+            it('should store parsed commands', () => {
+                const expected = '!123\n!456';
+                const command = new Commands({}, expected);
+                utils.mapGet(command).commands.should.have.length(2);
+            });
+            it('should store parsed mention commands', () => {
+                const expected = `@${username} help`;
+                const command = new Commands({}, expected);
+                utils.mapGet(command).commands.should.have.length(1);
+            });
+            it('should ignore unknown mention commands', () => {
+                const expected = `@${username} NOT_A_COMMAND_${Math.random()}`;
+                const command = new Commands({}, expected);
+                utils.mapGet(command).commands.should.have.length(0);
             });
         });
         describe('simple getters', () => {
@@ -808,75 +864,127 @@ describe('lib/config', () => {
             });
         });
         describe('execute()', () => {
-            let command, data;
-            beforeEach(() => {
-                command = new Commands({}, '');
-                data = utils.mapGet(command);
-            });
-            it('should resolve to executing instance', () => {
-                return command.execute().should.become(command);
-            });
-            it('should execute contained commands', () => {
-                const spy = sinon.stub().resolves();
-                const cmd = {
-                    execute: spy
-                };
-                data.commands = [cmd, cmd, cmd, cmd];
-                return command.execute().then(() => {
-                    spy.callCount.should.equal(4);
+            describe('non limited commands', () => {
+                let command, data;
+                beforeEach(() => {
+                    command = new Commands({}, '');
+                    data = utils.mapGet(command);
+                    data._replyFn = sinon.stub().resolves();
+                });
+                it('should resolve to executing instance', () => {
+                    return command.execute().should.become(command);
+                });
+                it('should execute contained commands', () => {
+                    const spy = sinon.stub().resolves();
+                    const cmd = {
+                        execute: spy
+                    };
+                    data.commands = [cmd, cmd, cmd, cmd];
+                    return command.execute().then(() => {
+                        spy.callCount.should.equal(4);
+                    });
+                });
+                it('should execute contained commands sequentially', () => {
+                    data.commands = [];
+                    for (let i = 0; i < 10; i += 1) {
+                        data.commands.push({
+                            execute: sinon.stub().resolves()
+                        });
+                    }
+                    return command.execute().then(() => {
+                        for (let i = 0; i < data.commands.length - 1; i += 1) {
+                            const spy1 = data.commands[i].execute,
+                                spy2 = data.commands[i + 1].execute;
+                            spy1.calledBefore(spy2).should.be.true;
+                        }
+                    });
+                });
+                it('should post command results', () => {
+                    forum.Post = {
+                        reply: sinon.stub().resolves()
+                    };
+                    const expected = 'foo';
+                    data.ids.post = 1;
+                    data.ids.topic = 50;
+                    data.commands = [{
+                        execute: sinon.stub().resolves(),
+                        replyText: expected
+                    }];
+                    data._replyFn = sinon.stub().resolves();
+                    return command.execute().then(() => {
+                        data._replyFn.calledWith(expected).should.be.true;
+                    });
+                });
+                it('should execute onError when any command rejects', () => {
+                    forum.Post = {
+                        reply: sinon.stub().rejects('foo')
+                    };
+                    forum.emit = sinon.spy();
+                    const spy = sinon.stub().resolves();
+                    const rejector = sinon.stub().rejects('bad');
+                    data.ids.post = 1;
+                    data.ids.topic = 50;
+                    data._replyFn = sinon.stub().resolves();
+                    data.commands = [{
+                        execute: spy
+                    }, {
+                        execute: rejector
+                    }, {
+                        execute: spy
+                    }];
+                    return command.execute().then(() => {
+                        forum.Post.reply.called.should.be.false;
+                        data._replyFn.calledWith('An unexpected error `bad` occured and your commands' +
+                            ' could not be processed!').should.be.true;
+                    });
+                });
+                it('should emit error when onError rejects', () => {
+                    forum.emit = sinon.spy();
+                    data.commands = [{
+                        execute: sinon.stub().rejects('bad')
+                    }];
+                    data._replyFn = sinon.stub().rejects('badbad');
+                    return command.execute().then(() => {
+                        forum.emit.calledWith('logError').should.be.true;
+                    });
                 });
             });
-            it('should post command results', () => {
-                forum.Post = {
-                    reply: sinon.stub().resolves()
-                };
-                const expected = 'foo';
-                data.ids.post = 1;
-                data.ids.topic = 50;
-                data.commands = [{
-                    execute: sinon.stub().resolves(),
-                    replyText: expected
-                }];
-                data._replyFn = sinon.stub().resolves();
-                return command.execute().then(() => {
-                    data._replyFn.calledWith(expected).should.be.true;
+            describe('too many commands executing', () => {
+                let command, data;
+                beforeEach(() => {
+                    forum.emit = sinon.spy();
+                    command = new Commands({}, '');
+                    data = utils.mapGet(command);
+                    data._replyFn = sinon.stub().resolves();
+                    data.commands = [];
+                    for (let i = 0; i < 20; i += 1) {
+                        data.commands.push({
+                            execute: sinon.stub().resolves()
+                        });
+                    }
                 });
-            });
-            it('should execute onError when any command rejects', () => {
-                forum.Post = {
-                    reply: sinon.stub().resolves()
-                };
-                forum.emit = sinon.spy();
-                const spy = sinon.stub().resolves();
-                const rejector = sinon.stub().rejects('bad');
-                data.ids.post = 1;
-                data.ids.topic = 50;
-                data._replyFn = sinon.stub().resolves();
-                data.commands = [{
-                    execute: spy
-                }, {
-                    execute: rejector
-                }, {
-                    execute: spy
-                }];
-                return command.execute().then(() => {
-                    forum.Post.reply.called.should.be.false;
-                    data._replyFn.calledWith('An unexpected error `bad` occured and your commands' +
-                        ' could not be processed!').should.be.true;
+                it('should resolve to executing instance', () => {
+                    return command.execute().should.become(command);
                 });
-            });
-            it('should emit error when onError rejects', () => {
-                forum.Post = {
-                    reply: sinon.stub().rejects('badbad')
-                };
-                forum.emit = sinon.spy();
-                data.ids.post = 1;
-                data.ids.topic = 50;
-                data.commands = [{
-                    execute: sinon.stub().rejects('bad')
-                }];
-                return command.execute().then(() => {
-                    forum.emit.calledWith('logError').should.be.true;
+                it('should not execute contained commands', () => {
+                    return command.execute().then(() => {
+                        data.commands.forEach((cmd) => {
+                            cmd.execute.called.should.be.false;
+                        });
+                    });
+                });
+                it('should post rate limit results', () => {
+                    const expected = 'Your request contained too many commands to process.\n' +
+                        '\nPlease try again with fewer commands.';
+                    data._replyFn = sinon.stub().resolves();
+                    return command.execute().then(() => {
+                        data._replyFn.calledWith(expected).should.be.true;
+                    });
+                });
+                it('should emit error when limiting execution', () => {
+                    return command.execute().then(() => {
+                        forum.emit.calledWith('logError').should.be.true;
+                    });
                 });
             });
         });

@@ -146,7 +146,29 @@ exports.bindPost = function bindPost(forum) {
          * @reject {Error} An Error that occured while posting
          */
         reply(content) {
-            return Post.reply(this.topicId, this.id, content);
+            return Post._retryReply(this.topicId, this.id, content, 5);
+        }
+
+        static _retryDelay() {
+            return 10 * 1000;
+        }
+
+        static _retryReply(topicId, postId, content, retries) {
+            return forum._emit('posts.reply', {
+                tid: topicId,
+                content: content,
+                toPid: postId,
+                lock: false
+            }).then((result) => Post.parse(result), (err) => {
+                retries -= 1;
+                if (/^\[\[error:too-many-posts/.test(err.message) && retries > 0) {
+                    return new Promise((resolve, reject) => {
+                        setTimeout(() => Post._retryReply(topicId, postId, content, retries)
+                            .then(resolve, reject), Post._retryDelay());
+                    });
+                }
+                throw err;
+            });
         }
 
         /**
@@ -165,12 +187,7 @@ exports.bindPost = function bindPost(forum) {
          * @reject {Error} An Error that occured while posting
          */
         static reply(topicId, postId, content) {
-            return forum._emit('posts.reply', {
-                tid: topicId,
-                content: content,
-                toPid: postId,
-                lock: false
-            }).then((result) => Post.parse(result));
+            return Post._retryReply(topicId, postId, content, 5);
         }
 
         /**

@@ -20,6 +20,7 @@ NodeBB provider module User class
             * [.args](#sockbot.lib.module_commands..Command+args) : <code>Array.&lt;string&gt;</code>
             * [.parent](#sockbot.lib.module_commands..Command+parent) : <code>Commands</code>
             * [.replyText](#sockbot.lib.module_commands..Command+replyText) : <code>string</code>
+            * [.executable](#sockbot.lib.module_commands..Command+executable) : <code>boolean</code>
             * [.execute()](#sockbot.lib.module_commands..Command+execute) ⇒ <code>Promise</code>
             * [.getPost()](#sockbot.lib.module_commands..Command+getPost) ⇒ <code>Promise.&lt;Post&gt;</code>
             * [.getTopic()](#sockbot.lib.module_commands..Command+getTopic) ⇒ <code>Promise.&lt;Topic&gt;</code>
@@ -84,6 +85,7 @@ Command Class. Represents a single command within a post
     * [.args](#sockbot.lib.module_commands..Command+args) : <code>Array.&lt;string&gt;</code>
     * [.parent](#sockbot.lib.module_commands..Command+parent) : <code>Commands</code>
     * [.replyText](#sockbot.lib.module_commands..Command+replyText) : <code>string</code>
+    * [.executable](#sockbot.lib.module_commands..Command+executable) : <code>boolean</code>
     * [.execute()](#sockbot.lib.module_commands..Command+execute) ⇒ <code>Promise</code>
     * [.getPost()](#sockbot.lib.module_commands..Command+getPost) ⇒ <code>Promise.&lt;Post&gt;</code>
     * [.getTopic()](#sockbot.lib.module_commands..Command+getTopic) ⇒ <code>Promise.&lt;Topic&gt;</code>
@@ -140,6 +142,13 @@ Parent Commands object
 
 #### command.replyText : <code>string</code>
 Text to post as a reply to the command
+
+**Kind**: instance property of <code>[Command](#sockbot.lib.module_commands..Command)</code>  
+**Access:** public  
+<a name="sockbot.lib.module_commands..Command+executable"></a>
+
+#### command.executable : <code>boolean</code>
+Indicates if this command will execute any handler
 
 **Kind**: instance property of <code>[Command](#sockbot.lib.module_commands..Command)</code>  
 **Access:** public  

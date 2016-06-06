@@ -1,6 +1,35 @@
 'use strict';
 
-const string = require('string');
+/**
+ * stringify a parameter.
+ *
+ * falsy things become empty string, everything else is toStringed
+ *
+ * @private
+ * @param {*} text thing to stringify
+ * @returns {string} stringified text
+ */
+function stringify(text) {
+    return `${text || ''}`;
+}
+
+/**
+ * Apply a prefix (and suffix) to a text
+ *
+ * @private
+ * @param {string} prefix Prefix to apply
+ * @param {*} text Text to wrap
+ * @param {string} [suffix=''] Suffix to apply
+ * @returns {string} wrapped Text
+ */
+function prefixifier(prefix, text, suffix) {
+    text = stringify(text);
+    if (!text) {
+        return '';
+    }
+    suffix = suffix || '';
+    return prefix + text.replace(/^\s+|\s+$/g, '') + suffix;
+}
 
 /**
  * Generate a permalink for a post
@@ -9,7 +38,7 @@ const string = require('string');
  * @returns {string} Absolute URL for post
  */
 exports.urlForPost = function postLink(postId) {
-    return `/post/${postId}`;
+    return prefixifier('/post/', postId);
 };
 
 /**
@@ -21,6 +50,9 @@ exports.urlForPost = function postLink(postId) {
  * @returns {string} Absolute URL for topic
  */
 exports.urlForTopic = function linkTopic(topicId, topicSlug, postIndex) {
+    if (!topicId || !`${topicId}`) {
+        return '';
+    }
     if (typeof topicSlug === 'number' && !postIndex) {
         // No slug provided. i can deal with that
         postIndex = topicSlug;
@@ -46,14 +78,21 @@ exports.urlForTopic = function linkTopic(topicId, topicSlug, postIndex) {
  * @returns {string} quoted text, with attribution if username provided
  */
 exports.quoteText = function quoteText(text, quotedUser, contextUrl, contextTitle) {
-    const parts = text.split(/\n/).map((line) => `> ${line}`);
-    if (quotedUser) {
-        let attribution = `@${quotedUser}`;
-        if (contextUrl) {
-            if (contextTitle) {
-                attribution += ` said in [${contextTitle}](${contextUrl}):`;
+    const quote = stringify(text),
+        user = stringify(quotedUser),
+        url = stringify(contextUrl),
+        title = stringify(contextTitle);
+    if (!quote) {
+        return '';
+    }
+    const parts = quote.split(/\n/).map((line) => `> ${line}`);
+    if (user) {
+        let attribution = `@${user}`;
+        if (url) {
+            if (title) {
+                attribution += ` said in [${title}](${url}):`;
             } else {
-                attribution += ` [said](${contextUrl}):`;
+                attribution += ` [said](${url}):`;
             }
         } else {
             attribution += ' said:';
@@ -64,6 +103,27 @@ exports.quoteText = function quoteText(text, quotedUser, contextUrl, contextTitl
 };
 
 /**
+ * Construct a result consisting of two data points in three parts
+ *
+ * @private
+ * @param {string} before Prefix
+ * @param {*} item1 First part
+ * @param {string} defaultItem1 Value to use for item1 when item1 is falsy
+ * @param {string} middle part to go between item1 and item2
+ * @param {*} item2 Second Part
+ * @param {string} after Suffix
+ * @returns {string} Formatted thing
+ */
+function threeParts(before, item1, defaultItem1, middle, item2, after) {
+    item2 = stringify(item2);
+    item1 = stringify(item1);
+    if (!item2) {
+        return '';
+    }
+    return before + (item1 || defaultItem1) + middle + item2 + after;
+}
+
+/**
  * Generate a hyperlink
  *
  * @param {!string} url URL to link to
@@ -71,7 +131,7 @@ exports.quoteText = function quoteText(text, quotedUser, contextUrl, contextTitl
  * @returns {string} Linkified url
  */
 exports.link = function link(url, linkText) {
-    return `[${linkText || 'Click Me.'}](${url})`;
+    return threeParts('[', linkText, 'Click Me.', '](', url, ')');
 };
 
 /**
@@ -82,6 +142,11 @@ exports.link = function link(url, linkText) {
  * @returns {string} Image incantation
  */
 exports.image = function image(url, titleText) {
+    url = stringify(url);
+    titleText = stringify(titleText);
+    if (!url) {
+        return '';
+    }
     if (!titleText) {
         const parts = url.split('/');
         titleText = parts[parts.length - 1];
@@ -97,7 +162,7 @@ exports.image = function image(url, titleText) {
  * @returns {string} spoilered text
  */
 exports.spoiler = function spoiler(body, title) {
-    return `<details><summary>${title || 'SPOILER!'}</summary>${body}</details>`;
+    return threeParts('<details><summary>', title, 'SPOILER!', '</summary>', body, '</details>');
 };
 
 /**
@@ -108,7 +173,7 @@ exports.spoiler = function spoiler(body, title) {
  */
 
 exports.bold = function bold(text) {
-    return `**${text.replace(/^\s+|\s+$/g, '')}**`;
+    return prefixifier('**', text, '**');
 };
 
 /**
@@ -119,7 +184,7 @@ exports.bold = function bold(text) {
  */
 
 exports.italic = function italic(text) {
-    return `*${text.replace(/^\s+|\s+$/g, '')}*`;
+    return prefixifier('*', text, '*');
 };
 
 /**
@@ -130,7 +195,7 @@ exports.italic = function italic(text) {
  */
 
 exports.bolditalic = function bolditalic(text) {
-    return `***${text.replace(/^\s+|\s+$/g, '')}***`;
+    return prefixifier('***', text, '***');
 };
 
 /**
@@ -141,7 +206,7 @@ exports.bolditalic = function bolditalic(text) {
  */
 
 exports.header1 = function header1(text) {
-    return `# ${text}`;
+    return prefixifier('# ', text);
 };
 
 /**
@@ -152,7 +217,7 @@ exports.header1 = function header1(text) {
  */
 
 exports.header2 = function header2(text) {
-    return `## ${text}`;
+    return prefixifier('## ', text);
 };
 
 /**
@@ -163,7 +228,7 @@ exports.header2 = function header2(text) {
  */
 
 exports.header3 = function header3(text) {
-    return `### ${text}`;
+    return prefixifier('### ', text);
 };
 
 /**
@@ -174,7 +239,7 @@ exports.header3 = function header3(text) {
  */
 
 exports.header4 = function header4(text) {
-    return `#### ${text}`;
+    return prefixifier('#### ', text);
 };
 
 /**
@@ -185,7 +250,7 @@ exports.header4 = function header4(text) {
  */
 
 exports.header5 = function header5(text) {
-    return `##### ${text}`;
+    return prefixifier('##### ', text);
 };
 
 /**
@@ -196,5 +261,5 @@ exports.header5 = function header5(text) {
  */
 
 exports.header6 = function header6(text) {
-    return `###### ${text}`;
+    return prefixifier('###### ', text);
 };

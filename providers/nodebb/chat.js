@@ -265,9 +265,9 @@ exports.bindChat = function bindChat(forum) {
 
         /**
          * Apply an operation to a list of users
-         * 
+         *
          * @private
-         * 
+         *
          * @param {string} action Action to apply
          * @param {User|User[]} users List of users to apply action to
          * @returns {Promise} resolves when action has been applied to all users
