@@ -882,6 +882,21 @@ describe('lib/config', () => {
                     spy.callCount.should.equal(4);
                 });
             });
+            it('should execute contained commands sequentially', () => {
+                data.commands = [];
+                for (let i = 0; i < 10; i += 1) {
+                    data.commands.push({
+                        execute: sinon.stub().resolves()
+                    });
+                }
+                return command.execute().then(() => {
+                    for (let i = 0; i < data.commands.length - 1; i += 1) {
+                        const spy1 = data.commands[i].execute,
+                            spy2 = data.commands[i + 1].execute;
+                        spy1.calledBefore(spy2).should.be.true;
+                    }
+                });
+            });
             it('should post command results', () => {
                 forum.Post = {
                     reply: sinon.stub().resolves()
