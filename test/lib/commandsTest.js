@@ -864,90 +864,127 @@ describe('lib/config', () => {
             });
         });
         describe('execute()', () => {
-            let command, data;
-            beforeEach(() => {
-                command = new Commands({}, '');
-                data = utils.mapGet(command);
-            });
-            it('should resolve to executing instance', () => {
-                return command.execute().should.become(command);
-            });
-            it('should execute contained commands', () => {
-                const spy = sinon.stub().resolves();
-                const cmd = {
-                    execute: spy
-                };
-                data.commands = [cmd, cmd, cmd, cmd];
-                return command.execute().then(() => {
-                    spy.callCount.should.equal(4);
+            describe('non limited commands', () => {
+                let command, data;
+                beforeEach(() => {
+                    command = new Commands({}, '');
+                    data = utils.mapGet(command);
+                    data._replyFn = sinon.stub().resolves();
+                });
+                it('should resolve to executing instance', () => {
+                    return command.execute().should.become(command);
+                });
+                it('should execute contained commands', () => {
+                    const spy = sinon.stub().resolves();
+                    const cmd = {
+                        execute: spy
+                    };
+                    data.commands = [cmd, cmd, cmd, cmd];
+                    return command.execute().then(() => {
+                        spy.callCount.should.equal(4);
+                    });
+                });
+                it('should execute contained commands sequentially', () => {
+                    data.commands = [];
+                    for (let i = 0; i < 10; i += 1) {
+                        data.commands.push({
+                            execute: sinon.stub().resolves()
+                        });
+                    }
+                    return command.execute().then(() => {
+                        for (let i = 0; i < data.commands.length - 1; i += 1) {
+                            const spy1 = data.commands[i].execute,
+                                spy2 = data.commands[i + 1].execute;
+                            spy1.calledBefore(spy2).should.be.true;
+                        }
+                    });
+                });
+                it('should post command results', () => {
+                    forum.Post = {
+                        reply: sinon.stub().resolves()
+                    };
+                    const expected = 'foo';
+                    data.ids.post = 1;
+                    data.ids.topic = 50;
+                    data.commands = [{
+                        execute: sinon.stub().resolves(),
+                        replyText: expected
+                    }];
+                    data._replyFn = sinon.stub().resolves();
+                    return command.execute().then(() => {
+                        data._replyFn.calledWith(expected).should.be.true;
+                    });
+                });
+                it('should execute onError when any command rejects', () => {
+                    forum.Post = {
+                        reply: sinon.stub().rejects('foo')
+                    };
+                    forum.emit = sinon.spy();
+                    const spy = sinon.stub().resolves();
+                    const rejector = sinon.stub().rejects('bad');
+                    data.ids.post = 1;
+                    data.ids.topic = 50;
+                    data._replyFn = sinon.stub().resolves();
+                    data.commands = [{
+                        execute: spy
+                    }, {
+                        execute: rejector
+                    }, {
+                        execute: spy
+                    }];
+                    return command.execute().then(() => {
+                        forum.Post.reply.called.should.be.false;
+                        data._replyFn.calledWith('An unexpected error `bad` occured and your commands' +
+                            ' could not be processed!').should.be.true;
+                    });
+                });
+                it('should emit error when onError rejects', () => {
+                    forum.emit = sinon.spy();
+                    data.commands = [{
+                        execute: sinon.stub().rejects('bad')
+                    }];
+                    data._replyFn = sinon.stub().rejects('badbad');
+                    return command.execute().then(() => {
+                        forum.emit.calledWith('logError').should.be.true;
+                    });
                 });
             });
-            it('should execute contained commands sequentially', () => {
-                data.commands = [];
-                for (let i = 0; i < 10; i += 1) {
-                    data.commands.push({
-                        execute: sinon.stub().resolves()
-                    });
-                }
-                return command.execute().then(() => {
-                    for (let i = 0; i < data.commands.length - 1; i += 1) {
-                        const spy1 = data.commands[i].execute,
-                            spy2 = data.commands[i + 1].execute;
-                        spy1.calledBefore(spy2).should.be.true;
+            describe('too many commands executing', () => {
+                let command, data;
+                beforeEach(() => {
+                    forum.emit = sinon.spy();
+                    command = new Commands({}, '');
+                    data = utils.mapGet(command);
+                    data._replyFn = sinon.stub().resolves();
+                    data.commands = [];
+                    for (let i = 0; i < 20; i += 1) {
+                        data.commands.push({
+                            execute: sinon.stub().resolves()
+                        });
                     }
                 });
-            });
-            it('should post command results', () => {
-                forum.Post = {
-                    reply: sinon.stub().resolves()
-                };
-                const expected = 'foo';
-                data.ids.post = 1;
-                data.ids.topic = 50;
-                data.commands = [{
-                    execute: sinon.stub().resolves(),
-                    replyText: expected
-                }];
-                data._replyFn = sinon.stub().resolves();
-                return command.execute().then(() => {
-                    data._replyFn.calledWith(expected).should.be.true;
+                it('should resolve to executing instance', () => {
+                    return command.execute().should.become(command);
                 });
-            });
-            it('should execute onError when any command rejects', () => {
-                forum.Post = {
-                    reply: sinon.stub().resolves()
-                };
-                forum.emit = sinon.spy();
-                const spy = sinon.stub().resolves();
-                const rejector = sinon.stub().rejects('bad');
-                data.ids.post = 1;
-                data.ids.topic = 50;
-                data._replyFn = sinon.stub().resolves();
-                data.commands = [{
-                    execute: spy
-                }, {
-                    execute: rejector
-                }, {
-                    execute: spy
-                }];
-                return command.execute().then(() => {
-                    forum.Post.reply.called.should.be.false;
-                    data._replyFn.calledWith('An unexpected error `bad` occured and your commands' +
-                        ' could not be processed!').should.be.true;
+                it('should not execute contained commands', () => {
+                    return command.execute().then(() => {
+                        data.commands.forEach((cmd) => {
+                            cmd.execute.called.should.be.false;
+                        });
+                    });
                 });
-            });
-            it('should emit error when onError rejects', () => {
-                forum.Post = {
-                    reply: sinon.stub().rejects('badbad')
-                };
-                forum.emit = sinon.spy();
-                data.ids.post = 1;
-                data.ids.topic = 50;
-                data.commands = [{
-                    execute: sinon.stub().rejects('bad')
-                }];
-                return command.execute().then(() => {
-                    forum.emit.calledWith('logError').should.be.true;
+                it('should post rate limit results', () => {
+                    const expected = 'Your request contained too many commands to process.\n' +
+                        '\nPlease try again with fewer commands.';
+                    data._replyFn = sinon.stub().resolves();
+                    return command.execute().then(() => {
+                        data._replyFn.calledWith(expected).should.be.true;
+                    });
+                });
+                it('should emit error when limiting execution', () => {
+                    return command.execute().then(() => {
+                        forum.emit.calledWith('logError').should.be.true;
+                    });
                 });
             });
         });
