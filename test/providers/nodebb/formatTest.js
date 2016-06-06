@@ -347,45 +347,45 @@ describe('providers/nodebb/format', () => {
             it(`should remove leading and trailing whitespace for ${cfg[0]} text`, () => {
                 testModule[cfg[0]](' \t test text \t  \t\t ').should.equal(cfg[1]);
             });
-            describe('resists bad input', () => {
-                [
-                    undefined, null, false, '', 0, NaN, []
-                ].forEach((input) => {
-                    const expected = '';
-                    it(`bold: should provide sensible output for input: ${input}`, () => {
-                        const actual = testModule.bold(input);
-                        actual.should.equal(expected);
-                    });
-                    it(`italic: should provide sensible output for input: ${input}`, () => {
-                        const actual = testModule.italic(input);
-                        actual.should.equal(expected);
-                    });
-                    it(`bolditalic: should provide sensible output for input: ${input}`, () => {
-                        const actual = testModule.bolditalic(input);
-                        actual.should.equal(expected);
-                    });
+        });
+        describe('resists bad input', () => {
+            [
+                undefined, null, false, '', 0, NaN, []
+            ].forEach((input) => {
+                const expected = '';
+                it(`bold: should provide sensible output for input: ${input}`, () => {
+                    const actual = testModule.bold(input);
+                    actual.should.equal(expected);
                 });
-                [
-                    ['Summer Glau', 'Summer Glau'],
-                    [4, '4'],
-                    [3.1415, '3.1415'],
-                    [true, 'true'],
-                    [{}, '[object Object]']
-                ].forEach((testcfg) => {
-                    const input = testcfg[0],
-                        expected = testcfg[1];
-                    it(`bold: should provide sensible output for input: ${input}`, () => {
-                        const actual = testModule.bold(input);
-                        actual.should.equal(`**${expected}**`);
-                    });
-                    it(`italic: should provide sensible output for input: ${input}`, () => {
-                        const actual = testModule.italic(input);
-                        actual.should.equal(`*${expected}*`);
-                    });
-                    it(`bolditalic: should provide sensible output for input: ${input}`, () => {
-                        const actual = testModule.bolditalic(input);
-                        actual.should.equal(`***${expected}***`);
-                    });
+                it(`italic: should provide sensible output for input: ${input}`, () => {
+                    const actual = testModule.italic(input);
+                    actual.should.equal(expected);
+                });
+                it(`bolditalic: should provide sensible output for input: ${input}`, () => {
+                    const actual = testModule.bolditalic(input);
+                    actual.should.equal(expected);
+                });
+            });
+            [
+                ['Summer Glau', 'Summer Glau'],
+                [4, '4'],
+                [3.1415, '3.1415'],
+                [true, 'true'],
+                [{}, '[object Object]']
+            ].forEach((testcfg) => {
+                const input = testcfg[0],
+                    expected = testcfg[1];
+                it(`bold: should provide sensible output for input: ${input}`, () => {
+                    const actual = testModule.bold(input);
+                    actual.should.equal(`**${expected}**`);
+                });
+                it(`italic: should provide sensible output for input: ${input}`, () => {
+                    const actual = testModule.italic(input);
+                    actual.should.equal(`*${expected}*`);
+                });
+                it(`bolditalic: should provide sensible output for input: ${input}`, () => {
+                    const actual = testModule.bolditalic(input);
+                    actual.should.equal(`***${expected}***`);
                 });
             });
         });
