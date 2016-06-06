@@ -104,7 +104,7 @@ exports.quoteText = function quoteText(text, quotedUser, contextUrl, contextTitl
 
 /**
  * Construct a result consisting of two data points in three parts
- * 
+ *
  * @private
  * @param {string} before Prefix
  * @param {*} item1 First part
