@@ -103,6 +103,27 @@ exports.quoteText = function quoteText(text, quotedUser, contextUrl, contextTitl
 };
 
 /**
+ * Construct a result consisting of two data points in three parts
+ * 
+ * @private
+ * @param {string} before Prefix
+ * @param {*} item1 First part
+ * @param {string} defaultItem1 Value to use for item1 when item1 is falsy
+ * @param {string} middle part to go between item1 and item2
+ * @param {*} item2 Second Part
+ * @param {string} after Suffix
+ * @returns {string} Formatted thing
+ */
+function threeParts(before, item1, defaultItem1, middle, item2, after) {
+    item2 = stringify(item2);
+    item1 = stringify(item1);
+    if (!item2) {
+        return '';
+    }
+    return before + (item1 || defaultItem1) + middle + item2 + after;
+}
+
+/**
  * Generate a hyperlink
  *
  * @param {!string} url URL to link to
@@ -110,12 +131,7 @@ exports.quoteText = function quoteText(text, quotedUser, contextUrl, contextTitl
  * @returns {string} Linkified url
  */
 exports.link = function link(url, linkText) {
-    url = stringify(url);
-    linkText = stringify(linkText);
-    if (!url) {
-        return '';
-    }
-    return `[${linkText || 'Click Me.'}](${url})`;
+    return threeParts('[', linkText, 'Click Me.', '](', url, ')');
 };
 
 /**
@@ -146,12 +162,7 @@ exports.image = function image(url, titleText) {
  * @returns {string} spoilered text
  */
 exports.spoiler = function spoiler(body, title) {
-    body = stringify(body);
-    title = stringify(title);
-    if (!body) {
-        return '';
-    }
-    return `<details><summary>${title || 'SPOILER!'}</summary>${body}</details>`;
+    return threeParts('<details><summary>', title, 'SPOILER!', '</summary>', body, '</details>');
 };
 
 /**
