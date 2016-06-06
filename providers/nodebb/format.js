@@ -7,6 +7,9 @@
  * @returns {string} Absolute URL for post
  */
 exports.urlForPost = function postLink(postId) {
+    if (!postId || !`${postId}`) {
+        return '';
+    }
     return `/post/${postId}`;
 };
 
@@ -19,6 +22,9 @@ exports.urlForPost = function postLink(postId) {
  * @returns {string} Absolute URL for topic
  */
 exports.urlForTopic = function linkTopic(topicId, topicSlug, postIndex) {
+    if (!topicId || !`${topicId}`) {
+        return '';
+    }
     if (typeof topicSlug === 'number' && !postIndex) {
         // No slug provided. i can deal with that
         postIndex = topicSlug;
@@ -44,11 +50,15 @@ exports.urlForTopic = function linkTopic(topicId, topicSlug, postIndex) {
  * @returns {string} quoted text, with attribution if username provided
  */
 exports.quoteText = function quoteText(text, quotedUser, contextUrl, contextTitle) {
+    if (!text || !`${text}`) {
+        return '';
+    }
+    text = `${text}`;
     const parts = text.split(/\n/).map((line) => `> ${line}`);
-    if (quotedUser) {
+    if (quotedUser && `${quotedUser}`) {
         let attribution = `@${quotedUser}`;
-        if (contextUrl) {
-            if (contextTitle) {
+        if (contextUrl && `${contextUrl}`) {
+            if (contextTitle && `${contextTitle}`) {
                 attribution += ` said in [${contextTitle}](${contextUrl}):`;
             } else {
                 attribution += ` [said](${contextUrl}):`;
@@ -69,6 +79,15 @@ exports.quoteText = function quoteText(text, quotedUser, contextUrl, contextTitl
  * @returns {string} Linkified url
  */
 exports.link = function link(url, linkText) {
+    if (url) {
+        url = `${url}`;
+    }
+    if (!url) {
+        return '';
+    }
+    if (linkText) {
+        linkText = `${linkText}`;
+    }
     return `[${linkText || 'Click Me.'}](${url})`;
 };
 
@@ -80,6 +99,15 @@ exports.link = function link(url, linkText) {
  * @returns {string} Image incantation
  */
 exports.image = function image(url, titleText) {
+    if (url) {
+        url = `${url}`;
+    }
+    if (!url) {
+        return '';
+    }
+    if (titleText) {
+        titleText = `${titleText}`;
+    }
     if (!titleText) {
         const parts = url.split('/');
         titleText = parts[parts.length - 1];
@@ -95,6 +123,15 @@ exports.image = function image(url, titleText) {
  * @returns {string} spoilered text
  */
 exports.spoiler = function spoiler(body, title) {
+    if (body) {
+        body = `${body}`;
+    }
+    if (!body) {
+        return '';
+    }
+    if (title) {
+        title = `${title}`;
+    }
     return `<details><summary>${title || 'SPOILER!'}</summary>${body}</details>`;
 };
 
@@ -106,7 +143,10 @@ exports.spoiler = function spoiler(body, title) {
  */
 
 exports.bold = function bold(text) {
-    return `**${text.replace(/^\s+|\s+$/g, '')}**`;
+    if (!text || !`${text}`) {
+        return '';
+    }
+    return `**${text.toString().replace(/^\s+|\s+$/g, '')}**`;
 };
 
 /**
@@ -117,7 +157,10 @@ exports.bold = function bold(text) {
  */
 
 exports.italic = function italic(text) {
-    return `*${text.replace(/^\s+|\s+$/g, '')}*`;
+    if (!text || !`${text}`) {
+        return '';
+    }
+    return `*${text.toString().replace(/^\s+|\s+$/g, '')}*`;
 };
 
 /**
@@ -128,7 +171,10 @@ exports.italic = function italic(text) {
  */
 
 exports.bolditalic = function bolditalic(text) {
-    return `***${text.replace(/^\s+|\s+$/g, '')}***`;
+    if (!text || !`${text}`) {
+        return '';
+    }
+    return `***${text.toString().replace(/^\s+|\s+$/g, '')}***`;
 };
 
 /**
@@ -139,6 +185,9 @@ exports.bolditalic = function bolditalic(text) {
  */
 
 exports.header1 = function header1(text) {
+    if (!text || !`${text}`) {
+        return '';
+    }
     return `# ${text}`;
 };
 
@@ -150,6 +199,9 @@ exports.header1 = function header1(text) {
  */
 
 exports.header2 = function header2(text) {
+    if (!text || !`${text}`) {
+        return '';
+    }
     return `## ${text}`;
 };
 
@@ -161,6 +213,9 @@ exports.header2 = function header2(text) {
  */
 
 exports.header3 = function header3(text) {
+    if (!text || !`${text}`) {
+        return '';
+    }
     return `### ${text}`;
 };
 
@@ -172,6 +227,9 @@ exports.header3 = function header3(text) {
  */
 
 exports.header4 = function header4(text) {
+    if (!text || !`${text}`) {
+        return '';
+    }
     return `#### ${text}`;
 };
 
@@ -183,6 +241,9 @@ exports.header4 = function header4(text) {
  */
 
 exports.header5 = function header5(text) {
+    if (!text || !`${text}`) {
+        return '';
+    }
     return `##### ${text}`;
 };
 
@@ -194,5 +255,8 @@ exports.header5 = function header5(text) {
  */
 
 exports.header6 = function header6(text) {
+    if (!text || !`${text}`) {
+        return '';
+    }
     return `###### ${text}`;
 };
