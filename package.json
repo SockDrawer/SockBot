@@ -68,11 +68,10 @@
       "path": "./node_modules/cz-conventional-changelog"
     },
     "ghooks": {
-      "pre-commit": "npm run lint",
       "commit-msg": "validate-commit-msg",
       "pre-push": "npm test",
       "post-merge": "npm install",
-      "post-rewrite": "npm install",
+      "post-rewrite": "npm install"
     }
   }
 }

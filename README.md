@@ -10,7 +10,7 @@
 [![Stories in Progress](https://badge.waffle.io/sockdrawer/sockbot.png?label=in%20progress&title=In%20Progress)](https://waffle.io/sockdrawer/sockbot)
 
 
-SockBot 3.0
+SockBot
 ===========
 Sockbot - A sock puppet robot worthy of TheDailyWTF in EcmaScript 6.
 
