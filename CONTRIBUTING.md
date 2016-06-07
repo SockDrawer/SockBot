@@ -73,6 +73,11 @@ Before you submit your pull request consider the following guidelines:
 
 * Search [GitHub](https://github.com/SockDrawer/SockBot/pulls) for an open or closed Pull Request
   that relates to your submission. You don't want to duplicate effort.
+* Make sure you have initialized your repository clone with all the needed dependencies and configuration for
+  local development:
+     ```shell
+     npm install && npm run init
+     ```
 * Make your changes in a new git branch:
 
      ```shell
