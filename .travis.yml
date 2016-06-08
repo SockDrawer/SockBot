@@ -12,6 +12,7 @@ before_script:
 - echo "https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@github.com" > .git/credentials
 script:
 - npm test
+- bithound check git@github.com:SockDrawer/SockBot.git
 after_script:
 - npm run buildDocs && npm run pushDocs
 - test -e ./coverage/lcov.info && < ./coverage/lcov.info ./node_modules/.bin/codeclimate-test-reporter
