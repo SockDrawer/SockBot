@@ -17,8 +17,8 @@ script:
 - bithound check git@github.com:SockDrawer/SockBot.git
 after_script:
 - test -e ./coverage/lcov.info && < ./coverage/lcov.info ./node_modules/.bin/codeclimate-test-reporter
-after_success: 
--python travis_after_all.py
+after_success:
+- python travis_after_all.py
 - npm run semantic-release
 notifications:
   slack:
