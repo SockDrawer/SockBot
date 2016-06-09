@@ -7,14 +7,16 @@ node_js:
 - '6.1'
 - '6.2'
 before_script:
+- npm prune
+- curl -Lo travis_after_all.py https://git.io/vLSON
 - rm -rf ./coverage
-- git config credential.helper "store --file=.git/credentials"
-- echo "https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@github.com" > .git/credentials
 script:
 - npm test
 after_script:
-- npm run buildDocs && npm run pushDocs
 - test -e ./coverage/lcov.info && < ./coverage/lcov.info ./node_modules/.bin/codeclimate-test-reporter
+after_success:
+- python travis_after_all.py
+- npm run semantic-release
 notifications:
   slack:
     secure: Fycz8f/0HY/rgiMePSF4IhavbvSR0/B20gGX4sHHd83ql6WLOx8bf+Al348HhF8GobqD3uTUs1tQPmIGGHdPZ2l+0ZFythSSUNy766612WfyYOpCAqXeCALgcciKzrw7lkECtOLgBOm7vRWVSOfxHXle2NefZR3Q8eNPWpKlNP8=
