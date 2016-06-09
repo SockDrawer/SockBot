@@ -3,7 +3,7 @@
   "description": "A sockpuppet bot to use on http://what.thedailywtf.com.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SockDrawer/SockBot"
+    "url": "https://github.com/SockDrawer/SockBot"
   },
   "license": "MIT",
   "author": "Accalia Elementia <accalia@sockdrawer.io> (https://github.com/AccaliaDeElementia)",
