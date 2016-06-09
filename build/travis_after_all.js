@@ -32,6 +32,8 @@ function launchNPMTask(task) {
 }
 
 function waitUntilDone(buildId, ms) {
+    let cycle = -1,
+        waitingFor = 0;
     return getBuild(buildId).then((build) => {
         const jobs = build.matrix.filter((job) => !/[.]1$/.test(job.number));
         const finished = jobs.every((job) => job.finished_at);
@@ -42,13 +44,11 @@ function waitUntilDone(buildId, ms) {
         } else if (finished) {
             return Promise.resolve();
         }
-        console.log(jobs.map((job) => { //eslint-disable-line no-console
-            return {
-                result: job.result,
-                'finished_at': job.finished_at
-            };
-        }));
-        console.log(`Leader waits for ${runningJobs.length} minions...`); //eslint-disable-line no-console
+        if (cycle % 6 === 0 || waitingFor !== runningJobs) {
+            console.log(`Leader waits for ${runningJobs.length} minions...`); //eslint-disable-line no-console
+        }
+        cycle += 1;
+        waitingFor = runningJobs;
         return delay(ms).then(() => waitUntilDone(buildId, ms));
 
     });
