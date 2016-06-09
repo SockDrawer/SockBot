@@ -40,11 +40,16 @@ function getChanges(filter) {
     });
 }
 
-function getDestination(file){
+function getDestination(file) {
     const dir = path.join(docDest, path.dirname(file)),
-            name = `${path.basename(file, '.js') }.md`,
-            dest = path.join(dir, name);
-            return {target:file,dir: dir,name:name,path:dest};
+        name = `${path.basename(file, '.js') }.md`,
+        dest = path.join(dir, name);
+    return {
+        target: file,
+        dir: dir,
+        name: name,
+        path: dest
+    };
 }
 
 function documentPath(toDoc) {
