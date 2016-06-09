@@ -40,22 +40,27 @@ function getChanges(filter) {
     });
 }
 
+function getDestination(file){
+    const dir = path.join(docDest, path.dirname(file)),
+            name = `${path.basename(file, '.js') }.md`,
+            dest = path.join(dir, name);
+            return {target:file,dir: dir,name:name,path:dest};
+}
+
 function documentPath(toDoc) {
     return new Promise((resolve, reject) => {
-        const dir = path.join(docDest, path.dirname(toDoc)),
-            name = `${path.basename(toDoc, '.js') }.md`,
-            dest = path.join(dir, name);
-        mkdirp(dir, (err) => {
+        const dest = getDestination(toDoc);
+        mkdirp(dest.dir, (err) => {
             if (err) {
                 reject();
             }
             try {
                 const inFile = fs.createReadStream(toDoc);
-                const outFile = fs.createWriteStream(dest);
+                const outFile = fs.createWriteStream(dest.path);
                 inFile.pipe(jsdoc()).pipe(dmd()).pipe(outFile);
                 inFile.on('error', (ioerr) => reject(ioerr));
                 outFile.on('error', (ioerr) => reject(ioerr));
-                outFile.on('finish', () => resolve(dest));
+                outFile.on('finish', () => resolve(dest.path));
             } catch (err2) {
                 reject(err2);
             }
@@ -81,9 +86,7 @@ function verifyDocument(file) {
 
 function removeStale(file) {
     return new Promise((resolve) => {
-        const dir = path.join(docDest, path.dirname(file)),
-            name = `${path.basename(file, '.js') }.md`,
-            dest = path.join(dir, name);
+        const dest = getDestination(file).path;
         git.silent(true).rm(dest, (err) => {
             if (err) {
                 fs.unlink(dest, () => resolve());
