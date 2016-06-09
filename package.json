@@ -69,6 +69,7 @@
       "path": "./node_modules/cz-conventional-changelog"
     },
     "ghooks": {
+      "post-commit": "node build/post-commit.js",
       "commit-msg": "validate-commit-msg",
       "pre-push": "npm test",
       "post-merge": "npm install",
