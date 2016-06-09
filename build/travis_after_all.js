@@ -33,7 +33,7 @@ function launchNPMTask(task) {
 
 function waitUntilDone(buildId, ms) {
     return getBuild(buildId).then((build) => {
-        const jobs = build.matrix.filter((job) => !/[.]1$/.test(job));
+        const jobs = build.matrix.filter((job) => !/[.]1$/.test(job.number));
         const finished = jobs.every((job) => job.finished_at);
         const failed = jobs.some((job) => (job.result || 0) !== 0);
         const runningJobs = jobs.filter((job) => !job.finished_at);
