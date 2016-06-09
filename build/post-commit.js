@@ -110,5 +110,5 @@ function commitDocs(){
 getChanges(/[.]js$/i)
     .then((files) => Promise.all(files.map((file) => processFile(file))))
     .then(commitDocs)
-    .then(() => console.log('done'))
+    .then(() => console.log('Documentation Built'))
     .catch((err) => console.log(err));
