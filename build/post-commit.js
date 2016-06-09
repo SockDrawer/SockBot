@@ -1,5 +1,6 @@
-'use strict'
+'use strict';
 
+/* eslint-disable require-jsdoc */
 
 const fs = require('fs'),
     dmd = require('dmd'),
@@ -18,21 +19,23 @@ function getChanges(filter) {
             to: 'HEAD'
         }, (logErr, logData) => {
             if (logErr) {
-                return reject(logErr);
-            }
-            git.show([logData.latest.hash], (err, diff) => {
-                if (err) {
-                    return reject(err);
-                }
-                const files = {};
-                diff.split('\n').map((line) => {
-                    const file = /^diff --git a\/(.*) b\/(.*)/.exec(line);
-                    if (file && file[1] == file[2]) {
-                        files[file[1]] = 1;
+                reject(logErr);
+            } else {
+                git.show([logData.latest.hash], (err, diff) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        const files = {};
+                        diff.split('\n').map((line) => {
+                            const file = /^diff --git a\/(.*) b\/(.*)/.exec(line);
+                            if (file && file[1] === file[2]) {
+                                files[file[1]] = 1;
+                            }
+                        });
+                        resolve(Object.keys(files).filter((file) => filter.test(file)));
                     }
                 });
-                resolve(Object.keys(files).filter((file) => filter.test(file)));
-            });
+            }
         });
     });
 }
@@ -50,8 +53,8 @@ function documentPath(toDoc) {
                 const inFile = fs.createReadStream(toDoc);
                 const outFile = fs.createWriteStream(dest);
                 inFile.pipe(jsdoc()).pipe(dmd()).pipe(outFile);
-                inFile.on('error', (err) => reject(err));
-                outFile.on('error', (err) => reject(err));
+                inFile.on('error', (ioerr) => reject(ioerr));
+                outFile.on('error', (ioerr) => reject(ioerr));
                 outFile.on('finish', () => resolve(dest));
             } catch (err2) {
                 reject(err2);
@@ -68,10 +71,10 @@ function verifyDocument(file) {
             }
             const origFile = `.${file.replace(/[.]md$/, '.js').slice(docDest.length)}`;
             if (stats.size === 0) {
-                console.warn(`${origFile} has no jsdocs, please consider adding some.`);
+                console.warn(`${origFile} has no jsdocs, please consider adding some`); //eslint-disable-line no-console
                 return removeStale(origFile).then(resolve, reject);
             }
-            git.add(file, () => resolve());
+            return git.add(file, () => resolve());
         });
     });
 }
@@ -98,17 +101,18 @@ function processFile(file) {
         if (err.code === 'ENOENT') {
             return removeStale(file);
         }
+        throw err;
     });
 }
 
-function commitDocs(){
-    return new Promise((resolve,reject)=>{
-        git.commit(['docs: Update API Documentation'], (err)=>{err?reject(err):resolve()});
+function commitDocs() {
+    return new Promise((resolve, reject) => {
+        git.commit(['docs: Update API Documentation'], (err) => err ? reject(err) : resolve());
     });
 }
 
 getChanges(/[.]js$/i)
     .then((files) => Promise.all(files.map((file) => processFile(file))))
     .then(commitDocs)
-    .then(() => console.log('Documentation Built'))
-    .catch((err) => console.log(err));
+    .then(() => console.log('Documentation Built')) //eslint-disable-line no-console
+    .catch((err) => console.log(err)); //eslint-disable-line no-console
