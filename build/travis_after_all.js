@@ -36,12 +36,19 @@ function waitUntilDone(buildId, ms) {
         const jobs = build.matrix.filter((job) => !/[.]1$/.test(job));
         const finished = jobs.every((job) => job.finished_at);
         const failed = jobs.some((job) => (job.result || 0) !== 0);
+        const runningJobs = jobs.filter((job) => !job.finished_at);
         if (failed) {
             return Promise.reject('E_BUILD_FAILED');
         } else if (finished) {
             return Promise.resolve();
         }
-        console.log(`Leader waits for ${jobs.length} minions...`); //eslint-disable-line no-console
+        console.log(jobs.map((job) => { //eslint-disable-line no-console
+            return {
+                result: job.result,
+                'finished_at': job.finished_at
+            };
+        }));
+        console.log(`Leader waits for ${runningJobs.length} minions...`); //eslint-disable-line no-console
         return delay(ms).then(() => waitUntilDone(buildId, ms));
 
     });
