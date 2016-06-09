@@ -12,7 +12,6 @@ before_script:
 - rm -rf ./coverage
 script:
 - npm test
-- bithound check git@github.com:SockDrawer/SockBot.git
 after_script:
 - test -e ./coverage/lcov.info && < ./coverage/lcov.info ./node_modules/.bin/codeclimate-test-reporter
 after_success:
