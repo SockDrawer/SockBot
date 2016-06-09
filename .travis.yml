@@ -8,15 +8,13 @@ node_js:
 - '6.2'
 before_script:
 - npm prune
-- curl -Lo travis_after_all.py https://git.io/vLSON
 - rm -rf ./coverage
 script:
 - npm test
 after_script:
 - test -e ./coverage/lcov.info && < ./coverage/lcov.info ./node_modules/.bin/codeclimate-test-reporter
 after_success:
-- python travis_after_all.py
-- npm run semantic-release
+- node build/travis_after_all semantic-release
 notifications:
   slack:
     secure: Fycz8f/0HY/rgiMePSF4IhavbvSR0/B20gGX4sHHd83ql6WLOx8bf+Al348HhF8GobqD3uTUs1tQPmIGGHdPZ2l+0ZFythSSUNy766612WfyYOpCAqXeCALgcciKzrw7lkECtOLgBOm7vRWVSOfxHXle2NefZR3Q8eNPWpKlNP8=
