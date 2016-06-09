@@ -6,8 +6,6 @@ node_js:
 - '5.11'
 - '6.1'
 - '6.2'
-before_install:
-- npm install -g npm@^2.0.0
 before_script:
 - npm prune
 - curl -Lo travis_after_all.py https://git.io/vLSON
