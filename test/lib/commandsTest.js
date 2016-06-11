@@ -42,7 +42,7 @@ describe('lib/config', () => {
         const fns = ['Commands', 'Command', 'parseLine', 'getCommandHelps', 'cmdHelp', 'defaultHandler',
                 'onError', 'onComplete'
             ],
-            objs = ['handlers', 'helpTopics'],
+            objs = ['handlers', 'shadowHandlers', 'helpTopics'],
             vals = [];
 
         describe('should internalize expected functions:', () => {
@@ -558,12 +558,14 @@ describe('lib/config', () => {
     describe('Command', () => {
         let forum = null,
             Command = null,
-            handlers = null;
+            handlers = null,
+            shadowHandlers = null;
         beforeEach(() => {
             forum = {};
             commands.bindCommands(forum);
             Command = commands.internals.Command;
             handlers = commands.internals.handlers;
+            shadowHandlers = commands.internals.shadowHandlers;
         });
         describe('ctor()', () => {
             it('should use utils.mapSet for storage', () => {
@@ -621,6 +623,25 @@ describe('lib/config', () => {
             });
             it('should select registered handler for valid command', () => {
                 const expected = sinon.spy();
+                handlers.ook = {
+                    handler: expected
+                };
+                const command = new Command({
+                    command: 'ook'
+                }, {});
+                utils.mapGet(command).handler.should.equal(expected);
+            });
+            it('should select registered shadowHandler for valid command', () => {
+                const expected = sinon.spy();
+                shadowHandlers.ook = expected;
+                const command = new Command({
+                    command: 'ook'
+                }, {});
+                utils.mapGet(command).handler.should.equal(expected);
+            });
+            it('should select registered handler for valid command when shadowHandler also exists', () => {
+                const expected = sinon.spy();
+                shadowHandlers.ook = sinon.spy();
                 handlers.ook = {
                     handler: expected
                 };
@@ -1032,6 +1053,16 @@ describe('lib/config', () => {
                     handler: handler,
                     help: text
                 });
+            });
+        });
+        describe('static addAlias()', () => {
+            beforeEach(() => commands.bindCommands({}));
+            it('should add command alias to helpers', () => {
+                const cmd = `a${Math.random()}a`,
+                    handler = sinon.spy();
+                expect(commands.internals.shadowHandlers[cmd]).to.be.not.ok;
+                commands.internals.Commands.addAlias(cmd, handler);
+                commands.internals.shadowHandlers[cmd].should.equal(handler);
             });
         });
     });
