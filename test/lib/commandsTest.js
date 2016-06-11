@@ -75,7 +75,7 @@ describe('lib/config', () => {
         describe('imperative commands', () => {
             describe('output object format', () => {
                 it('should match bare command', () => {
-                    parseLine('!help').should.have.all.keys(['line', 'command', 'args', 'mention']);
+                    parseLine('!help').should.have.all.keys(['line', 'command', 'commandText', 'args', 'mention']);
                 });
                 it('should copy input into output object', () => {
                     parseLine('!help arg1 arg2').line.should.equal('!help arg1 arg2');
@@ -85,6 +85,9 @@ describe('lib/config', () => {
                 });
                 it('should normalize command case in output object', () => {
                     parseLine('!HELP arg1 arg2').command.should.equal('help');
+                });
+                it('should store original command case in output object', () => {
+                    parseLine('!HeLp arg1 arg2').commandText.should.equal('HeLp');
                 });
                 it('should set args correctly', () => {
                     parseLine('!help arg1 arg2').args.should.deep.equal(['arg1', 'arg2']);
@@ -136,7 +139,7 @@ describe('lib/config', () => {
         describe('mention commands', () => {
             describe('output object format', () => {
                 it('should match bare command', () => {
-                    parseLine('@fred help').should.have.all.keys(['line', 'command', 'args', 'mention']);
+                    parseLine('@fred help').should.have.all.keys(['line', 'command', 'commandText', 'args', 'mention']);
                 });
                 it('should copy input into output object', () => {
                     parseLine('@fred help arg1 arg2').line.should.equal('@fred help arg1 arg2');
@@ -146,6 +149,9 @@ describe('lib/config', () => {
                 });
                 it('should normalize command case in output object', () => {
                     parseLine('@fred HELP arg1 arg2').command.should.equal('help');
+                });
+                it('should store original command case in output object', () => {
+                    parseLine('@fred hElP arg1 arg2').commandText.should.equal('hElP');
                 });
                 it('should set args correctly', () => {
                     parseLine('@fred help arg1 arg2').args.should.deep.equal(['arg1', 'arg2']);
@@ -578,6 +584,13 @@ describe('lib/config', () => {
                 }, {});
                 utils.mapGet(command).command.should.equal(expected);
             });
+            it('should store definition.commandText', () => {
+                const expected = `${Math.random()}${Math.random()}`;
+                const command = new Command({
+                    commandText: expected
+                }, {});
+                utils.mapGet(command).commandText.should.equal(expected);
+            });
             it('should store definition.args', () => {
                 const expected = `${Math.random()}${Math.random()}`;
                 const command = new Command({
@@ -656,7 +669,9 @@ describe('lib/config', () => {
                 command = new Command({}, {});
                 data = utils.mapGet(command);
             });
-            ['line', 'command', 'mention', 'args', 'parent', 'replyText', 'executable'].forEach((property) => {
+            ['line', 'command', 'commandText', 'mention', 'args', 'parent',
+                'replyText', 'executable'
+            ].forEach((property) => {
                 it(`should allow get of ${property} from storage`, () => {
                     const expected = Math.random();
                     data[property] = expected;
