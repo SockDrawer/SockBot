@@ -16,6 +16,7 @@ NodeBB provider module User class
             * [new Command(definition, parent)](#new_sockbot.lib.module_commands..Command_new)
             * [.line](#sockbot.lib.module_commands..Command+line) : <code>string</code>
             * [.command](#sockbot.lib.module_commands..Command+command) : <code>string</code>
+            * [.commandText](#sockbot.lib.module_commands..Command+commandText) : <code>string</code>
             * [.mention](#sockbot.lib.module_commands..Command+mention) : <code>boolean</code>
             * [.args](#sockbot.lib.module_commands..Command+args) : <code>Array.&lt;string&gt;</code>
             * [.parent](#sockbot.lib.module_commands..Command+parent) : <code>Commands</code>
@@ -81,6 +82,7 @@ Command Class. Represents a single command within a post
     * [new Command(definition, parent)](#new_sockbot.lib.module_commands..Command_new)
     * [.line](#sockbot.lib.module_commands..Command+line) : <code>string</code>
     * [.command](#sockbot.lib.module_commands..Command+command) : <code>string</code>
+    * [.commandText](#sockbot.lib.module_commands..Command+commandText) : <code>string</code>
     * [.mention](#sockbot.lib.module_commands..Command+mention) : <code>boolean</code>
     * [.args](#sockbot.lib.module_commands..Command+args) : <code>Array.&lt;string&gt;</code>
     * [.parent](#sockbot.lib.module_commands..Command+parent) : <code>Commands</code>
@@ -113,7 +115,14 @@ Full Command line definition
 <a name="sockbot.lib.module_commands..Command+command"></a>
 
 #### command.command : <code>string</code>
-Command name
+Normalized command name
+
+**Kind**: instance property of <code>[Command](#sockbot.lib.module_commands..Command)</code>  
+**Access:** public  
+<a name="sockbot.lib.module_commands..Command+commandText"></a>
+
+#### command.commandText : <code>string</code>
+Unnormalized command name
 
 **Kind**: instance property of <code>[Command](#sockbot.lib.module_commands..Command)</code>  
 **Access:** public  
