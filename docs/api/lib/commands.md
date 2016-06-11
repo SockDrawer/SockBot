@@ -10,6 +10,7 @@ NodeBB provider module User class
     * _static_
         * [.bindCommands(forum)](#sockbot.lib.module_commands.bindCommands) ⇒ <code>Commands</code>
             * [~handlers](#sockbot.lib.module_commands.bindCommands..handlers)
+            * [~shadowHandlers](#sockbot.lib.module_commands.bindCommands..shadowHandlers)
             * [~helpTopics](#sockbot.lib.module_commands.bindCommands..helpTopics)
     * _inner_
         * [~Command](#sockbot.lib.module_commands..Command)
@@ -40,6 +41,7 @@ NodeBB provider module User class
             * _static_
                 * [.get(notification, postBody, handler)](#sockbot.lib.module_commands..Commands.get) ⇒ <code>Promise.&lt;Commands&gt;</code>
                 * [.add(command, helpText, handler)](#sockbot.lib.module_commands..Commands.add) ⇒ <code>Promise</code>
+                * [.addAlias(command, handler)](#sockbot.lib.module_commands..Commands.addAlias) ⇒ <code>Promise</code>
 
 <a name="sockbot.lib.module_commands.bindCommands"></a>
 
@@ -56,6 +58,7 @@ Create a Commands class and bind it to a forum instance.
 
 * [.bindCommands(forum)](#sockbot.lib.module_commands.bindCommands) ⇒ <code>Commands</code>
     * [~handlers](#sockbot.lib.module_commands.bindCommands..handlers)
+    * [~shadowHandlers](#sockbot.lib.module_commands.bindCommands..shadowHandlers)
     * [~helpTopics](#sockbot.lib.module_commands.bindCommands..helpTopics)
 
 <a name="sockbot.lib.module_commands.bindCommands..handlers"></a>
@@ -65,6 +68,13 @@ Command Handlers
 
 **Kind**: inner constant of <code>[bindCommands](#sockbot.lib.module_commands.bindCommands)</code>  
 **Default**: <code>{&quot;help&quot;:&quot;&quot;}</code>  
+<a name="sockbot.lib.module_commands.bindCommands..shadowHandlers"></a>
+
+#### bindCommands~shadowHandlers
+Shadow Command Handlers
+
+**Kind**: inner constant of <code>[bindCommands](#sockbot.lib.module_commands.bindCommands)</code>  
+**Default**: <code>{}</code>  
 <a name="sockbot.lib.module_commands.bindCommands..helpTopics"></a>
 
 #### bindCommands~helpTopics
@@ -226,6 +236,7 @@ Commands class. Represents all commands for a Notification
     * _static_
         * [.get(notification, postBody, handler)](#sockbot.lib.module_commands..Commands.get) ⇒ <code>Promise.&lt;Commands&gt;</code>
         * [.add(command, helpText, handler)](#sockbot.lib.module_commands..Commands.add) ⇒ <code>Promise</code>
+        * [.addAlias(command, handler)](#sockbot.lib.module_commands..Commands.addAlias) ⇒ <code>Promise</code>
 
 <a name="new_sockbot.lib.module_commands..Commands_new"></a>
 
@@ -320,5 +331,19 @@ Add a command to this forum instance
 | --- | --- | --- |
 | command | <code>string</code> | Command to be added |
 | helpText | <code>string</code> | Short help text for command |
+| handler | <code>CommandHandler</code> | Function to handle the command |
+
+<a name="sockbot.lib.module_commands..Commands.addAlias"></a>
+
+#### Commands.addAlias(command, handler) ⇒ <code>Promise</code>
+Add a command alias to this forum instance
+
+**Kind**: static method of <code>[Commands](#sockbot.lib.module_commands..Commands)</code>  
+**Returns**: <code>Promise</code> - Resolves when command has been added  
+**Access:** public  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| command | <code>string</code> | Command alias to be added |
 | handler | <code>CommandHandler</code> | Function to handle the command |
 
