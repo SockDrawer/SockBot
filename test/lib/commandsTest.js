@@ -1048,10 +1048,21 @@ describe('lib/config', () => {
                     text = `b${Math.random()}b`,
                     handler = sinon.spy();
                 expect(commands.internals.handlers[cmd]).to.be.not.ok;
-                commands.internals.Commands.add(cmd, text, handler);
-                commands.internals.handlers[cmd].should.eql({
-                    handler: handler,
-                    help: text
+                return commands.internals.Commands.add(cmd, text, handler).then(() => {
+                    commands.internals.handlers[cmd].should.eql({
+                        commandText: cmd,
+                        handler: handler,
+                        help: text
+                    });
+                });
+            });
+            it('should normalize command case for matching', () => {
+                const cmd = `A${Math.random()}A`,
+                    text = `b${Math.random()}b`,
+                    handler = sinon.spy();
+                expect(commands.internals.handlers[cmd]).to.be.not.ok;
+                return commands.internals.Commands.add(cmd, text, handler).then(() => {
+                    commands.internals.handlers[cmd.toLowerCase()].should.be.ok;
                 });
             });
         });
@@ -1061,8 +1072,17 @@ describe('lib/config', () => {
                 const cmd = `a${Math.random()}a`,
                     handler = sinon.spy();
                 expect(commands.internals.shadowHandlers[cmd]).to.be.not.ok;
-                commands.internals.Commands.addAlias(cmd, handler);
-                commands.internals.shadowHandlers[cmd].should.equal(handler);
+                return commands.internals.Commands.addAlias(cmd, handler).then(() => {
+                    commands.internals.shadowHandlers[cmd].should.equal(handler);
+                });
+            });
+            it('should normalize command case for matching', () => {
+                const cmd = `A${Math.random()}A`,
+                    handler = sinon.spy();
+                expect(commands.internals.shadowHandlers[cmd]).to.be.not.ok;
+                return commands.internals.Commands.addAlias(cmd, handler).then(() => {
+                    commands.internals.shadowHandlers[cmd.toLocaleLowerCase()].should.be.ok;
+                });
             });
         });
     });
