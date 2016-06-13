@@ -6,6 +6,9 @@ node_js:
 - '5.11'
 - '6.1'
 - '6.2'
+branches:
+  except:
+    - /^(?i:v)\d+[.]\d+[.]\d+$/
 before_script:
 - npm prune
 - rm -rf ./coverage
