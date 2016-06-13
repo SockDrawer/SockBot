@@ -1042,7 +1042,13 @@ describe('lib/config', () => {
             });
         });
         describe('static add()', () => {
-            beforeEach(() => commands.bindCommands({}));
+            let emit = null;
+            beforeEach(() => {
+                emit = sinon.spy();
+                commands.bindCommands({
+                    emit: emit
+                });
+            });
             it('should add command to helpers', () => {
                 const cmd = `a${Math.random()}a`,
                     text = `b${Math.random()}b`,
@@ -1065,9 +1071,37 @@ describe('lib/config', () => {
                     commands.internals.handlers[cmd.toLowerCase()].should.be.ok;
                 });
             });
+            it('should warn when registering a command where alias already exists', () => {
+                const cmd = `a${Math.random()}a`;
+                commands.internals.shadowHandlers[cmd] = 5;
+                return commands.internals.Commands.add(cmd, 'foo', () => 0).then(() => {
+                    const msg = `WARNING: alias ${cmd} is already registered, the alias will have no effect.`;
+                    emit.calledWith('log', msg).should.be.true;
+                });
+            });
+            it('should log error when registering a command where already exists', () => {
+                const cmd = `a${Math.random()}a`;
+                commands.internals.handlers[cmd] = 5;
+                return commands.internals.Commands.add(cmd, 'foo', () => 0).catch(() => {
+                    const msg = `ERROR: command ${cmd} is already registered, cannot override existing command.`;
+                    emit.calledWith('error', msg).should.be.true;
+                });
+            });
+            it('should error when registering an alias where already exists', () => {
+                const cmd = `a${Math.random()}a`;
+                commands.internals.handlers[cmd] = 5;
+                const Cmds = commands.internals.Commands;
+                return Cmds.add(cmd, 'foo', () => 0).should.be.rejectedWith('E_ALREADY_REGISTERED');
+            });
         });
         describe('static addAlias()', () => {
-            beforeEach(() => commands.bindCommands({}));
+            let emit = null;
+            beforeEach(() => {
+                emit = sinon.spy();
+                commands.bindCommands({
+                    emit: emit
+                });
+            });
             it('should add command alias to helpers', () => {
                 const cmd = `a${Math.random()}a`,
                     handler = sinon.spy();
@@ -1083,6 +1117,29 @@ describe('lib/config', () => {
                 return commands.internals.Commands.addAlias(cmd, handler).then(() => {
                     commands.internals.shadowHandlers[cmd.toLocaleLowerCase()].should.be.ok;
                 });
+            });
+            it('should warn when registering an alias where command already exists', () => {
+                const cmd = `a${Math.random()}a`;
+                commands.internals.handlers[cmd] = 5;
+                expect(commands.internals.shadowHandlers[cmd]).to.be.not.ok;
+                return commands.internals.Commands.addAlias(cmd, () => 0).then(() => {
+                    const msg = `WARNING: ${cmd} is already registered, this alias will have no effect.`;
+                    emit.calledWith('log', msg).should.be.true;
+                });
+            });
+            it('should log error when registering an alias where already exists', () => {
+                const cmd = `a${Math.random()}a`;
+                commands.internals.shadowHandlers[cmd] = 5;
+                return commands.internals.Commands.addAlias(cmd, () => 0).catch(() => {
+                    const msg = `ERROR: alias ${cmd} is already registered, cannot override existing alias.`;
+                    emit.calledWith('error', msg).should.be.true;
+                });
+            });
+            it('should error when registering an alias where already exists', () => {
+                const cmd = `a${Math.random()}a`;
+                commands.internals.shadowHandlers[cmd] = 5;
+                const Cmds = commands.internals.Commands;
+                return Cmds.addAlias(cmd, () => 0).should.be.rejectedWith('E_ALREADY_REGISTERED');
             });
         });
     });
