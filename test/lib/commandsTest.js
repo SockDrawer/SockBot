@@ -746,6 +746,24 @@ describe('lib/config', () => {
                 data.replyText.should.equal(expected);
             });
         });
+        describe('appendReply()', () => {
+            let command, data;
+            beforeEach(() => {
+                command = new Command({}, {});
+                data = utils.mapGet(command);
+            });
+            it('should set replyText property', () => {
+                const expected = `a${Math.random()}b`;
+                command.appendReply(expected);
+                data.replyText.should.equal(expected);
+            });
+            it('should add to replyText property', () => {
+                data.replyText = 'foobar';
+                const content = `a${Math.random()}b`;
+                command.appendReply(content);
+                data.replyText.should.equal(`foobar\n\n${content}`);
+            });
+        });
         describe('execute()', () => {
             let command, data;
             beforeEach(() => {
