@@ -28,6 +28,7 @@ NodeBB provider module User class
             * [.getTopic()](#sockbot.lib.module_commands..Command+getTopic) ⇒ <code>Promise.&lt;Topic&gt;</code>
             * [.getUser()](#sockbot.lib.module_commands..Command+getUser) ⇒ <code>Promise.&lt;User&gt;</code>
             * [.reply(content)](#sockbot.lib.module_commands..Command+reply)
+            * [.appendReply(content)](#sockbot.lib.module_commands..Command+appendReply)
         * [~Commands](#sockbot.lib.module_commands..Commands)
             * [new Commands(ids, postBody, handler)](#new_sockbot.lib.module_commands..Commands_new)
             * _instance_
@@ -103,6 +104,7 @@ Command Class. Represents a single command within a post
     * [.getTopic()](#sockbot.lib.module_commands..Command+getTopic) ⇒ <code>Promise.&lt;Topic&gt;</code>
     * [.getUser()](#sockbot.lib.module_commands..Command+getUser) ⇒ <code>Promise.&lt;User&gt;</code>
     * [.reply(content)](#sockbot.lib.module_commands..Command+reply)
+    * [.appendReply(content)](#sockbot.lib.module_commands..Command+appendReply)
 
 <a name="new_sockbot.lib.module_commands..Command_new"></a>
 
@@ -214,6 +216,18 @@ Reply to command with content
 | Param | Type | Description |
 | --- | --- | --- |
 | content | <code>string</code> | Content to reply with |
+
+<a name="sockbot.lib.module_commands..Command+appendReply"></a>
+
+#### command.appendReply(content)
+Append content to the reply of command
+
+**Kind**: instance method of <code>[Command](#sockbot.lib.module_commands..Command)</code>  
+**Access:** public  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| content | <code>string</code> | Content to append to reply |
 
 <a name="sockbot.lib.module_commands..Commands"></a>
 
