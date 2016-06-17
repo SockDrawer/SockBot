@@ -11,7 +11,9 @@ NodeBB provider module User class
         * [.bindCommands(forum)](#sockbot.lib.module_commands.bindCommands) ⇒ <code>Commands</code>
             * [~handlers](#sockbot.lib.module_commands.bindCommands..handlers)
             * [~shadowHandlers](#sockbot.lib.module_commands.bindCommands..shadowHandlers)
+            * [~forbiddenCmds](#sockbot.lib.module_commands.bindCommands..forbiddenCmds)
             * [~helpTopics](#sockbot.lib.module_commands.bindCommands..helpTopics)
+            * [~checkAvailable(map, command, logType, logMsg)](#sockbot.lib.module_commands.bindCommands..checkAvailable) ⇒ <code>boolean</code>
     * _inner_
         * [~Command](#sockbot.lib.module_commands..Command)
             * [new Command(definition, parent)](#new_sockbot.lib.module_commands..Command_new)
@@ -43,6 +45,7 @@ NodeBB provider module User class
                 * [.get(notification, postBody, handler)](#sockbot.lib.module_commands..Commands.get) ⇒ <code>Promise.&lt;Commands&gt;</code>
                 * [.add(command, helpText, handler)](#sockbot.lib.module_commands..Commands.add) ⇒ <code>Promise</code>
                 * [.addAlias(command, handler)](#sockbot.lib.module_commands..Commands.addAlias) ⇒ <code>Promise</code>
+                * [.forbidCommand(command)](#sockbot.lib.module_commands..Commands.forbidCommand) ⇒ <code>boolean</code>
 
 <a name="sockbot.lib.module_commands.bindCommands"></a>
 
@@ -60,7 +63,9 @@ Create a Commands class and bind it to a forum instance.
 * [.bindCommands(forum)](#sockbot.lib.module_commands.bindCommands) ⇒ <code>Commands</code>
     * [~handlers](#sockbot.lib.module_commands.bindCommands..handlers)
     * [~shadowHandlers](#sockbot.lib.module_commands.bindCommands..shadowHandlers)
+    * [~forbiddenCmds](#sockbot.lib.module_commands.bindCommands..forbiddenCmds)
     * [~helpTopics](#sockbot.lib.module_commands.bindCommands..helpTopics)
+    * [~checkAvailable(map, command, logType, logMsg)](#sockbot.lib.module_commands.bindCommands..checkAvailable) ⇒ <code>boolean</code>
 
 <a name="sockbot.lib.module_commands.bindCommands..handlers"></a>
 
@@ -76,12 +81,34 @@ Shadow Command Handlers
 
 **Kind**: inner constant of <code>[bindCommands](#sockbot.lib.module_commands.bindCommands)</code>  
 **Default**: <code>{}</code>  
+<a name="sockbot.lib.module_commands.bindCommands..forbiddenCmds"></a>
+
+#### bindCommands~forbiddenCmds
+Commands forbidden by the forum provider
+
+**Kind**: inner constant of <code>[bindCommands](#sockbot.lib.module_commands.bindCommands)</code>  
+**Default**: <code>{}</code>  
 <a name="sockbot.lib.module_commands.bindCommands..helpTopics"></a>
 
 #### bindCommands~helpTopics
 Extended help topics
 
 **Kind**: inner constant of <code>[bindCommands](#sockbot.lib.module_commands.bindCommands)</code>  
+<a name="sockbot.lib.module_commands.bindCommands..checkAvailable"></a>
+
+#### bindCommands~checkAvailable(map, command, logType, logMsg) ⇒ <code>boolean</code>
+Check the availability of a command
+
+**Kind**: inner method of <code>[bindCommands](#sockbot.lib.module_commands.bindCommands)</code>  
+**Returns**: <code>boolean</code> - True if available, false otherwise  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| map | <code>object</code> | A map of commands to check availability against |
+| command | <code>string</code> | Name of command to check |
+| logType | <code>string</code> | Type of log to log if command isn't available |
+| logMsg | <code>string</code> | Message to log if command is not available |
+
 <a name="sockbot.lib.module_commands..Command"></a>
 
 ### commands~Command
@@ -251,6 +278,7 @@ Commands class. Represents all commands for a Notification
         * [.get(notification, postBody, handler)](#sockbot.lib.module_commands..Commands.get) ⇒ <code>Promise.&lt;Commands&gt;</code>
         * [.add(command, helpText, handler)](#sockbot.lib.module_commands..Commands.add) ⇒ <code>Promise</code>
         * [.addAlias(command, handler)](#sockbot.lib.module_commands..Commands.addAlias) ⇒ <code>Promise</code>
+        * [.forbidCommand(command)](#sockbot.lib.module_commands..Commands.forbidCommand) ⇒ <code>boolean</code>
 
 <a name="new_sockbot.lib.module_commands..Commands_new"></a>
 
@@ -360,4 +388,19 @@ Add a command alias to this forum instance
 | --- | --- | --- |
 | command | <code>string</code> | Command alias to be added |
 | handler | <code>CommandHandler</code> | Function to handle the command |
+
+<a name="sockbot.lib.module_commands..Commands.forbidCommand"></a>
+
+#### Commands.forbidCommand(command) ⇒ <code>boolean</code>
+Forbid a command from being registered.
+
+This is to allow a provider the ability to prevent commands from being registered or triggered that
+would be problematic or prone to being accidentally triggered on the target system.
+
+**Kind**: static method of <code>[Commands](#sockbot.lib.module_commands..Commands)</code>  
+**Returns**: <code>boolean</code> - True if the command was already forbidden, false otherwise.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| command | <code>string</code> | The forbidden command |
 
