@@ -42,7 +42,7 @@ describe('lib/config', () => {
         const fns = ['Commands', 'Command', 'parseLine', 'getCommandHelps', 'cmdHelp', 'defaultHandler',
                 'onError', 'onComplete'
             ],
-            objs = ['handlers', 'shadowHandlers', 'helpTopics'],
+            objs = ['handlers', 'shadowHandlers', 'forbiddenCmds', 'helpTopics'],
             vals = [];
 
         describe('should internalize expected functions:', () => {
@@ -1111,6 +1111,20 @@ describe('lib/config', () => {
                 const Cmds = commands.internals.Commands;
                 return Cmds.add(cmd, 'foo', () => 0).should.be.rejectedWith('E_ALREADY_REGISTERED');
             });
+            it('should log error when registering a forbidden command', () => {
+                const cmd = `a${Math.random()}a`;
+                commands.internals.forbiddenCmds[cmd] = 5;
+                return commands.internals.Commands.add(cmd, 'foo', () => 0).catch(() => {
+                    const msg = `ERROR: command ${cmd} is not allowed by the active forum provider.`;
+                    emit.calledWith('error', msg).should.be.true;
+                });
+            });
+            it('should error when registering a forbidden command', () => {
+                const cmd = `a${Math.random()}a`;
+                commands.internals.forbiddenCmds[cmd] = 5;
+                const Cmds = commands.internals.Commands;
+                return Cmds.add(cmd, 'foo', () => 0).should.be.rejectedWith('E_FORBIDDEN_COMMAND');
+            });
         });
         describe('static addAlias()', () => {
             let emit = null;
@@ -1158,6 +1172,40 @@ describe('lib/config', () => {
                 commands.internals.shadowHandlers[cmd] = 5;
                 const Cmds = commands.internals.Commands;
                 return Cmds.addAlias(cmd, () => 0).should.be.rejectedWith('E_ALREADY_REGISTERED');
+            });
+            it('should log error when registering a forbidden alias', () => {
+                const cmd = `a${Math.random()}a`;
+                commands.internals.forbiddenCmds[cmd] = 5;
+                return commands.internals.Commands.addAlias(cmd, 'foo', () => 0).catch(() => {
+                    const msg = `ERROR: alias ${cmd} is not allowed by the active forum provider.`;
+                    emit.calledWith('error', msg).should.be.true;
+                });
+            });
+            it('should error when registering a forbidden alias', () => {
+                const cmd = `a${Math.random()}a`;
+                commands.internals.forbiddenCmds[cmd] = 5;
+                const Cmds = commands.internals.Commands;
+                return Cmds.addAlias(cmd, 'foo', () => 0).should.be.rejectedWith('E_FORBIDDEN_COMMAND');
+            });
+        });
+        describe('static forbidCommand()', () => {
+            it('should forbid a command', () => {
+                Object.keys(commands.internals.forbiddenCmds).should.eql([]);
+                Commands.forbidCommand('foobar');
+                commands.internals.forbiddenCmds.foobar.should.be.ok;
+            });
+            it('should forbid with capital command', () => {
+                Object.keys(commands.internals.forbiddenCmds).should.eql([]);
+                Commands.forbidCommand('FOOBAR');
+                commands.internals.forbiddenCmds.foobar.should.be.ok;
+            });
+            it('should return false when command was not already forbidden', () => {
+                expect(commands.internals.forbiddenCmds.foobar).to.be.undefined;
+                Commands.forbidCommand('FoOBaR').should.be.false;
+            });
+            it('should return true when command was already forbidden', () => {
+                commands.internals.forbiddenCmds.foobar = Math.random();
+                Commands.forbidCommand('FooBar').should.be.true;
             });
         });
     });
