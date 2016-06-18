@@ -1207,6 +1207,11 @@ describe('lib/config', () => {
                 commands.internals.forbiddenCmds.foobar = Math.random();
                 Commands.forbidCommand('FooBar').should.be.true;
             });
+            it('should forbid command only for current provider', () => {
+                Commands.forbidCommand('FooBar');
+                commands.bindCommands({}); // rebind commands
+                expect(commands.internals.forbiddenCmds.foobar).to.be.undefined;
+            });
         });
     });
 });
