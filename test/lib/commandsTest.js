@@ -42,7 +42,7 @@ describe('lib/config', () => {
         const fns = ['Commands', 'Command', 'parseLine', 'getCommandHelps', 'cmdHelp', 'defaultHandler',
                 'onError', 'onComplete'
             ],
-            objs = ['handlers', 'helpTopics'],
+            objs = ['handlers', 'shadowHandlers', 'forbiddenCmds', 'helpTopics'],
             vals = [];
 
         describe('should internalize expected functions:', () => {
@@ -75,7 +75,7 @@ describe('lib/config', () => {
         describe('imperative commands', () => {
             describe('output object format', () => {
                 it('should match bare command', () => {
-                    parseLine('!help').should.have.all.keys(['line', 'command', 'args', 'mention']);
+                    parseLine('!help').should.have.all.keys(['line', 'command', 'commandText', 'args', 'mention']);
                 });
                 it('should copy input into output object', () => {
                     parseLine('!help arg1 arg2').line.should.equal('!help arg1 arg2');
@@ -85,6 +85,9 @@ describe('lib/config', () => {
                 });
                 it('should normalize command case in output object', () => {
                     parseLine('!HELP arg1 arg2').command.should.equal('help');
+                });
+                it('should store original command case in output object', () => {
+                    parseLine('!HeLp arg1 arg2').commandText.should.equal('HeLp');
                 });
                 it('should set args correctly', () => {
                     parseLine('!help arg1 arg2').args.should.deep.equal(['arg1', 'arg2']);
@@ -136,7 +139,7 @@ describe('lib/config', () => {
         describe('mention commands', () => {
             describe('output object format', () => {
                 it('should match bare command', () => {
-                    parseLine('@fred help').should.have.all.keys(['line', 'command', 'args', 'mention']);
+                    parseLine('@fred help').should.have.all.keys(['line', 'command', 'commandText', 'args', 'mention']);
                 });
                 it('should copy input into output object', () => {
                     parseLine('@fred help arg1 arg2').line.should.equal('@fred help arg1 arg2');
@@ -146,6 +149,9 @@ describe('lib/config', () => {
                 });
                 it('should normalize command case in output object', () => {
                     parseLine('@fred HELP arg1 arg2').command.should.equal('help');
+                });
+                it('should store original command case in output object', () => {
+                    parseLine('@fred hElP arg1 arg2').commandText.should.equal('hElP');
                 });
                 it('should set args correctly', () => {
                     parseLine('@fred help arg1 arg2').args.should.deep.equal(['arg1', 'arg2']);
@@ -552,12 +558,14 @@ describe('lib/config', () => {
     describe('Command', () => {
         let forum = null,
             Command = null,
-            handlers = null;
+            handlers = null,
+            shadowHandlers = null;
         beforeEach(() => {
             forum = {};
             commands.bindCommands(forum);
             Command = commands.internals.Command;
             handlers = commands.internals.handlers;
+            shadowHandlers = commands.internals.shadowHandlers;
         });
         describe('ctor()', () => {
             it('should use utils.mapSet for storage', () => {
@@ -577,6 +585,13 @@ describe('lib/config', () => {
                     command: expected
                 }, {});
                 utils.mapGet(command).command.should.equal(expected);
+            });
+            it('should store definition.commandText', () => {
+                const expected = `${Math.random()}${Math.random()}`;
+                const command = new Command({
+                    commandText: expected
+                }, {});
+                utils.mapGet(command).commandText.should.equal(expected);
             });
             it('should store definition.args', () => {
                 const expected = `${Math.random()}${Math.random()}`;
@@ -608,6 +623,25 @@ describe('lib/config', () => {
             });
             it('should select registered handler for valid command', () => {
                 const expected = sinon.spy();
+                handlers.ook = {
+                    handler: expected
+                };
+                const command = new Command({
+                    command: 'ook'
+                }, {});
+                utils.mapGet(command).handler.should.equal(expected);
+            });
+            it('should select registered shadowHandler for valid command', () => {
+                const expected = sinon.spy();
+                shadowHandlers.ook = expected;
+                const command = new Command({
+                    command: 'ook'
+                }, {});
+                utils.mapGet(command).handler.should.equal(expected);
+            });
+            it('should select registered handler for valid command when shadowHandler also exists', () => {
+                const expected = sinon.spy();
+                shadowHandlers.ook = sinon.spy();
                 handlers.ook = {
                     handler: expected
                 };
@@ -656,7 +690,9 @@ describe('lib/config', () => {
                 command = new Command({}, {});
                 data = utils.mapGet(command);
             });
-            ['line', 'command', 'mention', 'args', 'parent', 'replyText', 'executable'].forEach((property) => {
+            ['line', 'command', 'commandText', 'mention', 'args', 'parent',
+                'replyText', 'executable'
+            ].forEach((property) => {
                 it(`should allow get of ${property} from storage`, () => {
                     const expected = Math.random();
                     data[property] = expected;
@@ -708,6 +744,24 @@ describe('lib/config', () => {
                 const expected = `a${Math.random()}b`;
                 command.reply(expected);
                 data.replyText.should.equal(expected);
+            });
+        });
+        describe('appendReply()', () => {
+            let command, data;
+            beforeEach(() => {
+                command = new Command({}, {});
+                data = utils.mapGet(command);
+            });
+            it('should set replyText property', () => {
+                const expected = `a${Math.random()}b`;
+                command.appendReply(expected);
+                data.replyText.should.equal(expected);
+            });
+            it('should add to replyText property', () => {
+                data.replyText = 'foobar';
+                const content = `a${Math.random()}b`;
+                command.appendReply(content);
+                data.replyText.should.equal(`foobar\n\n${content}`);
             });
         });
         describe('execute()', () => {
@@ -1006,17 +1060,158 @@ describe('lib/config', () => {
             });
         });
         describe('static add()', () => {
-            beforeEach(() => commands.bindCommands({}));
+            let emit = null;
+            beforeEach(() => {
+                emit = sinon.spy();
+                commands.bindCommands({
+                    emit: emit
+                });
+            });
             it('should add command to helpers', () => {
                 const cmd = `a${Math.random()}a`,
                     text = `b${Math.random()}b`,
                     handler = sinon.spy();
                 expect(commands.internals.handlers[cmd]).to.be.not.ok;
-                commands.internals.Commands.add(cmd, text, handler);
-                commands.internals.handlers[cmd].should.eql({
-                    handler: handler,
-                    help: text
+                return commands.internals.Commands.add(cmd, text, handler).then(() => {
+                    commands.internals.handlers[cmd].should.eql({
+                        commandText: cmd,
+                        handler: handler,
+                        help: text
+                    });
                 });
+            });
+            it('should normalize command case for matching', () => {
+                const cmd = `A${Math.random()}A`,
+                    text = `b${Math.random()}b`,
+                    handler = sinon.spy();
+                expect(commands.internals.handlers[cmd]).to.be.not.ok;
+                return commands.internals.Commands.add(cmd, text, handler).then(() => {
+                    commands.internals.handlers[cmd.toLowerCase()].should.be.ok;
+                });
+            });
+            it('should warn when registering a command where alias already exists', () => {
+                const cmd = `a${Math.random()}a`;
+                commands.internals.shadowHandlers[cmd] = 5;
+                return commands.internals.Commands.add(cmd, 'foo', () => 0).then(() => {
+                    const msg = `WARNING, ${cmd} is already registered: will override alias.`;
+                    emit.calledWith('log', msg).should.be.true;
+                });
+            });
+            it('should log error when registering a command where already exists', () => {
+                const cmd = `a${Math.random()}a`;
+                commands.internals.handlers[cmd] = 5;
+                return commands.internals.Commands.add(cmd, 'foo', () => 0).catch(() => {
+                    const msg = `ERROR, ${cmd} is already registered: cannot override existing command.`;
+                    emit.calledWith('error', msg).should.be.true;
+                });
+            });
+            it('should error when registering an alias where already exists', () => {
+                const cmd = `a${Math.random()}a`;
+                commands.internals.handlers[cmd] = 5;
+                const Cmds = commands.internals.Commands;
+                return Cmds.add(cmd, 'foo', () => 0).should.be.rejectedWith('E_ALREADY_REGISTERED');
+            });
+            it('should log error when registering a forbidden command', () => {
+                const cmd = `a${Math.random()}a`;
+                commands.internals.forbiddenCmds[cmd] = 5;
+                return commands.internals.Commands.add(cmd, 'foo', () => 0).catch(() => {
+                    const msg = `ERROR, ${cmd} is already registered: not allowed by the active forum provider.`;
+                    emit.calledWith('error', msg).should.be.true;
+                });
+            });
+            it('should error when registering a forbidden command', () => {
+                const cmd = `a${Math.random()}a`;
+                commands.internals.forbiddenCmds[cmd] = 5;
+                const Cmds = commands.internals.Commands;
+                return Cmds.add(cmd, 'foo', () => 0).should.be.rejectedWith('E_FORBIDDEN_COMMAND');
+            });
+        });
+        describe('static addAlias()', () => {
+            let emit = null;
+            beforeEach(() => {
+                emit = sinon.spy();
+                commands.bindCommands({
+                    emit: emit
+                });
+            });
+            it('should add command alias to helpers', () => {
+                const cmd = `a${Math.random()}a`,
+                    handler = sinon.spy();
+                expect(commands.internals.shadowHandlers[cmd]).to.be.not.ok;
+                return commands.internals.Commands.addAlias(cmd, handler).then(() => {
+                    commands.internals.shadowHandlers[cmd].should.equal(handler);
+                });
+            });
+            it('should normalize command case for matching', () => {
+                const cmd = `A${Math.random()}A`,
+                    handler = sinon.spy();
+                expect(commands.internals.shadowHandlers[cmd]).to.be.not.ok;
+                return commands.internals.Commands.addAlias(cmd, handler).then(() => {
+                    commands.internals.shadowHandlers[cmd.toLocaleLowerCase()].should.be.ok;
+                });
+            });
+            it('should warn when registering an alias where command already exists', () => {
+                const cmd = `a${Math.random()}a`;
+                commands.internals.handlers[cmd] = 5;
+                expect(commands.internals.shadowHandlers[cmd]).to.be.not.ok;
+                return commands.internals.Commands.addAlias(cmd, () => 0).then(() => {
+                    const msg = `WARNING, ${cmd} is already registered: existing command will override.`;
+                    emit.calledWith('log', msg).should.be.true;
+                });
+            });
+            it('should log error when registering an alias where already exists', () => {
+                const cmd = `a${Math.random()}a`;
+                commands.internals.shadowHandlers[cmd] = 5;
+                return commands.internals.Commands.addAlias(cmd, () => 0).catch(() => {
+                    const msg = `ERROR, ${cmd} is already registered: cannot override existing alias.`;
+                    emit.calledWith('error').should.be.true;
+                    emit.lastCall.args[1].should.equal(msg);
+                });
+            });
+            it('should error when registering an alias where already exists', () => {
+                const cmd = `a${Math.random()}a`;
+                commands.internals.shadowHandlers[cmd] = 5;
+                const Cmds = commands.internals.Commands;
+                return Cmds.addAlias(cmd, () => 0).should.be.rejectedWith('E_ALREADY_REGISTERED');
+            });
+            it('should log error when registering a forbidden alias', () => {
+                const cmd = `a${Math.random()}a`;
+                commands.internals.forbiddenCmds[cmd] = 5;
+                return commands.internals.Commands.addAlias(cmd, 'foo', () => 0).catch(() => {
+                    const msg = `ERROR, ${cmd} is already registered: not allowed by the active forum provider.`;
+                    emit.calledWith('error', msg).should.be.true;
+                });
+            });
+            it('should error when registering a forbidden alias', () => {
+                const cmd = `a${Math.random()}a`;
+                commands.internals.forbiddenCmds[cmd] = 5;
+                const Cmds = commands.internals.Commands;
+                return Cmds.addAlias(cmd, 'foo', () => 0).should.be.rejectedWith('E_FORBIDDEN_COMMAND');
+            });
+        });
+        describe('static forbidCommand()', () => {
+            it('should forbid a command', () => {
+                Object.keys(commands.internals.forbiddenCmds).should.eql([]);
+                Commands.forbidCommand('foobar');
+                commands.internals.forbiddenCmds.foobar.should.be.ok;
+            });
+            it('should forbid with capital command', () => {
+                Object.keys(commands.internals.forbiddenCmds).should.eql([]);
+                Commands.forbidCommand('FOOBAR');
+                commands.internals.forbiddenCmds.foobar.should.be.ok;
+            });
+            it('should return false when command was not already forbidden', () => {
+                expect(commands.internals.forbiddenCmds.foobar).to.be.undefined;
+                Commands.forbidCommand('FoOBaR').should.be.false;
+            });
+            it('should return true when command was already forbidden', () => {
+                commands.internals.forbiddenCmds.foobar = Math.random();
+                Commands.forbidCommand('FooBar').should.be.true;
+            });
+            it('should forbid command only for current provider', () => {
+                Commands.forbidCommand('FooBar');
+                commands.bindCommands({}); // rebind commands
+                expect(commands.internals.forbiddenCmds.foobar).to.be.undefined;
             });
         });
     });
