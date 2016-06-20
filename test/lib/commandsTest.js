@@ -1093,7 +1093,7 @@ describe('lib/config', () => {
                 const cmd = `a${Math.random()}a`;
                 commands.internals.shadowHandlers[cmd] = 5;
                 return commands.internals.Commands.add(cmd, 'foo', () => 0).then(() => {
-                    const msg = `WARNING: alias ${cmd} is already registered, the alias will have no effect.`;
+                    const msg = `WARNING, ${cmd} is already registered: will override alias.`;
                     emit.calledWith('log', msg).should.be.true;
                 });
             });
@@ -1101,7 +1101,7 @@ describe('lib/config', () => {
                 const cmd = `a${Math.random()}a`;
                 commands.internals.handlers[cmd] = 5;
                 return commands.internals.Commands.add(cmd, 'foo', () => 0).catch(() => {
-                    const msg = `ERROR: command ${cmd} is already registered, cannot override existing command.`;
+                    const msg = `ERROR, ${cmd} is already registered: cannot override existing command.`;
                     emit.calledWith('error', msg).should.be.true;
                 });
             });
@@ -1115,7 +1115,7 @@ describe('lib/config', () => {
                 const cmd = `a${Math.random()}a`;
                 commands.internals.forbiddenCmds[cmd] = 5;
                 return commands.internals.Commands.add(cmd, 'foo', () => 0).catch(() => {
-                    const msg = `ERROR: command ${cmd} is not allowed by the active forum provider.`;
+                    const msg = `ERROR, ${cmd} is already registered: not allowed by the active forum provider.`;
                     emit.calledWith('error', msg).should.be.true;
                 });
             });
@@ -1155,7 +1155,7 @@ describe('lib/config', () => {
                 commands.internals.handlers[cmd] = 5;
                 expect(commands.internals.shadowHandlers[cmd]).to.be.not.ok;
                 return commands.internals.Commands.addAlias(cmd, () => 0).then(() => {
-                    const msg = `WARNING: ${cmd} is already registered, this alias will have no effect.`;
+                    const msg = `WARNING, ${cmd} is already registered: existing command will override.`;
                     emit.calledWith('log', msg).should.be.true;
                 });
             });
@@ -1163,8 +1163,9 @@ describe('lib/config', () => {
                 const cmd = `a${Math.random()}a`;
                 commands.internals.shadowHandlers[cmd] = 5;
                 return commands.internals.Commands.addAlias(cmd, () => 0).catch(() => {
-                    const msg = `ERROR: alias ${cmd} is already registered, cannot override existing alias.`;
-                    emit.calledWith('error', msg).should.be.true;
+                    const msg = `ERROR, ${cmd} is already registered: cannot override existing alias.`;
+                    emit.calledWith('error').should.be.true;
+                    emit.lastCall.args[1].should.equal(msg);
                 });
             });
             it('should error when registering an alias where already exists', () => {
@@ -1177,7 +1178,7 @@ describe('lib/config', () => {
                 const cmd = `a${Math.random()}a`;
                 commands.internals.forbiddenCmds[cmd] = 5;
                 return commands.internals.Commands.addAlias(cmd, 'foo', () => 0).catch(() => {
-                    const msg = `ERROR: alias ${cmd} is not allowed by the active forum provider.`;
+                    const msg = `ERROR, ${cmd} is already registered: not allowed by the active forum provider.`;
                     emit.calledWith('error', msg).should.be.true;
                 });
             });
