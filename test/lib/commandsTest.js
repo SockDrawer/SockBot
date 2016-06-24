@@ -917,6 +917,32 @@ describe('lib/config', () => {
                 });
             });
         });
+        describe('cached setters', () => {
+            [
+                ['setPost', 'post'],
+                ['setTopic', 'topic'],
+                ['setUser', 'user']
+            ].forEach((config) => {
+                const method = config[0],
+                    store = config[1];
+                let command, data, notification;
+                beforeEach(() => {
+                    notification = {};
+                    command = new Commands(notification, '');
+                    data = utils.mapGet(command);
+                });
+                it(`should save ${store} when set`, () => {
+                    const expected = Math.random();
+                    command[method](expected);
+                    data[store].should.equal(expected);
+                });
+                it(`should throw when ${store} is already set`, () => {
+                    const expected = Math.random();
+                    data[store] = expected;
+                    expect(() => command[method](Math.random())).to.throw('E_ALREADY_SET');
+                });
+            });
+        });
         describe('execute()', () => {
             describe('non limited commands', () => {
                 let command, data;
