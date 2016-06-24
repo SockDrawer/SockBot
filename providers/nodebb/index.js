@@ -27,6 +27,14 @@ const utils = require('../../lib/utils'),
  * Connects to a NodeBB foru
  */
 class Forum extends EventEmitter {
+
+    /**
+     * Get announced compatibilities string for the provider
+     */
+    static get compatibilities() {
+        return '(nodebb/compatible) (wtdwtf/compatible)';
+    }
+
     /**
      * Create a forum connector instance
      *

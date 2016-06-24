@@ -415,21 +415,38 @@ describe('lib/app', () => {
     describe('getUserAgent()', () => {
         let username = null,
             owner = null,
-            ua = null;
+            ua = null,
+            provider = null;
         beforeEach(() => {
             username = `username${Math.random()}`;
             owner = `owner${Math.random()}`;
+            provider = {};
             ua = testModule.getUserAgent({
                 core: {
                     username: username,
                     owner: owner
                 }
-            });
+            }, provider);
         });
         it('should return a string', () => {
             testModule.getUserAgent({
                 core: {}
-            }).should.be.a('string');
+            }, provider).should.be.a('string');
+        });
+        it('should not end in white space', () => {
+            /\s+$/.test(testModule.getUserAgent({
+                core: {}
+            }, {
+                compatibilities: ''
+            })).should.be.false;
+        });
+        it('should not end in white space', () => {
+            const expected = `abc${Math.random()}def`;
+            testModule.getUserAgent({
+                core: {}
+            }, {
+                compatibilities: expected
+            }).should.endWith(expected);
         });
         it('should startWith package name/version', () => {
             ua.indexOf(`${packageInfo.name}/${packageInfo.version}`).should.equal(0);
