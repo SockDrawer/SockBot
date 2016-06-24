@@ -7,6 +7,7 @@
  */
 
 const utils = require('../lib/utils');
+const debug = require('debug')('sockbot:plugins:summoner');
 
 const defaultMessages = [
     '@%username% has summoned me, and so I appear.',
@@ -42,8 +43,10 @@ module.exports = function summoner(forum, config) {
      * @returns {Promise} Resolves when event is processed
      */
     function handler(notification) {
+        debug('summoner received a mention notification!');
         return notification.getUser()
             .then((user) => {
+                debug(`summoner responding to summons by ${user.name}`);
                 const index = Math.floor(Math.random() * messages.length);
                 const message = messages[index].replace(/%(\w+)%/g, (_, key) => {
                     let value = user[key] || `%${key}%`;
@@ -52,6 +55,7 @@ module.exports = function summoner(forum, config) {
                     }
                     return value;
                 });
+                debug(`summoner replying with: ${message}`);
                 return forum.Post.reply(notification.topicId, notification.postId, message);
             }).catch((err) => {
                 forum.emit('error', err);
