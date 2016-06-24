@@ -79,10 +79,10 @@ function verifyDocument(file) {
             if (err) {
                 return reject(err);
             }
-            git.add(file, () => {
+            return git.add(file, () => {
                 const origFile = `.${file.replace(/[.]md$/, '.js').slice(docDest.length)}`;
                 if (stats.size === 0) {
-                    console.warn(`${origFile} has no jsdocs, please consider adding some`); //eslint-disable-line no-console
+                    console.warn(`${origFile} has no jsdocs, please add some?`); //eslint-disable-line no-console
                     return removeStale(origFile).then(resolve, reject);
                 }
                 return resolve();
@@ -96,7 +96,6 @@ function removeStale(file) {
         const dest = getDestination(file).path;
         git.rm([dest], (err) => {
             if (err) {
-                console.log(err)
                 fs.unlink(dest, (err2) => err2 ? reject(err2) : resolve());
             } else {
                 resolve();
