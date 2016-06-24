@@ -46,8 +46,10 @@ describe('lib/app', () => {
             spy.calledWith(expected).should.be.true;
         });
         it('should require module direct on ENOENT', () => {
-            const spy = sinon.stub();
-            spy.onFirstCall().throws(new Error('Cannot find module icky bad'));
+            const spy = sinon.stub(),
+                enoent = new Error('Cannot find module icky bad');
+            enoent.code = 45;
+            spy.onFirstCall().throws(enoent);
             testModule.relativeRequire('../ardvark', 'bar', spy);
             spy.calledWith('bar').should.be.true;
         });
