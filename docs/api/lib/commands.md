@@ -38,8 +38,11 @@ NodeBB provider module User class
                 * [.commands](#sockbot.lib.module_commands..Commands+commands) : <code>Array.&lt;Command&gt;</code>
                 * [.text](#sockbot.lib.module_commands..Commands+text) : <code>string</code>
                 * [.getPost()](#sockbot.lib.module_commands..Commands+getPost) ⇒ <code>Promise.&lt;Post&gt;</code>
+                * [.setPost(post)](#sockbot.lib.module_commands..Commands+setPost)
                 * [.getTopic()](#sockbot.lib.module_commands..Commands+getTopic) ⇒ <code>Promise.&lt;Topic&gt;</code>
+                * [.setTopic(topic)](#sockbot.lib.module_commands..Commands+setTopic)
                 * [.getUser()](#sockbot.lib.module_commands..Commands+getUser) ⇒ <code>Promise.&lt;User&gt;</code>
+                * [.setUser(user)](#sockbot.lib.module_commands..Commands+setUser)
                 * [.execute()](#sockbot.lib.module_commands..Commands+execute) ⇒ <code>Promise.&lt;Commands&gt;</code>
             * _static_
                 * [.get(notification, postBody, handler)](#sockbot.lib.module_commands..Commands.get) ⇒ <code>Promise.&lt;Commands&gt;</code>
@@ -271,8 +274,11 @@ Commands class. Represents all commands for a Notification
         * [.commands](#sockbot.lib.module_commands..Commands+commands) : <code>Array.&lt;Command&gt;</code>
         * [.text](#sockbot.lib.module_commands..Commands+text) : <code>string</code>
         * [.getPost()](#sockbot.lib.module_commands..Commands+getPost) ⇒ <code>Promise.&lt;Post&gt;</code>
+        * [.setPost(post)](#sockbot.lib.module_commands..Commands+setPost)
         * [.getTopic()](#sockbot.lib.module_commands..Commands+getTopic) ⇒ <code>Promise.&lt;Topic&gt;</code>
+        * [.setTopic(topic)](#sockbot.lib.module_commands..Commands+setTopic)
         * [.getUser()](#sockbot.lib.module_commands..Commands+getUser) ⇒ <code>Promise.&lt;User&gt;</code>
+        * [.setUser(user)](#sockbot.lib.module_commands..Commands+setUser)
         * [.execute()](#sockbot.lib.module_commands..Commands+execute) ⇒ <code>Promise.&lt;Commands&gt;</code>
     * _static_
         * [.get(notification, postBody, handler)](#sockbot.lib.module_commands..Commands.get) ⇒ <code>Promise.&lt;Commands&gt;</code>
@@ -321,6 +327,18 @@ Get the Post this Commands object referrs to
 **Kind**: instance method of <code>[Commands](#sockbot.lib.module_commands..Commands)</code>  
 **Returns**: <code>Promise.&lt;Post&gt;</code> - Resolves to the retrieved Post  
 **Access:** public  
+<a name="sockbot.lib.module_commands..Commands+setPost"></a>
+
+#### commands.setPost(post)
+Set the Post this Commands object refers to
+
+**Kind**: instance method of <code>[Commands](#sockbot.lib.module_commands..Commands)</code>  
+**Access:** public  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| post | <code>Post</code> | The Post to cache |
+
 <a name="sockbot.lib.module_commands..Commands+getTopic"></a>
 
 #### commands.getTopic() ⇒ <code>Promise.&lt;Topic&gt;</code>
@@ -329,6 +347,18 @@ Get the Topic this Commands object referrs to
 **Kind**: instance method of <code>[Commands](#sockbot.lib.module_commands..Commands)</code>  
 **Returns**: <code>Promise.&lt;Topic&gt;</code> - Resolves to the retrieved Topic  
 **Access:** public  
+<a name="sockbot.lib.module_commands..Commands+setTopic"></a>
+
+#### commands.setTopic(topic)
+Set the Topic this Commands object refers to
+
+**Kind**: instance method of <code>[Commands](#sockbot.lib.module_commands..Commands)</code>  
+**Access:** public  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| topic | <code>Topic</code> | The Topic to cache |
+
 <a name="sockbot.lib.module_commands..Commands+getUser"></a>
 
 #### commands.getUser() ⇒ <code>Promise.&lt;User&gt;</code>
@@ -337,6 +367,18 @@ Get the user who sent these commands
 **Kind**: instance method of <code>[Commands](#sockbot.lib.module_commands..Commands)</code>  
 **Returns**: <code>Promise.&lt;User&gt;</code> - Resolved to the retrieved User  
 **Access:** public  
+<a name="sockbot.lib.module_commands..Commands+setUser"></a>
+
+#### commands.setUser(user)
+Set the User this Commands object refers to
+
+**Kind**: instance method of <code>[Commands](#sockbot.lib.module_commands..Commands)</code>  
+**Access:** public  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| user | <code>User</code> | The User to cache |
+
 <a name="sockbot.lib.module_commands..Commands+execute"></a>
 
 #### commands.execute() ⇒ <code>Promise.&lt;Commands&gt;</code>
