@@ -1,7 +1,7 @@
 ## Functions
 
 <dl>
-<dt><a href="#getUserAgent">getUserAgent(cfg)</a> ⇒ <code>string</code></dt>
+<dt><a href="#getUserAgent">getUserAgent(cfg, provider)</a> ⇒ <code>string</code></dt>
 <dd><p>Construct a useragent for sockbot to use</p>
 </dd>
 <dt><a href="#_buildMessage">_buildMessage(args)</a> ⇒ <code>string</code></dt>
@@ -26,7 +26,7 @@
 
 <a name="getUserAgent"></a>
 
-## getUserAgent(cfg) ⇒ <code>string</code>
+## getUserAgent(cfg, provider) ⇒ <code>string</code>
 Construct a useragent for sockbot to use
 
 **Kind**: global function  
@@ -35,6 +35,7 @@ Construct a useragent for sockbot to use
 | Param | Type | Description |
 | --- | --- | --- |
 | cfg | <code>object</code> | Instance Configuration to construct User Agent for |
+| provider | <code>Forum</code> | Forum Provider class to construct User Agent for |
 
 <a name="_buildMessage"></a>
 

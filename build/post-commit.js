@@ -79,22 +79,24 @@ function verifyDocument(file) {
             if (err) {
                 return reject(err);
             }
-            const origFile = `.${file.replace(/[.]md$/, '.js').slice(docDest.length)}`;
-            if (stats.size === 0) {
-                console.warn(`${origFile} has no jsdocs, please consider adding some`); //eslint-disable-line no-console
-                return removeStale(origFile).then(resolve, reject);
-            }
-            return git.add(file, () => resolve());
+            return git.add(file, () => {
+                const origFile = `.${file.replace(/[.]md$/, '.js').slice(docDest.length)}`;
+                if (stats.size === 0) {
+                    console.warn(`${origFile} has no jsdocs, please add some?`); //eslint-disable-line no-console
+                    return removeStale(origFile).then(resolve, reject);
+                }
+                return resolve();
+            });
         });
     });
 }
 
 function removeStale(file) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         const dest = getDestination(file).path;
-        git.silent(true).rm(dest, (err) => {
+        git.rm([dest], (err) => {
             if (err) {
-                fs.unlink(dest, () => resolve());
+                fs.unlink(dest, (err2) => err2 ? reject(err2) : resolve());
             } else {
                 resolve();
             }

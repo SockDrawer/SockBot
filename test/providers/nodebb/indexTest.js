@@ -24,6 +24,11 @@ describe('providers/nodebb', () => {
     it('should export a function()', () => {
         Forum.should.be.a('function');
     });
+    describe('compatibilities', () => {
+        it('should be a string', () => {
+            Forum.compatibilities.should.be.a('string');
+        });
+    });
     describe('ctor', () => {
         let sandbox = null;
         beforeEach(() => {

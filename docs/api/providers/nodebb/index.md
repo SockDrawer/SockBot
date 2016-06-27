@@ -9,6 +9,35 @@ NodeBB provider module
 * [nodebb](#sockbot.providers.module_nodebb)
     * [~Forum](#sockbot.providers.module_nodebb..Forum)
         * [new Forum(config, useragent)](#new_sockbot.providers.module_nodebb..Forum_new)
+        * _instance_
+            * [.config](#sockbot.providers.module_nodebb..Forum+config) : <code>object</code>
+            * [.useragent](#sockbot.providers.module_nodebb..Forum+useragent) : <code>string</code>
+            * [.url](#sockbot.providers.module_nodebb..Forum+url) : <code>string</code>
+            * [.username](#sockbot.providers.module_nodebb..Forum+username)
+            * [.user](#sockbot.providers.module_nodebb..Forum+user) : <code>User</code>
+            * [.owner](#sockbot.providers.module_nodebb..Forum+owner) : <code>User</code>
+            * [.Commands](#sockbot.providers.module_nodebb..Forum+Commands) : <code>Commands</code>
+            * [.login()](#sockbot.providers.module_nodebb..Forum+login) ⇒ <code>Promise.&lt;Forum&gt;</code>
+            * [.connectWebsocket()](#sockbot.providers.module_nodebb..Forum+connectWebsocket) ⇒ <code>Promise.&lt;Forum&gt;</code>
+            * [.addPlugin(fnPlugin, pluginConfig)](#sockbot.providers.module_nodebb..Forum+addPlugin) ⇒ <code>Promise</code>
+            * [.activate()](#sockbot.providers.module_nodebb..Forum+activate) ⇒ <code>Promise</code>
+            * [.deactivate()](#sockbot.providers.module_nodebb..Forum+deactivate) ⇒ <code>Promise</code>
+            * [.fetchObject(func, id, parser)](#sockbot.providers.module_nodebb..Forum+fetchObject) ⇒ <code>Promise.&lt;T&gt;</code>
+        * _static_
+            * [.compatibilities](#sockbot.providers.module_nodebb..Forum.compatibilities)
+
+<a name="sockbot.providers.module_nodebb..Forum"></a>
+
+### nodebb~Forum
+Forum connector
+
+Connects to a NodeBB foru
+
+**Kind**: inner class of <code>[nodebb](#sockbot.providers.module_nodebb)</code>  
+
+* [~Forum](#sockbot.providers.module_nodebb..Forum)
+    * [new Forum(config, useragent)](#new_sockbot.providers.module_nodebb..Forum_new)
+    * _instance_
         * [.config](#sockbot.providers.module_nodebb..Forum+config) : <code>object</code>
         * [.useragent](#sockbot.providers.module_nodebb..Forum+useragent) : <code>string</code>
         * [.url](#sockbot.providers.module_nodebb..Forum+url) : <code>string</code>
@@ -22,31 +51,8 @@ NodeBB provider module
         * [.activate()](#sockbot.providers.module_nodebb..Forum+activate) ⇒ <code>Promise</code>
         * [.deactivate()](#sockbot.providers.module_nodebb..Forum+deactivate) ⇒ <code>Promise</code>
         * [.fetchObject(func, id, parser)](#sockbot.providers.module_nodebb..Forum+fetchObject) ⇒ <code>Promise.&lt;T&gt;</code>
-
-<a name="sockbot.providers.module_nodebb..Forum"></a>
-
-### nodebb~Forum
-Forum connector
-
-Connects to a NodeBB foru
-
-**Kind**: inner class of <code>[nodebb](#sockbot.providers.module_nodebb)</code>  
-
-* [~Forum](#sockbot.providers.module_nodebb..Forum)
-    * [new Forum(config, useragent)](#new_sockbot.providers.module_nodebb..Forum_new)
-    * [.config](#sockbot.providers.module_nodebb..Forum+config) : <code>object</code>
-    * [.useragent](#sockbot.providers.module_nodebb..Forum+useragent) : <code>string</code>
-    * [.url](#sockbot.providers.module_nodebb..Forum+url) : <code>string</code>
-    * [.username](#sockbot.providers.module_nodebb..Forum+username)
-    * [.user](#sockbot.providers.module_nodebb..Forum+user) : <code>User</code>
-    * [.owner](#sockbot.providers.module_nodebb..Forum+owner) : <code>User</code>
-    * [.Commands](#sockbot.providers.module_nodebb..Forum+Commands) : <code>Commands</code>
-    * [.login()](#sockbot.providers.module_nodebb..Forum+login) ⇒ <code>Promise.&lt;Forum&gt;</code>
-    * [.connectWebsocket()](#sockbot.providers.module_nodebb..Forum+connectWebsocket) ⇒ <code>Promise.&lt;Forum&gt;</code>
-    * [.addPlugin(fnPlugin, pluginConfig)](#sockbot.providers.module_nodebb..Forum+addPlugin) ⇒ <code>Promise</code>
-    * [.activate()](#sockbot.providers.module_nodebb..Forum+activate) ⇒ <code>Promise</code>
-    * [.deactivate()](#sockbot.providers.module_nodebb..Forum+deactivate) ⇒ <code>Promise</code>
-    * [.fetchObject(func, id, parser)](#sockbot.providers.module_nodebb..Forum+fetchObject) ⇒ <code>Promise.&lt;T&gt;</code>
+    * _static_
+        * [.compatibilities](#sockbot.providers.module_nodebb..Forum.compatibilities)
 
 <a name="new_sockbot.providers.module_nodebb..Forum_new"></a>
 
@@ -176,3 +182,9 @@ Retrieve and parse an object
 | id | <code>\*</code> | Id parameter to websocket function |
 | parser | <code>ParserFunction.&lt;T&gt;</code> | Parse function to apply to retrieved data |
 
+<a name="sockbot.providers.module_nodebb..Forum.compatibilities"></a>
+
+#### Forum.compatibilities
+Get announced compatibilities string for the provider
+
+**Kind**: static property of <code>[Forum](#sockbot.providers.module_nodebb..Forum)</code>  
