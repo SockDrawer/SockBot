@@ -31,7 +31,7 @@ NodeBB provider module
 ### nodebb~Forum
 Forum connector
 
-Connects to a NodeBB foru
+Connects to a NodeBB forum
 
 **Kind**: inner class of <code>[nodebb](#sockbot.providers.module_nodebb)</code>  
 

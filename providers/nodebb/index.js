@@ -24,7 +24,7 @@ const utils = require('../../lib/utils'),
 /**
  * Forum connector
  *
- * Connects to a NodeBB foru
+ * Connects to a NodeBB forum
  */
 class Forum extends EventEmitter {
 

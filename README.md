@@ -3,6 +3,7 @@
 [![Docs Status](https://readthedocs.org/projects/sockbot/badge/?version=latest)](http://sockbot.readthedocs.org/)
 
 [![Build Status](https://travis-ci.org/SockDrawer/SockBot.svg)](https://travis-ci.org/SockDrawer/SockBot)
+[![Build status](https://ci.appveyor.com/api/projects/status/2aaq3ay3waq5sxi9?svg=true)](https://ci.appveyor.com/project/AccaliaDeElementia/sockbot)
 [![bitHound Overall Score](https://www.bithound.io/github/SockDrawer/SockBot/badges/score.svg)](https://www.bithound.io/github/SockDrawer/SockBot)
 [![Code Climate](https://codeclimate.com/github/SockDrawer/SockBot/badges/gpa.svg)](https://codeclimate.com/github/SockDrawer/SockBot)
 [![Test Coverage](https://codeclimate.com/github/SockDrawer/SockBot/badges/coverage.svg)](https://codeclimate.com/github/SockDrawer/SockBot/coverage)
