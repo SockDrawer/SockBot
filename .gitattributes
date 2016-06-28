@@ -1,1 +1,2 @@
 version.js export-subst
+*.js       eol=lf
