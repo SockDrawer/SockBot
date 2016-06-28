@@ -8,6 +8,7 @@ chai.should();
 
 const sinon = require('sinon');
 require('sinon-as-promised');
+chai.use(require('sinon-chai'));
 
 const topicModule = require('../../../providers/nodebb/topic');
 const utils = require('../../../lib/utils');
@@ -123,7 +124,7 @@ describe('providers/nodebb/topic', () => {
                 const expected = Math.random();
                 forum._emit.resolves(expected);
                 return topic.reply('xyyzy').then(() => {
-                    forum.Post.parse.calledWith(expected).should.be.true;
+                    forum.Post.parse.should.have.been.calledWith(expected);
                 });
             });
             it('should resolve to results of `forum.Post.parse`', () => {
@@ -454,7 +455,7 @@ describe('providers/nodebb/topic', () => {
                         topics: [expected]
                     });
                     return Topic.getRecentTopics(spy).then(() => {
-                        forum.Topic.parse.calledWith(expected).should.be.true;
+                        forum.Topic.parse.should.have.been.calledWith(expected);
                     });
                 });
                 it('should pass expected values to User.parse()', () => {
@@ -465,7 +466,7 @@ describe('providers/nodebb/topic', () => {
                         }]
                     });
                     return Topic.getRecentTopics(spy).then(() => {
-                        forum.User.parse.calledWith(expected).should.be.true;
+                        forum.User.parse.should.have.been.calledWith(expected);
                     });
                 });
                 it('should pass expected values to Category.parse()', () => {
@@ -476,7 +477,7 @@ describe('providers/nodebb/topic', () => {
                         }]
                     });
                     return Topic.getRecentTopics(spy).then(() => {
-                        forum.Category.parse.calledWith(expected).should.be.true;
+                        forum.Category.parse.should.have.been.calledWith(expected);
                     });
                 });
             });
@@ -564,7 +565,7 @@ describe('providers/nodebb/topic', () => {
                         topics: [expected]
                     });
                     return Topic.getUnreadTopics(spy).then(() => {
-                        forum.Topic.parse.calledWith(expected).should.be.true;
+                        forum.Topic.parse.should.have.been.calledWith(expected);
                     });
                 });
                 it('should pass expected values to User.parse()', () => {
@@ -575,7 +576,7 @@ describe('providers/nodebb/topic', () => {
                         }]
                     });
                     return Topic.getUnreadTopics(spy).then(() => {
-                        forum.User.parse.calledWith(expected).should.be.true;
+                        forum.User.parse.should.have.been.calledWith(expected);
                     });
                 });
                 it('should pass expected values to Category.parse()', () => {
@@ -586,7 +587,7 @@ describe('providers/nodebb/topic', () => {
                         }]
                     });
                     return Topic.getUnreadTopics(spy).then(() => {
-                        forum.Category.parse.calledWith(expected).should.be.true;
+                        forum.Category.parse.should.have.been.calledWith(expected);
                     });
                 });
             });
@@ -611,7 +612,7 @@ describe('providers/nodebb/topic', () => {
                     const expected = Math.random();
                     forum._emit.resolves(expected);
                     return Topic.get(8472).then(() => {
-                        Topic.parse.calledWith(expected).should.be.true;
+                        Topic.parse.should.have.been.calledWith(expected);
                     });
                 });
                 it('should resolve to return value of Topic.parse()', () => {

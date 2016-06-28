@@ -8,6 +8,7 @@ chai.should();
 
 const sinon = require('sinon');
 require('sinon-as-promised');
+chai.use(require('sinon-chai'));
 
 const testModule = require('../../lib/app'),
     packageInfo = require('../../package.json'),
@@ -23,27 +24,27 @@ describe('lib/app', () => {
             const spy = sinon.spy();
             const expected = `${dirname}/../foo/bar`;
             testModule.relativeRequire('foo', 'bar', spy);
-            spy.calledWith(expected).should.be.true;
+            spy.should.have.been.calledWith(expected);
         });
         it('should require relative to config for relative path', () => {
             const spy = sinon.spy();
             config.basePath = '/bar/baz/';
             const expected = '/bar/baz/foo';
             testModule.relativeRequire('../ardvark', './foo', spy);
-            spy.calledWith(expected).should.be.true;
+            spy.should.have.been.calledWith(expected);
         });
         it('should require relative to config for walking relative path', () => {
             const spy = sinon.spy();
             config.basePath = '/bar/baz/';
             const expected = '/bar/foo';
             testModule.relativeRequire('../ardvark', '../foo', spy);
-            spy.calledWith(expected).should.be.true;
+            spy.should.have.been.calledWith(expected);
         });
         it('should require absolute for absolute path', () => {
             const spy = sinon.spy();
             const expected = '/foo/to/the/bar';
             testModule.relativeRequire('../ardvark', '/foo/to/the/bar', spy);
-            spy.calledWith(expected).should.be.true;
+            spy.should.have.been.calledWith(expected);
         });
         it('should require module direct on ENOENT', () => {
             const spy = sinon.stub(),

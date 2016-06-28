@@ -8,6 +8,7 @@ chai.should();
 
 const sinon = require('sinon');
 require('sinon-as-promised');
+chai.use(require('sinon-chai'));
 
 const Forum = require('../../../providers/nodebb'),
     postModule = require('../../../providers/nodebb/post'),
@@ -897,7 +898,7 @@ describe('providers/nodebb', () => {
             const expected = Math.random();
             forum._emit.resolves(expected);
             return forum.fetchObject('', '', parser).then(() => {
-                parser.calledWith(expected).should.be.true;
+                parser.should.have.been.calledWith(expected);
             });
         });
         it('should resolve to results of parser', () => {

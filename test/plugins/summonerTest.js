@@ -8,6 +8,7 @@ chai.should();
 
 const sinon = require('sinon');
 require('sinon-as-promised');
+chai.use(require('sinon-chai'));
 
 const testModule = require('../../plugins/summoner');
 
@@ -107,7 +108,7 @@ describe('plugins/echo', () => {
             const expected = Math.random();
             notification.topicId = expected;
             return summoner.handler(notification).then(() => {
-                forum.Post.reply.calledWith(expected).should.be.true;
+                forum.Post.reply.should.have.been.calledWith(expected);
             });
         });
         it('should reply to notification.postId', () => {

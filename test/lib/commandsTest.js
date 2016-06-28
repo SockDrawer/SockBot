@@ -8,6 +8,7 @@ const expect = chai.expect;
 
 const sinon = require('sinon');
 require('sinon-as-promised');
+chai.use(require('sinon-chai'));
 
 const commands = require('../../lib/commands');
 const utils = require('../../lib/utils');
@@ -992,7 +993,7 @@ describe('lib/config', () => {
                     }];
                     data._replyFn = sinon.stub().resolves();
                     return command.execute().then(() => {
-                        data._replyFn.calledWith(expected).should.be.true;
+                        data._replyFn.should.have.been.calledWith(expected);
                     });
                 });
                 it('should execute onError when any command rejects', () => {
@@ -1058,7 +1059,7 @@ describe('lib/config', () => {
                         '\nPlease try again with fewer commands.';
                     data._replyFn = sinon.stub().resolves();
                     return command.execute().then(() => {
-                        data._replyFn.calledWith(expected).should.be.true;
+                        data._replyFn.should.have.been.calledWith(expected);
                     });
                 });
                 it('should emit error when limiting execution', () => {

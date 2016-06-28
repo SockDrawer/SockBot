@@ -10,6 +10,7 @@ const expect = chai.expect;
 
 const sinon = require('sinon');
 require('sinon-as-promised');
+chai.use(require('sinon-chai'));
 
 const utils = require('../../lib/utils');
 

@@ -8,6 +8,7 @@ chai.should();
 
 const sinon = require('sinon');
 require('sinon-as-promised');
+chai.use(require('sinon-chai'));
 
 const categoryModule = require('../../../providers/nodebb/category');
 const utils = require('../../../lib/utils');
@@ -157,7 +158,7 @@ describe('providers/nodebb/categor', () => {
                     topics: [expected]
                 });
                 return category.getAllTopics(spy).then(() => {
-                    forum.Topic.parseExtended.calledWith(expected).should.be.true;
+                    forum.Topic.parseExtended.should.have.been.calledWith(expected);
                 });
             });
             it('should pass expected values to progress fn', () => {
@@ -265,7 +266,7 @@ describe('providers/nodebb/categor', () => {
                     topics: [expected]
                 });
                 return category.getRecentTopics(spy).then(() => {
-                    forum.Topic.parseExtended.calledWith(expected).should.be.true;
+                    forum.Topic.parseExtended.should.have.been.calledWith(expected);
                 });
             });
             it('should pass expected values to progress fn', () => {

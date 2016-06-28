@@ -8,6 +8,7 @@ chai.should();
 
 const sinon = require('sinon');
 require('sinon-as-promised');
+chai.use(require('sinon-chai'));
 
 const testModule = require('../../../providers/nodebb/chat');
 const utils = require('../../../lib/utils');
@@ -957,7 +958,7 @@ describe('providers/nodebb/chat', () => {
                 adaptor.should.be.a('function');
                 const expected = Math.random();
                 adaptor(expected);
-                message.reply.calledWith(expected).should.be.true;
+                message.reply.should.have.been.calledWith(expected);
             });
         });
         it('should execute retrieved commands', () => {

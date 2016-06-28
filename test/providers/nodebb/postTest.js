@@ -8,6 +8,7 @@ chai.should();
 
 const sinon = require('sinon');
 require('sinon-as-promised');
+chai.use(require('sinon-chai'));
 
 const postModule = require('../../../providers/nodebb/post');
 const utils = require('../../../lib/utils');
@@ -98,7 +99,7 @@ describe('providers/nodebb/post', () => {
                 const expected = Math.random();
                 data.content = expected;
                 return post.markup().then(() => {
-                    Post.preview.calledWith(expected).should.be.true;
+                    Post.preview.should.have.been.calledWith(expected);
                 });
             });
         });
@@ -119,7 +120,7 @@ describe('providers/nodebb/post', () => {
                 const expected = Math.random();
                 data.id = expected;
                 return post.url().then(() => {
-                    forum.Format.urlForPost.calledWith(expected).should.be.true;
+                    forum.Format.urlForPost.should.have.been.calledWith(expected);
                 });
             });
             it('should resolve to result of urlForPost', () => {
@@ -225,7 +226,7 @@ describe('providers/nodebb/post', () => {
                 const expected = Math.random();
                 forum._emit.onSecondCall().resolves(expected);
                 return post.edit('').then(() => {
-                    Post.parse.calledWith(expected).should.be.true;
+                    Post.parse.should.have.been.calledWith(expected);
                 });
             });
             it('should resolve to results of Post.parse()', () => {
@@ -299,7 +300,7 @@ describe('providers/nodebb/post', () => {
                 const expected = Math.random();
                 forum._emit.onSecondCall().resolves(expected);
                 return post.append('').then(() => {
-                    Post.parse.calledWith(expected).should.be.true;
+                    Post.parse.should.have.been.calledWith(expected);
                 });
             });
             it('should resolve to results of Post.parse()', () => {
@@ -623,7 +624,7 @@ describe('providers/nodebb/post', () => {
                     const expected = Math.random();
                     forum._emit.resolves(expected);
                     return Post.reply(1, 2, '').then(() => {
-                        Post.parse.calledWith(expected).should.be.true;
+                        Post.parse.should.have.been.calledWith(expected);
                     });
                 });
                 it('should resolve to results of Post.parse()', () => {

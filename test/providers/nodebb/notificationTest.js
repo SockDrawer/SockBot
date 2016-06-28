@@ -8,6 +8,7 @@ chai.should();
 
 const sinon = require('sinon');
 require('sinon-as-promised');
+chai.use(require('sinon-chai'));
 
 const testModule = require('../../../providers/nodebb/notification');
 const utils = require('../../../lib/utils');
@@ -187,7 +188,7 @@ describe('providers/nodebb/notification', () => {
                 data.body = expected;
                 data.type = 'mention';
                 return notification.getText().then(() => {
-                    forum.Post.preview.calledWith(expected).should.be.true;
+                    forum.Post.preview.should.have.been.calledWith(expected);
                 });
             });
             it('should resolve to result of Post.preview for mention notification', () => {
@@ -249,7 +250,7 @@ describe('providers/nodebb/notification', () => {
                     const expected = Math.random();
                     data[prop] = expected;
                     return notification[fn]().then(() => {
-                        forum[obj].get.calledWith(expected).should.be.true;
+                        forum[obj].get.should.have.been.calledWith(expected);
                     });
                 });
                 it(`should resolve to results of ${obj}.get()`, () => {
@@ -293,7 +294,7 @@ describe('providers/nodebb/notification', () => {
                 const expected = Math.random();
                 forum._emit.resolves([expected]);
                 return Notification.get().then(() => {
-                    Notification.parse.calledWith(expected).should.be.true;
+                    Notification.parse.should.have.been.calledWith(expected);
                 });
             });
             it('should resolve to results of `Notification.parse()`', () => {
@@ -501,7 +502,7 @@ describe('providers/nodebb/notification', () => {
                     notifications: [expected]
                 });
                 return Notification.getNotifications(() => Promise.resolve()).then(() => {
-                    Notification.parse.calledWith(expected).should.be.true;
+                    Notification.parse.should.have.been.calledWith(expected);
                 });
             });
             it('should call progress function with result of `Notification.parse`', () => {
@@ -512,7 +513,7 @@ describe('providers/nodebb/notification', () => {
                 });
                 Notification.parse.returns(expected);
                 return Notification.getNotifications(spy).then(() => {
-                    spy.calledWith(expected).should.be.true;
+                    spy.should.have.been.calledWith(expected);
                 });
             });
             it('should reject when `notifications.loadMore` rejects', () => {
@@ -570,7 +571,7 @@ describe('providers/nodebb/notification', () => {
             it('should parse notification with `Notification.parse`', () => {
                 const expected = Math.random();
                 return notifyHandler(expected).then(() => {
-                    Notification.parse.calledWith(expected).should.be.true;
+                    Notification.parse.should.have.been.calledWith(expected);
                 });
             });
             it('should get text from notification with `notification.getText()`', () => {
