@@ -15,7 +15,7 @@ const testModule = require('../../lib/app'),
     commands = require('../../lib/commands'),
     utils = require('../../lib/utils');
 const path = require('path');
-const dirname = path.posix.resolve(__dirname, '../../lib');
+const dirname = path.resolve(__dirname, '../../lib');
 
 describe('lib/app', () => {
     describe('relativeRequire()', () => {
