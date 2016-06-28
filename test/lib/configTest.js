@@ -68,7 +68,7 @@ describe('lib/config', () => {
                 fs.readFile.yields(null, '');
                 yaml.safeLoad.returns();
                 config.internals.readYaml('foo');
-                fs.readFile.calledWith('foo').should.be.true;
+                fs.readFile.should.have.been.calledWith('foo');
             });
             it('should reject on fs error', () => {
                 const error = new Error('bugaboo');

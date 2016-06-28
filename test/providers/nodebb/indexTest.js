@@ -58,7 +58,7 @@ describe('providers/nodebb', () => {
         });
         it('should use Post.bindPost to generate Post object', () => {
             const forum = new Forum();
-            postModule.bindPost.calledWith(forum).should.be.true;
+            postModule.bindPost.should.have.been.calledWith(forum);
         });
         it('should store Post object in this.Post', () => {
             const expected = Math.random();
@@ -67,7 +67,7 @@ describe('providers/nodebb', () => {
         });
         it('should use Topic.bindTopic to generate Topic object', () => {
             const forum = new Forum();
-            topicModule.bindTopic.calledWith(forum).should.be.true;
+            topicModule.bindTopic.should.have.been.calledWith(forum);
         });
         it('should store Topic object in this.Topic', () => {
             const expected = Math.random();
@@ -76,7 +76,7 @@ describe('providers/nodebb', () => {
         });
         it('should use Category.bindCategory to generate Category object', () => {
             const forum = new Forum();
-            categoryModule.bindCategory.calledWith(forum).should.be.true;
+            categoryModule.bindCategory.should.have.been.calledWith(forum);
         });
         it('should store Category object in this.Category', () => {
             const expected = Math.random();
@@ -85,7 +85,7 @@ describe('providers/nodebb', () => {
         });
         it('should use User.bindUser to generate User object', () => {
             const forum = new Forum();
-            userModule.bindUser.calledWith(forum).should.be.true;
+            userModule.bindUser.should.have.been.calledWith(forum);
         });
         it('should store User object in this.User', () => {
             const expected = Math.random();
@@ -94,7 +94,7 @@ describe('providers/nodebb', () => {
         });
         it('should use Notification.bindNotification to generate Notification object', () => {
             const forum = new Forum({});
-            notifyModule.bindNotification.calledWith(forum).should.be.true;
+            notifyModule.bindNotification.should.have.been.calledWith(forum);
         });
         it('should store Notification object in this.Notification', () => {
             const expected = Math.random();
@@ -103,7 +103,7 @@ describe('providers/nodebb', () => {
         });
         it('should use Chat.bindChat to generate Chat object', () => {
             const forum = new Forum({});
-            chatModule.bindChat.calledWith(forum).should.be.true;
+            chatModule.bindChat.should.have.been.calledWith(forum);
         });
         it('should store Notification object in this.Notification', () => {
             const expected = Math.random();
@@ -488,14 +488,14 @@ describe('providers/nodebb', () => {
                 const url = `a${Math.random()}b`;
                 data.config.core.forum = url;
                 return forum.connectWebsocket().then(() => {
-                    forum._cookiejar.getCookieString.calledWith(url).should.be.true;
+                    forum._cookiejar.getCookieString.should.have.been.calledWith(url);
                 });
             });
             it('should construct websocket for forum', () => {
                 const url = `a${Math.random()}b`;
                 data.config.core.forum = url;
                 return forum.connectWebsocket().then(() => {
-                    Forum.io.calledWith(url).should.be.true;
+                    Forum.io.should.have.been.calledWith(url);
                 });
             });
             it('should pass cookies to websocket for forum', () => {
@@ -530,35 +530,35 @@ describe('providers/nodebb', () => {
             });
             it('should register for websocket `pong` event', () => {
                 return forum.connectWebsocket().then(() => {
-                    socket.on.calledWith('pong').should.be.true;
+                    socket.on.should.have.been.calledWith('pong');
                 });
             });
             it('should emit `log` on websocket pong event', () => {
                 socket.on = (evt, callback) => evt === 'pong' && callback(4242);
                 return forum.connectWebsocket().then(() => {
-                    forum.emit.calledWith('log', 'Ping exchanged with 4242ms latency').should.be.true;
+                    forum.emit.should.have.been.calledWith('log', 'Ping exchanged with 4242ms latency');
                 });
             });
             it('should register for websocket `connect` event', () => {
                 return forum.connectWebsocket().then(() => {
-                    socket.on.calledWith('connect').should.be.true;
+                    socket.on.should.have.been.calledWith('connect');
                 });
             });
             it('should emit `connect` on websocket connect event', () => {
                 socket.on = (evt, callback) => evt === 'connect' && callback();
                 return forum.connectWebsocket().then(() => {
-                    forum.emit.calledWith('connect').should.be.true;
+                    forum.emit.should.have.been.calledWith('connect');
                 });
             });
             it('should register for websocket `disconnect` event', () => {
                 return forum.connectWebsocket().then(() => {
-                    socket.on.calledWith('disconnect').should.be.true;
+                    socket.on.should.have.been.calledWith('disconnect');
                 });
             });
             it('should emit `connect` on websocket connect event', () => {
                 socket.on = (evt, callback) => evt === 'disconnect' && callback();
                 return forum.connectWebsocket().then(() => {
-                    forum.emit.calledWith('disconnect').should.be.true;
+                    forum.emit.should.have.been.calledWith('disconnect');
                 });
             });
             it('should store socket for later', () => {
@@ -642,14 +642,14 @@ describe('providers/nodebb', () => {
         it('should pass forum to plugin function', () => {
             const spy = sinon.spy(() => plug);
             return forum.addPlugin(spy).then(() => {
-                spy.calledWith(forum).should.be.true;
+                spy.should.have.been.calledWith(forum);
             });
         });
         it('should pass configuration to plugin function', () => {
             const spy = sinon.spy(() => plug);
             const expected = Math.random();
             return forum.addPlugin(spy, expected).then(() => {
-                spy.calledWith(forum, expected).should.be.true;
+                spy.should.have.been.calledWith(forum, expected);
             });
         });
         it('should reject when plugin function does not return an object', () => {
@@ -689,14 +689,14 @@ describe('providers/nodebb', () => {
             const name = `name${Math.random()}`;
             data.config.core.username = name;
             return forum.activate().then(() => {
-                forum.User.getByName.calledWith(name).should.be.true;
+                forum.User.getByName.should.have.been.calledWith(name);
             });
         });
         it('should fetch logged in user info', () => {
             const name = `owner${Math.random()}`;
             data.config.core.owner = name;
             return forum.activate().then(() => {
-                forum.User.getByName.calledWith(name).should.be.true;
+                forum.User.getByName.should.have.been.calledWith(name);
             });
         });
         it('should store logged in user information', () => {
@@ -846,7 +846,7 @@ describe('providers/nodebb', () => {
                 arg1 = Math.random(),
                 arg2 = Math.random();
             return forum._emit(evt, arg1, arg2).then(() => {
-                forum.socket.emit.calledWith(evt, arg1, arg2).should.be.true;
+                forum.socket.emit.should.have.been.calledWith(evt, arg1, arg2);
             });
         });
         it('should resolve to undefined on empty success', () => {
@@ -890,7 +890,7 @@ describe('providers/nodebb', () => {
                 id = Math.random(),
                 parser = sinon.spy();
             return forum.fetchObject(func, id, parser).then(() => {
-                forum._emit.calledWith(func, id).should.be.true;
+                forum._emit.should.have.been.calledWith(func, id);
             });
         });
         it('should pass result to parser', () => {

@@ -69,11 +69,11 @@ describe('plugins/echo', () => {
         });
         it('should register handler for event on activate', () => {
             summoner.activate();
-            forum.on.calledWith('notification:mention', summoner.handler).should.be.true;
+            forum.on.should.have.been.calledWith('notification:mention', summoner.handler);
         });
         it('should unregister handler for event on deactivate', () => {
             summoner.deactivate();
-            forum.off.calledWith('notification:mention', summoner.handler).should.be.true;
+            forum.off.should.have.been.calledWith('notification:mention', summoner.handler);
         });
     });
     describe('handler', () => {
@@ -115,7 +115,7 @@ describe('plugins/echo', () => {
             const expected = Math.random();
             notification.postId = expected;
             return summoner.handler(notification).then(() => {
-                forum.Post.reply.calledWith(undefined, expected).should.be.true;
+                forum.Post.reply.should.have.been.calledWith(undefined, expected);
             });
         });
         it('should perform string replacements on message', () => {
@@ -123,14 +123,14 @@ describe('plugins/echo', () => {
             user.keyblade = expected;
             summoner = testModule(forum, ['%keyblade%']);
             return summoner.handler(notification).then(() => {
-                forum.Post.reply.calledWith(undefined, undefined, expected).should.be.true;
+                forum.Post.reply.should.have.been.calledWith(undefined, undefined, expected);
             });
         });
         it('should leave replacement string in place when the replacement is not stringy', () => {
             user.keyblade = () => 0;
             summoner = testModule(forum, ['%keyblade%']);
             return summoner.handler(notification).then(() => {
-                forum.Post.reply.calledWith(undefined, undefined, '%keyblade%').should.be.true;
+                forum.Post.reply.should.have.been.calledWith(undefined, undefined, '%keyblade%');
             });
         });
         it('choose message randomly', () => {
@@ -140,7 +140,7 @@ describe('plugins/echo', () => {
             summoner = testModule(forum, ['0', '1', '2', '3', '4']);
             return summoner.handler(notification).then(() => {
                 Math.random.called.should.be.true;
-                forum.Post.reply.calledWith(undefined, undefined, '2').should.be.true;
+                forum.Post.reply.should.have.been.calledWith(undefined, undefined, '2');
             }).then(() => sandbox.restore());
         });
         describe('errors', () => {
@@ -148,7 +148,7 @@ describe('plugins/echo', () => {
                 const expected = new Error(Math.random());
                 notification.getUser.rejects(expected);
                 return summoner.handler(notification).catch(() => {
-                    forum.emit.calledWith('error', expected).should.be.true;
+                    forum.emit.should.have.been.calledWith('error', expected);
                 });
             });
             it('should reject when getUser rejects', () => {

@@ -274,7 +274,7 @@ describe('providers/nodebb/notification', () => {
             afterEach(() => sandbox.restore());
             it('should emit `notifications.get` via websocket', () => {
                 return Notification.get('foo').then(() => {
-                    forum._emit.calledWith('notifications.get').should.be.true;
+                    forum._emit.should.have.been.calledWith('notifications.get');
                 });
             });
             it('should pass expected payload to `notifications.get`', () => {
@@ -430,7 +430,7 @@ describe('providers/nodebb/notification', () => {
             });
             it('should listen to `event:new_notification`', () => {
                 Notification.activate();
-                forum.socket.on.calledWith('event:new_notification').should.be.true;
+                forum.socket.on.should.have.been.calledWith('event:new_notification');
             });
             it('should register listener function for `event:new_notification`', () => {
                 Notification.activate();
@@ -446,7 +446,7 @@ describe('providers/nodebb/notification', () => {
             });
             it('should unlisten to `event:new_notification`', () => {
                 Notification.deactivate();
-                forum.socket.off.calledWith('event:new_notification').should.be.true;
+                forum.socket.off.should.have.been.calledWith('event:new_notification');
             });
             it('should unregister listener function for `event:new_notification`', () => {
                 Notification.deactivate();
@@ -616,7 +616,7 @@ describe('providers/nodebb/notification', () => {
                     const handler = args[2];
                     const content = `a${Math.random()}g`;
                     return handler(content).then(() => {
-                        forum.Post.reply.calledWith(topic, post, content).should.be.true;
+                        forum.Post.reply.should.have.been.calledWith(topic, post, content);
                     });
                 });
             });
@@ -634,7 +634,7 @@ describe('providers/nodebb/notification', () => {
                 commands.commands = [];
                 notifier.type = `a${Math.random()}b`;
                 return notifyHandler(5).then(() => {
-                    forum.emit.calledWith(`notification:${notifier.type}`, notifier).should.be.true;
+                    forum.emit.should.have.been.calledWith(`notification:${notifier.type}`, notifier);
                 });
             });
             it('should not emit specific notification event when commands in post', () => {
@@ -648,7 +648,7 @@ describe('providers/nodebb/notification', () => {
                 commands.commands = [];
                 notifier.type = `a${Math.random()}b`;
                 return notifyHandler(5).then(() => {
-                    forum.emit.calledWith('notification', notifier).should.be.true;
+                    forum.emit.should.have.been.calledWith('notification', notifier);
                 });
             });
             it('should not emit general notification event when commands in post', () => {

@@ -157,7 +157,7 @@ describe('providers/nodebb/post', () => {
                 data.id = id;
                 data.topicId = topicId;
                 return post.reply(content).then(() => {
-                    Post._retryReply.calledWith(topicId, id, content, 5).should.be.true;
+                    Post._retryReply.should.have.been.calledWith(topicId, id, content, 5);
                 });
             });
             it('should resolve to results of Post.reply()', () => {
@@ -185,13 +185,13 @@ describe('providers/nodebb/post', () => {
             it('should emit `plugins.composer.push` to retrieve post values', () => {
                 data.id = Math.random();
                 return post.edit('').then(() => {
-                    forum._emit.calledWith('plugins.composer.push', data.id).should.be.true;
+                    forum._emit.should.have.been.calledWith('plugins.composer.push', data.id);
                 });
             });
             it('should emit `posts.edit` to edit post', () => {
                 data.id = Math.random();
                 return post.edit('').then(() => {
-                    forum._emit.calledWith('posts.edit').should.be.true;
+                    forum._emit.should.have.been.calledWith('posts.edit');
                 });
             });
             it('should combine data from composer to pass to `posts.edit`', () => {
@@ -258,13 +258,13 @@ describe('providers/nodebb/post', () => {
             it('should emit `plugins.composer.push` to retrieve post values', () => {
                 data.id = Math.random();
                 return post.append('').then(() => {
-                    forum._emit.calledWith('plugins.composer.push', data.id).should.be.true;
+                    forum._emit.should.have.been.calledWith('plugins.composer.push', data.id);
                 });
             });
             it('should emit `posts.edit` to edit post', () => {
                 data.id = Math.random();
                 return post.append('').then(() => {
-                    forum._emit.calledWith('posts.edit').should.be.true;
+                    forum._emit.should.have.been.calledWith('posts.edit');
                 });
             });
             it('should combine data from composer to pass to `posts.edit`', () => {
@@ -343,7 +343,7 @@ describe('providers/nodebb/post', () => {
                 });
                 it('should emit `posts.delete`', () => {
                     return post.delete().then(() => {
-                        forum._emit.calledWith('posts.delete').should.be.true;
+                        forum._emit.should.have.been.calledWith('posts.delete');
                     });
                 });
                 it('should pass postId and topicId to `posts.delete`', () => {
@@ -374,7 +374,7 @@ describe('providers/nodebb/post', () => {
                 });
                 it('should emit `posts.restore`', () => {
                     return post.undelete().then(() => {
-                        forum._emit.calledWith('posts.restore').should.be.true;
+                        forum._emit.should.have.been.calledWith('posts.restore');
                     });
                 });
                 it('should pass postId and topicId to `posts.restore`', () => {
@@ -405,7 +405,7 @@ describe('providers/nodebb/post', () => {
                 });
                 it('should emit `posts.upvote`', () => {
                     return post.upvote().then(() => {
-                        forum._emit.calledWith('posts.upvote').should.be.true;
+                        forum._emit.should.have.been.calledWith('posts.upvote');
                     });
                 });
                 it('should pass postId and topicId to `posts.upvote`', () => {
@@ -436,7 +436,7 @@ describe('providers/nodebb/post', () => {
                 });
                 it('should emit `posts.downvote`', () => {
                     return post.downvote().then(() => {
-                        forum._emit.calledWith('posts.downvote').should.be.true;
+                        forum._emit.should.have.been.calledWith('posts.downvote');
                     });
                 });
                 it('should pass postId and topicId to `posts.downvote`', () => {
@@ -467,7 +467,7 @@ describe('providers/nodebb/post', () => {
                 });
                 it('should emit `posts.unvote`', () => {
                     return post.unvote().then(() => {
-                        forum._emit.calledWith('posts.unvote').should.be.true;
+                        forum._emit.should.have.been.calledWith('posts.unvote');
                     });
                 });
                 it('should pass postId and topicId to `posts.unvote`', () => {
@@ -498,7 +498,7 @@ describe('providers/nodebb/post', () => {
                 });
                 it('should emit `posts.favorite`', () => {
                     return post.bookmark().then(() => {
-                        forum._emit.calledWith('posts.favorite').should.be.true;
+                        forum._emit.should.have.been.calledWith('posts.favorite');
                     });
                 });
                 it('should pass postId and topicId to `posts.favorite`', () => {
@@ -529,7 +529,7 @@ describe('providers/nodebb/post', () => {
                 });
                 it('should emit `posts.unfavorite`', () => {
                     return post.unbookmark().then(() => {
-                        forum._emit.calledWith('posts.unfavorite').should.be.true;
+                        forum._emit.should.have.been.calledWith('posts.unfavorite');
                     });
                 });
                 it('should pass postId and topicId to `posts.unfavorite`', () => {
@@ -570,7 +570,7 @@ describe('providers/nodebb/post', () => {
                     const topicId = Math.random();
                     const content = `a${Math.random()}b`;
                     return Post.reply(topicId, id, content).then(() => {
-                        Post._retryReply.calledWith(topicId, id, content, 5).should.be.true;
+                        Post._retryReply.should.have.been.calledWith(topicId, id, content, 5);
                     });
                 });
                 it('should resolve to results of Post.reply()', () => {
@@ -599,7 +599,7 @@ describe('providers/nodebb/post', () => {
                 afterEach(() => sandbox.restore());
                 it('should emit `posts.reply`', () => {
                     return Post.reply(1, 2, '').then(() => {
-                        forum._emit.calledWith('posts.reply').should.be.true;
+                        forum._emit.should.have.been.calledWith('posts.reply');
                     });
                 });
                 it('should pass post spec to `posts.reply`', () => {
@@ -664,7 +664,7 @@ describe('providers/nodebb/post', () => {
                 it('should load via function `posts.getPost`', () => {
                     const expected = Math.random();
                     return Post.get(expected).then(() => {
-                        forum.fetchObject.calledWith('posts.getPost', expected, Post.parse).should.be.true;
+                        forum.fetchObject.should.have.been.calledWith('posts.getPost', expected, Post.parse);
                     });
                 });
                 it('should resolve to result of forum.fetchObject()', () => {
@@ -683,13 +683,13 @@ describe('providers/nodebb/post', () => {
                 });
                 it('should emit `plugins.composer.renderPreview`', () => {
                     return Post.preview('').then(() => {
-                        forum._emit.calledWith('plugins.composer.renderPreview').should.be.true;
+                        forum._emit.should.have.been.calledWith('plugins.composer.renderPreview');
                     });
                 });
                 it('should pass content `plugins.composer.renderPreview`', () => {
                     const content = `a${Math.random()}b`;
                     return Post.preview(content).then(() => {
-                        forum._emit.calledWith('plugins.composer.renderPreview', content).should.be.true;
+                        forum._emit.should.have.been.calledWith('plugins.composer.renderPreview', content);
                     });
                 });
                 it('should resolve to results of `plugins.composer.renderPreview`', () => {
