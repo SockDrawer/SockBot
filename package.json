@@ -55,7 +55,7 @@
     "start": "node lib/app.js",
     "lint": "eslint .",
     "preistanbul": "npm run lint",
-    "istanbul": "istanbul cover node_modules/mocha/bin/_mocha --print both -x 'external/**' -x 'build/**' --include-all-sources -- --recursive -R dot",
+    "istanbul": "istanbul cover node_modules/mocha/bin/_mocha -- --recursive -R dot",
     "pretest": "npm run istanbul",
     "test": "istanbul check-coverage coverage/coverage.json",
     "mocha": "mocha --recursive -R dot",

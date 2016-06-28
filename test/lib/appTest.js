@@ -15,7 +15,7 @@ const testModule = require('../../lib/app'),
     commands = require('../../lib/commands'),
     utils = require('../../lib/utils');
 const path = require('path');
-const dirname = path.posix.resolve(__dirname, '../../lib');
+const dirname = path.resolve(__dirname, '../../lib');
 
 describe('lib/app', () => {
     describe('relativeRequire()', () => {
@@ -23,6 +23,8 @@ describe('lib/app', () => {
             const spy = sinon.spy();
             const expected = `${dirname}/../foo/bar`;
             testModule.relativeRequire('foo', 'bar', spy);
+            const actual = spy.firstCall.args[0];
+            actual.should.equal(expected);
             spy.calledWith(expected).should.be.true;
         });
         it('should require relative to config for relative path', () => {

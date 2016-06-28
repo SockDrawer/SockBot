@@ -2,7 +2,10 @@ verbose: false
 instrumentation:
     compact: false
     preserve-comments: true
+    excludes: ["build/**", "external/**"]
+    include-all-sources: true
 reporting:
+    print: both
     watermarks:
         statements: [95, 97]
         lines: [95, 97]
