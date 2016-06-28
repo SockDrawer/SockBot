@@ -9,6 +9,7 @@ const expect = chai.expect;
 
 const sinon = require('sinon');
 require('sinon-as-promised');
+chai.use(require('sinon-chai'));
 
 const fs = require('fs');
 const yaml = require('js-yaml');
@@ -67,7 +68,7 @@ describe('lib/config', () => {
                 fs.readFile.yields(null, '');
                 yaml.safeLoad.returns();
                 config.internals.readYaml('foo');
-                fs.readFile.calledWith('foo').should.be.true;
+                fs.readFile.should.have.been.calledWith('foo');
             });
             it('should reject on fs error', () => {
                 const error = new Error('bugaboo');
@@ -80,7 +81,7 @@ describe('lib/config', () => {
                 const expected = Math.random();
                 fs.readFile.yields(null, expected);
                 return config.internals.readYaml('foo').then(() => {
-                    yaml.safeLoad.calledWith(expected).should.be.true;
+                    yaml.safeLoad.should.have.been.calledWith(expected);
                 });
             });
             it('should strip UTF8 BOM from file', () => {

@@ -8,6 +8,7 @@ const expect = chai.expect;
 
 const sinon = require('sinon');
 require('sinon-as-promised');
+chai.use(require('sinon-chai'));
 
 const commands = require('../../lib/commands');
 const utils = require('../../lib/utils');
@@ -254,7 +255,7 @@ describe('lib/config', () => {
             };
             return onComplete(command)
                 .then(() => {
-                    spy.calledWith('foo').should.be.true;
+                    spy.should.have.been.calledWith('foo');
                 });
         });
         it('should merge multiple command replies', () => {
@@ -272,7 +273,7 @@ describe('lib/config', () => {
             };
             return onComplete(command)
                 .then(() => {
-                    spy.calledWith('foo\n\n---\n\nbar').should.be.true;
+                    spy.should.have.been.calledWith('foo\n\n---\n\nbar');
                 });
         });
         it('should merge preseve whitespace in command replies', () => {
@@ -290,7 +291,7 @@ describe('lib/config', () => {
             };
             return onComplete(command)
                 .then(() => {
-                    spy.calledWith('\nfoo \n\n---\n\n\tbar\n').should.be.true;
+                    spy.should.have.been.calledWith('\nfoo \n\n---\n\n\tbar\n');
                 });
         });
         it('should ignore blank command replies', () => {
@@ -314,7 +315,7 @@ describe('lib/config', () => {
             };
             return onComplete(command)
                 .then(() => {
-                    spy.calledWith('foo\n\n---\n\nbar').should.be.true;
+                    spy.should.have.been.calledWith('foo\n\n---\n\nbar');
                 });
         });
     });
@@ -383,7 +384,7 @@ describe('lib/config', () => {
                 reply: sinon.spy()
             };
             return defaultHandler(command).then(() => {
-                command.reply.calledWith('Command `kittens` is not recognized').should.be.true;
+                command.reply.should.have.been.calledWith('Command `kittens` is not recognized');
             });
         });
         it('should not reply with message to mention command', () => {
@@ -900,7 +901,7 @@ describe('lib/config', () => {
                     notification[store] = id;
                     expect(data[store]).to.be.not.ok;
                     return command[method]().then(() => {
-                        spy.calledWith(id).should.be.true;
+                        spy.should.have.been.calledWith(id);
                     });
                 });
                 it(`should resolve to fetched ${object}`, () => {
@@ -992,7 +993,7 @@ describe('lib/config', () => {
                     }];
                     data._replyFn = sinon.stub().resolves();
                     return command.execute().then(() => {
-                        data._replyFn.calledWith(expected).should.be.true;
+                        data._replyFn.should.have.been.calledWith(expected);
                     });
                 });
                 it('should execute onError when any command rejects', () => {
@@ -1025,7 +1026,7 @@ describe('lib/config', () => {
                     }];
                     data._replyFn = sinon.stub().rejects('badbad');
                     return command.execute().then(() => {
-                        forum.emit.calledWith('logError').should.be.true;
+                        forum.emit.should.have.been.calledWith('logError');
                     });
                 });
             });
@@ -1058,12 +1059,12 @@ describe('lib/config', () => {
                         '\nPlease try again with fewer commands.';
                     data._replyFn = sinon.stub().resolves();
                     return command.execute().then(() => {
-                        data._replyFn.calledWith(expected).should.be.true;
+                        data._replyFn.should.have.been.calledWith(expected);
                     });
                 });
                 it('should emit error when limiting execution', () => {
                     return command.execute().then(() => {
-                        forum.emit.calledWith('logError').should.be.true;
+                        forum.emit.should.have.been.calledWith('logError');
                     });
                 });
             });
@@ -1120,7 +1121,7 @@ describe('lib/config', () => {
                 commands.internals.shadowHandlers[cmd] = 5;
                 return commands.internals.Commands.add(cmd, 'foo', () => 0).then(() => {
                     const msg = `WARNING, ${cmd} is already registered: will override alias.`;
-                    emit.calledWith('log', msg).should.be.true;
+                    emit.should.have.been.calledWith('log', msg);
                 });
             });
             it('should log error when registering a command where already exists', () => {
@@ -1128,7 +1129,7 @@ describe('lib/config', () => {
                 commands.internals.handlers[cmd] = 5;
                 return commands.internals.Commands.add(cmd, 'foo', () => 0).catch(() => {
                     const msg = `ERROR, ${cmd} is already registered: cannot override existing command.`;
-                    emit.calledWith('error', msg).should.be.true;
+                    emit.should.have.been.calledWith('error', msg);
                 });
             });
             it('should error when registering an alias where already exists', () => {
@@ -1142,7 +1143,7 @@ describe('lib/config', () => {
                 commands.internals.forbiddenCmds[cmd] = 5;
                 return commands.internals.Commands.add(cmd, 'foo', () => 0).catch(() => {
                     const msg = `ERROR, ${cmd} is already registered: not allowed by the active forum provider.`;
-                    emit.calledWith('error', msg).should.be.true;
+                    emit.should.have.been.calledWith('error', msg);
                 });
             });
             it('should error when registering a forbidden command', () => {
@@ -1182,7 +1183,7 @@ describe('lib/config', () => {
                 expect(commands.internals.shadowHandlers[cmd]).to.be.not.ok;
                 return commands.internals.Commands.addAlias(cmd, () => 0).then(() => {
                     const msg = `WARNING, ${cmd} is already registered: existing command will override.`;
-                    emit.calledWith('log', msg).should.be.true;
+                    emit.should.have.been.calledWith('log', msg);
                 });
             });
             it('should log error when registering an alias where already exists', () => {
@@ -1190,7 +1191,7 @@ describe('lib/config', () => {
                 commands.internals.shadowHandlers[cmd] = 5;
                 return commands.internals.Commands.addAlias(cmd, () => 0).catch(() => {
                     const msg = `ERROR, ${cmd} is already registered: cannot override existing alias.`;
-                    emit.calledWith('error').should.be.true;
+                    emit.should.have.been.calledWith('error');
                     emit.lastCall.args[1].should.equal(msg);
                 });
             });
@@ -1205,7 +1206,7 @@ describe('lib/config', () => {
                 commands.internals.forbiddenCmds[cmd] = 5;
                 return commands.internals.Commands.addAlias(cmd, 'foo', () => 0).catch(() => {
                     const msg = `ERROR, ${cmd} is already registered: not allowed by the active forum provider.`;
-                    emit.calledWith('error', msg).should.be.true;
+                    emit.should.have.been.calledWith('error', msg);
                 });
             });
             it('should error when registering a forbidden alias', () => {
