@@ -158,7 +158,7 @@ describe('providers/nodebb/categor', () => {
                     topics: [expected]
                 });
                 return category.getAllTopics(spy).then(() => {
-                    forum.Topic.parseExtended.should.have.been.calledWith(expected);
+                    forum.Topic.parseExtended.should.have.been.calledWith(expected).once;
                 });
             });
             it('should pass expected values to progress fn', () => {
@@ -175,7 +175,7 @@ describe('providers/nodebb/categor', () => {
                 });
 
                 return category.getAllTopics(spy).then(() => {
-                    spy.should.have.been.calledWith(topic, user, categoryval);
+                    spy.should.have.been.calledWith(topic, user, categoryval).once;
                 });
             });
             describe('promise behavior', () => {
@@ -266,7 +266,7 @@ describe('providers/nodebb/categor', () => {
                     topics: [expected]
                 });
                 return category.getRecentTopics(spy).then(() => {
-                    forum.Topic.parseExtended.should.have.been.calledWith(expected);
+                    forum.Topic.parseExtended.should.have.been.calledWith(expected).once;
                 });
             });
             it('should pass expected values to progress fn', () => {
@@ -282,7 +282,7 @@ describe('providers/nodebb/categor', () => {
                     category: categoryval
                 });
                 return category.getRecentTopics(spy).then(() => {
-                    spy.should.have.been.calledWith(topic, user, categoryval);
+                    spy.should.have.been.calledWith(topic, user, categoryval).once;
                 });
             });
             describe('promise behavior', () => {
@@ -317,7 +317,7 @@ describe('providers/nodebb/categor', () => {
             });
             it('should emit `categories.watch`', () => {
                 return category.watch().then(() => {
-                    forum._emit.should.have.been.calledWith('categories.watch');
+                    forum._emit.should.have.been.calledWith('categories.watch').once;
                 });
             });
             it('should pass cid to `categories.watch`', () => {
@@ -344,7 +344,7 @@ describe('providers/nodebb/categor', () => {
             });
             it('should emit `categories.ignore`', () => {
                 return category.unwatch().then(() => {
-                    forum._emit.should.have.been.calledWith('categories.ignore');
+                    forum._emit.should.have.been.calledWith('categories.ignore').once;
                 });
             });
             it('should pass cid to `categories.ignore`', () => {
@@ -379,7 +379,8 @@ describe('providers/nodebb/categor', () => {
             it('should load via function `categories.getCategory`', () => {
                 const expected = Math.random();
                 return Category.get(expected).then(() => {
-                    forum.fetchObject.should.have.been.calledWith('categories.getCategory', expected, Category.parse);
+                    forum.fetchObject.should.have.been
+                    .calledWith('categories.getCategory', expected, Category.parse).once;
                 });
             });
             it('should resolve to result of forum.fetchObject()', () => {

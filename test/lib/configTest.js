@@ -68,7 +68,7 @@ describe('lib/config', () => {
                 fs.readFile.yields(null, '');
                 yaml.safeLoad.returns();
                 config.internals.readYaml('foo');
-                fs.readFile.should.have.been.calledWith('foo');
+                fs.readFile.should.have.been.calledWith('foo').once;
             });
             it('should reject on fs error', () => {
                 const error = new Error('bugaboo');
@@ -81,7 +81,7 @@ describe('lib/config', () => {
                 const expected = Math.random();
                 fs.readFile.yields(null, expected);
                 return config.internals.readYaml('foo').then(() => {
-                    yaml.safeLoad.should.have.been.calledWith(expected);
+                    yaml.safeLoad.should.have.been.calledWith(expected).once;
                 });
             });
             it('should strip UTF8 BOM from file', () => {
