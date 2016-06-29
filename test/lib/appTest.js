@@ -79,7 +79,7 @@ describe('lib/app', () => {
             return testModule.loadPlugins(forum, {
                 plugins: {}
             }).then(() => {
-                testModule.relativeRequire.called.should.be.false;
+                testModule.relativeRequire.should.not.have.been.called;
             });
         });
         it('should load listed plugins', () => {
@@ -213,7 +213,7 @@ describe('lib/app', () => {
             const expected = `a${Math.random()}b`;
             testModule.getUserAgent.returns(expected);
             return testModule.activateConfig(basicConfig).then(() => {
-                testModule.getUserAgent.called.should.be.true;
+                testModule.getUserAgent.should.have.been.calledOnce;
             });
         });
         it('should call testModule.getUserAgent with configuration information', () => {
@@ -244,12 +244,12 @@ describe('lib/app', () => {
         });
         it('should login to instance', () => {
             return testModule.activateConfig(basicConfig).then(() => {
-                instance.login.called.should.be.true;
+                instance.login.should.have.been.calledOnce;
             });
         });
         it('should activate instance', () => {
             return testModule.activateConfig(basicConfig).then(() => {
-                instance.activate.called.should.be.true;
+                instance.activate.should.have.been.calledOnce;
             });
         });
         it('should reject when exports.loadPlugins rejects', () => {
@@ -481,7 +481,7 @@ describe('lib/app', () => {
         afterEach(() => sandbox.restore());
         it('should log error via exports.error', () => {
             testModule.ponyError();
-            testModule.error.called.should.be.true;
+            testModule.error.should.have.been.calledOnce;
         });
         it('should log error with prefix', () => {
             const prefix = `a${Math.random()}b`;

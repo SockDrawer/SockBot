@@ -965,7 +965,7 @@ describe('providers/nodebb/chat', () => {
             return handleChat({
                 message: 1
             }).then(() => {
-                command.execute.called.should.be.true;
+                command.execute.should.have.been.calledOnce;
                 command.execute.calledAfter(forum.Commands.get).should.be.true;
             });
         });

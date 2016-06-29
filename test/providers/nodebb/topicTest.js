@@ -117,7 +117,7 @@ describe('providers/nodebb/topic', () => {
             });
             it('should parse results via `forum.Post.parse`', () => {
                 return topic.reply('xyyzy').then(() => {
-                    forum.Post.parse.called.should.be.true;
+                    forum.Post.parse.should.have.been.calledOnce;
                 });
             });
             it('should pass websockets results to `forum.Post.parse`', () => {
@@ -408,7 +408,7 @@ describe('providers/nodebb/topic', () => {
                 });
                 it('should abort successfully when websocket does not return topics', () => {
                     return Topic.getRecentTopics(spy).then(() => {
-                        spy.called.should.be.false;
+                        spy.should.not.have.been.called;
                     });
                 });
                 it('should abort successfully when websocket returns zero topics', () => {
@@ -416,7 +416,7 @@ describe('providers/nodebb/topic', () => {
                         topics: []
                     });
                     return Topic.getRecentTopics(spy).then(() => {
-                        spy.called.should.be.false;
+                        spy.should.not.have.been.called;
                     });
                 });
                 it('should reject when websocket rejects', () => {
@@ -518,7 +518,7 @@ describe('providers/nodebb/topic', () => {
                 });
                 it('should abort successfully when websocket does not return topics', () => {
                     return Topic.getUnreadTopics(spy).then(() => {
-                        spy.called.should.be.false;
+                        spy.should.not.have.been.called;
                     });
                 });
                 it('should abort successfully when websocket returns zero topics', () => {
@@ -526,7 +526,7 @@ describe('providers/nodebb/topic', () => {
                         topics: []
                     });
                     return Topic.getUnreadTopics(spy).then(() => {
-                        spy.called.should.be.false;
+                        spy.should.not.have.been.called;
                     });
                 });
                 it('should reject when websocket rejects', () => {

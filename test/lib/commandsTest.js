@@ -227,7 +227,7 @@ describe('lib/config', () => {
             };
             return onComplete(command)
                 .then(() => {
-                    spy.called.should.be.false;
+                    spy.should.not.have.been.called;
                 });
         });
         it('should not attempt to post on whitespace content', () => {
@@ -239,7 +239,7 @@ describe('lib/config', () => {
             };
             return onComplete(command)
                 .then(() => {
-                    spy.called.should.be.false;
+                    spy.should.not.have.been.called;
                 });
         });
         it('should post with content', () => {
@@ -341,7 +341,7 @@ describe('lib/config', () => {
                 },
                 _replyFn: spy
             }).then(() => {
-                forum.Post.reply.called.should.be.false;
+                forum.Post.reply.should.not.have.been.called;
                 spy.calledWith('An unexpected error `a florgle wozzer was grutzed` ' +
                     'occured and your commands could not be processed!').should.be.true;
             });
@@ -352,7 +352,7 @@ describe('lib/config', () => {
             return onError(err, {
                 _replyFn: spy
             }).then(() => {
-                forum.Post.reply.called.should.be.false;
+                forum.Post.reply.should.not.have.been.called;
                 spy.calledWith('An unexpected error `a florgle wozzer was grutzed` ' +
                     'occured and your commands could not be processed!').should.be.true;
             });
@@ -363,7 +363,7 @@ describe('lib/config', () => {
             return onError(err, {
                 _replyFn: spy
             }).then(() => {
-                forum.Post.reply.called.should.be.false;
+                forum.Post.reply.should.not.have.been.called;
                 spy.calledWith('An unexpected error `[object Object]` ' +
                     'occured and your commands could not be processed!').should.be.true;
             });
@@ -394,7 +394,7 @@ describe('lib/config', () => {
                 reply: sinon.spy()
             };
             return defaultHandler(command).then(() => {
-                command.reply.called.should.be.false;
+                command.reply.should.not.have.been.called;
             });
         });
     });
@@ -720,19 +720,19 @@ describe('lib/config', () => {
                 const expected = Math.random();
                 parent.getPost.returns(expected);
                 command.getPost().should.equal(expected);
-                parent.getPost.called.should.be.true;
+                parent.getPost.should.have.been.calledOnce;
             });
             it('should proxy getTopic() to parent.getTopic()', () => {
                 const expected = Math.random();
                 parent.getTopic.returns(expected);
                 command.getTopic().should.equal(expected);
-                parent.getTopic.called.should.be.true;
+                parent.getTopic.should.have.been.calledOnce;
             });
             it('should proxy getUser() to parent.getUser()', () => {
                 const expected = Math.random();
                 parent.getUser.returns(expected);
                 command.getUser().should.equal(expected);
-                parent.getUser.called.should.be.true;
+                parent.getUser.should.have.been.calledOnce;
             });
         });
         describe('reply()', () => {
@@ -776,7 +776,7 @@ describe('lib/config', () => {
                 data.handler = spy;
                 data.executable = true;
                 return command.execute().then(() => {
-                    spy.called.should.be.true;
+                    spy.should.have.been.calledOnce;
                 });
             });
             it('should bypass execution for non-executable command', () => {
@@ -784,7 +784,7 @@ describe('lib/config', () => {
                 data.handler = spy;
                 data.executable = false;
                 return command.execute().then(() => {
-                    spy.called.should.be.false;
+                    spy.should.not.have.been.called;
                 });
             });
         });
@@ -893,7 +893,7 @@ describe('lib/config', () => {
                     data[store] = expected;
                     return command[method]().then((item) => {
                         item.should.equal(expected);
-                        spy.called.should.be.false;
+                        spy.should.not.have.been.called;
                     });
                 });
                 it(`should request ${store} by notification ${store}`, () => {
@@ -1014,7 +1014,7 @@ describe('lib/config', () => {
                         execute: spy
                     }];
                     return command.execute().then(() => {
-                        forum.Post.reply.called.should.be.false;
+                        forum.Post.reply.should.not.have.been.called;
                         data._replyFn.calledWith('An unexpected error `bad` occured and your commands' +
                             ' could not be processed!').should.be.true;
                     });
@@ -1050,7 +1050,7 @@ describe('lib/config', () => {
                 it('should not execute contained commands', () => {
                     return command.execute().then(() => {
                         data.commands.forEach((cmd) => {
-                            cmd.execute.called.should.be.false;
+                            cmd.execute.should.not.have.been.called;
                         });
                     });
                 });

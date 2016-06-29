@@ -87,7 +87,7 @@ describe('providers/nodebb/post', () => {
             afterEach(() => sandbox.restore());
             it('should proxy markup() to Post.preview()', () => {
                 return post.markup().then(() => {
-                    Post.preview.called.should.be.true;
+                    Post.preview.should.have.been.calledOnce;
                 });
             });
             it('should resolve to results toresults of Post.preview()', () => {
@@ -147,7 +147,7 @@ describe('providers/nodebb/post', () => {
             afterEach(() => sandbox.restore());
             it('should proxy to Post._retryReply()', () => {
                 return post.reply('').then(() => {
-                    Post._retryReply.called.should.be.true;
+                    Post._retryReply.should.have.been.calledOnce;
                 });
             });
             it('should pass post id, topicId and content to Post._retryReply()', () => {
@@ -562,7 +562,7 @@ describe('providers/nodebb/post', () => {
                 afterEach(() => sandbox.restore());
                 it('should proxy to Post._retryReply()', () => {
                     return Post.reply('').then(() => {
-                        Post._retryReply.called.should.be.true;
+                        Post._retryReply.should.have.been.calledOnce;
                     });
                 });
                 it('should pass post id, topicId and content to Post._retryReply()', () => {
@@ -656,7 +656,7 @@ describe('providers/nodebb/post', () => {
                     });
                     return Post.reply(1, 2, '').then(() => {
                         forum._emit.callCount.should.equal(2);
-                        Post._retryDelay.called.should.be.true;
+                        Post._retryDelay.should.have.been.calledOnce;
                     });
                 });
             });

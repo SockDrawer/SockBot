@@ -133,7 +133,7 @@ describe('providers/nodebb/categor', () => {
             });
             it('should not call progress fn with no results', () => {
                 return category.getAllTopics(spy).then(() => {
-                    spy.called.should.be.false;
+                    spy.should.not.have.been.called;
                 });
             });
             it('should not call progress fn with empty results', () => {
@@ -141,7 +141,7 @@ describe('providers/nodebb/categor', () => {
                     topics: []
                 });
                 return category.getAllTopics(spy).then(() => {
-                    spy.called.should.be.false;
+                    spy.should.not.have.been.called;
                 });
             });
             it('should call progress fn for each loaded topic', () => {
@@ -241,7 +241,7 @@ describe('providers/nodebb/categor', () => {
             });
             it('should not call progress fn with no results', () => {
                 return category.getRecentTopics(spy).then(() => {
-                    spy.called.should.be.false;
+                    spy.should.not.have.been.called;
                 });
             });
             it('should not call progress fn with empty results', () => {
@@ -249,7 +249,7 @@ describe('providers/nodebb/categor', () => {
                     topics: []
                 });
                 return category.getRecentTopics(spy).then(() => {
-                    spy.called.should.be.false;
+                    spy.should.not.have.been.called;
                 });
             });
             it('should call progress fn for each loaded topic', () => {

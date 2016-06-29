@@ -174,13 +174,13 @@ describe('providers/nodebb/notification', () => {
             it('should not call post.preview  for non mention notification', () => {
                 data.type = `a${Math.random()}b`;
                 return notification.getText().then(() => {
-                    forum.Post.preview.called.should.be.false;
+                    forum.Post.preview.should.not.have.been.called;
                 });
             });
             it('should call Post.preview for mention notification', () => {
                 data.type = 'mention';
                 return notification.getText().then(() => {
-                    forum.Post.preview.called.should.be.true;
+                    forum.Post.preview.should.have.been.calledOnce;
                 });
             });
             it('should process body via Post.preview for mention notification', () => {
@@ -243,7 +243,7 @@ describe('providers/nodebb/notification', () => {
                 });
                 it(`should retrieve post via ${obj}.get()`, () => {
                     return notification[fn]().then(() => {
-                        forum[obj].get.called.should.be.true;
+                        forum[obj].get.should.have.been.calledOnce;
                     });
                 });
                 it(`should pass ${prop} to ${obj}.get()`, () => {
@@ -287,7 +287,7 @@ describe('providers/nodebb/notification', () => {
             });
             it('should parse results by `Notification.parse`', () => {
                 return Notification.get().then(() => {
-                    Notification.parse.called.should.be.true;
+                    Notification.parse.should.have.been.calledOnce;
                 });
             });
             it('should parse single result by `Notification.parse`', () => {
@@ -484,7 +484,7 @@ describe('providers/nodebb/notification', () => {
             it('should not call progress function for zero results', () => {
                 const spy = sinon.stub().resolves();
                 return Notification.getNotifications(spy).then(() => {
-                    spy.called.should.be.false;
+                    spy.should.not.have.been.called;
                 });
             });
             it('should not call progress function for empty results', () => {
@@ -493,7 +493,7 @@ describe('providers/nodebb/notification', () => {
                 });
                 const spy = sinon.stub().resolves();
                 return Notification.getNotifications(spy).then(() => {
-                    spy.called.should.be.false;
+                    spy.should.not.have.been.called;
                 });
             });
             it('should not parse notification via `Notification.parse`', () => {
@@ -577,7 +577,7 @@ describe('providers/nodebb/notification', () => {
             it('should get text from notification with `notification.getText()`', () => {
                 const expected = Math.random();
                 return notifyHandler(expected).then(() => {
-                    notifier.getText.called.should.be.true;
+                    notifier.getText.should.have.been.calledOnce;
                 });
             });
             it('should parse commands with `forum.Commands.get`', () => {
@@ -627,7 +627,7 @@ describe('providers/nodebb/notification', () => {
                     execute: spy
                 });
                 return notifyHandler(5).then(() => {
-                    spy.called.should.be.true;
+                    spy.should.have.been.calledOnce;
                 });
             });
             it('should emit specific notification event when no commands in post', () => {

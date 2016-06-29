@@ -233,7 +233,7 @@ describe('providers/nodebb', () => {
         afterEach(() => sandbox.restore());
         it('should create cookiejar when not set', () => {
             forum._verifyCookies();
-            request.jar.called.should.be.true;
+            request.jar.should.have.been.calledOnce;
         });
         it('should store cookiejar when not set', () => {
             const expected = Math.random();
@@ -244,7 +244,7 @@ describe('providers/nodebb', () => {
         it('should not create cookiejar when set', () => {
             forum._cookiejar = true;
             forum._verifyCookies();
-            request.jar.called.should.be.false;
+            request.jar.should.not.have.been.called;
         });
         it('should use existing cookiejar when set', () => {
             const expected = Math.random();
@@ -269,7 +269,7 @@ describe('providers/nodebb', () => {
         afterEach(() => sandbox.restore());
         it('should verify cookiejar', () => {
             return forum._getConfig().then(() => {
-                forum._verifyCookies.called.should.be.true;
+                forum._verifyCookies.should.have.been.calledOnce;
             });
         });
         it('should request config url', () => {
@@ -357,17 +357,17 @@ describe('providers/nodebb', () => {
         afterEach(() => sandbox.restore());
         it('should retrieve config via _getConfig', () => {
             return forum.login().then(() => {
-                forum._getConfig.called.should.be.true;
+                forum._getConfig.should.have.been.calledOnce;
             });
         });
         it('should verify cookiejar via _verifyCookies', () => {
             return forum.login().then(() => {
-                forum._verifyCookies.called.should.be.true;
+                forum._verifyCookies.should.have.been.calledOnce;
             });
         });
         it('should use request.post to login', () => {
             return forum.login().then(() => {
-                request.post.called.should.be.true;
+                request.post.should.have.been.calledOnce;
             });
         });
         it('should post to expected URL', () => {
@@ -481,7 +481,7 @@ describe('providers/nodebb', () => {
         describe('initial call', () => {
             it('should verify cookies', () => {
                 return forum.connectWebsocket().then(() => {
-                    forum._verifyCookies.called.should.be.true;
+                    forum._verifyCookies.should.have.been.calledOnce;
                 });
             });
             it('should steal the cookies from the cookie jar', () => {
@@ -580,27 +580,27 @@ describe('providers/nodebb', () => {
             });
             it('should not verify cookies', () => {
                 return forum.connectWebsocket().then(() => {
-                    forum._verifyCookies.called.should.be.false;
+                    forum._verifyCookies.should.not.have.been.called;
                 });
             });
             it('should not steal the cookies from the cookie jar', () => {
                 return forum.connectWebsocket().then(() => {
-                    forum._cookiejar.getCookieString.called.should.be.false;
+                    forum._cookiejar.getCookieString.should.not.have.been.called;
                 });
             });
             it('should not construct websocket for forum', () => {
                 return forum.connectWebsocket().then(() => {
-                    Forum.io.called.should.be.false;
+                    Forum.io.should.not.have.been.called;
                 });
             });
             it('should not register for websocket multi events', () => {
                 return forum.connectWebsocket().then(() => {
-                    socket.on.called.should.be.false;
+                    socket.on.should.not.have.been.called;
                 });
             });
             it('should not register for websocket once events', () => {
                 return forum.connectWebsocket().then(() => {
-                    socket.once.called.should.be.false;
+                    socket.once.should.not.have.been.called;
                 });
             });
             it('should leafe stored socket undisturbed', () => {
@@ -682,7 +682,7 @@ describe('providers/nodebb', () => {
         afterEach(() => sandbox.restore());
         it('should connect to websocket', () => {
             return forum.activate().then(() => {
-                forum.connectWebsocket.called.should.be.true;
+                forum.connectWebsocket.should.have.been.calledOnce;
             });
         });
         it('should fetch logged in user info', () => {
@@ -715,12 +715,12 @@ describe('providers/nodebb', () => {
         });
         it('should activate notifications', () => {
             return forum.activate().then(() => {
-                forum.Notification.activate.called.should.be.true;
+                forum.Notification.activate.should.have.been.calledOnce;
             });
         });
         it('should activate chats', () => {
             return forum.activate().then(() => {
-                forum.Chat.activate.called.should.be.true;
+                forum.Chat.activate.should.have.been.calledOnce;
             });
         });
         it('should activate plugins', () => {
@@ -732,8 +732,8 @@ describe('providers/nodebb', () => {
                 activate: spy2
             }];
             return forum.activate().then(() => {
-                spy1.called.should.be.true;
-                spy2.called.should.be.true;
+                spy1.should.have.been.calledOnce;
+                spy2.should.have.been.calledOnce;
             });
         });
         describe('promise behavior', () => {
@@ -782,12 +782,12 @@ describe('providers/nodebb', () => {
         afterEach(() => sandbox.restore());
         it('should deactivate notifications', () => {
             return forum.deactivate().then(() => {
-                forum.Notification.deactivate.called.should.be.true;
+                forum.Notification.deactivate.should.have.been.calledOnce;
             });
         });
         it('should deactivate chat', () => {
             return forum.deactivate().then(() => {
-                forum.Chat.deactivate.called.should.be.true;
+                forum.Chat.deactivate.should.have.been.calledOnce;
             });
         });
         it('should deactivate plugins', () => {
@@ -799,8 +799,8 @@ describe('providers/nodebb', () => {
                 deactivate: spy2
             }];
             return forum.deactivate().then(() => {
-                spy1.called.should.be.true;
-                spy2.called.should.be.true;
+                spy1.should.have.been.calledOnce;
+                spy2.should.have.been.calledOnce;
             });
         });
         it('should resolve to self', () => {
@@ -833,7 +833,7 @@ describe('providers/nodebb', () => {
         });
         it('should use websocket emit', () => {
             return forum._emit().then(() => {
-                forum.socket.emit.called.should.be.true;
+                forum.socket.emit.should.have.been.calledOnce;
             });
         });
         it('should bind websocket emit to websokcet', () => {
@@ -882,7 +882,7 @@ describe('providers/nodebb', () => {
         });
         it('should use self._emit', () => {
             return forum.fetchObject('', '', () => 0).then(() => {
-                forum._emit.called.should.be.true;
+                forum._emit.should.have.been.calledOnce;
             });
         });
         it('should pass arguments to _emit', () => {

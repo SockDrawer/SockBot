@@ -63,12 +63,12 @@ describe('plugins/echo', () => {
         describe('echo()', () => {
             it('should not retrieve post data', () => {
                 return plugin._echo(command).then(() => {
-                    command.getPost.called.should.be.false;
+                    command.getPost.should.not.have.been.called;
                 });
             });
             it('should retrieve user data', () => {
                 return plugin._echo(command).then(() => {
-                    command.getUser.called.should.be.true;
+                    command.getUser.should.have.been.calledOnce;
                 });
             });
             it('should reply with expected text', () => {

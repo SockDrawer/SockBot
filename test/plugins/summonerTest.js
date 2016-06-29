@@ -96,12 +96,12 @@ describe('plugins/echo', () => {
         });
         it('should retrieve user who generated reply', () => {
             return summoner.handler(notification).then(() => {
-                notification.getUser.called.should.be.true;
+                notification.getUser.should.have.been.calledOnce;
             });
         });
         it('should reply via static Post.reply', () => {
             return summoner.handler(notification).then(() => {
-                forum.Post.reply.called.should.be.true;
+                forum.Post.reply.should.have.been.calledOnce;
             });
         });
         it('should reply to notification.topicId', () => {
@@ -139,7 +139,7 @@ describe('plugins/echo', () => {
             Math.random.returns(0.5);
             summoner = testModule(forum, ['0', '1', '2', '3', '4']);
             return summoner.handler(notification).then(() => {
-                Math.random.called.should.be.true;
+                Math.random.should.have.been.calledOnce;
                 forum.Post.reply.should.have.been.calledWith(undefined, undefined, '2');
             }).then(() => sandbox.restore());
         });
