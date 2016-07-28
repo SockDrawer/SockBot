@@ -26,6 +26,7 @@ NodeBB provider module User class
                 * [.url()](#sockbot.providers.nodebb.module_User..User+url) ⇒ <code>Promise.&lt;string&gt;</code>
                 * [.follow()](#sockbot.providers.nodebb.module_User..User+follow) ⇒ <code>Promise.&lt;User&gt;</code>
                 * [.unfollow()](#sockbot.providers.nodebb.module_User..User+unfollow) ⇒ <code>Promise.&lt;user&gt;</code>
+                * [.whisper(message, [title])](#sockbot.providers.nodebb.module_User..User+whisper) ⇒ <code>Promise</code>
             * _static_
                 * [.get(userId)](#sockbot.providers.nodebb.module_User..User.get) ⇒ <code>Promise.&lt;User&gt;</code>
                 * [.getByName(username)](#sockbot.providers.nodebb.module_User..User.getByName) ⇒ <code>Promise.&lt;User&gt;</code>
@@ -69,6 +70,7 @@ Represents a forum user
         * [.url()](#sockbot.providers.nodebb.module_User..User+url) ⇒ <code>Promise.&lt;string&gt;</code>
         * [.follow()](#sockbot.providers.nodebb.module_User..User+follow) ⇒ <code>Promise.&lt;User&gt;</code>
         * [.unfollow()](#sockbot.providers.nodebb.module_User..User+unfollow) ⇒ <code>Promise.&lt;user&gt;</code>
+        * [.whisper(message, [title])](#sockbot.providers.nodebb.module_User..User+whisper) ⇒ <code>Promise</code>
     * _static_
         * [.get(userId)](#sockbot.providers.nodebb.module_User..User.get) ⇒ <code>Promise.&lt;User&gt;</code>
         * [.getByName(username)](#sockbot.providers.nodebb.module_User..User.getByName) ⇒ <code>Promise.&lt;User&gt;</code>
@@ -192,6 +194,20 @@ Unfollow the User
 **Promise**:   
 **Fulfill**: <code>User</code> The unfollowed User  
 **Reject**: <code>Error</code> An Error that occured while processing  
+<a name="sockbot.providers.nodebb.module_User..User+whisper"></a>
+
+#### user.whisper(message, [title]) ⇒ <code>Promise</code>
+Communicate privately with the user
+
+**Kind**: instance method of <code>[User](#sockbot.providers.nodebb.module_User..User)</code>  
+**Returns**: <code>Promise</code> - Resolve when communication has occured, rejects if attempt fails or is unsupported  
+**Access:** public  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| message | <code>string</code> | Message to communicate with the user |
+| [title] | <code>string</code> | Optional: Title of the message to communicate |
+
 <a name="sockbot.providers.nodebb.module_User..User.get"></a>
 
 #### User.get(userId) ⇒ <code>Promise.&lt;User&gt;</code>

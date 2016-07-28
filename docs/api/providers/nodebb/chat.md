@@ -163,7 +163,7 @@ Represents a chat room
         * [.leave()](#ChatRoom+leave) ⇒ <code>Promise</code>
         * [.rename(newName)](#ChatRoom+rename) ⇒ <code>Promise</code>
     * _static_
-        * [.create(users, message)](#ChatRoom.create) ⇒ <code>Promise</code>
+        * [.create(users, message, [title])](#ChatRoom.create) ⇒ <code>Promise</code>
         * [.activate()](#ChatRoom.activate)
         * [.deactivate()](#ChatRoom.deactivate)
         * [.get(roomId)](#ChatRoom.get) ⇒ <code>[Promise.&lt;ChatRoom&gt;](#ChatRoom)</code>
@@ -294,7 +294,7 @@ Rename the chat room
 
 <a name="ChatRoom.create"></a>
 
-### ChatRoom.create(users, message) ⇒ <code>Promise</code>
+### ChatRoom.create(users, message, [title]) ⇒ <code>Promise</code>
 Create a new chatroom, add a list of users to it and send a message.
 
 **Kind**: static method of <code>[ChatRoom](#ChatRoom)</code>  
@@ -305,6 +305,7 @@ Create a new chatroom, add a list of users to it and send a message.
 | --- | --- | --- |
 | users | <code>User</code> &#124; <code>Array.&lt;User&gt;</code> | User or users to add to the chatroom |
 | message | <code>string</code> | Message to send to the new chat room |
+| [title] | <code>string</code> | Optional: Set the title of the chat message to this value |
 
 <a name="ChatRoom.activate"></a>
 
