@@ -873,7 +873,8 @@ describe('lib/config', () => {
             [
                 ['getPost', 'Post', 'post'],
                 ['getTopic', 'Topic', 'topic'],
-                ['getUser', 'User', 'user']
+                ['getUser', 'User', 'user'],
+                ['getRoom', 'Chat', 'room']
             ].forEach((config) => {
                 const method = config[0],
                     object = config[1],
@@ -922,6 +923,7 @@ describe('lib/config', () => {
             [
                 ['setPost', 'post'],
                 ['setTopic', 'topic'],
+                ['setRoom', 'room'],
                 ['setUser', 'user']
             ].forEach((config) => {
                 const method = config[0],
