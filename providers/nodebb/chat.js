@@ -342,9 +342,10 @@ exports.bindChat = function bindChat(forum) {
          *
          * @param {User|User[]} users User or users to add to the chatroom
          * @param {string} message Message to send to the new chat room
+         * @param {string} [title] Optional: Set the title of the chat message to this value
          * @returns {Promise} Resolves once message has been sent
          */
-        static create(users, message) {
+        static create(users, message, title) {
             if (!Array.isArray(users)) {
                 users = [users];
             }
@@ -355,7 +356,13 @@ exports.bindChat = function bindChat(forum) {
             return forum._emit('modules.chats.newRoom', payload)
                 .then((roomId) => ChatRoom.get(roomId))
                 .then((chat) => chat.addUsers(users))
-                .then((chat) => chat.send(message));
+                .then((chat) => chat.send(message))
+                .then((chat) => {
+                    if (title) {
+                        return chat.rename(title);
+                    }
+                    return Promise.resolve(chat);
+                });
         }
 
         /**

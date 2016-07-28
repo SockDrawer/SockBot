@@ -26,6 +26,9 @@ describe('providers/nodebb/user', () => {
         beforeEach(() => {
             forum._emit = sinon.stub().resolves();
             forum.fetchObject = sinon.stub().resolves();
+            forum.Chat = {
+                create: sinon.stub().resolves()
+            };
         });
         describe('ctor()', () => {
             it('should store instance data in utils.storage', () => {
@@ -115,6 +118,21 @@ describe('providers/nodebb/user', () => {
                 it('should reject when websocket rejects', () => {
                     forum._emit.rejects('bad');
                     return user[method]().should.be.rejected;
+                });
+            });
+        });
+        describe('whisper()', () => {
+            let user = null;
+            beforeEach(() => {
+                user = new User({
+                    username: `username${Math.random()}`
+                });
+            });
+            it('should proxy request to forum.Chat.create()', () => {
+                const message = `message${Math.random()}`,
+                    title = `title${Math.random()}`;
+                return user.whisper(message, title).then(() => {
+                    forum.Chat.create.should.be.calledWith(user.username, message, title);
                 });
             });
         });

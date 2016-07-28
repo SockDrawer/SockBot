@@ -214,6 +214,19 @@ exports.bindUser = function bindUser(forum) {
         }
 
         /**
+         * Communicate privately with the user
+         *
+         * @public
+         *
+         * @param {string} message Message to communicate with the user
+         * @param {string} [title] Optional: Title of the message to communicate
+         * @returns {Promise} Resolve when communication has occured, rejects if attempt fails or is unsupported
+         */
+        whisper(message, title) {
+            return forum.Chat.create(this.username, message, title);
+        }
+
+        /**
          * Get User by Id
          *
          * @static

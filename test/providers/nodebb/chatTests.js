@@ -505,10 +505,12 @@ describe('providers/nodebb/chat', () => {
                 forum._emit.resolves(id);
                 room = {
                     addUsers: sinon.stub().resolves(),
-                    send: sinon.stub().resolves()
+                    send: sinon.stub().resolves(),
+                    rename: sinon.stub().resolves()
                 };
                 room.addUsers.resolves(room);
                 room.send.resolves(room);
+                room.rename.resolves(room);
                 ChatRoom.get.resolves(room);
             });
             afterEach(() => sandbox.restore());
@@ -591,6 +593,24 @@ describe('providers/nodebb/chat', () => {
             });
             it('should resolve to self for method chaining', () => {
                 return ChatRoom.create('foo', 'bar').should.become(room);
+            });
+            describe('Set Chat Title', () => {
+                it('should not set title when title not provided', () => {
+                    return ChatRoom.create('foo', 'bar').then(() => {
+                        room.rename.should.not.be.called;
+                    });
+                });
+                it('should not set title when title is falsy', () => {
+                    return ChatRoom.create('foo', 'bar', '').then(() => {
+                        room.rename.should.not.be.called;
+                    });
+                });
+                it('should set title when title provided', () => {
+                    const expected = `title${Math.random()}`;
+                    return ChatRoom.create('foo', 'bar', expected).then(() => {
+                        room.rename.should.be.calledWith(expected);
+                    });
+                });
             });
         });
         describe('static activate()', () => {
