@@ -279,6 +279,9 @@ exports.bindUser = function bindUser(forum) {
          *
          */
         static parse(payload) {
+            if (!payload) {
+                throw new Error('E_USER_NOT_FOUND');
+            }
             return new User(payload);
         }
     }

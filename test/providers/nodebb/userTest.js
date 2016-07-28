@@ -170,7 +170,10 @@ describe('providers/nodebb/user', () => {
                 return User.getByName(5).should.be.rejected;
             });
         });
-        describe('ctor()', () => {
+        describe('parse()', () => {
+            it('should throw error on falsy payload', () => {
+                chai.expect(() => User.parse()).to.throw('E_USER_NOT_FOUND');
+            });
             it('should store instance data in utils.storage', () => {
                 const user = User.parse({});
                 utils.mapGet(user).should.be.ok;

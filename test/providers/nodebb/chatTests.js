@@ -672,6 +672,9 @@ describe('providers/nodebb/chat', () => {
             });
         });
         describe('static parse()', () => {
+            it('should throw error on falsy payload', () => {
+                chai.expect(() => ChatRoom.parse()).to.throw('E_CHATROOM_NOT_FOUND');
+            });
             it('should store instance data in utils.storage', () => {
                 const room = ChatRoom.parse({});
                 utils.mapGet(room).should.be.ok;
@@ -839,6 +842,9 @@ describe('providers/nodebb/chat', () => {
             });
         });
         describe('static parse()', () => {
+            it('should throw error on falsy payload', () => {
+                chai.expect(() => Message.parse()).to.throw('E_CHATMESSAGE_NOT_FOUND');
+            });
             it('should store instance data in utils.storage', () => {
                 const message = Message.parse({});
                 utils.mapGet(message).should.be.ok;

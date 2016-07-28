@@ -296,6 +296,9 @@ exports.bindNotification = function bindNotification(forum) {
          * @returns {Notification} the parsed notification
          */
         static parse(payload) {
+            if (!payload) {
+                throw new Error('E_NOTIFICATION_NOT_FOUND');
+            }
             return new Notification(payload);
         }
 

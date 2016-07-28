@@ -143,6 +143,9 @@ exports.bindChat = function bindChat(forum) {
          * @returns {Message} parsed Message
          */
         static parse(payload) {
+            if (!payload) {
+                throw new Error('E_CHATMESSAGE_NOT_FOUND');
+            }
             return new Message(payload);
         }
     }
@@ -406,6 +409,9 @@ exports.bindChat = function bindChat(forum) {
          * @returns {ChatRoom} Parsed Chatroom
          */
         static parse(payload) {
+            if (!payload) {
+                throw new Error('E_CHATROOM_NOT_FOUND');
+            }
             return new ChatRoom(payload);
         }
     }
