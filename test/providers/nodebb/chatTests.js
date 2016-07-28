@@ -191,6 +191,9 @@ describe('providers/nodebb/chat', () => {
                     forum._emit.callCount.should.equal(1);
                 });
             });
+            it('should resolve to self for method chaining', () => {
+                return room.send('foo').should.become(room);
+            });
         });
         describe('addUsers()', () => {
             let data = null,
@@ -200,7 +203,11 @@ describe('providers/nodebb/chat', () => {
                 data = utils.mapGet(room);
                 data.id = Math.random();
             });
-
+            it('should resolve to self for method chaining', () => {
+                return room.addUsers({
+                    username: 'foo'
+                }).should.become(room);
+            });
             it('should accept empty array of users to add', () => {
                 return room.addUsers([]).then(() => {
                     forum._emit.callCount.should.equal(0);
@@ -312,6 +319,11 @@ describe('providers/nodebb/chat', () => {
                 room = new ChatRoom({});
                 data = utils.mapGet(room);
                 data.id = Math.random();
+            });
+            it('should resolve to self for method chaining', () => {
+                return room.removeUsers({
+                    username: 'foo'
+                }).should.become(room);
             });
             it('should accept empty array of users to remove', () => {
                 return room.removeUsers([]).then(() => {
@@ -425,6 +437,9 @@ describe('providers/nodebb/chat', () => {
                 data = utils.mapGet(room);
                 data.id = Math.random();
             });
+            it('should resolve to self for method chaining', () => {
+                return room.leave().should.become(room);
+            });
             it('should emit expected message', () => {
                 return room.leave().then(() => {
                     forum._emit.calledWith('modules.chats.leave', data.id).once;
@@ -475,6 +490,9 @@ describe('providers/nodebb/chat', () => {
                     forum._emit.callCount.should.equal(1);
                 });
             });
+            it('should resolve to self for method chaining', () => {
+                return room.rename('foo').should.become(room);
+            });
         });
         describe('static create()', () => {
             let room = null,
@@ -489,6 +507,8 @@ describe('providers/nodebb/chat', () => {
                     addUsers: sinon.stub().resolves(),
                     send: sinon.stub().resolves()
                 };
+                room.addUsers.resolves(room);
+                room.send.resolves(room);
                 ChatRoom.get.resolves(room);
             });
             afterEach(() => sandbox.restore());
@@ -568,6 +588,9 @@ describe('providers/nodebb/chat', () => {
             it('should reject when sending message rejects', () => {
                 room.send.rejects('bad');
                 return ChatRoom.create({}, '').should.be.rejected;
+            });
+            it('should resolve to self for method chaining', () => {
+                return ChatRoom.create('foo', 'bar').should.become(room);
             });
         });
         describe('static activate()', () => {
