@@ -41,6 +41,8 @@ NodeBB provider module User class
                 * [.setPost(post)](#sockbot.lib.module_commands..Commands+setPost)
                 * [.getTopic()](#sockbot.lib.module_commands..Commands+getTopic) ⇒ <code>Promise.&lt;Topic&gt;</code>
                 * [.setTopic(topic)](#sockbot.lib.module_commands..Commands+setTopic)
+                * [.getRoom()](#sockbot.lib.module_commands..Commands+getRoom) ⇒ <code>Promise.&lt;ChatRoom&gt;</code>
+                * [.setRoom(room)](#sockbot.lib.module_commands..Commands+setRoom)
                 * [.getUser()](#sockbot.lib.module_commands..Commands+getUser) ⇒ <code>Promise.&lt;User&gt;</code>
                 * [.setUser(user)](#sockbot.lib.module_commands..Commands+setUser)
                 * [.execute()](#sockbot.lib.module_commands..Commands+execute) ⇒ <code>Promise.&lt;Commands&gt;</code>
@@ -277,6 +279,8 @@ Commands class. Represents all commands for a Notification
         * [.setPost(post)](#sockbot.lib.module_commands..Commands+setPost)
         * [.getTopic()](#sockbot.lib.module_commands..Commands+getTopic) ⇒ <code>Promise.&lt;Topic&gt;</code>
         * [.setTopic(topic)](#sockbot.lib.module_commands..Commands+setTopic)
+        * [.getRoom()](#sockbot.lib.module_commands..Commands+getRoom) ⇒ <code>Promise.&lt;ChatRoom&gt;</code>
+        * [.setRoom(room)](#sockbot.lib.module_commands..Commands+setRoom)
         * [.getUser()](#sockbot.lib.module_commands..Commands+getUser) ⇒ <code>Promise.&lt;User&gt;</code>
         * [.setUser(user)](#sockbot.lib.module_commands..Commands+setUser)
         * [.execute()](#sockbot.lib.module_commands..Commands+execute) ⇒ <code>Promise.&lt;Commands&gt;</code>
@@ -358,6 +362,26 @@ Set the Topic this Commands object refers to
 | Param | Type | Description |
 | --- | --- | --- |
 | topic | <code>Topic</code> | The Topic to cache |
+
+<a name="sockbot.lib.module_commands..Commands+getRoom"></a>
+
+#### commands.getRoom() ⇒ <code>Promise.&lt;ChatRoom&gt;</code>
+Get the ChatRoom this Commands object referrs to
+
+**Kind**: instance method of <code>[Commands](#sockbot.lib.module_commands..Commands)</code>  
+**Returns**: <code>Promise.&lt;ChatRoom&gt;</code> - Resolves to the retrieved ChatRoom  
+**Access:** public  
+<a name="sockbot.lib.module_commands..Commands+setRoom"></a>
+
+#### commands.setRoom(room)
+Set the ChatRoom this Commands object refers to
+
+**Kind**: instance method of <code>[Commands](#sockbot.lib.module_commands..Commands)</code>  
+**Access:** public  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| room | <code>ChatRoom</code> | The ChatRoom to cache |
 
 <a name="sockbot.lib.module_commands..Commands+getUser"></a>
 
