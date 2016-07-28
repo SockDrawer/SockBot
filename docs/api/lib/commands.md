@@ -29,6 +29,7 @@ NodeBB provider module User class
             * [.getPost()](#sockbot.lib.module_commands..Command+getPost) ⇒ <code>Promise.&lt;Post&gt;</code>
             * [.getTopic()](#sockbot.lib.module_commands..Command+getTopic) ⇒ <code>Promise.&lt;Topic&gt;</code>
             * [.getUser()](#sockbot.lib.module_commands..Command+getUser) ⇒ <code>Promise.&lt;User&gt;</code>
+            * [.getRoom()](#sockbot.lib.module_commands..Command+getRoom) ⇒ <code>Promise.&lt;ChatRoom&gt;</code>
             * [.reply(content)](#sockbot.lib.module_commands..Command+reply)
             * [.appendReply(content)](#sockbot.lib.module_commands..Command+appendReply)
         * [~Commands](#sockbot.lib.module_commands..Commands)
@@ -135,6 +136,7 @@ Command Class. Represents a single command within a post
     * [.getPost()](#sockbot.lib.module_commands..Command+getPost) ⇒ <code>Promise.&lt;Post&gt;</code>
     * [.getTopic()](#sockbot.lib.module_commands..Command+getTopic) ⇒ <code>Promise.&lt;Topic&gt;</code>
     * [.getUser()](#sockbot.lib.module_commands..Command+getUser) ⇒ <code>Promise.&lt;User&gt;</code>
+    * [.getRoom()](#sockbot.lib.module_commands..Command+getRoom) ⇒ <code>Promise.&lt;ChatRoom&gt;</code>
     * [.reply(content)](#sockbot.lib.module_commands..Command+reply)
     * [.appendReply(content)](#sockbot.lib.module_commands..Command+appendReply)
 
@@ -236,6 +238,14 @@ Get User who posted the command
 
 **Kind**: instance method of <code>[Command](#sockbot.lib.module_commands..Command)</code>  
 **Returns**: <code>Promise.&lt;User&gt;</code> - Resolved to retrieved User  
+**Access:** public  
+<a name="sockbot.lib.module_commands..Command+getRoom"></a>
+
+#### command.getRoom() ⇒ <code>Promise.&lt;ChatRoom&gt;</code>
+Get ChatRoom who posted the command
+
+**Kind**: instance method of <code>[Command](#sockbot.lib.module_commands..Command)</code>  
+**Returns**: <code>Promise.&lt;ChatRoom&gt;</code> - Resolved to retrieved ChatRoom  
 **Access:** public  
 <a name="sockbot.lib.module_commands..Command+reply"></a>
 
