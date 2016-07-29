@@ -26,14 +26,14 @@ exports.bindCategory = function bindCategory(forum) {
      * @returns {Promise} Resolves on completion
      */
 
-     /**
-      * Create a function to process topic data using a Topic Processor
-      *
-      * @private
-      *
-      * @param {TopicProcessor} eachTopic Function to process topics
-      * @returns {function} Internal topic processing function
-      */
+    /**
+     * Create a function to process topic data using a Topic Processor
+     *
+     * @private
+     *
+     * @param {TopicProcessor} eachTopic Function to process topics
+     * @returns {function} Internal topic processing function
+     */
     function onEachTopic(eachTopic) {
         return (data) => forum.Topic.parseExtended(data)
             .then((parsed) => eachTopic(parsed.topic, parsed.user, parsed.category));
@@ -296,6 +296,9 @@ exports.bindCategory = function bindCategory(forum) {
          *
          */
         static parse(payload) {
+            if (!payload) {
+                throw new Error('E_CATEGORY_NOT_FOUND');
+            }
             return new Category(payload);
         }
     }

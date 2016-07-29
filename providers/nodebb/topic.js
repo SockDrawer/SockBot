@@ -363,6 +363,9 @@ exports.bindTopic = function bindTopic(forum) {
          * @returns {Topic} Parsed topic
          */
         static parse(payload) {
+            if (!payload) {
+                throw new Error('E_TOPIC_NOT_FOUND');
+            }
             return new Topic(payload);
         }
 

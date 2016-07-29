@@ -712,7 +712,8 @@ describe('lib/config', () => {
                 parent = {
                     getPost: sinon.stub(),
                     getTopic: sinon.stub(),
-                    getUser: sinon.stub()
+                    getUser: sinon.stub(),
+                    getRoom: sinon.stub()
                 };
                 command = new Command({}, parent);
             });
@@ -733,6 +734,12 @@ describe('lib/config', () => {
                 parent.getUser.returns(expected);
                 command.getUser().should.equal(expected);
                 parent.getUser.should.have.been.calledOnce;
+            });
+            it('should proxy getRoom() to parent.getRoom()', () => {
+                const expected = Math.random();
+                parent.getRoom.returns(expected);
+                command.getRoom().should.equal(expected);
+                parent.getRoom.should.have.been.calledOnce;
             });
         });
         describe('reply()', () => {
@@ -873,7 +880,8 @@ describe('lib/config', () => {
             [
                 ['getPost', 'Post', 'post'],
                 ['getTopic', 'Topic', 'topic'],
-                ['getUser', 'User', 'user']
+                ['getUser', 'User', 'user'],
+                ['getRoom', 'Chat', 'room']
             ].forEach((config) => {
                 const method = config[0],
                     object = config[1],
@@ -922,6 +930,7 @@ describe('lib/config', () => {
             [
                 ['setPost', 'post'],
                 ['setTopic', 'topic'],
+                ['setRoom', 'room'],
                 ['setUser', 'user']
             ].forEach((config) => {
                 const method = config[0],

@@ -8,6 +8,7 @@ engines:
     exclude_fingerprints:
       - cce295526e01b62ae2806f9b4d245744 #Ignore duplication of a block of require() statements in build/makeDocs
       - 30fc9a280f95976dfb0abfde22f0930c #Ignore duplication of a block of require() statements in providers/nodebb/index
+      - a6fe60863ebe12ef6b71d8465b1ca3b1 # Ignore overzealous code dupelication issue
   eslint:
     enabled: true
     channel: "eslint-2"

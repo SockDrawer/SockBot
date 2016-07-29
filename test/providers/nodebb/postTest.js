@@ -552,7 +552,6 @@ describe('providers/nodebb/post', () => {
             });
         });
         describe('functions', () => {
-
             describe('reply()', () => {
                 let sandbox = null;
                 beforeEach(() => {
@@ -703,6 +702,9 @@ describe('providers/nodebb/post', () => {
                 });
             });
             describe('parse()', () => {
+                it('should throw error on falsy payload', () => {
+                    chai.expect(() => Post.parse()).to.throw('E_POST_NOT_FOUND');
+                });
                 it('should store instance data in utils.storage', () => {
                     const post = Post.parse({});
                     utils.mapGet(post).should.be.ok;

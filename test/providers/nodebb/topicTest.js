@@ -507,7 +507,7 @@ describe('providers/nodebb/topic', () => {
                         topics: [{}, {}, {}]
                     });
                     return Topic.getUnreadTopics(spy).then(() => {
-                        
+
                         forum._emit.calledWith('topics.loadMoreUnreadTopics', {
                             after: 0
                         }).should.be.true;
@@ -622,6 +622,9 @@ describe('providers/nodebb/topic', () => {
                 });
             });
             describe('static parse()', () => {
+                it('should throw error on falsy payload', () => {
+                    chai.expect(() => Topic.parse()).to.throw('E_TOPIC_NOT_FOUND');
+                });
                 it('should store instance data in utils.storage', () => {
                     const topic = Topic.parse({});
                     utils.mapGet(topic).should.be.ok;

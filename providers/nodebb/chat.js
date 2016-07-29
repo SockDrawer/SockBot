@@ -143,6 +143,9 @@ exports.bindChat = function bindChat(forum) {
          * @returns {Message} parsed Message
          */
         static parse(payload) {
+            if (!payload) {
+                throw new Error('E_CHATMESSAGE_NOT_FOUND');
+            }
             return new Message(payload);
         }
     }
@@ -260,7 +263,7 @@ exports.bindChat = function bindChat(forum) {
             return forum._emit('modules.chats.send', {
                 roomId: this.id,
                 message: content
-            });
+            }).then(() => this);
         }
 
         /**
@@ -292,7 +295,7 @@ exports.bindChat = function bindChat(forum) {
          * @returns {Promise} Resolves when all users have been added to the chatroom
          */
         addUsers(users) {
-            return this._applyToUsers('modules.chats.addUserToRoom', users);
+            return this._applyToUsers('modules.chats.addUserToRoom', users).then(() => this);
         }
 
         /**
@@ -304,7 +307,7 @@ exports.bindChat = function bindChat(forum) {
          * @returns {Promsie} Resos when users have been removed from the chatroom
          */
         removeUsers(users) {
-            return this._applyToUsers('modules.chats.removeUserFromRoom', users);
+            return this._applyToUsers('modules.chats.removeUserFromRoom', users).then(() => this);
         }
 
         /**
@@ -317,7 +320,7 @@ exports.bindChat = function bindChat(forum) {
          * @returns {Promise} Resolves when chatroom has been left
          */
         leave() {
-            return forum._emit('modules.chats.leave', this.id);
+            return forum._emit('modules.chats.leave', this.id).then(() => this);
         }
 
         /**
@@ -332,7 +335,7 @@ exports.bindChat = function bindChat(forum) {
             return forum._emit('modules.chats.renameRoom', {
                 roomId: this.id,
                 newName: newName
-            });
+            }).then(() => this);
         }
 
         /**
@@ -342,9 +345,10 @@ exports.bindChat = function bindChat(forum) {
          *
          * @param {User|User[]} users User or users to add to the chatroom
          * @param {string} message Message to send to the new chat room
+         * @param {string} [title] Optional: Set the title of the chat message to this value
          * @returns {Promise} Resolves once message has been sent
          */
-        static create(users, message) {
+        static create(users, message, title) {
             if (!Array.isArray(users)) {
                 users = [users];
             }
@@ -354,8 +358,14 @@ exports.bindChat = function bindChat(forum) {
             };
             return forum._emit('modules.chats.newRoom', payload)
                 .then((roomId) => ChatRoom.get(roomId))
-                .then((chat) => chat.addUsers(users)
-                    .then(() => chat.send(message)));
+                .then((chat) => chat.addUsers(users))
+                .then((chat) => chat.send(message))
+                .then((chat) => {
+                    if (title) {
+                        return chat.rename(title);
+                    }
+                    return Promise.resolve(chat);
+                });
         }
 
         /**
@@ -399,6 +409,9 @@ exports.bindChat = function bindChat(forum) {
          * @returns {ChatRoom} Parsed Chatroom
          */
         static parse(payload) {
+            if (!payload) {
+                throw new Error('E_CHATROOM_NOT_FOUND');
+            }
             return new ChatRoom(payload);
         }
     }

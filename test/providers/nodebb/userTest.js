@@ -26,6 +26,9 @@ describe('providers/nodebb/user', () => {
         beforeEach(() => {
             forum._emit = sinon.stub().resolves();
             forum.fetchObject = sinon.stub().resolves();
+            forum.Chat = {
+                create: sinon.stub().resolves()
+            };
         });
         describe('ctor()', () => {
             it('should store instance data in utils.storage', () => {
@@ -118,6 +121,21 @@ describe('providers/nodebb/user', () => {
                 });
             });
         });
+        describe('whisper()', () => {
+            let user = null;
+            beforeEach(() => {
+                user = new User({
+                    username: `username${Math.random()}`
+                });
+            });
+            it('should proxy request to forum.Chat.create()', () => {
+                const message = `message${Math.random()}`,
+                    title = `title${Math.random()}`;
+                return user.whisper(message, title).then(() => {
+                    forum.Chat.create.should.be.calledWith(user.username, message, title);
+                });
+            });
+        });
         describe('static get()', () => {
             it('should load via function `user.getUserByUID`', () => {
                 const expected = Math.random();
@@ -152,7 +170,10 @@ describe('providers/nodebb/user', () => {
                 return User.getByName(5).should.be.rejected;
             });
         });
-        describe('ctor()', () => {
+        describe('parse()', () => {
+            it('should throw error on falsy payload', () => {
+                chai.expect(() => User.parse()).to.throw('E_USER_NOT_FOUND');
+            });
             it('should store instance data in utils.storage', () => {
                 const user = User.parse({});
                 utils.mapGet(user).should.be.ok;

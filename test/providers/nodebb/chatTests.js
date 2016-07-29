@@ -191,6 +191,9 @@ describe('providers/nodebb/chat', () => {
                     forum._emit.callCount.should.equal(1);
                 });
             });
+            it('should resolve to self for method chaining', () => {
+                return room.send('foo').should.become(room);
+            });
         });
         describe('addUsers()', () => {
             let data = null,
@@ -200,7 +203,11 @@ describe('providers/nodebb/chat', () => {
                 data = utils.mapGet(room);
                 data.id = Math.random();
             });
-
+            it('should resolve to self for method chaining', () => {
+                return room.addUsers({
+                    username: 'foo'
+                }).should.become(room);
+            });
             it('should accept empty array of users to add', () => {
                 return room.addUsers([]).then(() => {
                     forum._emit.callCount.should.equal(0);
@@ -312,6 +319,11 @@ describe('providers/nodebb/chat', () => {
                 room = new ChatRoom({});
                 data = utils.mapGet(room);
                 data.id = Math.random();
+            });
+            it('should resolve to self for method chaining', () => {
+                return room.removeUsers({
+                    username: 'foo'
+                }).should.become(room);
             });
             it('should accept empty array of users to remove', () => {
                 return room.removeUsers([]).then(() => {
@@ -425,6 +437,9 @@ describe('providers/nodebb/chat', () => {
                 data = utils.mapGet(room);
                 data.id = Math.random();
             });
+            it('should resolve to self for method chaining', () => {
+                return room.leave().should.become(room);
+            });
             it('should emit expected message', () => {
                 return room.leave().then(() => {
                     forum._emit.calledWith('modules.chats.leave', data.id).once;
@@ -475,6 +490,9 @@ describe('providers/nodebb/chat', () => {
                     forum._emit.callCount.should.equal(1);
                 });
             });
+            it('should resolve to self for method chaining', () => {
+                return room.rename('foo').should.become(room);
+            });
         });
         describe('static create()', () => {
             let room = null,
@@ -487,8 +505,12 @@ describe('providers/nodebb/chat', () => {
                 forum._emit.resolves(id);
                 room = {
                     addUsers: sinon.stub().resolves(),
-                    send: sinon.stub().resolves()
+                    send: sinon.stub().resolves(),
+                    rename: sinon.stub().resolves()
                 };
+                room.addUsers.resolves(room);
+                room.send.resolves(room);
+                room.rename.resolves(room);
                 ChatRoom.get.resolves(room);
             });
             afterEach(() => sandbox.restore());
@@ -569,6 +591,27 @@ describe('providers/nodebb/chat', () => {
                 room.send.rejects('bad');
                 return ChatRoom.create({}, '').should.be.rejected;
             });
+            it('should resolve to self for method chaining', () => {
+                return ChatRoom.create('foo', 'bar').should.become(room);
+            });
+            describe('Set Chat Title', () => {
+                it('should not set title when title not provided', () => {
+                    return ChatRoom.create('foo', 'bar').then(() => {
+                        room.rename.should.not.be.called;
+                    });
+                });
+                it('should not set title when title is falsy', () => {
+                    return ChatRoom.create('foo', 'bar', '').then(() => {
+                        room.rename.should.not.be.called;
+                    });
+                });
+                it('should set title when title provided', () => {
+                    const expected = `title${Math.random()}`;
+                    return ChatRoom.create('foo', 'bar', expected).then(() => {
+                        room.rename.should.be.calledWith(expected);
+                    });
+                });
+            });
         });
         describe('static activate()', () => {
             beforeEach(() => {
@@ -629,6 +672,9 @@ describe('providers/nodebb/chat', () => {
             });
         });
         describe('static parse()', () => {
+            it('should throw error on falsy payload', () => {
+                chai.expect(() => ChatRoom.parse()).to.throw('E_CHATROOM_NOT_FOUND');
+            });
             it('should store instance data in utils.storage', () => {
                 const room = ChatRoom.parse({});
                 utils.mapGet(room).should.be.ok;
@@ -796,6 +842,9 @@ describe('providers/nodebb/chat', () => {
             });
         });
         describe('static parse()', () => {
+            it('should throw error on falsy payload', () => {
+                chai.expect(() => Message.parse()).to.throw('E_CHATMESSAGE_NOT_FOUND');
+            });
             it('should store instance data in utils.storage', () => {
                 const message = Message.parse({});
                 utils.mapGet(message).should.be.ok;

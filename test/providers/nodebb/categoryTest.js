@@ -380,7 +380,7 @@ describe('providers/nodebb/categor', () => {
                 const expected = Math.random();
                 return Category.get(expected).then(() => {
                     forum.fetchObject.should.have.been
-                    .calledWith('categories.getCategory', expected, Category.parse).once;
+                        .calledWith('categories.getCategory', expected, Category.parse).once;
                 });
             });
             it('should resolve to result of forum.fetchObject()', () => {
@@ -394,6 +394,9 @@ describe('providers/nodebb/categor', () => {
             });
         });
         describe('static parse()', () => {
+            it('should throw error on falsy payload', () => {
+                chai.expect(() => Category.parse()).to.throw('E_CATEGORY_NOT_FOUND');
+            });
             it('should store instance data in utils.storage', () => {
                 const category = Category.parse({});
                 utils.mapGet(category).should.be.ok;

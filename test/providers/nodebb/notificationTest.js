@@ -312,6 +312,9 @@ describe('providers/nodebb/notification', () => {
             });
         });
         describe('static parse()', () => {
+            it('should throw error on falsy payload', () => {
+                chai.expect(() => Notification.parse()).to.throw('E_NOTIFICATION_NOT_FOUND');
+            });
             it('should store instance data in utils.storage', () => {
                 const notification = Notification.parse({});
                 utils.mapGet(notification).should.be.ok;

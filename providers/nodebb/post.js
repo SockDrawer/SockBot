@@ -416,6 +416,9 @@ exports.bindPost = function bindPost(forum) {
          * @returns {Post} the deserialized Post object
          */
         static parse(payload) {
+            if (!payload) {
+                throw new Error('E_POST_NOT_FOUND');
+            }
             return new Post(payload);
         }
 
