@@ -5,7 +5,7 @@
 In order to function as a provider, certain assumptions are made about the code. Those assumptions form the public API, documented here. Anything not documented here can be assumed to be optional and ignored. 
 
 
-## Entry Point
+## Forum
 
 All providers must have a single entry point. This entry point, typically called `index.js`, must export a single class, often called `Forum`. 
 
@@ -176,3 +176,58 @@ This method should return a promise that will resolve to the requested Topic obj
 A static method should be provided to allow for parsing arbitrary topics. It will be given one arguments: the raw payload retrieved from the API.
 
 This method should return a promise that will resolve to the requested Topic object.
+
+## Category
+
+A Category is an optional third level of organization; a Category contains Topics the way a Topic contains Posts. A Category may optionally also contain other Categories.
+
+### bindCategory
+The Category file should export a single method, called bindCategory. This method takes in a forum object and returns a Category class, with specific references to provider functions bound to that instance of the provider. 
+
+### Category object: Properties
+
+The following properties are assumed to exist, either as plain objects or via getters:
+
+- `name`: the name of the Category
+- `id`: some identifier for the Category
+- `parentId`: some identifier for the Category's parent, if any
+- `description`: the description assigned to the Category
+- `postCount`: the number of Posts in this Category
+- `topicCount`: the number of Topics in this Category
+- `recentPosts`: Recently made posts, provider-defined.
+
+### Category object: Expensive properties
+
+The following methods each return a Promise for the property that they encapsulate. They should reject if no such property can exist.
+
+- `url`: the url to view this Category on the web
+
+### Category object: iterator functions
+
+The following methods each take a function that shall be applied to the relevant Post objects inside the Topic, and return a Promise that resolves when the iteration is done. 
+
+- `getAllTopics`: Perform the function on all Topics in the Category
+- `getRecentTopics`: Perform the function on the "latest" Topics in the Category, defined according to the Provider implementation
+
+Static versions of each of these functions should also exist. Each of them take a Category identifier as well as the function for iteration.
+
+### Topic object: actions
+
+The following actions are assumed to be available to be performed on a Post. Each should act upon the actual post in the system, and return a Promise that will resolve if the action completes or reject if it does not.
+
+- `watch`: Mark the Category as "watched" or "followed" (whatever the terminology). This typically results in an increase in notifications for the Category, often one per post in the Category.
+- `unwatch`: Mark the Category as no longer "watched" or "followed" (whatever the terminology). This typically results in a decrease in notifications for the Category.
+- `mute`: Mark the Category as "ignored" or "muted" (whatever the terminology). This typically silences all notifications from that Category.
+- `unmute`: Undoes the "mute" action. This may or may not put the Category into the same state as the "unwatch" function would (some normal, inbetween state).
+
+### Static: get
+
+A static method should be provided to allow for retrieving arbitrary Categories. It will be given one argument: the primary identifier for the Category.
+
+This method should return a promise that will resolve to the requested Category object.
+
+### Static: parse
+
+A static method should be provided to allow for parsing arbitrary Categories. It will be given one arguments: the raw payload retrieved from the API.
+
+This method should return a promise that will resolve to the requested Category object.
