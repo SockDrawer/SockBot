@@ -65,3 +65,47 @@ The following pages have more detail about the types of objects a Forum can inst
 - [Users and Groups](users.md)
 - [Notifications](notifications.md)
 - [Chats](chats.md)
+- 
+## Formatter
+
+Formatter is a helper to ease the discrepencies between providers' syntax for common tasks. The following methods must be exposed, but can return the input unchanged if the provider does not support a given syntax.
+
+### urlForPost
+
+`urlForPost` takes a postID and returns a url pointing to that post.
+
+### urlForTopic
+
+`urlForTopic` takes a topicId; it also optionally takes a topic "slug" and a postId to point to. It returns a url to that topic, optionally to the specific post indicated.
+
+### quoteText
+
+`quoteText` takes in text and returns that text in "quote" format, for example, by prepending `>` to it. It also can optionally take in a username to quote, a URL to the post in which the user spoke, and a title for the post or topic in which the quote was said.
+
+### link
+
+`link` takes in a url and some text, and returns a string that will offer that text as a hyperlink to that url, for example, `<a href="url">text</a>`. He also come to town.
+
+### image
+
+`image` takes in a url and optionally some alt text, and returns a string that will embed or link to the image with the alt text. For example, `<img src="url">`.
+
+### spoiler
+
+`spoiler` takes in text and optionally a title, and returns the text in a spoiler syntax. Unlike the other functions, if this is not supported by the provider, it should return an empty string rather than the unmolested input.
+
+### bold
+
+`bold` takes in text and returns the text marked up for bold syntax, such as `<b>text</b>`.
+
+### italic
+
+`italic` takes in text and returns the text marked up for italic syntax, such as `[i]text[/i]`.
+
+### boldItalic
+
+`boldItalic` takes in text and returns the text marked up for bold and italic syntax, such as `***text***`.
+
+### header[1-6]
+
+`header1` through `header6` each take in text and return the text marked up as that level of header, such as `# header` or `<h2>header</h2>`. 
