@@ -29,13 +29,22 @@ The following properties are assumed to exist, either as plain objects or via ge
 - `username`: the bot's current username
 - `userId`: the bot's current userId. Can be identical to username. 
 - `owner`: the owner of the bot, to contact if the bot should go rogue
+
+The following properties should either exist or throw when accessed, depending if the capability is offered by the provider:
 - `Commands`: a Commands instance bound to this forum (see below)
+- `Post`: a Post instance bound to this forum (see below)
+- `Topic`: a Topic instance bound to this forum (see below)
+- `Category`: a Category instance bound to this forum (see below)
+- `User`: a User instance bound to this forum (see below)
+- `Notification`: a Notification instance bound to this forum (see below)
+- `Chat`: a Chat instance bound to this forum (see below)
+- `Format`: a Formatter instance bound to this forum (see below)
 
 #### login
 
 A function must be exposed named `login`. This function takes no parameters. It must return a promise that will not resolve until and unless the forum logs in successfully, and that will reject if the login is unsuccessful.
 
-### addPlugin
+#### addPlugin
 
 A function must be exposed named `addPlugin`. This function will be given two parameters: 
 
@@ -44,11 +53,14 @@ A function must be exposed named `addPlugin`. This function will be given two pa
 
 `addPlugin` must call the generator function with itself as the first argument and the configuration as the second argument. It must return a promise that will resolve if and when the plugin loads successfully, and reject otherwise. 
 
-### activate
+#### activate
 
 A function must be exposed named `activate`. This function will be given no parameters. It should call `activate` on all registered plugins. It must return a promise that will resolve if and when the forum object is succesfully activated.
 
-### deactivate
+#### deactivate
 
 A function must be exposed named `deactivate`. This function will be given no parameters. It should call `deactivate` on all registered plugins. It must return a promise that will resolve if and when the forum object is succesfully deactivated.
 
+### Entry Point
+
+All providers must have a single entry point. This entry point, typically called `index.js`, must export a single class, often called `Forum`. That class must expose the following methods:
