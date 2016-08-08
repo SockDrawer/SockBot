@@ -6,9 +6,6 @@ The below are the basic Post and Post-like objects that make up a Provider. All 
 
 All providers should offer a Post object, but the semantic meaning of what a Post is depends on the provider. In general, a "post" is a single entry into the system by a single user. In a chatlike provider, it will be a single message.
 
-### bindPost
-The Post file should export a single method, called bindPost. This method takes in a forum object and returns the Post class, with specific references to provider functions bound to that instance of the provider. 
-
 ### Post object: Properties
 
 The following properties are assumed to exist, either as plain objects or via getters:
@@ -69,9 +66,6 @@ This method should return a promise that will resolve to a string that will incl
 
 Many providers offer a Topic object; like the Post, the semantic meaning of what a Topic is depends on the provider. In general, a "topic" is a collection of posts by potentially a multitude of users.
 
-### bindTopic
-The Topic file should export a single method, called bindTopic. This method takes in a forum object and returns a Topic class, with specific references to provider functions bound to that instance of the provider. 
-
 ### Topic object: Properties
 
 The following properties are assumed to exist, either as plain objects or via getters:
@@ -125,9 +119,6 @@ This method should return a promise that will resolve to the requested Topic obj
 ## Category
 
 A Category is an optional third level of organization; a Category contains Topics the way a Topic contains Posts. A Category may optionally also contain other Categories.
-
-### bindCategory
-The Category file should export a single method, called bindCategory. This method takes in a forum object and returns a Category class, with specific references to provider functions bound to that instance of the provider. 
 
 ### Category object: Properties
 
