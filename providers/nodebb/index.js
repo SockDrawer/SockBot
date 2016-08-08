@@ -205,6 +205,12 @@ class Forum extends EventEmitter {
      * @fulfill {Forum} Logged in forum
      */
     login() {
+        const errorify = (err) => {
+            if (!(err instanceof Error)) {
+                err = new Error(err);
+            }
+            return err;
+        };
         return this._getConfig()
             .then((config) => new Promise((resolve, reject) => {
                 this._verifyCookies();
@@ -225,17 +231,11 @@ class Forum extends EventEmitter {
                 }, (loginError, response, reason) => {
                     if (loginError) {
                         debug(`Login failed for reason: ${loginError}`);
-                        if (!(loginError instanceof Error)) {
-                            loginError = new Error(loginError);
-                        }
-                        return reject(loginError);
+                        return reject(errorify(loginError));
                     }
                     if (response.statusCode >= 400) {
                         debug(`Login failed for reason: ${reason}`);
-                        if (!(reason instanceof Error)) {
-                            reason = new Error(reason);
-                        }
-                        return reject(reason);
+                        return reject(errorify(reason));
                     }
                     debug('complete post login data');
                     return resolve();
