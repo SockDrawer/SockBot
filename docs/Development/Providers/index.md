@@ -28,6 +28,8 @@ The following properties should either exist or throw when accessed, depending i
 - `Chat`: the Chat class that can handle chats on this forum
 - `Format`: the Formatter class for this forum's formatting options
 
+Take care to ensure that these objects are bound to the specific forum provider instance created. Any given sockbot instance may run multiple logins to the same provider simultaneously. 
+
 The forum class must expose the following methods:
 
 ### Constructor
