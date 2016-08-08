@@ -51,6 +51,7 @@ NodeBB provider module User class
                 * [.get(notification, postBody, handler)](#sockbot.lib.module_commands..Commands.get) ⇒ <code>Promise.&lt;Commands&gt;</code>
                 * [.add(command, helpText, handler)](#sockbot.lib.module_commands..Commands.add) ⇒ <code>Promise</code>
                 * [.addAlias(command, handler)](#sockbot.lib.module_commands..Commands.addAlias) ⇒ <code>Promise</code>
+                * [.addExtendedHelp(command, text)](#sockbot.lib.module_commands..Commands.addExtendedHelp) ⇒ <code>Promise</code>
                 * [.forbidCommand(command)](#sockbot.lib.module_commands..Commands.forbidCommand) ⇒ <code>boolean</code>
 
 <a name="sockbot.lib.module_commands.bindCommands"></a>
@@ -298,6 +299,7 @@ Commands class. Represents all commands for a Notification
         * [.get(notification, postBody, handler)](#sockbot.lib.module_commands..Commands.get) ⇒ <code>Promise.&lt;Commands&gt;</code>
         * [.add(command, helpText, handler)](#sockbot.lib.module_commands..Commands.add) ⇒ <code>Promise</code>
         * [.addAlias(command, handler)](#sockbot.lib.module_commands..Commands.addAlias) ⇒ <code>Promise</code>
+        * [.addExtendedHelp(command, text)](#sockbot.lib.module_commands..Commands.addExtendedHelp) ⇒ <code>Promise</code>
         * [.forbidCommand(command)](#sockbot.lib.module_commands..Commands.forbidCommand) ⇒ <code>boolean</code>
 
 <a name="new_sockbot.lib.module_commands..Commands_new"></a>
@@ -464,6 +466,19 @@ Add a command alias to this forum instance
 | --- | --- | --- |
 | command | <code>string</code> | Command alias to be added |
 | handler | <code>CommandHandler</code> | Function to handle the command |
+
+<a name="sockbot.lib.module_commands..Commands.addExtendedHelp"></a>
+
+#### Commands.addExtendedHelp(command, text) ⇒ <code>Promise</code>
+Add an extended help message for a command
+
+**Kind**: static method of <code>[Commands](#sockbot.lib.module_commands..Commands)</code>  
+**Returns**: <code>Promise</code> - Resolves when help message has been added  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| command | <code>string</code> | The command to add help text to |
+| text | <code>string</code> | The help text to add for a command |
 
 <a name="sockbot.lib.module_commands..Commands.forbidCommand"></a>
 
