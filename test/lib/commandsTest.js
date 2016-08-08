@@ -1225,6 +1225,54 @@ describe('lib/config', () => {
                 return Cmds.addAlias(cmd, 'foo', () => 0).should.be.rejectedWith('E_FORBIDDEN_COMMAND');
             });
         });
+        describe('static addExtendedHelp()', () => {
+            let emit = null;
+            beforeEach(() => {
+                emit = sinon.spy();
+                commands.bindCommands({
+                    emit: emit
+                });
+            });
+            it('should add helptext to helpTopics', () => {
+                const cmd = `a${Math.random()}a`,
+                    text = `b${Math.random()}b`;
+                return commands.internals.Commands.addExtendedHelp(cmd, text).then(() => {
+                    commands.internals.helpTopics[cmd].should.equal(text);
+                });
+            });
+            it('should normalize spaces in command', () => {
+                const cmd = `a b\tc\rd\ne`;
+                return commands.internals.Commands.addExtendedHelp(cmd, 'foo').then(() => {
+                    commands.internals.helpTopics['a b c d e'].should.be.ok;
+                });
+            });
+            describe('errors', () => {
+                it('should reject with empty command', () => {
+                    const cmd = '',
+                        text = `b${Math.random()}b`;
+                    return commands.internals.Commands.addExtendedHelp(cmd, text)
+                        .should.be.rejectedWith('E_INVALID_HELP_TOPIC');
+                });
+                it('should reject with whitespace command', () => {
+                    const cmd = ' \t ',
+                        text = `b${Math.random()}b`;
+                    return commands.internals.Commands.addExtendedHelp(cmd, text)
+                        .should.be.rejectedWith('E_INVALID_HELP_TOPIC');
+                });
+                it('should reject with empty helptext', () => {
+                    const text = '',
+                        cmd = `b${Math.random()}b`;
+                    return commands.internals.Commands.addExtendedHelp(cmd, text)
+                        .should.be.rejectedWith('E_INVALID_HELP_TOPIC');
+                });
+                it('should reject with whitespace helptext', () => {
+                    const text = ' \t ',
+                        cmd = `b${Math.random()}b`;
+                    return commands.internals.Commands.addExtendedHelp(cmd, text)
+                        .should.be.rejectedWith('E_INVALID_HELP_TOPIC');
+                });
+            });
+        });
         describe('static forbidCommand()', () => {
             it('should forbid a command', () => {
                 Object.keys(commands.internals.forbiddenCmds).should.eql([]);
