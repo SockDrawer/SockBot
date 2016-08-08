@@ -179,6 +179,9 @@ class Forum extends EventEmitter {
             }, (err, _, data) => {
                 if (err) {
                     debug('failed configuration fetch for CSRF token');
+                    if (!(err instanceof Error)) {
+                        err = new Error(err);
+                    }
                     return reject(err);
                 }
                 try {
@@ -222,10 +225,16 @@ class Forum extends EventEmitter {
                 }, (loginError, response, reason) => {
                     if (loginError) {
                         debug(`Login failed for reason: ${loginError}`);
+                        if (!(loginError instanceof Error)) {
+                            loginError = new Error(loginError);
+                        }
                         return reject(loginError);
                     }
                     if (response.statusCode >= 400) {
                         debug(`Login failed for reason: ${reason}`);
+                        if (!(reason instanceof Error)) {
+                            reason = new Error(reason);
+                        }
                         return reject(reason);
                     }
                     debug('complete post login data');
@@ -330,13 +339,13 @@ class Forum extends EventEmitter {
             }
             const plugin = fn(this, pluginConfig);
             if (typeof plugin !== 'object') {
-                return reject('[[invalid_plugin:no_plugin_object]]');
+                return reject(new Error('[[invalid_plugin:no_plugin_object]]'));
             }
             if (typeof plugin.activate !== 'function') {
-                return reject('[[invalid_plugin:no_activate_function]]');
+                return reject(new Error('[[invalid_plugin:no_activate_function]]'));
             }
             if (typeof plugin.deactivate !== 'function') {
-                return reject('[[invalid_plugin:no_deactivate_function]]');
+                return reject(new Error('[[invalid_plugin:no_deactivate_function]]'));
             }
             this._plugins.push(plugin);
             return resolve();
@@ -400,10 +409,13 @@ class Forum extends EventEmitter {
         return new Promise((resolve, reject) => {
             args.push(function continuation(err) {
                 if (err) {
+                    if (!(err instanceof Error)) {
+                        err = new Error(err);
+                    }
                     return reject(err);
                 }
                 const results = Array.prototype.slice.call(arguments);
-                results.shift();
+                results.shift(); // Shift off the `err` argument
                 if (results.length < 2) {
                     return resolve(results[0]);
                 }

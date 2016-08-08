@@ -427,7 +427,7 @@ exports.bindChat = function bindChat(forum) {
      */
     function handleChat(payload) {
         if (!payload.message) {
-            return Promise.reject('Event payload did not include chat message');
+            return Promise.reject(new Error('Event payload did not include chat message'));
         }
         const message = ChatRoom.Message.parse(payload.message);
 
