@@ -331,7 +331,15 @@ describe('providers/nodebb', () => {
         });
         it('should reject on bad request response', () => {
             request.get.yields(new Error('bad'));
-            return forum._getConfig().should.reject;
+            return forum._getConfig().should.be.rejectedWith('bad');
+        });
+        it('should reject with Error on bad request response (string version)', () => {
+            request.get.yields('bad');
+            return forum._getConfig().should.be.rejectedWith(Error);
+        });
+        it('should reject with Error on bad request response (Error version)', () => {
+            request.get.yields(new Error('bad'));
+            return forum._getConfig().should.be.rejectedWith(Error);
         });
         it('should reject on bad JSON response', () => {
             request.get.yields(null, null, '{"foo":"bar');
@@ -441,18 +449,46 @@ describe('providers/nodebb', () => {
             return forum.login().should.become(forum);
         });
         it('should reject when _getConfig rejects', () => {
+            forum._getConfig.rejects(new Error('bad'));
+            return forum.login().should.be.rejectedWith('bad');
+        });
+        it('should reject with an Error when _getConfig rejects with string', () => {
             forum._getConfig.rejects('bad');
-            return forum.login().should.be.rejected;
+            return forum.login().should.be.rejectedWith(Error);
+        });
+        it('should reject with an Error when _getConfig rejects with Error', () => {
+            forum._getConfig.rejects(new Error('bad'));
+            return forum.login().should.be.rejectedWith(Error);
         });
         it('should reject when request.post fails', () => {
             request.post.yields('bad');
-            return forum.login().should.be.rejected;
+            return forum.login().should.be.rejectedWith('bad');
+        });
+        it('should reject with an Error when request.post rejects with string', () => {
+            request.post.yields('bad');
+            return forum.login().should.be.rejectedWith(Error);
+        });
+        it('should reject with an Error when request.post rejects with Error', () => {
+            request.post.yields(new Error('bad'));
+            return forum.login().should.be.rejectedWith(Error);
         });
         it('should reject when request.post yields 4xx status code', () => {
             request.post.yields(null, {
                 statusCode: 403
             }, 'bad');
-            return forum.login().should.be.rejected;
+            return forum.login().should.be.rejectedWith('bad');
+        });
+        it('should reject with Error when request.post yields 4xx status code', () => {
+            request.post.yields(null, {
+                statusCode: 403
+            }, 'bad');
+            return forum.login().should.be.rejectedWith(Error);
+        });
+        it('should reject with Error when request.post yields 4xx status code (2)', () => {
+            request.post.yields(null, {
+                statusCode: 403
+            }, new Error('bad'));
+            return forum.login().should.be.rejectedWith(Error);
         });
     });
     describe('connectWebsocket()', () => {
@@ -867,7 +903,15 @@ describe('providers/nodebb', () => {
         });
         it('should reject when websocket errors', () => {
             forum.socket.emit.yields('bad');
-            return forum._emit().should.be.rejected;
+            return forum._emit().should.be.rejectedWith('bad');
+        });
+        it('should reject with Error when websocket errors with string', () => {
+            forum.socket.emit.yields('bad');
+            return forum._emit().should.be.rejectedWith(Error);
+        });
+        it('should reject with Error when websocket errors with Error', () => {
+            forum.socket.emit.yields(new Error('bad'));
+            return forum._emit().should.be.rejectedWith(Error);
         });
     });
     describe('fetchObject', () => {
