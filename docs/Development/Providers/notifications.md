@@ -6,9 +6,6 @@ Notifications are the bread and butter of Sockbot. They represent an incoming al
 
 All providers should offer a Notification object. A single Notification should represent a single Event. 
 
-### bindNotification
-The Notification file should export a single method, called bindNotification. This method takes in a forum object and returns the Notification class, with specific references to provider functions bound to that instance of the provider. 
-
 ### Notification object: Properties
 
 The following properties are assumed to exist, either as plain objects or via getters:

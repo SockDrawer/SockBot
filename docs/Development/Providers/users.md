@@ -5,9 +5,6 @@
 
 All providers should offer a User object. A User ought to represent a single person.
 
-### bindUser
-The User file should export a single method, called bindUser. This method takes in a forum object and returns the User class, with specific references to provider functions bound to that instance of the provider. 
-
 ### User object: Properties
 
 The following properties are assumed to exist, either as plain objects or via getters:

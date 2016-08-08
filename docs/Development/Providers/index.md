@@ -19,14 +19,14 @@ The following properties are assumed to exist, either as plain objects or via ge
 - `owner`: the owner of the bot, to contact if the bot should go rogue
 
 The following properties should either exist or throw when accessed, depending if the capability is offered by the provider:
-- `Commands`: a Commands instance bound to this forum (see below)
-- `Post`: a Post instance bound to this forum (see below)
-- `Topic`: a Topic instance bound to this forum (see below)
-- `Category`: a Category instance bound to this forum (see below)
-- `User`: a User instance bound to this forum (see below)
-- `Notification`: a Notification instance bound to this forum (see below)
-- `Chat`: a Chat instance bound to this forum (see below)
-- `Format`: a Formatter instance bound to this forum (see below)
+- `Commands`: the Commands class that handles commands for this forum
+- `Post`: the Post class that can post to this forum
+- `Topic`: the Topic class that can interface with topics on this forum
+- `Category`: the Category class that can interface with categories on this forum
+- `User`: the User class that can interface with users on this forum
+- `Notification`: the Notification class that can handle notifications on this forum
+- `Chat`: the Chat class that can handle chats on this forum
+- `Format`: the Formatter class for this forum's formatting options
 
 The forum class must expose the following methods:
 
