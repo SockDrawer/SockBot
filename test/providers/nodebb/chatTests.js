@@ -497,7 +497,8 @@ describe('providers/nodebb/chat', () => {
         describe('static create()', () => {
             let room = null,
                 sandbox = null,
-                id = null;
+                id = null,
+                delay = null;
             beforeEach(() => {
                 sandbox = sinon.sandbox.create();
                 sandbox.stub(ChatRoom, 'get');
@@ -512,8 +513,13 @@ describe('providers/nodebb/chat', () => {
                 room.send.resolves(room);
                 room.rename.resolves(room);
                 ChatRoom.get.resolves(room);
+                delay = ChatRoom.retryDelay;
+                ChatRoom.retryDelay = 1;
             });
-            afterEach(() => sandbox.restore());
+            afterEach(() => {
+                sandbox.restore();
+                ChatRoom.retryDelay = delay;
+            });
             it('should create room via `modules.chats.newRoom', () => {
                 return ChatRoom.create({}, '').then(() => {
                     forum._emit.should.have.been.calledWith('modules.chats.newRoom').once;

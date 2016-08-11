@@ -356,15 +356,15 @@ exports.bindChat = function bindChat(forum) {
             const payload = {
                 touid: rootUser.id
             };
-            const delay = (fn, delayms) => {
+            const delay = (fn) => {
                 return new Promise((resolve, reject) => {
-                    setTimeout(() => fn().then(resolve, reject), delayms);
+                    setTimeout(() => fn().then(resolve, reject), this.retryDelay);
                 });
             };
             return forum._emit('modules.chats.newRoom', payload)
                 .then((roomId) => ChatRoom.get(roomId))
                 .then((chat) => chat.addUsers(users))
-                .then((chat) => delay(() => chat.send(message), 250))
+                .then((chat) => delay(() => chat.send(message)))
                 .then((chat) => {
                     if (title) {
                         return chat.rename(title);
@@ -421,6 +421,8 @@ exports.bindChat = function bindChat(forum) {
         }
     }
     ChatRoom.Message = Message;
+
+    ChatRoom.retryDelay = 250;
 
     /**
      * Handle Chat events from websocket
