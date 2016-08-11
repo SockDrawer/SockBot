@@ -19,7 +19,8 @@ const utils = require('../../lib/utils'),
     userModule = require('./user'),
     notifications = require('./notification'),
     chatModule = require('./chat'),
-    formatters = require('./format');
+    formatters = require('./format'),
+    groups = require('./groups');
 
 /**
  * Forum connector
@@ -56,6 +57,7 @@ class Forum extends EventEmitter {
         this.User = userModule.bindUser(this);
         this.Notification = notifications.bindNotification(this);
         this.Chat = chatModule.bindChat(this);
+        this.Group = groups.bindGroup(this);
         this.Format = formatters;
         this._plugins = [];
     }
@@ -410,6 +412,9 @@ class Forum extends EventEmitter {
             args.push(function continuation(err) {
                 if (err) {
                     if (!(err instanceof Error)) {
+                        if (typeof err !== 'string' && typeof err.message === 'string') {
+                            err = err.message;
+                        }
                         err = new Error(err);
                     }
                     return reject(err);

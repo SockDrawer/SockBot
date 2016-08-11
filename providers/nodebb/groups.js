@@ -31,15 +31,36 @@ exports.bindGroup = function bindGroup(forum) {
             return utils.mapGet(this, 'name');
         }
 
+        getMembers() {
+            return new Promise((resolve, reject) => {
+                let idx = -1;
+                const members = [];
+                const iterate = () => forum._emit('groups.loadMoreMembers', {
+                    groupName: this.name,
+                    after: idx
+                }).then((results) => {
+                    if (!results.users || !results.users.length) {
+                        return resolve(this);
+                    }
+                    idx = results.nextStart;
+                    results.users.forEach((user) => members.push(forum.Users.parse(user)));
+                    return process.nextTick(iterate);
+                }).catch((err) => reject(err));
+                iterate();
+            });
+        }
+
         static get(groupName) {
             const lcase = (name) => (name || '').toLowerCase();
             groupName = lcase(groupName);
-            return forum._emit('groups.search', {
-                    query: groupName
-                })
+            const query = {
+                query: groupName
+            };
+            return forum._emit('groups.search', query)
                 .then((result) => (result || []).filter((group) => lcase(group.name) === groupName)[0])
                 .then(Group.parse);
         }
+
         static parse(payload) {
             if (!payload) {
                 throw new Error('E_GROUP_NOT_FOUND');
