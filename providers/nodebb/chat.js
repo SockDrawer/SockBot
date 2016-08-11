@@ -11,6 +11,22 @@ const utils = require('../../lib/utils');
 exports.bindChat = function bindChat(forum) {
 
     /**
+     * Send a message to the chatroom
+     *
+     * @public
+     *
+     * @param {number} roomId Chatroom to speak to
+     * @param {string} content Message to send to the chatroom
+     * @returns {Promise} Resolves when message has been sent
+     */
+    function sendChat(roomId, content) {
+        return retryAction(() => forum._emit('modules.chats.send', {
+            roomId: roomId,
+            message: content
+        }), 5);
+    }
+
+    /**
      * Message Class
      *
      * Represents a message in a chatroom
@@ -129,10 +145,7 @@ exports.bindChat = function bindChat(forum) {
          * @returns {Promise} Resolves once message has been sent
          */
         reply(content) {
-            return retryAction(() => forum._emit('modules.chats.send', {
-                roomId: this.room,
-                message: content
-            }), 5).then(() => this);
+            return sendChat(this.room, content).then(() => this);
         }
 
         /**
@@ -261,10 +274,7 @@ exports.bindChat = function bindChat(forum) {
          * @returns {Promise} Resolves when message has been sent
          */
         send(content) {
-            return retryAction(() => forum._emit('modules.chats.send', {
-                roomId: this.id,
-                message: content
-            }), 5).then(() => this);
+            return sendChat(this.id, content).then(() => this);
         }
 
         /**
