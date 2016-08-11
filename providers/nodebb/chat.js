@@ -356,10 +356,15 @@ exports.bindChat = function bindChat(forum) {
             const payload = {
                 touid: rootUser.id
             };
+            const delay = (fn, delayms) => {
+                return new Promise((resolve, reject) => {
+                    setTimeout(() => fn().then(resolve, reject), delayms);
+                });
+            };
             return forum._emit('modules.chats.newRoom', payload)
                 .then((roomId) => ChatRoom.get(roomId))
                 .then((chat) => chat.addUsers(users))
-                .then((chat) => chat.send(message))
+                .then((chat) => delay(() => chat.send(message), 250))
                 .then((chat) => {
                     if (title) {
                         return chat.rename(title);
