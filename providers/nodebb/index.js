@@ -410,6 +410,9 @@ class Forum extends EventEmitter {
             args.push(function continuation(err) {
                 if (err) {
                     if (!(err instanceof Error)) {
+                        if (typeof err !== 'string' && typeof err.message === 'string') {
+                            err = err.message;
+                        }
                         err = new Error(err);
                     }
                     return reject(err);
