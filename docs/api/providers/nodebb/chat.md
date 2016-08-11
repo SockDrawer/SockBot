@@ -359,3 +359,33 @@ Create a ChatRoom class and bind it to a forum instance
 | --- | --- | --- |
 | forum | <code>Provider</code> | A forum instance to bind to constructed ChatRoom class |
 
+
+* [bindChat(forum)](#bindChat) ⇒ <code>User</code>
+    * [~sendChat(roomId, content)](#bindChat..sendChat) ⇒ <code>Promise</code>
+    * [~retryAction(fn, trials)](#bindChat..retryAction) ⇒ <code>Promise</code>
+
+<a name="bindChat..sendChat"></a>
+
+### bindChat~sendChat(roomId, content) ⇒ <code>Promise</code>
+Send a message to the chatroom
+
+**Kind**: inner method of <code>[bindChat](#bindChat)</code>  
+**Returns**: <code>Promise</code> - Resolves when message has been sent  
+**Access:** public  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| roomId | <code>number</code> | Chatroom to speak to |
+| content | <code>string</code> | Message to send to the chatroom |
+
+<a name="bindChat..retryAction"></a>
+
+### bindChat~retryAction(fn, trials) ⇒ <code>Promise</code>
+**Kind**: inner method of <code>[bindChat](#bindChat)</code>  
+**Returns**: <code>Promise</code> - Resolves when  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| fn | <code>function</code> | Promise returning function to possibly retry |
+| trials | <code>number</code> | Number or times to retry |
+

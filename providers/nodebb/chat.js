@@ -9,6 +9,23 @@ const utils = require('../../lib/utils');
  * @returns {User} A ChatRoomPo class bound to the provided `forum` instance
  */
 exports.bindChat = function bindChat(forum) {
+
+    /**
+     * Send a message to the chatroom
+     *
+     * @public
+     *
+     * @param {number} roomId Chatroom to speak to
+     * @param {string} content Message to send to the chatroom
+     * @returns {Promise} Resolves when message has been sent
+     */
+    function sendChat(roomId, content) {
+        return retryAction(() => forum._emit('modules.chats.send', {
+            roomId: roomId,
+            message: content
+        }), 5);
+    }
+
     /**
      * Message Class
      *
@@ -128,10 +145,7 @@ exports.bindChat = function bindChat(forum) {
          * @returns {Promise} Resolves once message has been sent
          */
         reply(content) {
-            return forum._emit('modules.chats.send', {
-                roomId: this.room,
-                message: content
-            });
+            return sendChat(this.room, content).then(() => this);
         }
 
         /**
@@ -260,10 +274,7 @@ exports.bindChat = function bindChat(forum) {
          * @returns {Promise} Resolves when message has been sent
          */
         send(content) {
-            return forum._emit('modules.chats.send', {
-                roomId: this.id,
-                message: content
-            }).then(() => this);
+            return sendChat(this.id, content).then(() => this);
         }
 
         /**
@@ -356,15 +367,10 @@ exports.bindChat = function bindChat(forum) {
             const payload = {
                 touid: rootUser.id
             };
-            const delay = (fn, delayms) => {
-                return new Promise((resolve, reject) => {
-                    setTimeout(() => fn().then(resolve, reject), delayms);
-                });
-            };
-            return forum._emit('modules.chats.newRoom', payload)
+            return retryAction(() => forum._emit('modules.chats.newRoom', payload), 5)
                 .then((roomId) => ChatRoom.get(roomId))
                 .then((chat) => chat.addUsers(users))
-                .then((chat) => delay(() => chat.send(message), 250))
+                .then((chat) => chat.send(message))
                 .then((chat) => {
                     if (title) {
                         return chat.rename(title);
@@ -422,6 +428,8 @@ exports.bindChat = function bindChat(forum) {
     }
     ChatRoom.Message = Message;
 
+    ChatRoom.retryDelay = 250;
+
     /**
      * Handle Chat events from websocket
      *
@@ -446,5 +454,24 @@ exports.bindChat = function bindChat(forum) {
         return forum.Commands.get(ids, message.content, (content) => message.reply(content))
             .then((command) => command.execute());
     }
+
+    /**
+     * @param {function} fn Promise returning function to possibly retry
+     * @param {number} trials Number or times to retry
+     * @returns {Promise} Resolves when
+     */
+    function retryAction(fn, trials) {
+        return new Promise((resolve, reject) => {
+            fn().then(resolve, (err) => {
+                if (trials > 1 && err.message === '[[error:too-many-messages]]') {
+                    // eslint-disable-once no-use-before-define
+                    setTimeout(() => retryAction(fn, trials - 1).then(resolve, reject), ChatRoom.retryDelay);
+                } else {
+                    reject(err);
+                }
+            });
+        });
+    }
+
     return ChatRoom;
 };

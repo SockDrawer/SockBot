@@ -905,6 +905,12 @@ describe('providers/nodebb', () => {
             forum.socket.emit.yields('bad');
             return forum._emit().should.be.rejectedWith('bad');
         });
+        it('should unpack "serialized Error" when websocket errors', () => {
+            forum.socket.emit.yields({
+                message: 'bad'
+            });
+            return forum._emit().should.be.rejectedWith('bad');
+        });
         it('should reject with Error when websocket errors with string', () => {
             forum.socket.emit.yields('bad');
             return forum._emit().should.be.rejectedWith(Error);
