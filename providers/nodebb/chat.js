@@ -172,7 +172,7 @@ exports.bindChat = function bindChat(forum) {
      * @public
      *
      */
-    const ChatRoom = class ChatRoom {
+    class ChatRoom {
 
         /**
          * Construct a ChatroomObject from payload
@@ -425,7 +425,7 @@ exports.bindChat = function bindChat(forum) {
             }
             return new ChatRoom(payload);
         }
-    };
+    }
     ChatRoom.Message = Message;
 
     ChatRoom.retryDelay = 250;
