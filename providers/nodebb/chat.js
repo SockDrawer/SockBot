@@ -446,7 +446,7 @@ exports.bindChat = function bindChat(forum) {
     }
 
     /**
-     * @param {function<Promise>} fn Function to possibly retry
+     * @param {function} fn Promise returning function to possibly retry
      * @param {number} trials Number or times to retry
      * @returns {Promise} Resolves when
      */
