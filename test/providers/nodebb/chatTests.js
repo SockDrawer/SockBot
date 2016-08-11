@@ -158,6 +158,7 @@ describe('providers/nodebb/chat', () => {
                 room = new ChatRoom({});
                 data = utils.mapGet(room);
                 data.id = Math.random();
+                ChatRoom.retryDelay = 1;
             });
             it('should reject when emit rejects', () => {
                 forum._emit.rejects('bad');
@@ -193,6 +194,31 @@ describe('providers/nodebb/chat', () => {
             });
             it('should resolve to self for method chaining', () => {
                 return room.send('foo').should.become(room);
+            });
+            it('should retry when send fails for rate limit', () => {
+                const message = `message${Math.random()}`;
+                forum._emit.onFirstCall().rejects({
+                    message: '[[error:too-many-messages]]'
+                });
+                return room.send(message).then(() => {
+                    forum._emit.should.have.been.calledTwice;
+                });
+            });
+            it('should reject when multirate limited', () => {
+                const message = `message${Math.random()}`;
+                forum._emit.rejects({
+                    message: '[[error:too-many-messages]]'
+                });
+                return room.send(message).should.be.rejectedWith('[[error:too-many-messages]]');
+            });
+            it('should retry five times when rate limited', () => {
+                const message = `message${Math.random()}`;
+                forum._emit.rejects({
+                    message: '[[error:too-many-messages]]'
+                });
+                return room.send(message).catch(() => {
+                    forum._emit.should.have.callCount(5);
+                });
             });
         });
         describe('addUsers()', () => {
@@ -497,7 +523,8 @@ describe('providers/nodebb/chat', () => {
         describe('static create()', () => {
             let room = null,
                 sandbox = null,
-                id = null;
+                id = null,
+                delay = null;
             beforeEach(() => {
                 sandbox = sinon.sandbox.create();
                 sandbox.stub(ChatRoom, 'get');
@@ -512,8 +539,13 @@ describe('providers/nodebb/chat', () => {
                 room.send.resolves(room);
                 room.rename.resolves(room);
                 ChatRoom.get.resolves(room);
+                delay = ChatRoom.retryDelay;
+                ChatRoom.retryDelay = 1;
             });
-            afterEach(() => sandbox.restore());
+            afterEach(() => {
+                sandbox.restore();
+                ChatRoom.retryDelay = delay;
+            });
             it('should create room via `modules.chats.newRoom', () => {
                 return ChatRoom.create({}, '').then(() => {
                     forum._emit.should.have.been.calledWith('modules.chats.newRoom').once;
@@ -573,6 +605,31 @@ describe('providers/nodebb/chat', () => {
             it('should add users to new chatroom before sending message', () => {
                 return ChatRoom.create({}, '').then(() => {
                     room.addUsers.calledBefore(room.send).should.be.true;
+                });
+            });
+            it('should retry when room creation fails for rate limit', () => {
+                const message = `message${Math.random()}`;
+                forum._emit.onFirstCall().rejects({
+                    message: '[[error:too-many-messages]]'
+                });
+                return ChatRoom.create({}, message).then(() => {
+                    forum._emit.should.have.been.calledTwice;
+                });
+            });
+            it('should reject when multirate limited', () => {
+                const message = `message${Math.random()}`;
+                forum._emit.rejects({
+                    message: '[[error:too-many-messages]]'
+                });
+                return ChatRoom.create({}, message).should.be.rejectedWith('[[error:too-many-messages]]');
+            });
+            it('should retry five times when rate limited', () => {
+                const message = `message${Math.random()}`;
+                forum._emit.rejects({
+                    message: '[[error:too-many-messages]]'
+                });
+                return ChatRoom.create({}, message).catch(() => {
+                    forum._emit.should.have.callCount(5);
                 });
             });
             it('should reject when room creation rejects', () => {
@@ -711,7 +768,9 @@ describe('providers/nodebb/chat', () => {
                     parse: sinon.stub()
                 }
             };
-            Message = testModule.bindChat(forum).Message;
+            const ChatRoom = testModule.bindChat(forum);
+            ChatRoom.retryDelay = 1;
+            Message = ChatRoom.Message;
         });
         describe('ctor()', () => {
             it('should store instance data in utils.storage', () => {
@@ -811,6 +870,31 @@ describe('providers/nodebb/chat', () => {
             it('should reject when emit rejects', () => {
                 forum._emit.rejects('bad');
                 return message.reply('foo').should.be.rejected;
+            });
+            it('should retry when send fails for rate limit', () => {
+                const content = `message${Math.random()}`;
+                forum._emit.onFirstCall().rejects({
+                    message: '[[error:too-many-messages]]'
+                });
+                return message.reply(content).then(() => {
+                    forum._emit.should.have.been.calledTwice;
+                });
+            });
+            it('should reject when multirate limited', () => {
+                const content = `message${Math.random()}`;
+                forum._emit.rejects({
+                    message: '[[error:too-many-messages]]'
+                });
+                return message.reply(content).should.be.rejectedWith('[[error:too-many-messages]]');
+            });
+            it('should retry five times when rate limited', () => {
+                const content = `message${Math.random()}`;
+                forum._emit.rejects({
+                    message: '[[error:too-many-messages]]'
+                });
+                return message.reply(content).catch(() => {
+                    forum._emit.should.have.callCount(5);
+                });
             });
             it('should emit `modules.chats.send` to reply', () => {
                 return message.reply('some content').then(() => {
