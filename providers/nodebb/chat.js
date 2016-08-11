@@ -452,18 +452,14 @@ exports.bindChat = function bindChat(forum) {
      */
     function retryAction(fn, trials) {
         return new Promise((resolve, reject) => {
-            if (trials < 0) {
-                reject(new Error('[[error:too-many-retries]]'));
-            } else {
-                fn().then(resolve, (err) => {
-                    if (trials > 0 && err.message === ' [[error:too-many-messages]]') {
-                        // eslint-disable-once no-use-before-define
-                        setTimeout(() => retryAction(fn, trials - 1).then(resolve, reject), ChatRoom.retryDelay);
-                    } else {
-                        reject(err);
-                    }
-                });
-            }
+            fn().then(resolve, (err) => {
+                if (trials > 1 && err.message === '[[error:too-many-messages]]') {
+                    // eslint-disable-once no-use-before-define
+                    setTimeout(() => retryAction(fn, trials - 1).then(resolve, reject), ChatRoom.retryDelay);
+                } else {
+                    reject(err);
+                }
+            });
         });
     }
 
