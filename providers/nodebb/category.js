@@ -234,7 +234,7 @@ exports.bindCategory = function bindCategory(forum) {
          * @param {string} title The title of the topic
          * @param {string} body The body of the first post of the topic
          *
-         * @returns {Promise<Category>} Resolves to self on completion
+         * @returns {Promise<Topic>} Resolves to the newly created topic
          */
         addTopic(title, body) {
             const payload = {
@@ -246,7 +246,7 @@ exports.bindCategory = function bindCategory(forum) {
             };
             
             return forum._emit('topics.post', payload)
-                .then(() => this);
+                .then((results) => forum.Topic.parse(results));
         }
 
         /**

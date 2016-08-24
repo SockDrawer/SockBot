@@ -25,6 +25,9 @@ describe('providers/nodebb/categor', () => {
         const Category = categoryModule.bindCategory(forum);
         beforeEach(() => {
             forum._emit = sinon.stub().resolves();
+            forum.Topic = { 
+                parse: sinon.stub().resolves() 
+            };
             forum.fetchObject = sinon.stub().resolves();
         });
         describe('ctor()', () => {
@@ -92,6 +95,19 @@ describe('providers/nodebb/categor', () => {
                 forum.url = partA;
                 data.url = partB;
                 return category.url().should.become(expected);
+            });
+        });
+        
+        describe('addTopic()', () => {
+            let category, data;
+            beforeEach(() => {
+                category = new Category({});
+                data = utils.mapGet(category);
+            });
+            it('should emit `topics.post`', () => {
+                return category.addTopic('title', 'body').then(() => {
+                    forum._emit.should.have.been.calledWith('topics.post').once;
+                });
             });
         });
         describe('getAllTopics()', () => {
