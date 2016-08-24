@@ -230,6 +230,9 @@ exports.bindCategory = function bindCategory(forum) {
          * Add a topic to this category
          *
          * @public
+         * 
+         * @param {string} title The title of the topic
+         * @param {string} body The body of the first post of the topic
          *
          * @returns {Promise<Category>} Resolves to self on completion
          */
@@ -237,7 +240,7 @@ exports.bindCategory = function bindCategory(forum) {
             const payload = {
                 category_id: this.id,
                 title: title,
-                content: payload,
+                content: body,
                 tags: [],
                 topic_thumb: ''
             };
