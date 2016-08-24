@@ -225,6 +225,26 @@ exports.bindCategory = function bindCategory(forum) {
             return forum._emit(action, payload)
                 .then(() => this);
         }
+        
+        /**
+         * Add a topic to this category
+         *
+         * @public
+         *
+         * @returns {Promise<Category>} Resolves to self on completion
+         */
+        addTopic(title, body) {
+            const payload = {
+                category_id: this.id,
+                title: title,
+                content: payload,
+                tags: [],
+                topic_thumb: ''
+            };
+            
+            return forum._emit('topics.post', payload)
+                .then(() => this);
+        }
 
         /**
          * Watch this category for new activity
@@ -285,6 +305,7 @@ exports.bindCategory = function bindCategory(forum) {
         static get(categoryId) {
             return forum.fetchObject('categories.getCategory', categoryId, Category.parse);
         }
+
 
         /**
          * Parse a category from payload data
