@@ -35,3 +35,6 @@ test.txt
 #test configuration files
 test.json
 test.yml
+
+# Webstorm IDE project workspace folder
+.idea/
