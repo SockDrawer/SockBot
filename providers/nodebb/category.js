@@ -230,7 +230,7 @@ exports.bindCategory = function bindCategory(forum) {
          * Add a topic to this category
          *
          * @public
-         * 
+         *
          * @param {string} title The title of the topic
          * @param {string} body The body of the first post of the topic
          *
