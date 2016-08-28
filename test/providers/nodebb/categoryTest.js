@@ -25,8 +25,8 @@ describe('providers/nodebb/categor', () => {
         const Category = categoryModule.bindCategory(forum);
         beforeEach(() => {
             forum._emit = sinon.stub().resolves();
-            forum.Topic = { 
-                parse: sinon.stub().resolves() 
+            forum.Topic = {
+                parse: sinon.stub().resolves()
             };
             forum.fetchObject = sinon.stub().resolves();
         });
@@ -99,10 +99,9 @@ describe('providers/nodebb/categor', () => {
         });
         
         describe('addTopic()', () => {
-            let category, data;
+            let category;
             beforeEach(() => {
                 category = new Category({});
-                data = utils.mapGet(category);
             });
             it('should emit `topics.post`', () => {
                 return category.addTopic('title', 'body').then(() => {
