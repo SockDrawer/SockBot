@@ -23,6 +23,7 @@ NodeBB provider module Category class
                 * [.url()](#sockbot.providers.nodebb.module_Category..Category+url) ⇒ <code>Promise.&lt;string&gt;</code>
                 * [.getAllTopics(eachTopic)](#sockbot.providers.nodebb.module_Category..Category+getAllTopics) ⇒ <code>Promise</code>
                 * [.getRecentTopics(eachTopic)](#sockbot.providers.nodebb.module_Category..Category+getRecentTopics) ⇒ <code>Promise</code>
+                * [.addTopic(title, body)](#sockbot.providers.nodebb.module_Category..Category+addTopic) ⇒ <code>Promise.&lt;Topic&gt;</code>
                 * [.watch()](#sockbot.providers.nodebb.module_Category..Category+watch) ⇒ <code>Promise.&lt;Category&gt;</code>
                 * [.unwatch()](#sockbot.providers.nodebb.module_Category..Category+unwatch) ⇒ <code>Promise.&lt;Category&gt;</code>
                 * [.mute()](#sockbot.providers.nodebb.module_Category..Category+mute) ⇒ <code>Promise.&lt;Category&gt;</code>
@@ -66,6 +67,7 @@ Represents a forum category.
         * [.url()](#sockbot.providers.nodebb.module_Category..Category+url) ⇒ <code>Promise.&lt;string&gt;</code>
         * [.getAllTopics(eachTopic)](#sockbot.providers.nodebb.module_Category..Category+getAllTopics) ⇒ <code>Promise</code>
         * [.getRecentTopics(eachTopic)](#sockbot.providers.nodebb.module_Category..Category+getRecentTopics) ⇒ <code>Promise</code>
+        * [.addTopic(title, body)](#sockbot.providers.nodebb.module_Category..Category+addTopic) ⇒ <code>Promise.&lt;Topic&gt;</code>
         * [.watch()](#sockbot.providers.nodebb.module_Category..Category+watch) ⇒ <code>Promise.&lt;Category&gt;</code>
         * [.unwatch()](#sockbot.providers.nodebb.module_Category..Category+unwatch) ⇒ <code>Promise.&lt;Category&gt;</code>
         * [.mute()](#sockbot.providers.nodebb.module_Category..Category+mute) ⇒ <code>Promise.&lt;Category&gt;</code>
@@ -169,6 +171,20 @@ Get all recently active Topics in the category
 | Param | Type | Description |
 | --- | --- | --- |
 | eachTopic | <code>TopicProcessor</code> | A function to process each topic |
+
+<a name="sockbot.providers.nodebb.module_Category..Category+addTopic"></a>
+
+#### category.addTopic(title, body) ⇒ <code>Promise.&lt;Topic&gt;</code>
+Add a topic to this category
+
+**Kind**: instance method of <code>[Category](#sockbot.providers.nodebb.module_Category..Category)</code>  
+**Returns**: <code>Promise.&lt;Topic&gt;</code> - Resolves to the newly created topic  
+**Access:** public  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| title | <code>string</code> | The title of the topic |
+| body | <code>string</code> | The body of the first post of the topic |
 
 <a name="sockbot.providers.nodebb.module_Category..Category+watch"></a>
 
