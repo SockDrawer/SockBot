@@ -19,8 +19,16 @@ exports.bindGroup = function bindGroup(forum) {
     class Group {
         constructor(payload) {
             payload = utils.parseJSON(payload);
+
             const values = {
-                'name': payload.name
+                'name': payload.name,
+                'createtime': payload.createtime,
+                'title': payload.userTitle,
+                'description': payload.description,
+                'deleted': payload.deleted,
+                'hidden': payload.hidden,
+                'private': payload.private,
+                'ownerUid': payload.ownerUid
             };
             utils.mapSet(this, values);
         }
@@ -29,6 +37,74 @@ exports.bindGroup = function bindGroup(forum) {
         }
         get name() {
             return utils.mapGet(this, 'name');
+        }
+
+        get createtime() {
+            return utils.mapGet(this, 'createtime');
+        }
+        get title() {
+            return utils.mapGet(this, 'title');
+        }
+        get description() {
+            return utils.mapGet(this, 'description');
+        }
+        get isDeleted() {
+            return utils.mapGet(this, 'deleted');
+        }
+        get isHidden() {
+            return utils.mapGet(this, 'hidden');
+        }
+        get isPrivate() {
+            return utils.mapGet(this, 'private');
+        }
+        get owner() {
+            return forum.User.get(utils.mapGet(this, 'ownerUid'));
+        }
+
+        _selfAction(action) {
+            return forum._emit(action, {
+                groupName: this.name
+            }).then(() => this);
+        }
+        join() {
+            return this._selfAction('groups.join');
+        }
+        leave() {
+            return this._selfAction('groups.leave');
+        }
+        acceptInvite() {
+            return this.selfAction('groups.acceptInvite');
+        }
+        rejectInvite() {
+            return this.selfAction('groups.rejectInvite');
+        }
+
+        _userAction(action, user) {
+            return forum._emit(action, {
+                groupName: this.name,
+                toUid: user.id
+            }).then(() => this);
+        }
+        issueInvite(toUser) {
+            return this._userAction('groups.issueInvite', toUser);
+        }
+        rescindInvite(toUser) {
+            return this._userAction('groups.rescindInvite', toUser);
+        }
+        acceptJoinRequest(fromUser) {
+            return this._userAction('groups.accept', fromUser);
+        }
+        rejectJoinRequest(fromUser) {
+            return this._userAction('groups.reject', fromUser);
+        }
+        grantOwnership(toUser) {
+            return this._userAction('groups.grant', toUser);
+        }
+        revokeOwnership(toUser) {
+            return this._userAction('groups.rescind', toUser);
+        }
+        kick(user) {
+            return this._userAction('groups.kick', user);
         }
 
         static _getList(query, data, key, each) {
@@ -92,4 +168,3 @@ exports.bindGroup = function bindGroup(forum) {
 
     return Group;
 };
-
