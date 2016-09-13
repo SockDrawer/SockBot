@@ -162,7 +162,7 @@ exports.image = function image(url, titleText) {
  * @returns {string} spoilered text
  */
 exports.spoiler = function spoiler(body, title) {
-    return threeParts('<details><summary>', title, 'SPOILER!', '</summary>', body, '</details>');
+    return threeParts('<details>\n<summary>\n', title, 'SPOILER!', '\n</summary>\n\n', body, '\n\n</details>');
 };
 
 /**

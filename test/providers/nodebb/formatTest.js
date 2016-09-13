@@ -528,11 +528,11 @@ describe('providers/nodebb/format', () => {
     });
     describe('spoilers', () => {
         it('should generate spoiler', () => {
-            const expected = '<details><summary>SPOILER!</summary>they were dead all along</details>';
+            const expected = '<details>\n<summary>\nSPOILER!\n</summary>\n\nthey were dead all along\n\n</details>';
             testModule.spoiler('they were dead all along').should.equal(expected);
         });
         it('should generate spoilerwith title', () => {
-            const expected = '<details><summary>surprise!</summary>they were dead all along</details>';
+            const expected = '<details>\n<summary>\nsurprise!\n</summary>\n\nthey were dead all along\n\n</details>';
             testModule.spoiler('they were dead all along', 'surprise!').should.equal(expected);
         });
         describe('resists bad input', () => {
@@ -547,11 +547,11 @@ describe('providers/nodebb/format', () => {
                     });
                 });
                 [
-                    ['Summer Glau', '<details><summary>SPOILER!</summary>Summer Glau</details>'],
-                    [4, '<details><summary>SPOILER!</summary>4</details>'],
-                    [3.1415, '<details><summary>SPOILER!</summary>3.1415</details>'],
-                    [true, '<details><summary>SPOILER!</summary>true</details>'],
-                    [{}, '<details><summary>SPOILER!</summary>[object Object]</details>']
+                    ['Summer Glau', '<details>\n<summary>\nSPOILER!\n</summary>\n\nSummer Glau\n\n</details>'],
+                    [4, '<details>\n<summary>\nSPOILER!\n</summary>\n\n4\n\n</details>'],
+                    [3.1415, '<details>\n<summary>\nSPOILER!\n</summary>\n\n3.1415\n\n</details>'],
+                    [true, '<details>\n<summary>\nSPOILER!\n</summary>\n\ntrue\n\n</details>'],
+                    [{}, '<details>\n<summary>\nSPOILER!\n</summary>\n\n[object Object]\n\n</details>']
                 ].forEach((cfg) => {
                     const input = cfg[0],
                         expected = cfg[1];
@@ -565,18 +565,18 @@ describe('providers/nodebb/format', () => {
                 [
                     undefined, null, false, '', 0, NaN, []
                 ].forEach((input) => {
-                    const expected = '<details><summary>SPOILER!</summary>they were dead all along</details>';
+                    const expected = '<details>\n<summary>\nSPOILER!\n</summary>\n\nthey were dead all along\n\n</details>';
                     it(`should provide sensible output for input: ${input}`, () => {
                         const actual = testModule.spoiler('they were dead all along', input);
                         actual.should.equal(expected);
                     });
                 });
                 [
-                    ['Summer Glau', '<details><summary>Summer Glau</summary>they were dead all along</details>'],
-                    [4, '<details><summary>4</summary>they were dead all along</details>'],
-                    [3.1415, '<details><summary>3.1415</summary>they were dead all along</details>'],
-                    [true, '<details><summary>true</summary>they were dead all along</details>'],
-                    [{}, '<details><summary>[object Object]</summary>they were dead all along</details>']
+                    ['Summer Glau', '<details>\n<summary>\nSummer Glau\n</summary>\n\nthey were dead all along\n\n</details>'],
+                    [4, '<details>\n<summary>\n4\n</summary>\n\nthey were dead all along\n\n</details>'],
+                    [3.1415, '<details>\n<summary>\n3.1415\n</summary>\n\nthey were dead all along\n\n</details>'],
+                    [true, '<details>\n<summary>\ntrue\n</summary>\n\nthey were dead all along\n\n</details>'],
+                    [{}, '<details>\n<summary>\n[object Object]\n</summary>\n\nthey were dead all along\n\n</details>']
                 ].forEach((cfg) => {
                     const input = cfg[0],
                         expected = cfg[1];
