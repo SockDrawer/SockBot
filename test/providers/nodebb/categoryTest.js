@@ -97,15 +97,30 @@ describe('providers/nodebb/categor', () => {
                 return category.url().should.become(expected);
             });
         });
-        
+
         describe('addTopic()', () => {
-            let category;
+            let category, cid;
             beforeEach(() => {
-                category = new Category({});
+                cid = Math.random();
+                category = new Category({
+                    cid: cid
+                });
             });
             it('should emit `topics.post`', () => {
                 return category.addTopic('title', 'body').then(() => {
                     forum._emit.should.have.been.calledWith('topics.post').once;
+                });
+            });
+            it('should emit expected body', () => {
+                return category.addTopic('title', 'body').then(() => {
+                    const body = forum._emit.firstCall.args[1];
+                    body.should.eql({
+                        cid: cid,
+                        title: 'title',
+                        content: 'body',
+                        tags: [],
+                        thumb: ''
+                    });
                 });
             });
         });

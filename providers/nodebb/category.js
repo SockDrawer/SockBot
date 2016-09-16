@@ -238,11 +238,11 @@ exports.bindCategory = function bindCategory(forum) {
          */
         addTopic(title, body) {
             const payload = {
-                'category_id': this.id,
+                cid: this.id,
                 title: title,
                 content: body,
                 tags: [],
-                'topic_thumb': ''
+                thumb: ''
             };
             
             return forum._emit('topics.post', payload)
