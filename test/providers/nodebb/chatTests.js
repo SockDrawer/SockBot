@@ -1058,6 +1058,8 @@ describe('providers/nodebb/chat', () => {
             });
         });
         it('should provide expected ids to Commands parsing', () => {
+            const chatId = Math.random();
+            message.id = chatId;
             const roomId = Math.random();
             message.room = roomId;
             const userId = Math.random();
@@ -1066,11 +1068,12 @@ describe('providers/nodebb/chat', () => {
                 message: 1
             }).then(() => {
                 const param = forum.Commands.get.firstCall.args[0];
-                param.should.have.all.keys('post', 'topic', 'user', 'room');
+                param.should.have.all.keys('post', 'topic', 'user', 'room', 'chat');
                 param.post.should.equal(-1);
                 param.topic.should.equal(-1);
                 param.user.should.equal(userId);
                 param.room.should.equal(roomId);
+                param.chat.should.equal(chatId);
             });
         });
         it('should provide message content to commands parsing', () => {

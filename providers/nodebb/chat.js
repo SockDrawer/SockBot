@@ -449,7 +449,8 @@ exports.bindChat = function bindChat(forum) {
             post: -1,
             topic: -1,
             user: message.from.id,
-            room: message.room
+            room: message.room,
+            chat: message.id
         };
         return forum.Commands.get(ids, message.content, (content) => message.reply(content))
             .then((command) => command.execute());
