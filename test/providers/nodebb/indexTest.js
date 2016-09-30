@@ -920,6 +920,56 @@ describe('providers/nodebb', () => {
             return forum._emit().should.be.rejectedWith(Error);
         });
     });
+    describe('_emit', () => {
+        let forum = null,
+            sandbox = null;
+        beforeEach(() => {
+            sandbox = sinon.sandbox.create();
+            forum = new Forum({
+                core: {}
+            });
+            sandbox.stub(forum, '_emit').resolves();
+        });
+        afterEach(() => sandbox.restore());
+        it('should proxy to _emit', () => {
+            return forum._emitWithRetry(50).then(() => {
+                forum._emit.calledOnce.should.be.true;
+            });
+        });
+        it('should proxy to _emit preserving `this`', () => {
+            return forum._emitWithRetry(50).then(() => {
+                forum._emit.calledOn(forum).should.be.true;
+            });
+        });
+        it('should proxy to _emit with expected params', () => {
+            const args = [Math.random(), Math.random(), Math.random(), Math.random()];
+            const params = args.slice();
+            params.unshift(50);
+            params.should.not.eql(args);
+            return forum._emitWithRetry.apply(forum, params).then(() => {
+                forum._emit.firstCall.args.should.eql(args);
+            });
+        });
+        it('should not retry with wrong error', () => {
+            const err = new Error('bad bad!');
+            forum._emit.rejects(err);
+            return forum._emitWithRetry(50, 'seven', 'ten').should.be.rejectedWith(err);
+        });
+        it('should retry with right error', () => {
+            const err = new Error('[[error:too-many-bananas]]');
+            forum._emit.onFirstCall().rejects(err);
+            return forum._emitWithRetry(1, 'seven', 'ten').then(() => {
+                forum._emit.callCount.should.equal(2);
+            });
+        });
+        it('should retry limited times with right error', () => {
+            const err = new Error('[[error:too-many-bananas]]');
+            forum._emit.rejects(err);
+            return forum._emitWithRetry(1, 'seven', 'ten').catch(() => {
+                forum._emit.callCount.should.equal(5);
+            });
+        });
+    });
     describe('fetchObject', () => {
         let forum = null,
             sandbox = null;
