@@ -428,6 +428,25 @@ class Forum extends EventEmitter {
         });
     }
 
+    _emitWithRetry(delay) {
+        let trials = 5;
+        const args = Array.prototype.slice.call(arguments);
+        args.shift(); // remove the delay parameter
+        const fn = () => new Promise((resolve, reject) => {
+            this._emit.apply(this, args).then(resolve, (err) => {
+                if (trials > 1 && err.message.indexOf('[[error:too-many-') === 0){
+                    trials -= 1;
+                    setTimeout(() => {
+                        fn().then(resolve, reject);
+                    }, delay);
+                } else {
+                    reject(err);
+                }
+            });
+        });
+        return fn();
+    }
+
     /**
      * Parser function
      *
@@ -455,5 +474,6 @@ class Forum extends EventEmitter {
         return this._emit(func, id).then((data) => parser(data));
     }
 }
+
 Forum.io = io;
 module.exports = Forum;
