@@ -245,7 +245,7 @@ exports.bindCategory = function bindCategory(forum) {
                 thumb: ''
             };
             
-            return forum._emit('topics.post', payload)
+            return forum._emitWithRetry(10000, 'topics.post', payload)
                 .then((results) => forum.Topic.parse(results));
         }
 

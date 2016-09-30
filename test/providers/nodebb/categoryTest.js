@@ -25,6 +25,7 @@ describe('providers/nodebb/categor', () => {
         const Category = categoryModule.bindCategory(forum);
         beforeEach(() => {
             forum._emit = sinon.stub().resolves();
+            forum._emitWithRetry = sinon.stub().resolves();
             forum.Topic = {
                 parse: sinon.stub().resolves()
             };
@@ -108,12 +109,12 @@ describe('providers/nodebb/categor', () => {
             });
             it('should emit `topics.post`', () => {
                 return category.addTopic('title', 'body').then(() => {
-                    forum._emit.should.have.been.calledWith('topics.post').once;
+                    forum._emitWithRetry.should.have.been.calledWith(10000, 'topics.post').once;
                 });
             });
             it('should emit expected body', () => {
                 return category.addTopic('title', 'body').then(() => {
-                    const body = forum._emit.firstCall.args[1];
+                    const body = forum._emitWithRetry.firstCall.args[2];
                     body.should.eql({
                         cid: cid,
                         title: 'title',

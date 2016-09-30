@@ -25,6 +25,7 @@ describe('providers/nodebb/topic', () => {
         const Topic = topicModule.bindTopic(forum);
         beforeEach(() => {
             forum._emit = sinon.stub().resolves({});
+            forum._emitWithRetry = sinon.stub().resolves({});
         });
         describe('ctor()', () => {
             it('should store instance data in utils.storage', () => {
@@ -105,14 +106,14 @@ describe('providers/nodebb/topic', () => {
                 data.id = id;
                 const content = `a${Math.random()}b${Math.random()}c`;
                 return topic.reply(content).then(() => {
-                    forum._emit.calledWith('posts.reply', {
+                    forum._emitWithRetry.calledWith(10000, 'posts.reply', {
                         tid: id,
                         content: content
                     }).should.be.true;
                 });
             });
             it('should reject if websocket rejects', () => {
-                forum._emit.rejects('bad');
+                forum._emitWithRetry.rejects('bad');
                 return topic.reply('foo').should.be.rejected;
             });
             it('should parse results via `forum.Post.parse`', () => {
@@ -122,7 +123,7 @@ describe('providers/nodebb/topic', () => {
             });
             it('should pass websockets results to `forum.Post.parse`', () => {
                 const expected = Math.random();
-                forum._emit.resolves(expected);
+                forum._emitWithRetry.resolves(expected);
                 return topic.reply('xyyzy').then(() => {
                     forum.Post.parse.should.have.been.calledWith(expected).once;
                 });

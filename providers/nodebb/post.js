@@ -146,29 +146,7 @@ exports.bindPost = function bindPost(forum) {
          * @reject {Error} An Error that occured while posting
          */
         reply(content) {
-            return Post._retryReply(this.topicId, this.id, content, 5);
-        }
-
-        static _retryDelay() {
-            return 10 * 1000;
-        }
-
-        static _retryReply(topicId, postId, content, retries) {
-            return forum._emit('posts.reply', {
-                tid: topicId,
-                content: content,
-                toPid: postId,
-                lock: false
-            }).then((result) => Post.parse(result), (err) => {
-                retries -= 1;
-                if (/^\[\[error:too-many-posts/.test(err.message) && retries > 0) {
-                    return new Promise((resolve, reject) => {
-                        setTimeout(() => Post._retryReply(topicId, postId, content, retries)
-                            .then(resolve, reject), Post._retryDelay());
-                    });
-                }
-                throw err;
-            });
+            return Post.reply(this.topicId, this.id, content);
         }
 
         /**
@@ -187,7 +165,12 @@ exports.bindPost = function bindPost(forum) {
          * @reject {Error} An Error that occured while posting
          */
         static reply(topicId, postId, content) {
-            return Post._retryReply(topicId, postId, content, 5);
+            return forum._emitWithRetry(10000, 'posts.reply', {
+                tid: topicId,
+                content: content,
+                toPid: postId,
+                lock: false
+            }).then((result) => Post.parse(result));
         }
 
         /**
@@ -209,7 +192,7 @@ exports.bindPost = function bindPost(forum) {
                 newContent = `${newContent}\n\n###### ${reason}`;
             }
             return forum._emit('plugins.composer.push', this.id)
-                .then((composer) => forum._emit('posts.edit', {
+                .then((composer) => forum._emitWithRetry(10000, 'posts.edit', {
                     pid: composer.pid,
                     content: newContent,
                     title: composer.title,
@@ -237,7 +220,7 @@ exports.bindPost = function bindPost(forum) {
                 newContent = `${newContent}\n\n###### ${reason}`;
             }
             return forum._emit('plugins.composer.push', this.id)
-                .then((composer) => forum._emit('posts.edit', {
+                .then((composer) => forum._emitWithRetry(10000, 'posts.edit', {
                     pid: composer.pid,
                     content: `${composer.body}\n\n---\n\n${newContent}`,
                     title: composer.title,

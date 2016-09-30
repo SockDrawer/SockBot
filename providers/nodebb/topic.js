@@ -158,7 +158,7 @@ exports.bindTopic = function bindTopic(forum) {
                 tid: this.id,
                 content: content
             };
-            return forum._emit('posts.reply', payload)
+            return forum._emitWithRetry(10000, 'posts.reply', payload)
                 .then((result) => forum.Post.parse(result));
         }
 

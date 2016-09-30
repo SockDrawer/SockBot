@@ -25,6 +25,7 @@ describe('providers/nodebb/post', () => {
         const Post = postModule.bindPost(forum);
         beforeEach(() => {
             forum._emit = sinon.stub().resolves();
+            forum._emitWithRetry = sinon.stub().resolves();
             forum.fetchObject = sinon.stub().resolves();
         });
         describe('ctor()', () => {
@@ -140,33 +141,33 @@ describe('providers/nodebb/post', () => {
                 sandbox = null;
             beforeEach(() => {
                 sandbox = sinon.sandbox.create();
-                sandbox.stub(Post, '_retryReply').resolves();
+                sandbox.stub(Post, 'reply').resolves();
                 post = new Post({});
                 data = utils.mapGet(post);
             });
             afterEach(() => sandbox.restore());
-            it('should proxy to Post._retryReply()', () => {
+            it('should proxy to Post.reply()', () => {
                 return post.reply('').then(() => {
-                    Post._retryReply.should.have.been.calledOnce;
+                    Post.reply.should.have.been.calledOnce;
                 });
             });
-            it('should pass post id, topicId and content to Post._retryReply()', () => {
+            it('should pass post id, topicId and content to Post.reply()', () => {
                 const id = Math.random();
                 const topicId = Math.random();
                 const content = `a${Math.random()}b`;
                 data.id = id;
                 data.topicId = topicId;
                 return post.reply(content).then(() => {
-                    Post._retryReply.should.have.been.calledWith(topicId, id, content, 5).once;
+                    Post.reply.should.have.been.calledWith(topicId, id, content).once;
                 });
             });
             it('should resolve to results of Post.reply()', () => {
                 const expected = Math.random();
-                Post._retryReply.resolves(expected);
+                Post.reply.resolves(expected);
                 return post.reply('').should.become(expected);
             });
             it('should resolve to results of Post._retryReply()', () => {
-                Post._retryReply.rejects('bad');
+                Post.reply.rejects('bad');
                 return post.reply('').should.be.rejected;
             });
         });
@@ -191,7 +192,7 @@ describe('providers/nodebb/post', () => {
             it('should emit `posts.edit` to edit post', () => {
                 data.id = Math.random();
                 return post.edit('').then(() => {
-                    forum._emit.should.have.been.calledWith('posts.edit').once;
+                    forum._emitWithRetry.should.have.been.calledWith(10000, 'posts.edit').once;
                 });
             });
             it('should combine data from composer to pass to `posts.edit`', () => {
@@ -206,7 +207,7 @@ describe('providers/nodebb/post', () => {
                     title: title
                 });
                 return post.edit(content).then(() => {
-                    forum._emit.calledWith('posts.edit', {
+                    forum._emitWithRetry.calledWith(10000, 'posts.edit', {
                         pid: id,
                         tags: tags,
                         title: title,
@@ -215,16 +216,16 @@ describe('providers/nodebb/post', () => {
                 });
             });
             it('should reject if `plugins.composer.push` rejects', () => {
-                forum._emit.onFirstCall().rejects('bad');
+                forum._emit.rejects('bad');
                 return post.edit('').should.be.rejected;
             });
             it('should reject if `posts.edit` rejects', () => {
-                forum._emit.onSecondCall().rejects('bad');
+                forum._emitWithRetry.rejects('bad');
                 return post.edit('').should.be.rejected;
             });
             it('should parse edit results via Post.parse()', () => {
                 const expected = Math.random();
-                forum._emit.onSecondCall().resolves(expected);
+                forum._emitWithRetry.resolves(expected);
                 return post.edit('').then(() => {
                     Post.parse.should.have.been.calledWith(expected).once;
                 });
@@ -239,7 +240,7 @@ describe('providers/nodebb/post', () => {
                 const reason = 'rasin rasin';
                 const expected = 'text text text\n\n###### rasin rasin';
                 return post.edit(text, reason).then(() => {
-                    forum._emit.secondCall.args[1].content.should.equal(expected);
+                    forum._emitWithRetry.firstCall.args[2].content.should.equal(expected);
                 });
             });
         });
@@ -264,7 +265,7 @@ describe('providers/nodebb/post', () => {
             it('should emit `posts.edit` to edit post', () => {
                 data.id = Math.random();
                 return post.append('').then(() => {
-                    forum._emit.should.have.been.calledWith('posts.edit').once;
+                    forum._emitWithRetry.should.have.been.calledWith(10000, 'posts.edit').once;
                 });
             });
             it('should combine data from composer to pass to `posts.edit`', () => {
@@ -273,14 +274,14 @@ describe('providers/nodebb/post', () => {
                 const title = Math.random();
                 const content = Math.random();
                 data.id = Math.random();
-                forum._emit.onFirstCall().resolves({
+                forum._emit.resolves({
                     pid: id,
                     tags: tags,
                     title: title,
                     body: ''
                 });
                 return post.append(content).then(() => {
-                    forum._emit.calledWith('posts.edit', {
+                    forum._emitWithRetry.calledWith(10000, 'posts.edit', {
                         pid: id,
                         tags: tags,
                         title: title,
@@ -289,16 +290,16 @@ describe('providers/nodebb/post', () => {
                 });
             });
             it('should reject if `plugins.composer.push` rejects', () => {
-                forum._emit.onFirstCall().rejects('bad');
+                forum._emit.rejects('bad');
                 return post.append('').should.be.rejected;
             });
             it('should reject if `posts.edit` rejects', () => {
-                forum._emit.onSecondCall().rejects('bad');
+                forum._emitWithRetry.rejects('bad');
                 return post.append('').should.be.rejected;
             });
             it('should parse edit results via Post.parse()', () => {
                 const expected = Math.random();
-                forum._emit.onSecondCall().resolves(expected);
+                forum._emitWithRetry.resolves(expected);
                 return post.append('').then(() => {
                     Post.parse.should.have.been.calledWith(expected).once;
                 });
@@ -316,7 +317,7 @@ describe('providers/nodebb/post', () => {
                     body: existing
                 });
                 return post.append(text).then(() => {
-                    forum._emit.secondCall.args[1].content.should.equal(expected);
+                    forum._emitWithRetry.firstCall.args[2].content.should.equal(expected);
                 });
             });
             it('should append reason to post when provided', () => {
@@ -328,7 +329,7 @@ describe('providers/nodebb/post', () => {
                     body: existing
                 });
                 return post.append(text, reason).then(() => {
-                    forum._emit.secondCall.args[1].content.should.equal(expected);
+                    forum._emitWithRetry.firstCall.args[2].content.should.equal(expected);
                 });
             });
         });
@@ -556,107 +557,33 @@ describe('providers/nodebb/post', () => {
                 let sandbox = null;
                 beforeEach(() => {
                     sandbox = sinon.sandbox.create();
-                    sandbox.stub(Post, '_retryReply').resolves();
+                    sandbox.stub(Post, 'parse').resolves();
                 });
                 afterEach(() => sandbox.restore());
-                it('should proxy to Post._retryReply()', () => {
-                    return Post.reply('').then(() => {
-                        Post._retryReply.should.have.been.calledOnce;
-                    });
-                });
-                it('should pass post id, topicId and content to Post._retryReply()', () => {
+                it('should emit with retry', () => {
                     const id = Math.random();
                     const topicId = Math.random();
                     const content = `a${Math.random()}b`;
                     return Post.reply(topicId, id, content).then(() => {
-                        Post._retryReply.should.have.been.calledWith(topicId, id, content, 5).once;
-                    });
-                });
-                it('should resolve to results of Post.reply()', () => {
-                    const expected = Math.random();
-                    Post._retryReply.resolves(expected);
-                    return Post.reply(1, 2, '').should.become(expected);
-                });
-                it('should resolve to results of Post._retryReply()', () => {
-                    Post._retryReply.rejects('bad');
-                    return Post.reply(1, 2, '').should.be.rejected;
-                });
-            });
-            describe('_retryDelay()', () => {
-                it('should return expected delay', () => {
-                    Post._retryDelay().should.equal(10 * 1000);
-                });
-            });
-            describe('_retryReply()', () => {
-                let sandbox = null;
-                beforeEach(() => {
-                    sandbox = sinon.sandbox.create();
-                    sandbox.stub(Post, '_retryDelay').returns(5);
-                    sandbox.stub(Post, 'parse').resolves();
-                    forum._emit = sinon.stub().resolves();
-                });
-                afterEach(() => sandbox.restore());
-                it('should emit `posts.reply`', () => {
-                    return Post.reply(1, 2, '').then(() => {
-                        forum._emit.should.have.been.calledWith('posts.reply').once;
-                    });
-                });
-                it('should pass post spec to `posts.reply`', () => {
-                    const topic = Math.random();
-                    const post = Math.random();
-                    const content = `${Math.random()}${Math.random()}`;
-                    return Post.reply(topic, post, content).then(() => {
-                        forum._emit.calledWith('posts.reply', {
-                            tid: topic,
-                            toPid: post,
-                            lock: false,
-                            content: content
+                        forum._emitWithRetry.calledWith(10000, 'posts.reply', {
+                            tid: topicId,
+                            content: content,
+                            toPid: id,
+                            lock: false
                         }).should.be.true;
-                        forum._emit.callCount.should.equal(1);
                     });
                 });
-                it('should reject if `posts.reply` rejects', () => {
-                    forum._emit.rejects('bad');
-                    return Post.reply(1, 2, '').should.be.rejected;
-                });
-                it('should pass results of `posts.reply` to Post.parse()', () => {
+                it('should parse result of websocket call', () => {
                     const expected = Math.random();
-                    forum._emit.resolves(expected);
-                    return Post.reply(1, 2, '').then(() => {
-                        Post.parse.should.have.been.calledWith(expected).once;
+                    forum._emitWithRetry.resolves(expected);
+                    return Post.reply(1, 2, 3).then(() => {
+                        Post.parse.calledWith(expected);
                     });
                 });
-                it('should resolve to results of Post.parse()', () => {
+                it('should resolve to result of Post.parse', () => {
                     const expected = Math.random();
                     Post.parse.resolves(expected);
-                    return Post.reply(1, 2, '').should.become(expected);
-                });
-                it('should retry when first request failes with rate limit error', () => {
-                    forum._emit.onFirstCall().rejects({
-                        message: '[[error:too-many-posts'
-                    });
-                    return Post.reply(1, 2, '').then(() => {
-                        forum._emit.callCount.should.equal(2);
-                    });
-                });
-                it('should retry when first request failes with rate limit error', () => {
-                    forum._emit.rejects({
-                        message: '[[error:too-many-posts'
-                    });
-                    return Post.reply(1, 2, '').then(() => {
-                        chai.assert.fail('should not have resolved');
-                    }, () => {
-                        forum._emit.callCount.should.equal(5);
-                    });
-                });
-                it('should call _retryDelay() to determine wait time', () => {
-                    forum._emit.onFirstCall().rejects({
-                        message: '[[error:too-many-posts'
-                    });
-                    return Post.reply(1, 2, '').then(() => {
-                        forum._emit.callCount.should.equal(2);
-                        Post._retryDelay.should.have.been.calledOnce;
-                    });
+                    return Post.reply(1, 2, 3).should.become(expected);
                 });
             });
             describe('get()', () => {
