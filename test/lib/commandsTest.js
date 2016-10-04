@@ -414,10 +414,7 @@ describe('lib/config', () => {
         it('should be registered as `command#help` event', () => {
             commands.internals.handlers.help.handler.should.equal(cmdHelp);
         });
-        it('should post expected text', () => {
-            const expected = 'Registered commands:\nhelp: print command help listing\n' +
-                'shutup: tell me to shutup\n\n* Help topic available.\n\nIssue the `help`' +
-                ' command with an available help topic as a parameter to read additonal help';
+        it('should list help topics', () => {
             commands.internals.handlers.help = {
                 help: 'print command help listing'
             };
@@ -429,29 +426,34 @@ describe('lib/config', () => {
                 command: 'foobar',
                 reply: spy
             });
-            spy.firstCall.args[0].should.equal(expected);
+            spy.firstCall.args[0].should.include('help:');
+            spy.firstCall.args[0].should.include('shutup:');
+            spy.firstCall.args[0].should.include('* Help topic available');
         });
-        it('should post expected text with help topics', () => {
-            const expected = 'Registered commands:\nhelp: print command help listing\n\n' +
-                'Help Topics:\nshutup: Extended help topic\n\n* Help topic available.\n\n' +
-                'Issue the `help` command with an available help topic as a parameter to ' +
-                'read additonal help';
+        it('should post short help', () => {
             commands.internals.handlers.help = {
                 help: 'print command help listing'
             };
-            commands.internals.helpTopics.shutup = 'tell me to shutup';
             const spy = sinon.spy();
             cmdHelp({
                 command: 'foobar',
                 reply: spy
             });
-            spy.firstCall.args[0].should.equal(expected);
+            spy.firstCall.args[0].should.include('help: print command help listing');
+            spy.firstCall.args[0].should.not.include('help: print command help listing *');
+        });
+        
+        it('should indicate extended help without short help available', () => {
+            commands.internals.helpTopics.shutup = 'foobar';
+            const spy = sinon.spy();
+            cmdHelp({
+                command: 'foobar',
+                reply: spy
+            });
+            spy.firstCall.args[0].should.include('shutup: Extended help topic');
         });
 
-        it('should indicate presence of help topic on command', () => {
-            const expected = 'Registered commands:\nhelp: print command help listing *\n\n' +
-                '* Help topic available.\n\nIssue the `help` command with an available help ' +
-                'topic as a parameter to read additonal help';
+        it('should indicate extended help when short help is available', () => {
             commands.internals.handlers.help = {
                 help: 'print command help listing'
             };
@@ -461,7 +463,7 @@ describe('lib/config', () => {
                 command: 'foobar',
                 reply: spy
             });
-            spy.firstCall.args[0].should.equal(expected);
+            spy.firstCall.args[0].should.include('help: print command help listing *');
         });
         describe('with parameters', () => {
             it('should post default text without parameters', () => {
