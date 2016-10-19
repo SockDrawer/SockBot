@@ -391,6 +391,26 @@ class Forum extends EventEmitter {
         return new Promise(promiser)
             .then(() => this);
     }
+    
+    supports(supportString) {
+        const supported = [
+            'Chats', 
+            'Forums', 
+            'Users', 'Users.Avatars',
+            'Posts', 'Posts.Editing',
+            'Topics', 
+            'Categories', 
+            'Notifications', 
+            'Formatting', 'Formatting.Markdown'
+        ]
+        let support = false;
+        
+        if (supported.indexOf(supportString) > -1) {
+            support = true;
+        }
+ 
+        return support;
+    }
 
     /**
      * Emit a websocket event
