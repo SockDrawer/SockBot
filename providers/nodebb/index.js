@@ -394,19 +394,22 @@ class Forum extends EventEmitter {
     
     supports(supportString) {
         const supported = [
-            'Chats', 
-            'Forums', 
+            'Chats',
+            'Forums',
             'Users', 'Users.Avatars',
             'Posts', 'Posts.Editing',
-            'Topics', 
-            'Categories', 
-            'Notifications', 
+            'Topics',
+            'Categories',
+            'Notifications',
             'Formatting', 'Formatting.Markdown'
-        ]
+        ];
+
         let support = false;
         
         if (Array.isArray(supportString)) {
-            support = supportString.reduce((value, item) => { return value && this.supports(item) }, true);
+            support = supportString.reduce((value, item) => { 
+                return value && this.supports(item);
+            }, true);
             return support;
         }
         
