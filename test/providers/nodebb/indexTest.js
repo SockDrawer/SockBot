@@ -870,16 +870,16 @@ describe('providers/nodebb', () => {
         });
         afterEach(() => sandbox.restore());
         
-       it('must expose a method named supports', () => {
+        it('must expose a method named supports', () => {
            forum.supports.should.be.a('function');
-       });
-       
-       it('must return false if a capability is unsupported', () => {
+        });
+        
+        it('must return false if a capability is unsupported', () => {
            forum.supports('Jack').should.be.false;
            forum.supports('PMs').should.be.false;
-       });
-       
-       it('must return true if a capability is supported', () => {
+        });
+        
+        it('must return true if a capability is supported', () => {
            forum.supports('Chats').should.be.true;
            forum.supports('Users').should.be.true;
            forum.supports('Posts').should.be.true;
@@ -887,16 +887,24 @@ describe('providers/nodebb', () => {
            forum.supports('Categories').should.be.true;
            forum.supports('Notifications').should.be.true;
            forum.supports('Formatting').should.be.true;
-       });
-       
-       it('must return false if a sub-capability is not supported', () => {
+        });
+        
+        it('must return false if a sub-capability is not supported', () => {
            forum.supports('Jack.Skellington').should.be.false;
            forum.supports('Chats.WithJackSkellington').should.be.false;
-       });
-       
-       it('must return true if a sub-capability is supported', () => {
+        });
+        
+        it('must return true if a sub-capability is supported', () => {
            forum.supports('Users.Avatars').should.be.true;
-       })
+        });
+        
+        it('should return true if all items in an array are supported', () => {
+           forum.supports(['Users', 'Chats']).should.be.true;
+        });
+       
+        it('must return false if any items in an array are not supported', () => {
+           forum.supports(['Users', 'Chats', 'Halloween']).should.be.false;
+       });
     });
     describe('_emit', () => {
         let forum = null;

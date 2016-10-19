@@ -405,6 +405,11 @@ class Forum extends EventEmitter {
         ]
         let support = false;
         
+        if (Array.isArray(supportString)) {
+            support = supportString.reduce((value, item) => { return value && this.supports(item) }, true);
+            return support;
+        }
+        
         if (supported.indexOf(supportString) > -1) {
             support = true;
         }
