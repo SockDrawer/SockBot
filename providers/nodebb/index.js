@@ -400,14 +400,14 @@ class Forum extends EventEmitter {
             'Topics', 'Topics.URL', 'Topics.Watch', 'Topics.Mute',
             'Categories',
             'Notifications', 'Notifications.URL',
-            'Formatting', 'Formatting.Markup', 'Formatting.Markup.Markdown', 
+            'Formatting', 'Formatting.Markup', 'Formatting.Markup.Markdown',
             'Formatting.Multiline', 'Formatting.Links', 'Formatting.Images', 'Formatting.Spoilers'
         ];
 
         let support = false;
         
         if (Array.isArray(supportString)) {
-            support = supportString.reduce((value, item) => { 
+            support = supportString.reduce((value, item) => {
                 return value && this.supports(item);
             }, true);
             return support;
