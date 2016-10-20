@@ -391,6 +391,34 @@ class Forum extends EventEmitter {
         return new Promise(promiser)
             .then(() => this);
     }
+    
+    supports(supportString) {
+        const supported = [
+            'Chats',
+            'Users', 'Users.Avatars', 'Users.Follow', 'Users.URL', 'Users.Seen', 'Users.PostCount',
+            'Posts', 'Posts.Edit', 'Posts.Vote', 'Posts.Delete', 'Posts.Bookmark', 'Posts.URL',
+            'Topics', 'Topics.URL', 'Topics.Watch', 'Topics.Mute',
+            'Categories',
+            'Notifications', 'Notifications.URL',
+            'Formatting', 'Formatting.Markup', 'Formatting.Markup.Markdown',
+            'Formatting.Multiline', 'Formatting.Links', 'Formatting.Images', 'Formatting.Spoilers'
+        ];
+
+        let support = false;
+        
+        if (Array.isArray(supportString)) {
+            support = supportString.reduce((value, item) => {
+                return value && this.supports(item);
+            }, true);
+            return support;
+        }
+        
+        if (supported.indexOf(supportString) > -1) {
+            support = true;
+        }
+ 
+        return support;
+    }
 
     /**
      * Emit a websocket event
