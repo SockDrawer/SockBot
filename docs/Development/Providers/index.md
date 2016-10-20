@@ -59,6 +59,19 @@ A function must be exposed named `activate`. This function will be given no para
 
 A function must be exposed named `deactivate`. This function will be given no parameters. It should call `deactivate` on all registered plugins. It must return a promise that will resolve if and when the forum object is succesfully deactivated.
 
+### supports
+
+A function must be exposed named `supports`. This function will be given either a functionality string or an array of functionality strings. It should return true if the forum supports the requested functionality, or false otherwise.
+
+A functionality string is a string that obeys the following rules:
+- The string contains up to ten tokens
+- These tokens are separated by periods
+- Each token is considered a hierarchical list of capabilities; tokens to the right are considered sub-capabilities of tokens to the left
+
+This method must return false if any token in the string is not supported. For example, if the forum supports users but not avatars, it may accept `Users` but must reject `Users.Avatars`.
+
+If an array of functionality strings is supplied, this method must reject if any of them are unsupported.
+
 ## Objects
 
 The following pages have more detail about the types of objects a Forum can instantiate:
