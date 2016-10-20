@@ -60,13 +60,13 @@ function documentPath(toDoc) {
             }
             jsdoc2md.render({
                 files: [toDoc]
-            }).then((docs)=>{
-                fs.writeFile(dest.path, docs, 'utf8', (err2)=>{
+            }).then((docs) => {
+                fs.writeFile(dest.path, docs, 'utf8', (err2) => {
                     if (err) {
                         return reject(err2);
                     }
-                    resolve(dest.path);
-                })
+                    return resolve(dest.path);
+                });
             });
         });
     });
@@ -104,7 +104,6 @@ function removeStale(file) {
 }
 
 function processFile(file) {
-    console.log(file);
     return documentPath(file).then((dest) => {
         return verifyDocument(dest);
     }, (err) => {
