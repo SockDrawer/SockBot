@@ -173,10 +173,11 @@ Deactivate forum and plugins
 Documentation for foo.
 
 **Kind**: instance method of <code>[Forum](#sockbot.providers.module_nodebb..Forum)</code>  
+**Returns**: <code>boolean</code> - it's a value?  
 
-| Param |
-| --- |
-| supportString | 
+| Param | Type | Description |
+| --- | --- | --- |
+| supportString | <code>string</code> &#124; <code>Array.&lt;strng&gt;</code> | it's a string? |
 
 <a name="sockbot.providers.module_nodebb..Forum+fetchObject"></a>
 
