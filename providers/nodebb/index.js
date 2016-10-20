@@ -395,8 +395,8 @@ class Forum extends EventEmitter {
     /**
      * Documentation for foo.
      *
-     * @param supportString
-     * @returns {boolean}
+     * @param {string|strng[]} supportString it's a string?
+     * @returns {boolean} it's a value?
      */
     supports(supportString) {
         const supported = [
