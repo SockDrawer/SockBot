@@ -22,6 +22,7 @@ NodeBB provider module
             * [.addPlugin(fnPlugin, pluginConfig)](#sockbot.providers.module_nodebb..Forum+addPlugin) ⇒ <code>Promise</code>
             * [.activate()](#sockbot.providers.module_nodebb..Forum+activate) ⇒ <code>Promise</code>
             * [.deactivate()](#sockbot.providers.module_nodebb..Forum+deactivate) ⇒ <code>Promise</code>
+            * [.supports(supportString)](#sockbot.providers.module_nodebb..Forum+supports) ⇒ <code>boolean</code>
             * [.fetchObject(func, id, parser)](#sockbot.providers.module_nodebb..Forum+fetchObject) ⇒ <code>Promise.&lt;T&gt;</code>
         * _static_
             * [.compatibilities](#sockbot.providers.module_nodebb..Forum.compatibilities)
@@ -50,6 +51,7 @@ Connects to a NodeBB forum
         * [.addPlugin(fnPlugin, pluginConfig)](#sockbot.providers.module_nodebb..Forum+addPlugin) ⇒ <code>Promise</code>
         * [.activate()](#sockbot.providers.module_nodebb..Forum+activate) ⇒ <code>Promise</code>
         * [.deactivate()](#sockbot.providers.module_nodebb..Forum+deactivate) ⇒ <code>Promise</code>
+        * [.supports(supportString)](#sockbot.providers.module_nodebb..Forum+supports) ⇒ <code>boolean</code>
         * [.fetchObject(func, id, parser)](#sockbot.providers.module_nodebb..Forum+fetchObject) ⇒ <code>Promise.&lt;T&gt;</code>
     * _static_
         * [.compatibilities](#sockbot.providers.module_nodebb..Forum.compatibilities)
@@ -165,6 +167,18 @@ Deactivate forum and plugins
 
 **Kind**: instance method of <code>[Forum](#sockbot.providers.module_nodebb..Forum)</code>  
 **Returns**: <code>Promise</code> - Resolves when all plugins have been disabled  
+<a name="sockbot.providers.module_nodebb..Forum+supports"></a>
+
+#### forum.supports(supportString) ⇒ <code>boolean</code>
+Documentation for foo.
+
+**Kind**: instance method of <code>[Forum](#sockbot.providers.module_nodebb..Forum)</code>  
+**Returns**: <code>boolean</code> - it's a value?  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| supportString | <code>string</code> &#124; <code>Array.&lt;strng&gt;</code> | it's a string? |
+
 <a name="sockbot.providers.module_nodebb..Forum+fetchObject"></a>
 
 #### forum.fetchObject(func, id, parser) ⇒ <code>Promise.&lt;T&gt;</code>

@@ -391,7 +391,13 @@ class Forum extends EventEmitter {
         return new Promise(promiser)
             .then(() => this);
     }
-    
+
+    /**
+     * Documentation for foo.
+     *
+     * @param {string|strng[]} supportString it's a string?
+     * @returns {boolean} it's a value?
+     */
     supports(supportString) {
         const supported = [
             'Chats',

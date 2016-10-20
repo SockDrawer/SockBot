@@ -3,8 +3,7 @@
 /* eslint-disable require-jsdoc */
 
 const fs = require('fs'),
-    dmd = require('dmd'),
-    jsdoc = require('jsdoc-parse'),
+    jsdoc2md = require('jsdoc-to-markdown'),
     mkdirp = require('mkdirp'),
     path = require('path');
 
@@ -59,16 +58,16 @@ function documentPath(toDoc) {
             if (err) {
                 reject();
             }
-            try {
-                const inFile = fs.createReadStream(toDoc);
-                const outFile = fs.createWriteStream(dest.path);
-                inFile.pipe(jsdoc()).pipe(dmd()).pipe(outFile);
-                inFile.on('error', (ioerr) => reject(ioerr));
-                outFile.on('error', (ioerr) => reject(ioerr));
-                outFile.on('finish', () => resolve(dest.path));
-            } catch (err2) {
-                reject(err2);
-            }
+            jsdoc2md.render({
+                files: [toDoc]
+            }).then((docs) => {
+                fs.writeFile(dest.path, docs, 'utf8', (err2) => {
+                    if (err) {
+                        return reject(err2);
+                    }
+                    return resolve(dest.path);
+                });
+            });
         });
     });
 }
