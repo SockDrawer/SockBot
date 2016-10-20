@@ -391,7 +391,13 @@ class Forum extends EventEmitter {
         return new Promise(promiser)
             .then(() => this);
     }
-    
+
+    /**
+     * Documentation for foo.
+     * 
+     * @param supportString
+     * @returns {boolean}
+     */
     supports(supportString) {
         const supported = [
             'Chats',
