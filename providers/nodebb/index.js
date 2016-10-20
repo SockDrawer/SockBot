@@ -394,7 +394,7 @@ class Forum extends EventEmitter {
 
     /**
      * Documentation for foo.
-     * 
+     *
      * @param supportString
      * @returns {boolean}
      */
