@@ -395,8 +395,12 @@ class Forum extends EventEmitter {
     /**
      * Supports: does the provider support a given feature?
      *
-     * @param {string|strng[]} supportString The feature string. Feature strings consist of one or more features connected by dots. May also be an array of such strings
-     * @returns {boolean} True if all levels of feature supplied are supported, false if not. In the case of an array, will only be true if all strings are supported
+     * @param {string|strng[]} supportString The feature string. 
+     *      Feature strings consist of one or more features connected by dots. 
+     *      May also be an array of such strings
+     * @returns {boolean} True if all levels of feature supplied are supported, 
+     *      false if not. In the case of an array, will only be true if all 
+     *      strings are supported
      */
     supports(supportString) {
         const supported = [
