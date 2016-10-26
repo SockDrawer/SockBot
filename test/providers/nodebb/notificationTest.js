@@ -571,6 +571,12 @@ describe('providers/nodebb/notification', () => {
                 notifyHandler = forum.socket.on.firstCall.args[1];
             });
             afterEach(() => sandbox.restore());
+            it('should log the notification', () => {
+                const notify = Math.random();
+                return notifyHandler(notify).then(() => {
+                    forum.emit.should.have.been.calledWith('log');
+                });
+            });
             it('should parse notification with `Notification.parse`', () => {
                 const expected = Math.random();
                 return notifyHandler(expected).then(() => {
