@@ -1243,7 +1243,7 @@ describe('lib/config', () => {
                 });
             });
             it('should normalize spaces in command', () => {
-                const cmd = `a b\tc\rd\ne`;
+                const cmd = 'a b\tc\rd\ne';
                 return commands.internals.Commands.addExtendedHelp(cmd, 'foo').then(() => {
                     commands.internals.helpTopics['a b c d e'].should.be.ok;
                 });
