@@ -373,7 +373,8 @@ exports.bindNotification = function bindNotification(forum) {
      */
     function notifyHandler(data) {
         const notification = Notification.parse(data);
-        debug(`Notification ${notification.id}: ${notification.label} received`);
+        //debug(`Notification ${notification.id}: ${notification.label} received`);
+        forum.emit('log', `Notification ${notification.id}: ${notification.label} received`);
 
         const ids = {
             post: notification.postId,
