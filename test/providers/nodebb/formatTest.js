@@ -12,7 +12,7 @@ describe('providers/nodebb/format', () => {
     describe('exports', () => {
         const fns = ['urlForPost', 'urlForTopic', 'quoteText', 'link', 'image', 'spoiler',
             'italic', 'bold', 'bolditalic', 'header1', 'header2', 'header3', 'header4',
-            'header5', 'header6', 'preformat', 'strikethrough'
+            'header5', 'header6', 'preformat', 'strikethrough', 'list'
         ];
         fns.forEach((fn) => {
             it(`should export '${fn}()'`, () => {
@@ -602,6 +602,12 @@ describe('providers/nodebb/format', () => {
         it('should generate preformatted text in markdown', () => {
             const expected = '~~text~~';
             testModule.strikethrough('text').should.equal(expected);
+        });
+    });
+    describe('list', () => {
+        it('should generate a  list in markdwn', () => {
+            const expected = '\n- item1\n- item2\n- item3';
+            testModule.list(['item1', 'item2', 'item3']).should.equal(expected);
         });
     });
 });

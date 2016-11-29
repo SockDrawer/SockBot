@@ -45,3 +45,4 @@ A plugin should refuse to activate on a platform that does not support key funct
     - Spoilers
     - Preformat
     - Strikethrough
+    - List

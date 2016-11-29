@@ -286,3 +286,13 @@ exports.preformat = function preformat(text) {
 exports.strikethrough = function strikethrough(text) {
     return prefixifier('~~', text, '~~');
 };
+
+/**
+ * Format text as a list of items
+ *
+ * @param {!string} items An array of strings to format as a list
+ * @returns {string} The list
+ */
+exports.list = function list(items) {
+    return items.map((item) => `\n- ${item}`).join('');
+};
