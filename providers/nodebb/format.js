@@ -263,3 +263,38 @@ exports.header5 = function header5(text) {
 exports.header6 = function header6(text) {
     return prefixifier('###### ', text);
 };
+
+/**
+ * Format text as a preformatted block
+ *
+ * @param {!string} text The text
+ * @returns {string} Text in a preformat block
+ */
+ /* eslint-disable prefer-template */
+exports.preformat = function preformat(text) {
+    if (text.indexOf('\n') > -1) {
+        return '```\n' + text + '\n```';
+    }
+    return '`' + text + '`';
+};
+/* eslint-enable prefer-template */
+
+/**
+ * Format text with a strikethrough effect
+ *
+ * @param {!string} text The text to strike out
+ * @returns {string} The stricken text
+ */
+exports.strikethrough = function strikethrough(text) {
+    return prefixifier('~~', text, '~~');
+};
+
+/**
+ * Format text as a list of items
+ *
+ * @param {!string} items An array of strings to format as a list
+ * @returns {string} The list
+ */
+exports.list = function list(items) {
+    return items.map((item) => `\n- ${item}`).join('');
+};

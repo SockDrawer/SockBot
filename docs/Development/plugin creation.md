@@ -43,3 +43,6 @@ A plugin should refuse to activate on a platform that does not support key funct
     - Links
     - Images
     - Spoilers
+    - Preformat
+    - Strikethrough
+    - List
