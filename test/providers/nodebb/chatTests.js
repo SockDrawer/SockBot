@@ -1068,11 +1068,11 @@ describe('providers/nodebb/chat', () => {
                 message: 1
             }).then(() => {
                 const param = forum.Commands.get.firstCall.args[0];
-                param.should.have.all.keys('post', 'topic', 'user', 'room', 'chat');
+                param.should.have.all.keys('post', 'topic', 'user', 'pm', 'chat');
                 param.post.should.equal(-1);
                 param.topic.should.equal(-1);
                 param.user.should.equal(userId);
-                param.room.should.equal(roomId);
+                param.pm.should.equal(roomId);
                 param.chat.should.equal(chatId);
             });
         });
