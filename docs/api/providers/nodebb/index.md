@@ -170,14 +170,16 @@ Deactivate forum and plugins
 <a name="sockbot.providers.module_nodebb..Forum+supports"></a>
 
 #### forum.supports(supportString) ⇒ <code>boolean</code>
-Documentation for foo.
+Supports: does the provider support a given feature?
 
 **Kind**: instance method of <code>[Forum](#sockbot.providers.module_nodebb..Forum)</code>  
-**Returns**: <code>boolean</code> - it's a value?  
+**Returns**: <code>boolean</code> - True if all levels of feature supplied are supported,
+     false if not. In the case of an array, will only be true if all
+     strings are supported  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| supportString | <code>string</code> &#124; <code>Array.&lt;strng&gt;</code> | it's a string? |
+| supportString | <code>string</code> &#124; <code>Array.&lt;strng&gt;</code> | The feature string.      Feature strings consist of one or more features connected by dots.      May also be an array of such strings |
 
 <a name="sockbot.providers.module_nodebb..Forum+fetchObject"></a>
 
