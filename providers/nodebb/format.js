@@ -264,9 +264,25 @@ exports.header6 = function header6(text) {
     return prefixifier('###### ', text);
 };
 
+/**
+ * Format text as a preformatted block
+ *
+ * @param {!string} text The text
+ * @returns {string} Text in a preformat block
+ */
 exports.preformat = function preformat(text) {
     if (text.indexOf('\n') > -1) {
         return prefixifier('```\n', text, '\n```');
     }
     return prefixifier('`', text, '`');
+};
+
+/**
+ * Format text with a strikethrough effect
+ *
+ * @param {!string} text The text to strike out
+ * @returns {string} The stricken text
+ */
+exports.strikethrough = function strikethrough(text) {
+    return prefixifier('~~', text, '~~');
 };

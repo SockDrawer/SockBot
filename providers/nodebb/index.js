@@ -412,7 +412,7 @@ class Forum extends EventEmitter {
             'Notifications', 'Notifications.URL',
             'Formatting', 'Formatting.Markup', 'Formatting.Markup.Markdown',
             'Formatting.Multiline', 'Formatting.Links', 'Formatting.Images', 'Formatting.Spoilers',
-            'Formatting.Preformat'
+            'Formatting.Preformat', 'Formatting.Strikethrough'
         ];
 
         let support = false;
