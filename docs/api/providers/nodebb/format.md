@@ -52,6 +52,9 @@
 <dt><a href="#strikethrough">strikethrough(text)</a> ⇒ <code>string</code></dt>
 <dd><p>Format text with a strikethrough effect</p>
 </dd>
+<dt><a href="#list">list(items)</a> ⇒ <code>string</code></dt>
+<dd><p>Format text as a list of items</p>
+</dd>
 </dl>
 
 <a name="urlForPost"></a>
@@ -265,4 +268,16 @@ Format text with a strikethrough effect
 | Param | Type | Description |
 | --- | --- | --- |
 | text | <code>string</code> | The text to strike out |
+
+<a name="list"></a>
+
+## list(items) ⇒ <code>string</code>
+Format text as a list of items
+
+**Kind**: global function  
+**Returns**: <code>string</code> - The list  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| items | <code>string</code> | An array of strings to format as a list |
 
