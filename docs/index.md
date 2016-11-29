@@ -1,4 +1,4 @@
-SockBot 3.0
+SockBot 4.0
 ===========
 Sockbot - A sock puppet robot worthy of TheDailyWTF Written and testedin EcmaScript 6.
 
