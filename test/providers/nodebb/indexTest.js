@@ -881,7 +881,7 @@ describe('providers/nodebb', () => {
         });
         
         it('must return true if a capability is supported', () => {
-            forum.supports('Chats').should.be.true;
+            forum.supports('PrivateMessage').should.be.true;
             forum.supports('Users').should.be.true;
             forum.supports('Posts').should.be.true;
             forum.supports('Topics').should.be.true;
@@ -900,11 +900,11 @@ describe('providers/nodebb', () => {
         });
         
         it('should return true if all items in an array are supported', () => {
-            forum.supports(['Users', 'Chats']).should.be.true;
+            forum.supports(['Users', 'PrivateMessage']).should.be.true;
         });
        
         it('must return false if any items in an array are not supported', () => {
-            forum.supports(['Users', 'Chats', 'Halloween']).should.be.false;
+            forum.supports(['Users', 'PrivateMessage', 'Halloween']).should.be.false;
         });
     });
     describe('_emit', () => {
