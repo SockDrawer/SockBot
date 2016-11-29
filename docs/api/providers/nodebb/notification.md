@@ -53,7 +53,7 @@ Create a Notification class and bind it to a forum instance
 #### bindNotification~notificationType
 Notification types enum
 
-**Kind**: inner constant of <code>[bindNotification](#sockbot.providers.nodebb.module_Notification.bindNotification)</code>  
+**Kind**: inner enum of <code>[bindNotification](#sockbot.providers.nodebb.module_Notification.bindNotification)</code>  
 **Read only**: true  
 **Properties**
 
