@@ -263,3 +263,10 @@ exports.header5 = function header5(text) {
 exports.header6 = function header6(text) {
     return prefixifier('###### ', text);
 };
+
+exports.preformat = function preformat(text) {
+    if (text.indexOf('\n') > -1) {
+        return prefixifier('```\n', text, '\n```');
+    }
+    return prefixifier('`', text, '`');
+};

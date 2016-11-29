@@ -411,7 +411,8 @@ class Forum extends EventEmitter {
             'Categories',
             'Notifications', 'Notifications.URL',
             'Formatting', 'Formatting.Markup', 'Formatting.Markup.Markdown',
-            'Formatting.Multiline', 'Formatting.Links', 'Formatting.Images', 'Formatting.Spoilers'
+            'Formatting.Multiline', 'Formatting.Links', 'Formatting.Images', 'Formatting.Spoilers',
+            'Formatting.Preformat'
         ];
 
         let support = false;
