@@ -597,6 +597,10 @@ describe('providers/nodebb/format', () => {
             const expected = '```\nline1\nline2\n```';
             testModule.preformat('line1\nline2').should.equal(expected);
         });
+        it('should retain existing whitespace', () => {
+            const expected = '```\n     line1\n   line2\n```';
+            testModule.preformat('     line1\n   line2').should.equal(expected);
+        });
     });
     describe('strikethrough', () => {
         it('should generate preformatted text in markdown', () => {

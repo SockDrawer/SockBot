@@ -270,12 +270,14 @@ exports.header6 = function header6(text) {
  * @param {!string} text The text
  * @returns {string} Text in a preformat block
  */
+ /* eslint-disable prefer-template */
 exports.preformat = function preformat(text) {
     if (text.indexOf('\n') > -1) {
-        return prefixifier('```\n', text, '\n```');
+        return '```\n' + text + '\n```';
     }
-    return prefixifier('`', text, '`');
+    return '`' + text + '`';
 };
+/* eslint-enable prefer-template */
 
 /**
  * Format text with a strikethrough effect
