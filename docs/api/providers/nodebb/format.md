@@ -46,6 +46,12 @@
 <dt><a href="#header6">header6(text)</a> ⇒ <code>string</code></dt>
 <dd><p>Format text as a sixth level header.</p>
 </dd>
+<dt><a href="#preformat">preformat(text)</a> ⇒ <code>string</code></dt>
+<dd><p>Format text as a preformatted block</p>
+</dd>
+<dt><a href="#strikethrough">strikethrough(text)</a> ⇒ <code>string</code></dt>
+<dd><p>Format text with a strikethrough effect</p>
+</dd>
 </dl>
 
 <a name="urlForPost"></a>
@@ -235,4 +241,28 @@ Format text as a sixth level header.
 | Param | Type | Description |
 | --- | --- | --- |
 | text | <code>string</code> | Header text |
+
+<a name="preformat"></a>
+
+## preformat(text) ⇒ <code>string</code>
+Format text as a preformatted block
+
+**Kind**: global function  
+**Returns**: <code>string</code> - Text in a preformat block  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| text | <code>string</code> | The text |
+
+<a name="strikethrough"></a>
+
+## strikethrough(text) ⇒ <code>string</code>
+Format text with a strikethrough effect
+
+**Kind**: global function  
+**Returns**: <code>string</code> - The stricken text  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| text | <code>string</code> | The text to strike out |
 
