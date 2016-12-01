@@ -44,11 +44,23 @@ exports.bindTopic = function bindTopic(forum) {
                 lastPosted: new Date(payload.lastposttime),
                 id: payload.tid,
                 mainPostId: payload.mainPid,
-                postCount: payload.postcount
+                postCount: payload.postcount,
+                categoryId: payload.cid
             };
             utils.mapSet(this, values);
         }
 
+        /**
+         * Forum specific ID for topic category
+         *
+         * @public
+         *
+         * @type {!number}
+         */
+        get categoryId() {
+            return utils.mapGet(this, 'categoryId');
+        }
+        
         /**
          * Forum specific ID for topic author
          *
