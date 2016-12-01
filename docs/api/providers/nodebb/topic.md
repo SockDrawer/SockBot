@@ -13,6 +13,7 @@ NodeBB provider module Topic class
         * [~Topic](#sockbot.providers.nodebb.module_Topic..Topic)
             * [new Topic(payload)](#new_sockbot.providers.nodebb.module_Topic..Topic_new)
             * _instance_
+                * [.categoryId](#sockbot.providers.nodebb.module_Topic..Topic+categoryId) : <code>number</code>
                 * [.authorId](#sockbot.providers.nodebb.module_Topic..Topic+authorId) : <code>number</code>
                 * [.title](#sockbot.providers.nodebb.module_Topic..Topic+title) : <code>string</code>
                 * [.posted](#sockbot.providers.nodebb.module_Topic..Topic+posted) : <code>Date</code>
@@ -61,6 +62,7 @@ Represends a forum topic
 * [~Topic](#sockbot.providers.nodebb.module_Topic..Topic)
     * [new Topic(payload)](#new_sockbot.providers.nodebb.module_Topic..Topic_new)
     * _instance_
+        * [.categoryId](#sockbot.providers.nodebb.module_Topic..Topic+categoryId) : <code>number</code>
         * [.authorId](#sockbot.providers.nodebb.module_Topic..Topic+authorId) : <code>number</code>
         * [.title](#sockbot.providers.nodebb.module_Topic..Topic+title) : <code>string</code>
         * [.posted](#sockbot.providers.nodebb.module_Topic..Topic+posted) : <code>Date</code>
@@ -97,6 +99,13 @@ This constructor is intended for private use only, if you need top construct a t
 | --- | --- | --- |
 | payload | <code>\*</code> | Payload to construct the User object out of |
 
+<a name="sockbot.providers.nodebb.module_Topic..Topic+categoryId"></a>
+
+#### topic.categoryId : <code>number</code>
+Forum specific ID for topic category
+
+**Kind**: instance property of <code>[Topic](#sockbot.providers.nodebb.module_Topic..Topic)</code>  
+**Access:** public  
 <a name="sockbot.providers.nodebb.module_Topic..Topic+authorId"></a>
 
 #### topic.authorId : <code>number</code>

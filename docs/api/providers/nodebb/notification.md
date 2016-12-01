@@ -17,6 +17,7 @@ NodeBB provider module Notification class
                 * [.id](#sockbot.providers.nodebb.module_Notification..Notification+id) : <code>string</code>
                 * [.postId](#sockbot.providers.nodebb.module_Notification..Notification+postId) : <code>number</code>
                 * [.topicId](#sockbot.providers.nodebb.module_Notification..Notification+topicId) : <code>number</code>
+                * [.categoryId](#sockbot.providers.nodebb.module_Notification..Notification+categoryId) : <code>number</code>
                 * [.userId](#sockbot.providers.nodebb.module_Notification..Notification+userId) : <code>number</code>
                 * [.type](#sockbot.providers.nodebb.module_Notification..Notification+type) : <code>notificationType</code>
                 * [.subtype](#sockbot.providers.nodebb.module_Notification..Notification+subtype) : <code>string</code>
@@ -53,7 +54,7 @@ Create a Notification class and bind it to a forum instance
 #### bindNotification~notificationType
 Notification types enum
 
-**Kind**: inner constant of <code>[bindNotification](#sockbot.providers.nodebb.module_Notification.bindNotification)</code>  
+**Kind**: inner enum of <code>[bindNotification](#sockbot.providers.nodebb.module_Notification.bindNotification)</code>  
 **Read only**: true  
 **Properties**
 
@@ -79,6 +80,7 @@ Represents a forum notification
         * [.id](#sockbot.providers.nodebb.module_Notification..Notification+id) : <code>string</code>
         * [.postId](#sockbot.providers.nodebb.module_Notification..Notification+postId) : <code>number</code>
         * [.topicId](#sockbot.providers.nodebb.module_Notification..Notification+topicId) : <code>number</code>
+        * [.categoryId](#sockbot.providers.nodebb.module_Notification..Notification+categoryId) : <code>number</code>
         * [.userId](#sockbot.providers.nodebb.module_Notification..Notification+userId) : <code>number</code>
         * [.type](#sockbot.providers.nodebb.module_Notification..Notification+type) : <code>notificationType</code>
         * [.subtype](#sockbot.providers.nodebb.module_Notification..Notification+subtype) : <code>string</code>
@@ -129,6 +131,13 @@ Post id this notification refers to
 
 #### notification.topicId : <code>number</code>
 Topic id this post refers to
+
+**Kind**: instance property of <code>[Notification](#sockbot.providers.nodebb.module_Notification..Notification)</code>  
+**Access:** public  
+<a name="sockbot.providers.nodebb.module_Notification..Notification+categoryId"></a>
+
+#### notification.categoryId : <code>number</code>
+Category id this post refers to
 
 **Kind**: instance property of <code>[Notification](#sockbot.providers.nodebb.module_Notification..Notification)</code>  
 **Access:** public  
