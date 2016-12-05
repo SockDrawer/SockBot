@@ -608,7 +608,7 @@ describe('providers/nodebb/notification', () => {
                         post: post,
                         topic: topic,
                         user: user,
-                        room: -1,
+                        pm: -1,
                         chat: -1
                     });
                     args[1].should.eql(text);
