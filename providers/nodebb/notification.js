@@ -74,6 +74,7 @@ exports.bindNotification = function bindNotification(forum) {
                 id: payload.nid,
                 postId: payload.pid,
                 topicId: payload.tid,
+                categoryId: payload.cid,
                 userId: payload.from,
                 read: payload.read,
                 date: new Date(payload.datetime),
@@ -113,6 +114,17 @@ exports.bindNotification = function bindNotification(forum) {
          */
         get topicId() {
             return utils.mapGet(this, 'topicId');
+        }
+        
+        /**
+         * Category id this post refers to
+         *
+         * @public
+         *
+         * @type {number}
+         */
+        get categoryId() {
+            return utils.mapGet(this, 'categoryId');
         }
 
         /**
@@ -373,29 +385,63 @@ exports.bindNotification = function bindNotification(forum) {
      */
     function notifyHandler(data) {
         const notification = Notification.parse(data);
-        //debug(`Notification ${notification.id}: ${notification.label} received`);
-        forum.emit('log', `Notification ${notification.id}: ${notification.label} received`);
+        return evalBlacklist(notification)
+        .then(() => {
+            forum.emit('log', `Notification ${notification.id}: ${notification.label} received`);
+    
+            const ids = {
+                post: notification.postId,
+                topic: notification.topicId,
+                user: notification.userId,
+                pm: -1,
+                chat: -1
+            };
+            return notification.getText()
+                .then((postData) => forum.Commands.get(ids,
+                    postData, (content) => forum.Post.reply(notification.topicId, notification.postId, content)))
+                .then((commands) => {
+                    if (commands.commands.length === 0) {
+                        debug(`Emitting events: 'notification' and 'notification:${notification.type}'`);
+                        forum.emit(`notification:${notification.type}`, notification);
+                        forum.emit('notification', notification);
+                    }
+                    return commands;
+                })
+                .then((commands) => commands.execute());
+        }).catch((err) => {
+            if (err === 'Ignoring notification') {
+                //We do not process the notification, but we can continue with life
+                return Promise.resolve();
+            }
+            throw err;
+        });
+    }
+    
+    /**
+     * Evaluate the blacklist.
+     *
+     * Determine if we want to process this notification or not based on config settings
+     *
+     * @private
+     *
+     * @param {*} notification Notification we are parsing
+     * @returns {Promise} Rejects with "Ignoring notification" if we do not process this. Resolves with the notification otherwise.
+     */
+    function evalBlacklist(notification) {
+        return new Promise((resolve, reject) => {
+            const ignoreCategories = forum.config.core.ignoreCategories || [];
 
-        const ids = {
-            post: notification.postId,
-            topic: notification.topicId,
-            user: notification.userId,
-            pm: -1,
-            chat: -1
-        };
-        return notification.getText()
-            .then((postData) => forum.Commands.get(ids,
-                postData, (content) => forum.Post.reply(notification.topicId, notification.postId, content)))
-            .then((commands) => {
-                if (commands.commands.length === 0) {
-                    debug(`Emitting events: 'notification' and 'notification:${notification.type}'`);
-                    forum.emit(`notification:${notification.type}`, notification);
-                    forum.emit('notification', notification);
+            //if there's no blacklist, we can ignore the hit for getting the category
+            if (ignoreCategories) {
+                if (ignoreCategories.some((elem) => elem.toString() === notification.categoryId.toString())) {
+                    forum.emit('log', `Notification from category ${notification.categoryId} ignored`);
+                    return reject('Ignoring notification');
                 }
-                return commands;
-            })
-            .then((commands) => commands.execute());
+            }
+            return resolve(notification);
+        });
     }
 
     return Notification;
 };
+

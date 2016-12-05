@@ -41,6 +41,7 @@ describe('providers/nodebb/topic', () => {
                 ['title', 'title'],
                 ['url', 'slug'],
                 ['id', 'tid'],
+                ['categoryId', 'cid'],
                 ['mainPostId', 'mainPid'],
                 ['postCount', 'postcount']
             ].forEach((keys) => {
@@ -76,7 +77,7 @@ describe('providers/nodebb/topic', () => {
                 data = utils.mapGet(topic);
             });
             ['authorId', 'title', 'id', 'mainPostId', 'postCount', 'posted',
-                'lastPosted'
+                'lastPosted', 'categoryId'
             ].forEach((key) => {
                 it(`should get value from utils.storage for ${key}`, () => {
                     const expected = `${Math.random()}${Math.random()}`;
