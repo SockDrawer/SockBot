@@ -6,9 +6,11 @@ Notifications are the bread and butter of Sockbot. They represent an incoming al
 
 All providers should offer a Notification object. A single Notification should represent a single Event. 
 
+*Important note:* Notification is responsible for handling the Commands object in order to support Command-type plugins. When a notification is spawned, a new Commands instance *must* be created. See [the Command docs](#http://sockbot.readthedocs.io/en/latest/api/lib/commands/#sockbot.lib.module_commands) for more information.
+
 ### Notification object: Properties
 
-The following properties are assumed to exist, either as plain objects or via getters:
+The following properties are assumed to exist, either as plain object properties or via getters:
 
 - `id`: some unique identifier for the notification
 - `topicId`: If applicable, some unique identifier for the Topic that generated the Notification
@@ -36,16 +38,23 @@ A static method should be provided to allow for retrieving arbitrary notificatio
 
 This method should return a promise that will resolve to the requested Notification object.
 
-### Static: parse
-
-A static method should be provided to allow for parsing arbitrary Notifications. It will be given one arguments: the raw payload retrieved from the API for the forum.
-
-This method should return a promise that will resolve to the requested Notification object.
-
 ### Static: activate
 
 A static method should be provided to begin listening for notifications. When called, it should begin sending Notifications through the Forum's eventEmitter.
 
+The usual method of activation is to create a Parse method and listen for incoming messages or notification events emitted by the underlying connection to the forum. When an event occurs, the following should happen:
+
+- The incoming message is parsed into a Notification object 
+- The forum should be asked to emit a `notification` event with the Notification attached
+- The forum should be asked to emit any of the applicable events: 
+   - `notification:notification`
+   - `notification:mention` if the notification was caused by the bot being mentioned
+   - `notification:group_mention` if the notification was caused by a group the bot is in being mentioned, such as `@moderators` on a forum, or a mechanism that notifies the entire channel in a chat-like provider
+   - `notification:reply` if the notification was caused by a reply to a post the bot made
+   - Any custom notification type specific to the provider, such as `notification:privmsg` for IRC
+- A new Command object should be created for each command the notification's associated post contains. This can be achieved by calling [Commands.get](http://sockbot.readthedocs.io/en/latest/api/lib/commands/#sockbot.lib.module_commands..Commands.get)
+- The Command object should be executed, calling the handlers for any commands that were detected. This can be achieved by calling [Command.execute](http://sockbot.readthedocs.io/en/latest/api/lib/commands/#sockbot.lib.module_commands..Command+execute)
+
 ### Static: deactivate
 
-A static method should be provided to stop listening for notifications. When called, it should cease sending notification events.
+A static method should be provided to stop listening for notifications. When called, it should cease sending notification events or processing commands.
