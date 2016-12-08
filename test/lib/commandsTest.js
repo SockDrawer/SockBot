@@ -128,6 +128,9 @@ describe('lib/config', () => {
             it('should not match really short command', () => {
                 expect(parseLine('!c text stuff')).to.equal(null);
             });
+            it('should not match non-letters after !', () => {
+                expect(parseLine('![0_1481227127790_upload.png]')).to.equal(null);
+            });
             it('should match bare command', () => {
                 parseLine('!help').command.should.equal('help');
             });
