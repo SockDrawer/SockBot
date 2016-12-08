@@ -38,6 +38,9 @@ describe('plugins/echo', () => {
             forum = {
                 Commands: {
                     add: sinon.stub().resolves()
+                },
+                Formatter: {
+                    quoteText: (text, username) => `@${username} said:\n> ${text}`
                 }
             };
             plugin = testModule.plugin(forum);
@@ -72,6 +75,7 @@ describe('plugins/echo', () => {
                 });
             });
             it('should reply with expected text', () => {
+                
                 command.parent.text = 'I am a teapot, short and stout.';
                 command.getUser.resolves({
                     username: 'Testy_McTesterson'

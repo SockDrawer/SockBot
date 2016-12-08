@@ -24,9 +24,8 @@ exports.plugin = function plugin(forum) {
     function echo(command) {
         return command.getUser()
         .then((user) => {
-            const content = (command.parent.text || '').split('\n').map((line) => `> ${line}`);
-            content.unshift(`@${user.username} said:`);
-            command.reply(content.join('\n'));
+            const content = forum.Formatter.quoteText(command.parent.text || '', user.username);
+            command.reply(content);
         });
     }
 
