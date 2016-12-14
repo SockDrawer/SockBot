@@ -88,7 +88,7 @@ describe('lib/utils', () => {
         });
         it('should reject when iteration function rejects', () => {
             const spy = sinon.stub().rejects('bad');
-            return utils.iterate([0], spy).should.eventually.reject;
+            return utils.iterate([0], spy).should.be.rejectedWith('bad');
         });
     });
     describe('parseJSON()', () => {

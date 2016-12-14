@@ -425,7 +425,8 @@ exports.bindNotification = function bindNotification(forum) {
      * @private
      *
      * @param {*} notification Notification we are parsing
-     * @returns {Promise} Rejects with "Ignoring notification" if we do not process this. Resolves with the notification otherwise.
+     * @returns {Promise} Rejects with "Ignoring notification" if we do not process this. Resolves with the notification
+     * otherwise.
      */
     function evalBlacklist(notification) {
         return new Promise((resolve, reject) => {
