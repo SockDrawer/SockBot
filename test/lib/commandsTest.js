@@ -445,7 +445,7 @@ describe('lib/config', () => {
             spy.firstCall.args[0].should.include('help: print command help listing');
             spy.firstCall.args[0].should.not.include('help: print command help listing *');
         });
-        
+
         it('should indicate extended help without short help available', () => {
             commands.internals.helpTopics.shutup = 'foobar';
             const spy = sinon.spy();
@@ -1114,11 +1114,37 @@ describe('lib/config', () => {
                     handler = sinon.spy();
                 expect(commands.internals.handlers[cmd]).to.be.not.ok;
                 return commands.internals.Commands.add(cmd, text, handler).then(() => {
-                    commands.internals.handlers[cmd].should.eql({
-                        commandText: cmd,
-                        handler: handler,
-                        help: text
-                    });
+                    const obj = commands.internals.handlers[cmd];
+                    obj.commandText.should.equal(cmd);
+                    obj.handler.should.be.a('function');
+                    obj.help.should.equal(text);
+                    handler.callCount.should.equal(0);
+                    obj.handler();
+                    handler.callCount.should.equal(1);
+                });
+            });
+            it('should use default `this` when context not provided', () => {
+                const cmd = `a${Math.random()}a`,
+                    text = `b${Math.random()}b`,
+                    handler = sinon.spy();
+                expect(commands.internals.handlers[cmd]).to.be.not.ok;
+                return commands.internals.Commands.add(cmd, text, handler).then(() => {
+                    commands.internals.handlers[cmd].handler();
+                    handler.firstCall.thisValue.should.deep.equal({});
+                });
+            });
+            it('should use provided `this` context', () => {
+                const cmd = `a${Math.random()}a`,
+                    text = `b${Math.random()}b`,
+                    handler = sinon.spy(),
+                    context = {
+                        foo: Math.random(),
+                        bar: Math.random()
+                    };
+                expect(commands.internals.handlers[cmd]).to.be.not.ok;
+                return commands.internals.Commands.add(cmd, text, handler, context).then(() => {
+                    commands.internals.handlers[cmd].handler();
+                    handler.firstCall.thisValue.should.equal(context);
                 });
             });
             it('should normalize command case for matching', () => {
@@ -1180,7 +1206,33 @@ describe('lib/config', () => {
                     handler = sinon.spy();
                 expect(commands.internals.shadowHandlers[cmd]).to.be.not.ok;
                 return commands.internals.Commands.addAlias(cmd, handler).then(() => {
-                    commands.internals.shadowHandlers[cmd].should.equal(handler);
+                    const func = commands.internals.shadowHandlers[cmd];
+                    func.should.be.a('function');
+                    handler.callCount.should.equal(0);
+                    func();
+                    handler.callCount.should.equal(1);
+                });
+            });
+            it('should use default `this` when context not provided', () => {
+                const cmd = `a${Math.random()}a`,
+                    handler = sinon.spy();
+                expect(commands.internals.shadowHandlers[cmd]).to.be.not.ok;
+                return commands.internals.Commands.addAlias(cmd, handler).then(() => {
+                    commands.internals.shadowHandlers[cmd]();
+                    handler.firstCall.thisValue.should.deep.equal({});
+                });
+            });
+            it('should use provided `this` context', () => {
+                const cmd = `a${Math.random()}a`,
+                    handler = sinon.spy(),
+                    context = {
+                        foo: Math.random(),
+                        bar: Math.random()
+                    };
+                expect(commands.internals.shadowHandlers[cmd]).to.be.not.ok;
+                return commands.internals.Commands.addAlias(cmd, handler, context).then(() => {
+                    commands.internals.shadowHandlers[cmd]();
+                    handler.firstCall.thisValue.should.equal(context);
                 });
             });
             it('should normalize command case for matching', () => {
