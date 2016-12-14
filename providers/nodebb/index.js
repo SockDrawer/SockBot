@@ -55,7 +55,8 @@ class Forum extends EventEmitter {
         this.Category = categoryModule.bindCategory(this);
         this.User = userModule.bindUser(this);
         this.Notification = notifications.bindNotification(this);
-        this.Chat = chatModule.bindChat(this);
+        this.PrivateMessage = chatModule.bindChat(this);
+        this.Chat = this.PrivateMessage;
         this.Format = formatters;
         this._plugins = [];
     }
@@ -404,14 +405,15 @@ class Forum extends EventEmitter {
      */
     supports(supportString) {
         const supported = [
-            'Chats',
+            'PrivateMessage',
             'Users', 'Users.Avatars', 'Users.Follow', 'Users.URL', 'Users.Seen', 'Users.PostCount',
             'Posts', 'Posts.Edit', 'Posts.Vote', 'Posts.Delete', 'Posts.Bookmark', 'Posts.URL',
             'Topics', 'Topics.URL', 'Topics.Watch', 'Topics.Mute',
             'Categories',
             'Notifications', 'Notifications.URL',
             'Formatting', 'Formatting.Markup', 'Formatting.Markup.Markdown',
-            'Formatting.Multiline', 'Formatting.Links', 'Formatting.Images', 'Formatting.Spoilers'
+            'Formatting.Multiline', 'Formatting.Links', 'Formatting.Images', 'Formatting.Spoilers',
+            'Formatting.Preformat', 'Formatting.Strikethrough', 'Formatting.List'
         ];
 
         let support = false;

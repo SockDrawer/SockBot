@@ -128,6 +128,9 @@ describe('lib/config', () => {
             it('should not match really short command', () => {
                 expect(parseLine('!c text stuff')).to.equal(null);
             });
+            it('should not match non-letters after !', () => {
+                expect(parseLine('![0_1481227127790_upload.png]')).to.equal(null);
+            });
             it('should match bare command', () => {
                 parseLine('!help').command.should.equal('help');
             });
@@ -715,7 +718,7 @@ describe('lib/config', () => {
                     getPost: sinon.stub(),
                     getTopic: sinon.stub(),
                     getUser: sinon.stub(),
-                    getRoom: sinon.stub()
+                    getPM: sinon.stub()
                 };
                 command = new Command({}, parent);
             });
@@ -739,9 +742,9 @@ describe('lib/config', () => {
             });
             it('should proxy getRoom() to parent.getRoom()', () => {
                 const expected = Math.random();
-                parent.getRoom.returns(expected);
-                command.getRoom().should.equal(expected);
-                parent.getRoom.should.have.been.calledOnce;
+                parent.getPM.returns(expected);
+                command.getPM().should.equal(expected);
+                parent.getPM.should.have.been.calledOnce;
             });
         });
         describe('reply()', () => {
@@ -883,7 +886,7 @@ describe('lib/config', () => {
                 ['getPost', 'Post', 'post'],
                 ['getTopic', 'Topic', 'topic'],
                 ['getUser', 'User', 'user'],
-                ['getRoom', 'Chat', 'room']
+                ['getPM', 'PrivateMessage', 'pm']
             ].forEach((config) => {
                 const method = config[0],
                     object = config[1],
@@ -932,7 +935,7 @@ describe('lib/config', () => {
             [
                 ['setPost', 'post'],
                 ['setTopic', 'topic'],
-                ['setRoom', 'room'],
+                ['setPM', 'pm'],
                 ['setUser', 'user']
             ].forEach((config) => {
                 const method = config[0],
