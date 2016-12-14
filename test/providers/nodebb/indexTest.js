@@ -343,7 +343,7 @@ describe('providers/nodebb', () => {
         });
         it('should reject on bad JSON response', () => {
             request.get.yields(null, null, '{"foo":"bar');
-            return forum._getConfig().should.be.rejectedWith('Unexpected end of JSON input');
+            return forum._getConfig().should.be.rejectedWith('Unexpected end of');
         });
     });
     describe('login()', () => {
