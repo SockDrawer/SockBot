@@ -44,6 +44,7 @@ describe('providers/nodebb/notification', () => {
                 ['id', 'nid'],
                 ['postId', 'pid'],
                 ['topicId', 'tid'],
+                ['categoryId', 'cid'],
                 ['userId', 'from'],
                 ['read', 'read'],
                 ['url', 'path']
@@ -146,7 +147,7 @@ describe('providers/nodebb/notification', () => {
                 notification = new Notification({});
                 data = utils.mapGet(notification);
             });
-            ['id', 'postId', 'topicId', 'userId', 'type', 'subtype', 'read',
+            ['id', 'postId', 'topicId', 'userId', 'categoryId', 'type', 'subtype', 'read',
                 'date', 'label', 'body'
             ].forEach((key) => {
                 it(`should get value from utils.storage for ${key}`, () => {
@@ -567,6 +568,9 @@ describe('providers/nodebb/notification', () => {
                 forum.Post = {
                     reply: sinon.stub().resolves()
                 };
+                forum.config = {
+                    core: {}
+                };
                 Notification.activate();
                 notifyHandler = forum.socket.on.firstCall.args[1];
             });
@@ -604,7 +608,7 @@ describe('providers/nodebb/notification', () => {
                         post: post,
                         topic: topic,
                         user: user,
-                        room: -1,
+                        pm: -1,
                         chat: -1
                     });
                     args[1].should.eql(text);
@@ -667,6 +671,45 @@ describe('providers/nodebb/notification', () => {
                 return notifyHandler(5).then(() => {
                     forum.emit.should.not.have.been.calledWith('notification', notifier);
                 });
+            });
+            it('should not emit notifications in blacklisted categories', () => {
+                forum.config.core = {
+                    ignoreCategories: [3]
+                };
+                
+                commands.commands = [];
+                notifier.categoryId = 3;
+                notifier.type = `a${Math.random()}b`;
+                return notifyHandler(42).then(() => {
+                    forum.emit.should.not.have.been.calledWith('notification', notifier);
+                });
+            });
+            it('should emit notifications in non-blacklisted categories', () => {
+                forum.config.core = {
+                    ignoreCategories: [2]
+                };
+                
+                commands.commands = [];
+                notifier.categoryId = 3;
+                notifier.type = `a${Math.random()}b`;
+                return notifyHandler(42).then(() => {
+                    forum.emit.should.have.been.calledWith('notification', notifier);
+                });
+            });
+            it('should not reject if the blacklist rejects', () => {
+                forum.config.core = {
+                    ignoreCategories: [3]
+                };
+                commands.commands = [];
+                notifier.categoryId = 3;
+                notifier.type = `a${Math.random()}b`;
+                
+                return notifyHandler(5).should.be.fulfilled;
+            });
+            it('should reject if something throws a wobbly other than the blacklist', () => {
+                notifier.getText.rejects('Bad wolf');
+                
+                return notifyHandler(5).should.be.rejectedWith('Bad wolf');
             });
         });
     });

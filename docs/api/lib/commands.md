@@ -29,7 +29,7 @@ NodeBB provider module User class
             * [.getPost()](#sockbot.lib.module_commands..Command+getPost) ⇒ <code>Promise.&lt;Post&gt;</code>
             * [.getTopic()](#sockbot.lib.module_commands..Command+getTopic) ⇒ <code>Promise.&lt;Topic&gt;</code>
             * [.getUser()](#sockbot.lib.module_commands..Command+getUser) ⇒ <code>Promise.&lt;User&gt;</code>
-            * [.getRoom()](#sockbot.lib.module_commands..Command+getRoom) ⇒ <code>Promise.&lt;ChatRoom&gt;</code>
+            * [.getPM()](#sockbot.lib.module_commands..Command+getPM) ⇒ <code>Promise.&lt;PrivateMessage&gt;</code>
             * [.reply(content)](#sockbot.lib.module_commands..Command+reply)
             * [.appendReply(content)](#sockbot.lib.module_commands..Command+appendReply)
         * [~Commands](#sockbot.lib.module_commands..Commands)
@@ -42,8 +42,8 @@ NodeBB provider module User class
                 * [.setPost(post)](#sockbot.lib.module_commands..Commands+setPost)
                 * [.getTopic()](#sockbot.lib.module_commands..Commands+getTopic) ⇒ <code>Promise.&lt;Topic&gt;</code>
                 * [.setTopic(topic)](#sockbot.lib.module_commands..Commands+setTopic)
-                * [.getRoom()](#sockbot.lib.module_commands..Commands+getRoom) ⇒ <code>Promise.&lt;ChatRoom&gt;</code>
-                * [.setRoom(room)](#sockbot.lib.module_commands..Commands+setRoom)
+                * [.getPM()](#sockbot.lib.module_commands..Commands+getPM) ⇒ <code>Promise.&lt;ChatRoom&gt;</code>
+                * [.setPM(pm)](#sockbot.lib.module_commands..Commands+setPM)
                 * [.getUser()](#sockbot.lib.module_commands..Commands+getUser) ⇒ <code>Promise.&lt;User&gt;</code>
                 * [.setUser(user)](#sockbot.lib.module_commands..Commands+setUser)
                 * [.execute()](#sockbot.lib.module_commands..Commands+execute) ⇒ <code>Promise.&lt;Commands&gt;</code>
@@ -137,7 +137,7 @@ Command Class. Represents a single command within a post
     * [.getPost()](#sockbot.lib.module_commands..Command+getPost) ⇒ <code>Promise.&lt;Post&gt;</code>
     * [.getTopic()](#sockbot.lib.module_commands..Command+getTopic) ⇒ <code>Promise.&lt;Topic&gt;</code>
     * [.getUser()](#sockbot.lib.module_commands..Command+getUser) ⇒ <code>Promise.&lt;User&gt;</code>
-    * [.getRoom()](#sockbot.lib.module_commands..Command+getRoom) ⇒ <code>Promise.&lt;ChatRoom&gt;</code>
+    * [.getPM()](#sockbot.lib.module_commands..Command+getPM) ⇒ <code>Promise.&lt;PrivateMessage&gt;</code>
     * [.reply(content)](#sockbot.lib.module_commands..Command+reply)
     * [.appendReply(content)](#sockbot.lib.module_commands..Command+appendReply)
 
@@ -240,13 +240,13 @@ Get User who posted the command
 **Kind**: instance method of <code>[Command](#sockbot.lib.module_commands..Command)</code>  
 **Returns**: <code>Promise.&lt;User&gt;</code> - Resolved to retrieved User  
 **Access:** public  
-<a name="sockbot.lib.module_commands..Command+getRoom"></a>
+<a name="sockbot.lib.module_commands..Command+getPM"></a>
 
-#### command.getRoom() ⇒ <code>Promise.&lt;ChatRoom&gt;</code>
-Get ChatRoom who posted the command
+#### command.getPM() ⇒ <code>Promise.&lt;PrivateMessage&gt;</code>
+Get PrivateMessage who posted the command
 
 **Kind**: instance method of <code>[Command](#sockbot.lib.module_commands..Command)</code>  
-**Returns**: <code>Promise.&lt;ChatRoom&gt;</code> - Resolved to retrieved ChatRoom  
+**Returns**: <code>Promise.&lt;PrivateMessage&gt;</code> - Resolved to retrieved PrivateMessage  
 **Access:** public  
 <a name="sockbot.lib.module_commands..Command+reply"></a>
 
@@ -290,8 +290,8 @@ Commands class. Represents all commands for a Notification
         * [.setPost(post)](#sockbot.lib.module_commands..Commands+setPost)
         * [.getTopic()](#sockbot.lib.module_commands..Commands+getTopic) ⇒ <code>Promise.&lt;Topic&gt;</code>
         * [.setTopic(topic)](#sockbot.lib.module_commands..Commands+setTopic)
-        * [.getRoom()](#sockbot.lib.module_commands..Commands+getRoom) ⇒ <code>Promise.&lt;ChatRoom&gt;</code>
-        * [.setRoom(room)](#sockbot.lib.module_commands..Commands+setRoom)
+        * [.getPM()](#sockbot.lib.module_commands..Commands+getPM) ⇒ <code>Promise.&lt;ChatRoom&gt;</code>
+        * [.setPM(pm)](#sockbot.lib.module_commands..Commands+setPM)
         * [.getUser()](#sockbot.lib.module_commands..Commands+getUser) ⇒ <code>Promise.&lt;User&gt;</code>
         * [.setUser(user)](#sockbot.lib.module_commands..Commands+setUser)
         * [.execute()](#sockbot.lib.module_commands..Commands+execute) ⇒ <code>Promise.&lt;Commands&gt;</code>
@@ -375,25 +375,25 @@ Set the Topic this Commands object refers to
 | --- | --- | --- |
 | topic | <code>Topic</code> | The Topic to cache |
 
-<a name="sockbot.lib.module_commands..Commands+getRoom"></a>
+<a name="sockbot.lib.module_commands..Commands+getPM"></a>
 
-#### commands.getRoom() ⇒ <code>Promise.&lt;ChatRoom&gt;</code>
-Get the ChatRoom this Commands object referrs to
+#### commands.getPM() ⇒ <code>Promise.&lt;ChatRoom&gt;</code>
+Get the PrivateMessage this Commands object referrs to
 
 **Kind**: instance method of <code>[Commands](#sockbot.lib.module_commands..Commands)</code>  
 **Returns**: <code>Promise.&lt;ChatRoom&gt;</code> - Resolves to the retrieved ChatRoom  
 **Access:** public  
-<a name="sockbot.lib.module_commands..Commands+setRoom"></a>
+<a name="sockbot.lib.module_commands..Commands+setPM"></a>
 
-#### commands.setRoom(room)
-Set the ChatRoom this Commands object refers to
+#### commands.setPM(pm)
+Set the PrivateMessage this Commands object refers to
 
 **Kind**: instance method of <code>[Commands](#sockbot.lib.module_commands..Commands)</code>  
 **Access:** public  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| room | <code>ChatRoom</code> | The ChatRoom to cache |
+| pm | <code>PrivateMessage</code> | The pm to cache |
 
 <a name="sockbot.lib.module_commands..Commands+getUser"></a>
 
