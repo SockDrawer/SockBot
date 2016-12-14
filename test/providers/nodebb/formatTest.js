@@ -565,14 +565,16 @@ describe('providers/nodebb/format', () => {
                 [
                     undefined, null, false, '', 0, NaN, []
                 ].forEach((input) => {
-                    const expected = '<details>\n<summary>\nSPOILER!\n</summary>\n\nthey were dead all along\n\n</details>';
+                    const expected = '<details>\n<summary>\nSPOILER!\n</summary>\n\nthey were dead all along\n\n' +
+                        '</details>';
                     it(`should provide sensible output for input: ${input}`, () => {
                         const actual = testModule.spoiler('they were dead all along', input);
                         actual.should.equal(expected);
                     });
                 });
                 [
-                    ['Summer Glau', '<details>\n<summary>\nSummer Glau\n</summary>\n\nthey were dead all along\n\n</details>'],
+                    ['Summer Glau', '<details>\n<summary>\nSummer Glau\n</summary>\n\nthey were dead all along\n\n' +
+                        '</details>'],
                     [4, '<details>\n<summary>\n4\n</summary>\n\nthey were dead all along\n\n</details>'],
                     [3.1415, '<details>\n<summary>\n3.1415\n</summary>\n\nthey were dead all along\n\n</details>'],
                     [true, '<details>\n<summary>\ntrue\n</summary>\n\nthey were dead all along\n\n</details>'],
