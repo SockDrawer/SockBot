@@ -2,8 +2,8 @@ language: node_js
 node_js:
 - 'node'
 - '4'
-- '6.2'
-- '6.3'
+- '6'
+- '7'
 branches:
   except:
     - /^(?i:v)\d+[.]\d+[.]\d+$/
