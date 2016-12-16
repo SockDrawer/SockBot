@@ -49,8 +49,8 @@ NodeBB provider module User class
                 * [.execute()](#sockbot.lib.module_commands..Commands+execute) ⇒ <code>Promise.&lt;Commands&gt;</code>
             * _static_
                 * [.get(notification, postBody, handler)](#sockbot.lib.module_commands..Commands.get) ⇒ <code>Promise.&lt;Commands&gt;</code>
-                * [.add(command, helpText, handler)](#sockbot.lib.module_commands..Commands.add) ⇒ <code>Promise</code>
-                * [.addAlias(command, handler)](#sockbot.lib.module_commands..Commands.addAlias) ⇒ <code>Promise</code>
+                * [.add(command, helpText, handler, [context])](#sockbot.lib.module_commands..Commands.add) ⇒ <code>Promise</code>
+                * [.addAlias(command, handler, [context])](#sockbot.lib.module_commands..Commands.addAlias) ⇒ <code>Promise</code>
                 * [.addExtendedHelp(command, text)](#sockbot.lib.module_commands..Commands.addExtendedHelp) ⇒ <code>Promise</code>
                 * [.forbidCommand(command)](#sockbot.lib.module_commands..Commands.forbidCommand) ⇒ <code>boolean</code>
 
@@ -297,8 +297,8 @@ Commands class. Represents all commands for a Notification
         * [.execute()](#sockbot.lib.module_commands..Commands+execute) ⇒ <code>Promise.&lt;Commands&gt;</code>
     * _static_
         * [.get(notification, postBody, handler)](#sockbot.lib.module_commands..Commands.get) ⇒ <code>Promise.&lt;Commands&gt;</code>
-        * [.add(command, helpText, handler)](#sockbot.lib.module_commands..Commands.add) ⇒ <code>Promise</code>
-        * [.addAlias(command, handler)](#sockbot.lib.module_commands..Commands.addAlias) ⇒ <code>Promise</code>
+        * [.add(command, helpText, handler, [context])](#sockbot.lib.module_commands..Commands.add) ⇒ <code>Promise</code>
+        * [.addAlias(command, handler, [context])](#sockbot.lib.module_commands..Commands.addAlias) ⇒ <code>Promise</code>
         * [.addExtendedHelp(command, text)](#sockbot.lib.module_commands..Commands.addExtendedHelp) ⇒ <code>Promise</code>
         * [.forbidCommand(command)](#sockbot.lib.module_commands..Commands.forbidCommand) ⇒ <code>boolean</code>
 
@@ -440,7 +440,7 @@ Get Commands from a notification
 
 <a name="sockbot.lib.module_commands..Commands.add"></a>
 
-#### Commands.add(command, helpText, handler) ⇒ <code>Promise</code>
+#### Commands.add(command, helpText, handler, [context]) ⇒ <code>Promise</code>
 Add a command to this forum instance
 
 **Kind**: static method of <code>[Commands](#sockbot.lib.module_commands..Commands)</code>  
@@ -452,10 +452,11 @@ Add a command to this forum instance
 | command | <code>string</code> | Command to be added |
 | helpText | <code>string</code> | Short help text for command |
 | handler | <code>CommandHandler</code> | Function to handle the command |
+| [context] | <code>object</code> | `this` context for the command. If not provided context will be a bare Object. |
 
 <a name="sockbot.lib.module_commands..Commands.addAlias"></a>
 
-#### Commands.addAlias(command, handler) ⇒ <code>Promise</code>
+#### Commands.addAlias(command, handler, [context]) ⇒ <code>Promise</code>
 Add a command alias to this forum instance
 
 **Kind**: static method of <code>[Commands](#sockbot.lib.module_commands..Commands)</code>  
@@ -466,6 +467,7 @@ Add a command alias to this forum instance
 | --- | --- | --- |
 | command | <code>string</code> | Command alias to be added |
 | handler | <code>CommandHandler</code> | Function to handle the command |
+| [context] | <code>object</code> | `this` context for the command. If not provided context will be a bare Object. |
 
 <a name="sockbot.lib.module_commands..Commands.addExtendedHelp"></a>
 
