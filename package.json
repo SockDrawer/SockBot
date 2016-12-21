@@ -1,5 +1,6 @@
 {
   "name": "sockbot",
+  "latestCommit": "$Id$",
   "version": "0.0.0-semantic-release",
   "description": "A sockpuppet bot to use on http://what.thedailywtf.com.",
   "repository": {

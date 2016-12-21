@@ -1,2 +1,4 @@
 version.js export-subst
 *.js       eol=lf
+
+package.config ident
