@@ -512,7 +512,7 @@ describe('lib/app', () => {
         const sha = '33d24d7c8f7f8cf320abb39425375d74d280f3e3';
         beforeEach(() => {
             packageInfo.version = '0.0.0-semantic-release'; // Restore placeholder version
-            packageInfo.latestCommit = `$Id: ${sha}$`;
+            packageInfo.latestCommit = `$Id: ${sha} $`;
         });
         it('should provide version when version is not semantic-release placeholder', () => {
             const version = `${Math.random() * 20}.${Math.random() * 20}`;
