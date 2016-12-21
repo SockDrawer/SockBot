@@ -421,8 +421,13 @@ describe('lib/app', () => {
         let username = null,
             owner = null,
             ua = null,
-            provider = null;
+            provider = null,
+            sandbox = null,
+            version = null;
         beforeEach(() => {
+            version = `ver$${Math.random()}$`;
+            sandbox = sinon.sandbox.create();
+            sandbox.stub(testModule, 'getVersion').returns(version);
             username = `username${Math.random()}`;
             owner = `owner${Math.random()}`;
             provider = {};
@@ -433,6 +438,7 @@ describe('lib/app', () => {
                 }
             }, provider);
         });
+        afterEach(() => sandbox.restore());
         it('should return a string', () => {
             testModule.getUserAgent({
                 core: {}
@@ -454,7 +460,7 @@ describe('lib/app', () => {
             }).should.endWith(expected);
         });
         it('should startWith package name/version', () => {
-            ua.indexOf(`${packageInfo.name}/${packageInfo.version}`).should.equal(0);
+            ua.indexOf(`${packageInfo.name}/${version}`).should.equal(0);
         });
         it('should contain OS platform/architecture', () => {
             ua.indexOf(`${process.platform} ${process.arch}`).should.be.greaterThan(0);
@@ -500,6 +506,34 @@ describe('lib/app', () => {
             testModule.ponyError(undefined, new Error(message));
             const lines = testModule.error.firstCall.args[0].split('\n');
             lines[lines.length - 1].should.endWith(message);
+        });
+    });
+    describe('getVersion()', () => {
+        const sha = '33d24d7c8f7f8cf320abb39425375d74d280f3e3';
+        beforeEach(() => {
+            packageInfo.version = '0.0.0-semantic-release'; // Restore placeholder version
+            packageInfo.latestCommit = `$Id: ${sha} $`;
+        });
+        it('should provide version when version is not semantic-release placeholder', () => {
+            const version = `${Math.random() * 20}.${Math.random() * 20}`;
+            packageInfo.version = version;
+            testModule.getVersion().should.equal(version);
+        });
+        it('should provide latestCommit sha when version is placeholder and format is correct', () => {
+            testModule.getVersion().should.equal(sha);
+        });
+        it('should provide latestCommit when version is place holder and format is weird', () => {
+            const version = `I LIKE ${Math.ceil(Math.random() * 1000)}FISH`;
+            packageInfo.latestCommit = version;
+            testModule.getVersion().should.equal(version);
+        });
+        it('should provide unknown version when version is placeholder and latestCommit is placeholder', () => {
+            packageInfo.latestCommit = '$Id$';
+            testModule.getVersion().should.equal('[Unknown Version]');
+        });
+        it('should provide unknown version when version is placeholder and latestCommit is missing', () => {
+            packageInfo.latestCommit = undefined;
+            testModule.getVersion().should.equal('[Unknown Version]');
         });
     });
 });
