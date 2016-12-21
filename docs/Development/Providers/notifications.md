@@ -4,7 +4,18 @@ Notifications are the bread and butter of Sockbot. They represent an incoming al
 
 ## Notification
 
-All providers should offer a Notification object. A single Notification should represent a single Event. 
+All providers should offer a Notification object. A single Notification should represent a single Event.
+
+### Types
+
+The following types of notification are well defined and assumed to exist:
+
+- `notification`: Any notification.
+- `notification:reply`: A reply to a message the bot has sent
+- `notification:mention`: A mention of the bot's username
+- `notification:message`: A message the bot cares about for some reason, such as a "watched" thread
+
+Other types may exist depending on the provider.
 
 *Important note:* Notification is responsible for handling the Commands object in order to support Command-type plugins. When a notification is spawned, a new Commands instance *must* be created. See [the Command docs](#http://sockbot.readthedocs.io/en/latest/api/lib/commands/#sockbot.lib.module_commands) for more information.
 
