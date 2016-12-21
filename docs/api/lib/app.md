@@ -2,7 +2,7 @@
 
 <dl>
 <dt><a href="#getVersion">getVersion()</a> ⇒ <code>string</code></dt>
-<dd><p>Get current version information, using latest commit sha1 as a fallback if detected version is semantic release 
+<dd><p>Get current version information, using latest commit sha1 as a fallback if detected version is semantic release
 placeholder.</p>
 </dd>
 <dt><a href="#getUserAgent">getUserAgent(cfg, provider)</a> ⇒ <code>string</code></dt>
@@ -31,7 +31,7 @@ placeholder.</p>
 <a name="getVersion"></a>
 
 ## getVersion() ⇒ <code>string</code>
-Get current version information, using latest commit sha1 as a fallback if detected version is semantic release 
+Get current version information, using latest commit sha1 as a fallback if detected version is semantic release
 placeholder.
 
 **Kind**: global function  
