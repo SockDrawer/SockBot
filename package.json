@@ -37,7 +37,7 @@
     "chai-string": "^1.2.0",
     "codeclimate-test-reporter": "^0.4.0",
     "commitizen": "^2.8.5",
-    "cz-conventional-changelog": "^1.1.7",
+    "cz-conventional-changelog": "^2.0.0",
     "eslint": "^3.11.0",
     "ghooks": "^2.0.0",
     "istanbul": "^0.4.3",
