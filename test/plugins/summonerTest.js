@@ -133,6 +133,24 @@ describe('plugins/echo', () => {
                 forum.Post.reply.should.have.been.calledWith(undefined, undefined, '%keyblade%').once;
             });
         });
+        it('should substitute `username` when `name` is missing', () => {
+            const expected = `a${Math.random()}b`;
+            user.username = expected;
+            summoner = testModule(forum, ['%name%']);
+            return summoner.handler(notification).then(() => {
+                forum.Post.reply.should.have.been.calledWith(undefined, undefined, expected).once;
+            });
+        });
+        it('should not substitute `username` when `name` is present', () => {
+            const dummy = `b${Math.random()}a`;
+            const expected = `a${Math.random()}b`;
+            user.username = dummy;
+            user.name = expected;
+            summoner = testModule(forum, ['%name%']);
+            return summoner.handler(notification).then(() => {
+                forum.Post.reply.should.have.been.calledWith(undefined, undefined, expected).once;
+            });
+        });
         it('choose message randomly', () => {
             const sandbox = sinon.sandbox.create();
             sandbox.stub(Math, 'random');
