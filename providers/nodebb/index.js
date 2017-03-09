@@ -264,6 +264,7 @@ class Forum extends EventEmitter {
             const cookies = this._cookiejar.getCookieString(this.url);
             this.socket = Forum.io(this.url, {
                 extraHeaders: {
+                    'Origin': this.url,
                     'User-Agent': this.useragent,
                     'Cookie': cookies
                 }
@@ -417,18 +418,18 @@ class Forum extends EventEmitter {
         ];
 
         let support = false;
-        
+
         if (Array.isArray(supportString)) {
             support = supportString.reduce((value, item) => {
                 return value && this.supports(item);
             }, true);
             return support;
         }
-        
+
         if (supported.indexOf(supportString) > -1) {
             support = true;
         }
- 
+
         return support;
     }
 
