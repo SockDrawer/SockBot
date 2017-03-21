@@ -9,7 +9,6 @@ chai.should();
 const expect = chai.expect;
 
 const sinon = require('sinon');
-require('sinon-as-promised');
 chai.use(require('sinon-chai'));
 
 const utils = require('../../lib/utils');
@@ -87,7 +86,7 @@ describe('lib/utils', () => {
                 });
         });
         it('should reject when iteration function rejects', () => {
-            const spy = sinon.stub().rejects('bad');
+            const spy = sinon.stub().rejects(new Error('bad'));
             return utils.iterate([0], spy).should.be.rejectedWith('bad');
         });
     });

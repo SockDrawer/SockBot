@@ -22,9 +22,9 @@
     "node": ">=4.0"
   },
   "dependencies": {
-    "debug": "^2.2.0",
+    "debug": "^2.6.3",
     "js-yaml": "^3.6.0",
-    "request": "^2.74.0",
+    "request": "^2.81.0",
     "sanitize-html": "^1.13.0",
     "socket.io-client": "^1.4.8",
     "string": "^3.3.1",
@@ -38,17 +38,16 @@
     "codeclimate-test-reporter": "^0.4.0",
     "commitizen": "^2.8.5",
     "cz-conventional-changelog": "^2.0.0",
-    "eslint": "^3.11.0",
+    "eslint": "^3.18.0",
     "ghooks": "^2.0.0",
     "istanbul": "^0.4.3",
     "jsdoc-to-markdown": "^2.0.1",
     "mkdirp": "^0.5.1",
     "mocha": "^3.0.2",
-    "semantic-release": "^6.3.2",
+    "semantic-release": "^6.3.6",
     "simple-git": "^1.45.0",
     "sinon": "^2.1.0",
-    "sinon-as-promised": "^4.0.2",
-    "sinon-chai": "^2.8.0",
+    "sinon-chai": "^2.9.0",
     "validate-commit-msg": "^2.6.1"
   },
   "scripts": {

@@ -7,13 +7,12 @@ chai.should();
 const expect = chai.expect;
 
 const sinon = require('sinon');
-require('sinon-as-promised');
 chai.use(require('sinon-chai'));
 
 const commands = require('../../lib/commands');
 const utils = require('../../lib/utils');
 
-describe('lib/config', () => {
+describe('lib/commands', () => {
     describe('exports', () => {
         const fns = ['bindCommands'],
             objs = ['internals'],
@@ -1012,11 +1011,11 @@ describe('lib/config', () => {
                 });
                 it('should execute onError when any command rejects', () => {
                     forum.Post = {
-                        reply: sinon.stub().rejects('foo')
+                        reply: sinon.stub().rejects(new Error('foo'))
                     };
                     forum.emit = sinon.spy();
                     const spy = sinon.stub().resolves();
-                    const rejector = sinon.stub().rejects('bad');
+                    const rejector = sinon.stub().rejects(new Error('bad'));
                     data.ids.post = 1;
                     data.ids.topic = 50;
                     data._replyFn = sinon.stub().resolves();
