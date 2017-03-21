@@ -41,7 +41,7 @@
     "eslint": "^3.18.0",
     "ghooks": "^2.0.0",
     "istanbul": "^0.4.3",
-    "jsdoc-to-markdown": "^2.0.1",
+    "jsdoc-to-markdown": "^3.0.0",
     "mkdirp": "^0.5.1",
     "mocha": "^3.0.2",
     "semantic-release": "^6.3.6",
