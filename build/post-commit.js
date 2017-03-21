@@ -122,12 +122,12 @@ function commitDocs() {
 }
 
 
-let args = process.argv.slice();
+const args = process.argv.slice();
 args.shift();
 args.shift();
 
 let targets;
-if(!args.length) {
+if (!args.length) {
     targets = getChanges(/[.]js$/i);
 } else {
     targets = Promise.all(args.map((arg) => new Promise((res, rej) => glob(arg, (err, files) => {
