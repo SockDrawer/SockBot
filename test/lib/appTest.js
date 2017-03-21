@@ -7,7 +7,6 @@ chai.use(require('chai-string'));
 chai.should();
 
 const sinon = require('sinon');
-require('sinon-as-promised');
 chai.use(require('sinon-chai'));
 
 const testModule = require('../../lib/app'),
@@ -136,7 +135,7 @@ describe('lib/app', () => {
             const cfg = Math.random();
             const plugin = Math.random();
             testModule.relativeRequire.returns(plugin);
-            forum.addPlugin.rejects('bad');
+            forum.addPlugin.rejects(new Error('bad'));
             return testModule.loadPlugins(forum, {
                 core: {},
                 plugins: {

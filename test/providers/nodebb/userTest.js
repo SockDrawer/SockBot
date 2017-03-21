@@ -7,7 +7,6 @@ chai.use(chaiAsPromised);
 chai.should();
 
 const sinon = require('sinon');
-require('sinon-as-promised');
 chai.use(require('sinon-chai'));
 
 const userModule = require('../../../providers/nodebb/user');

@@ -7,7 +7,6 @@ chai.use(chaiAsPromised);
 chai.should();
 
 const sinon = require('sinon');
-require('sinon-as-promised');
 chai.use(require('sinon-chai'));
 
 const testModule = require('../../../providers/nodebb/notification');
@@ -707,7 +706,7 @@ describe('providers/nodebb/notification', () => {
                 return notifyHandler(5).should.be.fulfilled;
             });
             it('should reject if something throws a wobbly other than the blacklist', () => {
-                notifier.getText.rejects('Bad wolf');
+                notifier.getText.rejects(new Error('Bad wolf'));
                 
                 return notifyHandler(5).should.be.rejectedWith('Bad wolf');
             });
