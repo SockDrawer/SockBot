@@ -5,7 +5,8 @@
 const fs = require('fs'),
     jsdoc2md = require('jsdoc-to-markdown'),
     mkdirp = require('mkdirp'),
-    path = require('path');
+    path = require('path'),
+    glob = require('glob');
 
 const git = require('simple-git')('.');
 
@@ -120,8 +121,25 @@ function commitDocs() {
     });
 }
 
-getChanges(/[.]js$/i)
-    .then((files) => Promise.all(files.map((file) => processFile(file))))
+
+let args = process.argv.slice();
+args.shift();
+args.shift();
+
+let targets;
+if(!args.length) {
+    targets = getChanges(/[.]js$/i);
+} else {
+    targets = Promise.all(args.map((arg) => new Promise((res, rej) => glob(arg, (err, files) => {
+        if(err){
+            return rej(err);
+        }
+        return res(files);
+    }))))
+    .then((res) => res.reduce((acc, val) => acc.concat(val), []));
+}
+
+targets.then((files) => Promise.all(files.map((file) => processFile(file))))
     .then(commitDocs)
     .then(() => console.log('Documentation Built')) //eslint-disable-line no-console
     .catch((err) => console.log(err)); //eslint-disable-line no-console
