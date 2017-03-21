@@ -3,7 +3,7 @@
 ## echo
 Example plugin, echos your words back at you.
 
-**Author:** Accalia  
+**Author**: Accalia  
 **License**: MIT  
 
 * [echo](#module_echo)

@@ -3,7 +3,7 @@
 ## summoner
 Example plugin, replies to mentions with random quips.
 
-**Author:** Accalia  
+**Author**: Accalia  
 **License**: MIT  
 
 * [summoner](#module_summoner)
