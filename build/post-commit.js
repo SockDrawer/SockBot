@@ -131,7 +131,7 @@ if (!args.length) {
     targets = getChanges(/[.]js$/i);
 } else {
     targets = Promise.all(args.map((arg) => new Promise((res, rej) => glob(arg, (err, files) => {
-        if(err){
+        if (err) {
             return rej(err);
         }
         return res(files);
