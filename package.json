@@ -39,8 +39,8 @@
     "commitizen": "^2.8.5",
     "cz-conventional-changelog": "^2.0.0",
     "eslint": "^3.18.0",
-    "ghooks": "^2.0.0",
     "glob": "^7.1.1",
+    "husky": "^0.13.2",
     "istanbul": "^0.4.3",
     "jsdoc-to-markdown": "^3.0.0",
     "mkdirp": "^0.5.1",
@@ -61,18 +61,16 @@
     "test": "istanbul check-coverage coverage/coverage.json",
     "mocha": "mocha --recursive -R dot",
     "commit": "git-cz",
-    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post",
+    "postcommit": "node build/post-commit.js",
+    "commitmsg": "validate-commit-msg",
+    "prepush": "npm test",
+    "postmerge": "npm install",
+    "postrewrite": "npm install"
   },
   "config": {
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
-    },
-    "ghooks": {
-      "post-commit": "node build/post-commit.js",
-      "commit-msg": "validate-commit-msg",
-      "pre-push": "npm test",
-      "post-merge": "npm install",
-      "post-rewrite": "npm install"
     }
   }
 }
