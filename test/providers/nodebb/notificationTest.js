@@ -675,7 +675,7 @@ describe('providers/nodebb/notification', () => {
                 forum.config.core = {
                     ignoreCategories: [3]
                 };
-                
+
                 commands.commands = [];
                 notifier.categoryId = 3;
                 notifier.type = `a${Math.random()}b`;
@@ -687,7 +687,7 @@ describe('providers/nodebb/notification', () => {
                 forum.config.core = {
                     ignoreCategories: [2]
                 };
-                
+
                 commands.commands = [];
                 notifier.categoryId = 3;
                 notifier.type = `a${Math.random()}b`;
@@ -702,13 +702,18 @@ describe('providers/nodebb/notification', () => {
                 commands.commands = [];
                 notifier.categoryId = 3;
                 notifier.type = `a${Math.random()}b`;
-                
+
                 return notifyHandler(5).should.be.fulfilled;
             });
             it('should reject if something throws a wobbly other than the blacklist', () => {
                 notifier.getText.rejects(new Error('Bad wolf'));
-                
+
                 return notifyHandler(5).should.be.rejectedWith('Bad wolf');
+            });
+        });
+        describe('internal evalBlacklist()', () => {
+            it('should have tests written for evalBlackList function', () => {
+                throw new Error('E_YAMI_NEEDS_TO_WRITE_THESE_TESTS');
             });
         });
     });

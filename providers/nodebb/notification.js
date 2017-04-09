@@ -115,7 +115,7 @@ exports.bindNotification = function bindNotification(forum) {
         get topicId() {
             return utils.mapGet(this, 'topicId');
         }
-        
+
         /**
          * Category id this post refers to
          *
@@ -388,7 +388,7 @@ exports.bindNotification = function bindNotification(forum) {
         return evalBlacklist(notification)
         .then(() => {
             forum.emit('log', `Notification ${notification.id}: ${notification.label} received`);
-    
+
             const ids = {
                 post: notification.postId,
                 topic: notification.topicId,
@@ -416,7 +416,7 @@ exports.bindNotification = function bindNotification(forum) {
             throw err;
         });
     }
-    
+
     /**
      * Evaluate the blacklist.
      *
@@ -433,7 +433,7 @@ exports.bindNotification = function bindNotification(forum) {
             const ignoreCategories = forum.config.core.ignoreCategories || [];
 
             //if there's no blacklist, we can ignore the hit for getting the category
-            if (ignoreCategories) {
+            if (ignoreCategories && notification.categoryId) {
                 if (ignoreCategories.some((elem) => elem.toString() === notification.categoryId.toString())) {
                     forum.emit('log', `Notification from category ${notification.categoryId} ignored`);
                     return reject('Ignoring notification');
