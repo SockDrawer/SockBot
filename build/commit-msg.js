@@ -1,12 +1,12 @@
 'use strict';
 
-var fs = require('fs');
+const fs = require('fs');
 
 const validateMessage = require('validate-commit-msg');
 
 const messageLocation = './.git/COMMIT_EDITMSG';
 
-fs.readFile(messageLocation, function(_, buffer) {
+fs.readFile(messageLocation, (_, buffer) => {
     let message = buffer.toString();
 
     // Alias `feature` => `feat`
@@ -15,7 +15,7 @@ fs.readFile(messageLocation, function(_, buffer) {
     }
 
     // Lowercase the message type
-    message = message.replace(/^[a-z]+/i, (m) => m.toLowerCase());
+    message = message.replace(/^[a-z]+/i, (type) => type.toLowerCase());
 
     fs.writeFile(messageLocation, message, 'utf8', () => {
         const result = validateMessage(message);
