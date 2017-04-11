@@ -347,6 +347,44 @@ exports.bindTopic = function bindTopic(forum) {
         unmute() {
             return Promise.resolve(this);
         }
+        
+        /**
+         * Locks the topic. Will reject if you're not a moderator.
+         *
+         * @public
+         *
+         * @returns {Promise<Topic>} Resolves to self on completion
+         *
+         * @promise
+         * @fulfill {Topic} Source Topic
+         * @reject {Error} An Error that occured while posting
+         */
+        lock() {
+            return forum._emit('topics.lock', {
+                tids: [this.id],
+                cid: this.categoryId
+            })
+            .then(() => this);
+        }
+        
+        /**
+         * Unlocks the topic. Will reject if you're not a moderator.
+         *
+         * @public
+         *
+         * @returns {Promise<Topic>} Resolves to self on completion
+         *
+         * @promise
+         * @fulfill {Topic} Source Topic
+         * @reject {Error} An Error that occured while posting
+         */
+        unlock() {
+            return forum._emit('topics.unlock', {
+                tids: [this.id],
+                cid: this.categoryId
+            })
+            .then(() => this);
+        }
 
         /**
          * Retrieve a topic by topic id

@@ -369,6 +369,58 @@ describe('providers/nodebb/topic', () => {
                 return topic.unmute().should.become(topic);
             });
         });
+        describe('lock()', () => {
+            let topic, data;
+            beforeEach(() => {
+                topic = new Topic({});
+                data = utils.mapGet(topic);
+            });
+            it('should emit `topics.lock` via websocket', () => {
+                const id = Math.random();
+                const cid = Math.random();
+                data.id = id;
+                data.categoryId = cid;
+                return topic.lock().then(() => {
+                    forum._emit.calledWith('topics.lock', {
+                        tids: [id],
+                        cid: cid
+                    }).should.be.true;
+                });
+            });
+            it('should resolve to locked topic', () => {
+                return topic.lock().should.become(topic);
+            });
+            it('should reject if websocket rejects', () => {
+                forum._emit.rejects('bad');
+                return topic.lock().should.be.rejected;
+            });
+        });
+        describe('unlock()', () => {
+            let topic, data;
+            beforeEach(() => {
+                topic = new Topic({});
+                data = utils.mapGet(topic);
+            });
+            it('should emit `topics.unlock` via websocket', () => {
+                const id = Math.random();
+                const cid = Math.random();
+                data.id = id;
+                data.categoryId = cid;
+                return topic.unlock().then(() => {
+                    forum._emit.calledWith('topics.unlock', {
+                        tids: [id],
+                        cid: cid
+                    }).should.be.true;
+                });
+            });
+            it('should resolve to locked topic', () => {
+                return topic.unlock().should.become(topic);
+            });
+            it('should reject if websocket rejects', () => {
+                forum._emit.rejects('bad');
+                return topic.unlock().should.be.rejected;
+            });
+        });
         describe('static functions', () => {
             describe('static getRecentTopics()', () => {
                 let spy = () => 0;
