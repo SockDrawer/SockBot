@@ -63,7 +63,7 @@
     "commit": "git-cz",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post",
     "postcommit": "node build/post-commit.js",
-    "commitmsg": "validate-commit-msg",
+    "commitmsg": "node build/commit-msg.js",
     "prepush": "npm test",
     "postmerge": "npm install",
     "postrewrite": "npm install"
