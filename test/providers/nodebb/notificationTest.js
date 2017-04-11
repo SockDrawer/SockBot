@@ -695,6 +695,30 @@ describe('providers/nodebb/notification', () => {
                     forum.emit.should.have.been.calledWith('notification', notifier);
                 });
             });
+            it('should emit notifications when there is no blacklist', () => {
+                forum.config.core = {
+                    ignoreCategories: undefined
+                };
+
+                commands.commands = [];
+                notifier.categoryId = 3;
+                notifier.type = `a${Math.random()}b`;
+                return notifyHandler(42).then(() => {
+                    forum.emit.should.have.been.calledWith('notification', notifier);
+                });
+            });
+            it('should emit notifications when there is no category (chats)', () => {
+                forum.config.core = {
+                    ignoreCategories: [2]
+                };
+
+                commands.commands = [];
+                notifier.categoryId = undefined;
+                notifier.type = `a${Math.random()}b`;
+                return notifyHandler(42).then(() => {
+                    forum.emit.should.have.been.calledWith('notification', notifier);
+                });
+            });
             it('should not reject if the blacklist rejects', () => {
                 forum.config.core = {
                     ignoreCategories: [3]
@@ -709,11 +733,6 @@ describe('providers/nodebb/notification', () => {
                 notifier.getText.rejects(new Error('Bad wolf'));
 
                 return notifyHandler(5).should.be.rejectedWith('Bad wolf');
-            });
-        });
-        describe('internal evalBlacklist()', () => {
-            it('should have tests written for evalBlackList function', () => {
-                throw new Error('E_YAMI_NEEDS_TO_WRITE_THESE_TESTS');
             });
         });
     });
