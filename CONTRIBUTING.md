@@ -1,5 +1,7 @@
 # Contributing to SockBot
 
+The following are our current guidelines, adapted from [Angular](https://github.com/angular/angular/blob/d92930e975afd20cb4e59c4d392a58edafeef9eb/CONTRIBUTING.md). If you see anything you dislike, let us know; we're always open to suggestions, and we're actively trying to improve our contributor process to make SockDrawer more welcoming to newcomers.
+
 We'd love for you to contribute to our source code and to make SockBot even better than it is
 today! Here are the guidelines we'd like you to follow:
 
@@ -16,12 +18,12 @@ Help us keep SockBot open and inclusive. Please read and follow our [Code of Con
 
 ## <a name="question"></a> Got a Question or Problem?
 
-If you have questions about how to use SockBot, please open an issue on our [GitHub Repository][github]. 
+If you have questions about how to use SockBot, please open an issue on our [GitHub Repository][github].
 You can also contact us via email at [developers@sockdrawer.io](mailto:developers@sockdrawer.io).
 
 ## <a name="issue"></a> Found an Issue?
 If you find a bug in the source code or a mistake in the documentation, you can help us by
-submitting an issue to our [GitHub Repository][github]. Even better you can submit a Pull Request
+submitting an issue to our [GitHub Repository][github]. Even better, you can submit a Pull Request
 with a fix.
 
 **Please see the Submission Guidelines below**.
@@ -31,8 +33,8 @@ You can request a new feature by submitting an issue to our [GitHub Repository][
 would like to implement a new feature then consider what kind of change it is:
 
 * **Major Changes** that you wish to contribute to the project should be discussed first by creating a
-feature request issue on our [GitHub Repository][github] so that we can better coordinate our efforts, 
-prevent duplication of work, and help you to craft the change so that it is successfully accepted into 
+feature request issue on our [GitHub Repository][github] so that we can better coordinate our efforts,
+prevent duplication of work, and help you to craft the change so that it is successfully accepted into
 the project.
 * **Small Changes** can be crafted and submitted to the [GitHub Repository][github] as a Pull Request.
 
@@ -88,8 +90,8 @@ Before you submit your pull request consider the following guidelines:
 * Follow our [Coding Rules](#rules).
 * Run the full SockBot test suite and ensure that all tests pass.
 * Commit your changes using a descriptive commit message that follows our
-  [commit message conventions](#commit-message-format). Adherence to the 
-  [commit message conventions](#commit-message-format) is required because release notes are 
+  [commit message conventions](#commit-message-format). Adherence to the
+  [commit message conventions](#commit-message-format) is required because release notes are
   automatically generated from these messages.
 
      ```shell
@@ -163,8 +165,8 @@ To ensure consistency throughout the source code, keep these rules in mind as yo
 * All features or bug fixes **must be tested** by one or more unit tests.
 * All public API methods **must be documented** with jsdoc. To see how we document our APIs, please check
   out the existing [docs].
-* All Code must conform to our eslint style rules without exceptions. If you feel a rule is being applied 
-  incorrectly please open an issue on our [GitHub Repository][github] so we may examine the implications 
+* All Code must conform to our eslint style rules without exceptions. If you feel a rule is being applied
+  incorrectly please open an issue on our [GitHub Repository][github] so we may examine the implications
   of the rule and your proposed changes.
 
 ## <a name="commit"></a> Git Commit Guidelines
@@ -173,8 +175,8 @@ We have very precise rules over how our git commit messages can be formatted.  T
 readable messages** that are easy to follow when looking through the **project history**.  But also,
 we use the git commit messages to **generate the SockBot change log**.
 
-The commit message formatting can be added using a typical git workflow or through the use of a CLI wizard 
-([Commitizen](https://github.com/commitizen/cz-cli)). To use the wizard, run `npm run commit` in your terminal 
+The commit message formatting can be added using a typical git workflow or through the use of a CLI wizard
+([Commitizen](https://github.com/commitizen/cz-cli)). To use the wizard, run `npm run commit` in your terminal
 after staging your changes in git.
 
 ### Commit Message Format
@@ -197,19 +199,19 @@ to read on GitHub as well as in various git tools.
 
 ### Revert
 If the commit reverts a previous commit, it should begin with `revert: `, followed by the header of the reverted
-commit. In the body it should say: `This reverts commit <hash>.`, where the hash is the SHA of the commit 
+commit. In the body it should say: `This reverts commit <hash>.`, where the hash is the SHA of the commit
 being reverted.
 
 ### Type
-Must be one of the following:
+Must be one of the following and is case insensitive:
 
-* **feat**: A new feature
+* **feat**: A new feature, this may also be specified as `feature`
 * **fix**: A bug fix
 * **docs**: Documentation only changes
 * **style**: Changes that do not affect the meaning of the code (white-space, formatting, missing
   semi-colons, etc)
 * **refactor**: A code change that neither fixes a bug nor adds a feature
-* **perf**: A code change that improves performance
+* **perf**: A code change that improves performance, this may also be specified as `performance`
 * **test**: Adding missing tests
 * **chore**: Changes to the build process or auxiliary tools and libraries such as documentation
   generation
@@ -239,7 +241,7 @@ reference GitHub issues that this commit **Closes**.
 
 For commits that fix no issues nor introduce breaking changes **footer** may be omitted.
 
-**Breaking Changes** should start with the word `BREAKING CHANGE:` with a space or two newlines. 
+**Breaking Changes** should start with the word `BREAKING CHANGE:` with a space or two newlines.
 The rest of the commit message is then used for this.
 
 

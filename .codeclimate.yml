@@ -4,7 +4,8 @@ engines:
     enabled: true
     config:
       languages:
-      - javascript
+        javascript:
+          mass_threshold: 50 # Increase detection thershold slightly
     exclude_fingerprints:
       - cce295526e01b62ae2806f9b4d245744 #Ignore duplication of a block of require() statements in build/makeDocs
       - 30fc9a280f95976dfb0abfde22f0930c #Ignore duplication of a block of require() statements in providers/nodebb/index
