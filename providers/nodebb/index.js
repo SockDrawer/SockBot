@@ -409,7 +409,7 @@ class Forum extends EventEmitter {
             'PrivateMessage',
             'Users', 'Users.Avatars', 'Users.Follow', 'Users.URL', 'Users.Seen', 'Users.PostCount',
             'Posts', 'Posts.Edit', 'Posts.Vote', 'Posts.Delete', 'Posts.Bookmark', 'Posts.URL',
-            'Topics', 'Topics.URL', 'Topics.Watch', 'Topics.Mute',
+            'Topics', 'Topics.URL', 'Topics.Watch', 'Topics.Mute', 'Topics.Lock',
             'Categories',
             'Notifications', 'Notifications.URL',
             'Formatting', 'Formatting.Markup', 'Formatting.Markup.Markdown',
