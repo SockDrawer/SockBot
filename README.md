@@ -7,11 +7,11 @@
 [![bitHound Overall Score](https://www.bithound.io/github/SockDrawer/SockBot/badges/score.svg)](https://www.bithound.io/github/SockDrawer/SockBot)
 [![Code Climate](https://codeclimate.com/github/SockDrawer/SockBot/badges/gpa.svg)](https://codeclimate.com/github/SockDrawer/SockBot)
 [![Test Coverage](https://codeclimate.com/github/SockDrawer/SockBot/badges/coverage.svg)](https://codeclimate.com/github/SockDrawer/SockBot/coverage)
+[![Package Quality](http://npm.packagequality.com/shield/sockbot.svg)](http://packagequality.com/#?package=sockbot)
 
 [![Dependency Status](https://david-dm.org/SockDrawer/SockBot/master.svg)](https://david-dm.org/SockDrawer/SockBot/master)
 [![devDependency Status](https://david-dm.org/SockDrawer/SockBot/master/dev-status.svg)](https://david-dm.org/SockDrawer/SockBot/master#info=devDependencies)
 [![optionalDependency Status](https://david-dm.org/SockDrawer/SockBot/master/optional-status.svg)](https://david-dm.org/SockDrawer/SockBot/master#info=optionalDependencies)
-
 
 SockBot
 ===========
