@@ -14,6 +14,11 @@ fs.readFile(messageLocation, (_, buffer) => {
         message = message.replace(/^feature/i, 'feat');
     }
 
+    // Alias `performance` => `perf`
+    if (/^performance[:\(]/i.test(message)) {
+        message = message.replace(/^performance/i, 'perf');
+    }
+
     // Lowercase the message type
     message = message.replace(/^[a-z]+/i, (type) => type.toLowerCase());
 
