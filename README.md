@@ -15,6 +15,8 @@
 
 SockBot
 ===========
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/SockDrawer/SockBot.svg)](https://greenkeeper.io/)
 Sockbot - A sock puppet robot worthy of TheDailyWTF in EcmaScript 6.
 
 So how do I run this thing anyway?
