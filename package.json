@@ -26,7 +26,7 @@
     "js-yaml": "^3.6.0",
     "request": "^2.81.0",
     "sanitize-html": "^1.13.0",
-    "socket.io-client": "^1.4.8",
+    "socket.io-client": "^2.0.0",
     "string": "^3.3.1",
     "yargs": "^8.0.1"
   },
