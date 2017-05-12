@@ -25,7 +25,7 @@ Returns a plugin object bound to the provided forum provider
 | Param | Type | Description |
 | --- | --- | --- |
 | forum | <code>Provider</code> | Active forum Provider |
-| config | <code>object</code> &#124; <code>Array</code> | Plugin configuration |
+| config | <code>object</code> \| <code>Array</code> | Plugin configuration |
 
 <a name="module_summoner--module.exports..handler"></a>
 
@@ -34,7 +34,7 @@ Handle a mention notification.
 
 Choose a random message and reply with it
 
-**Kind**: inner method of <code>[module.exports](#exp_module_summoner--module.exports)</code>  
+**Kind**: inner method of [<code>module.exports</code>](#exp_module_summoner--module.exports)  
 **Returns**: <code>Promise</code> - Resolves when event is processed  
 
 | Param | Type | Description |
@@ -46,10 +46,10 @@ Choose a random message and reply with it
 #### module.exports~activate()
 Activate the plugin
 
-**Kind**: inner method of <code>[module.exports](#exp_module_summoner--module.exports)</code>  
+**Kind**: inner method of [<code>module.exports</code>](#exp_module_summoner--module.exports)  
 <a name="module_summoner--module.exports..deactivate"></a>
 
 #### module.exports~deactivate()
 Deactivate the plugin
 
-**Kind**: inner method of <code>[module.exports](#exp_module_summoner--module.exports)</code>  
+**Kind**: inner method of [<code>module.exports</code>](#exp_module_summoner--module.exports)  
