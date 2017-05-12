@@ -710,6 +710,16 @@ describe('providers/nodebb/notification', () => {
                 
                 return notifyHandler(5).should.be.rejectedWith('Bad wolf');
             });
+            it('should not reject on an empty blacklist', () => {
+                forum.config.core = {
+                    ignoreCategories: null
+                };
+                commands.commands = [];
+                notifier.categoryId = 3;
+                notifier.type = `a${Math.random()}b`;
+                
+                return notifyHandler(5).should.be.fulfilled;
+            });
         });
     });
 });
