@@ -433,7 +433,7 @@ exports.bindNotification = function bindNotification(forum) {
             const ignoreCategories = forum.config.core.ignoreCategories || [];
 
             //if there's no blacklist, we can ignore the hit for getting the category
-            if (ignoreCategories) {
+            if (ignoreCategories.length) {
                 if (ignoreCategories.some((elem) => elem.toString() === notification.categoryId.toString())) {
                     forum.emit('log', `Notification from category ${notification.categoryId} ignored`);
                     return reject('Ignoring notification');

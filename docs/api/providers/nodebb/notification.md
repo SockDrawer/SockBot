@@ -3,7 +3,7 @@
 ## Notification
 NodeBB provider module Notification class
 
-**Author:** Accalia  
+**Author**: Accalia  
 **License**: MIT  
 
 * [Notification](#sockbot.providers.nodebb.module_Notification)
@@ -42,7 +42,7 @@ NodeBB provider module Notification class
 ### Notification.bindNotification(forum) ⇒ <code>Notification</code>
 Create a Notification class and bind it to a forum instance
 
-**Kind**: static method of <code>[Notification](#sockbot.providers.nodebb.module_Notification)</code>  
+**Kind**: static method of [<code>Notification</code>](#sockbot.providers.nodebb.module_Notification)  
 **Returns**: <code>Notification</code> - A Notification class bound to the provided `forum` instance  
 
 | Param | Type | Description |
@@ -54,7 +54,7 @@ Create a Notification class and bind it to a forum instance
 #### bindNotification~notificationType
 Notification types enum
 
-**Kind**: inner enum of <code>[bindNotification](#sockbot.providers.nodebb.module_Notification.bindNotification)</code>  
+**Kind**: inner enum of [<code>bindNotification</code>](#sockbot.providers.nodebb.module_Notification.bindNotification)  
 **Read only**: true  
 **Properties**
 
@@ -71,8 +71,8 @@ Notification Class
 
 Represents a forum notification
 
-**Kind**: inner class of <code>[Notification](#sockbot.providers.nodebb.module_Notification)</code>  
-**Access:** public  
+**Kind**: inner class of [<code>Notification</code>](#sockbot.providers.nodebb.module_Notification)  
+**Access**: public  
 
 * [~Notification](#sockbot.providers.nodebb.module_Notification..Notification)
     * [new Notification(payload)](#new_sockbot.providers.nodebb.module_Notification..Notification_new)
@@ -118,86 +118,86 @@ data use `Notification.parse()` instead
 #### notification.id : <code>string</code>
 Unique notification id of this notification
 
-**Kind**: instance property of <code>[Notification](#sockbot.providers.nodebb.module_Notification..Notification)</code>  
-**Access:** public  
+**Kind**: instance property of [<code>Notification</code>](#sockbot.providers.nodebb.module_Notification..Notification)  
+**Access**: public  
 <a name="sockbot.providers.nodebb.module_Notification..Notification+postId"></a>
 
 #### notification.postId : <code>number</code>
 Post id this notification refers to
 
-**Kind**: instance property of <code>[Notification](#sockbot.providers.nodebb.module_Notification..Notification)</code>  
-**Access:** public  
+**Kind**: instance property of [<code>Notification</code>](#sockbot.providers.nodebb.module_Notification..Notification)  
+**Access**: public  
 <a name="sockbot.providers.nodebb.module_Notification..Notification+topicId"></a>
 
 #### notification.topicId : <code>number</code>
 Topic id this post refers to
 
-**Kind**: instance property of <code>[Notification](#sockbot.providers.nodebb.module_Notification..Notification)</code>  
-**Access:** public  
+**Kind**: instance property of [<code>Notification</code>](#sockbot.providers.nodebb.module_Notification..Notification)  
+**Access**: public  
 <a name="sockbot.providers.nodebb.module_Notification..Notification+categoryId"></a>
 
 #### notification.categoryId : <code>number</code>
 Category id this post refers to
 
-**Kind**: instance property of <code>[Notification](#sockbot.providers.nodebb.module_Notification..Notification)</code>  
-**Access:** public  
+**Kind**: instance property of [<code>Notification</code>](#sockbot.providers.nodebb.module_Notification..Notification)  
+**Access**: public  
 <a name="sockbot.providers.nodebb.module_Notification..Notification+userId"></a>
 
 #### notification.userId : <code>number</code>
 User id that generated this notification
 
-**Kind**: instance property of <code>[Notification](#sockbot.providers.nodebb.module_Notification..Notification)</code>  
-**Access:** public  
+**Kind**: instance property of [<code>Notification</code>](#sockbot.providers.nodebb.module_Notification..Notification)  
+**Access**: public  
 <a name="sockbot.providers.nodebb.module_Notification..Notification+type"></a>
 
 #### notification.type : <code>notificationType</code>
 Notification type code
 
-**Kind**: instance property of <code>[Notification](#sockbot.providers.nodebb.module_Notification..Notification)</code>  
-**Access:** public  
+**Kind**: instance property of [<code>Notification</code>](#sockbot.providers.nodebb.module_Notification..Notification)  
+**Access**: public  
 <a name="sockbot.providers.nodebb.module_Notification..Notification+subtype"></a>
 
 #### notification.subtype : <code>string</code>
 Notification subtype
 
-**Kind**: instance property of <code>[Notification](#sockbot.providers.nodebb.module_Notification..Notification)</code>  
-**Access:** public  
+**Kind**: instance property of [<code>Notification</code>](#sockbot.providers.nodebb.module_Notification..Notification)  
+**Access**: public  
 <a name="sockbot.providers.nodebb.module_Notification..Notification+read"></a>
 
 #### notification.read : <code>boolean</code>
 Is this notification read yet?
 
-**Kind**: instance property of <code>[Notification](#sockbot.providers.nodebb.module_Notification..Notification)</code>  
-**Access:** public  
+**Kind**: instance property of [<code>Notification</code>](#sockbot.providers.nodebb.module_Notification..Notification)  
+**Access**: public  
 <a name="sockbot.providers.nodebb.module_Notification..Notification+date"></a>
 
 #### notification.date : <code>Date</code>
 Datetime this notification was generated on
 
-**Kind**: instance property of <code>[Notification](#sockbot.providers.nodebb.module_Notification..Notification)</code>  
-**Access:** public  
+**Kind**: instance property of [<code>Notification</code>](#sockbot.providers.nodebb.module_Notification..Notification)  
+**Access**: public  
 <a name="sockbot.providers.nodebb.module_Notification..Notification+label"></a>
 
 #### notification.label : <code>string</code>
 Notification label
 
-**Kind**: instance property of <code>[Notification](#sockbot.providers.nodebb.module_Notification..Notification)</code>  
-**Access:** public  
+**Kind**: instance property of [<code>Notification</code>](#sockbot.providers.nodebb.module_Notification..Notification)  
+**Access**: public  
 <a name="sockbot.providers.nodebb.module_Notification..Notification+body"></a>
 
 #### notification.body : <code>string</code>
 Content of notification.
 
-**Kind**: instance property of <code>[Notification](#sockbot.providers.nodebb.module_Notification..Notification)</code>  
-**Access:** public  
+**Kind**: instance property of [<code>Notification</code>](#sockbot.providers.nodebb.module_Notification..Notification)  
+**Access**: public  
 <a name="sockbot.providers.nodebb.module_Notification..Notification+getText"></a>
 
 #### notification.getText() ⇒ <code>Promise.&lt;string&gt;</code>
 HTML Markup for this notification body
 
-**Kind**: instance method of <code>[Notification](#sockbot.providers.nodebb.module_Notification..Notification)</code>  
+**Kind**: instance method of [<code>Notification</code>](#sockbot.providers.nodebb.module_Notification..Notification)  
 **Returns**: <code>Promise.&lt;string&gt;</code> - Resolves to the notification markup  
-**Access:** public  
+**Access**: public  
 **Promise**:   
 **Fulfill**: the Notification markup  
 <a name="sockbot.providers.nodebb.module_Notification..Notification+url"></a>
@@ -205,9 +205,9 @@ HTML Markup for this notification body
 #### notification.url() ⇒ <code>Promise.&lt;string&gt;</code>
 URL Link for the notification if available
 
-**Kind**: instance method of <code>[Notification](#sockbot.providers.nodebb.module_Notification..Notification)</code>  
+**Kind**: instance method of [<code>Notification</code>](#sockbot.providers.nodebb.module_Notification..Notification)  
 **Returns**: <code>Promise.&lt;string&gt;</code> - Resolves to the URL for the post the notification is for  
-**Access:** public  
+**Access**: public  
 **Promise**:   
 **Fullfil**: <code>string</code> The URL for the post the notification is for  
 <a name="sockbot.providers.nodebb.module_Notification..Notification+getPost"></a>
@@ -215,9 +215,9 @@ URL Link for the notification if available
 #### notification.getPost() ⇒ <code>Promise.&lt;Post&gt;</code>
 Get the post this Notification refers to
 
-**Kind**: instance method of <code>[Notification](#sockbot.providers.nodebb.module_Notification..Notification)</code>  
+**Kind**: instance method of [<code>Notification</code>](#sockbot.providers.nodebb.module_Notification..Notification)  
 **Returns**: <code>Promise.&lt;Post&gt;</code> - Resolves to the post the notification refers to  
-**Access:** public  
+**Access**: public  
 **Promise**:   
 **Fulfill**: <code>Post</code> the Post the notification refers to  
 <a name="sockbot.providers.nodebb.module_Notification..Notification+getTopic"></a>
@@ -225,9 +225,9 @@ Get the post this Notification refers to
 #### notification.getTopic() ⇒ <code>Promise.&lt;Topic&gt;</code>
 Get the topic this Notification refers to
 
-**Kind**: instance method of <code>[Notification](#sockbot.providers.nodebb.module_Notification..Notification)</code>  
+**Kind**: instance method of [<code>Notification</code>](#sockbot.providers.nodebb.module_Notification..Notification)  
 **Returns**: <code>Promise.&lt;Topic&gt;</code> - Resolves to the topic the notification refers to  
-**Access:** public  
+**Access**: public  
 **Promise**:   
 **Fulfill**: <code>Topic</code> the Topic the notification refers to  
 <a name="sockbot.providers.nodebb.module_Notification..Notification+getUser"></a>
@@ -235,9 +235,9 @@ Get the topic this Notification refers to
 #### notification.getUser() ⇒ <code>Promise.&lt;User&gt;</code>
 Get the user who generated this Notification
 
-**Kind**: instance method of <code>[Notification](#sockbot.providers.nodebb.module_Notification..Notification)</code>  
+**Kind**: instance method of [<code>Notification</code>](#sockbot.providers.nodebb.module_Notification..Notification)  
 **Returns**: <code>Promise.&lt;User&gt;</code> - Resolves to the user who generated this notification  
-**Access:** public  
+**Access**: public  
 **Promise**:   
 **Fulfill**: <code>Post</code> the User who generated this notification  
 <a name="sockbot.providers.nodebb.module_Notification..Notification.get"></a>
@@ -245,9 +245,9 @@ Get the user who generated this Notification
 #### Notification.get(notificationId) ⇒ <code>Promise.&lt;Notification&gt;</code>
 Get a notification
 
-**Kind**: static method of <code>[Notification](#sockbot.providers.nodebb.module_Notification..Notification)</code>  
+**Kind**: static method of [<code>Notification</code>](#sockbot.providers.nodebb.module_Notification..Notification)  
 **Returns**: <code>Promise.&lt;Notification&gt;</code> - resolves to the retrieved notification  
-**Access:** public  
+**Access**: public  
 **Promise**:   
 **Fulfill**: <code>Notification</code> the retrieved notification  
 
@@ -260,9 +260,9 @@ Get a notification
 #### Notification.parse(payload) ⇒ <code>Notification</code>
 Parse a notification from a given payload
 
-**Kind**: static method of <code>[Notification](#sockbot.providers.nodebb.module_Notification..Notification)</code>  
+**Kind**: static method of [<code>Notification</code>](#sockbot.providers.nodebb.module_Notification..Notification)  
 **Returns**: <code>Notification</code> - the parsed notification  
-**Access:** public  
+**Access**: public  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -273,9 +273,9 @@ Parse a notification from a given payload
 #### Notification.getNotifications(eachNotification) ⇒ <code>Promise</code>
 Get all notifications
 
-**Kind**: static method of <code>[Notification](#sockbot.providers.nodebb.module_Notification..Notification)</code>  
+**Kind**: static method of [<code>Notification</code>](#sockbot.providers.nodebb.module_Notification..Notification)  
 **Returns**: <code>Promise</code> - Fulfills after notifications are processed  
-**Access:** public  
+**Access**: public  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -288,7 +288,7 @@ Activate notifications.
 
 Listen for new notifications and process ones that arrive
 
-**Kind**: static method of <code>[Notification](#sockbot.providers.nodebb.module_Notification..Notification)</code>  
+**Kind**: static method of [<code>Notification</code>](#sockbot.providers.nodebb.module_Notification..Notification)  
 <a name="sockbot.providers.nodebb.module_Notification..Notification.deactivate"></a>
 
 #### Notification.deactivate()
@@ -296,4 +296,4 @@ Deactivate notifications
 
 Stop listening for new notifcations.
 
-**Kind**: static method of <code>[Notification](#sockbot.providers.nodebb.module_Notification..Notification)</code>  
+**Kind**: static method of [<code>Notification</code>](#sockbot.providers.nodebb.module_Notification..Notification)  

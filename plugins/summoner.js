@@ -46,13 +46,14 @@ module.exports = function summoner(forum, config) {
         debug('summoner received a mention notification!');
         return notification.getUser()
             .then((user) => {
-                if (user.username && !user.name) {
-                    user.name = user.username;
-                }
                 debug(`summoner responding to summons by ${user.name}`);
                 const index = Math.floor(Math.random() * messages.length);
                 const message = messages[index].replace(/%(\w+)%/g, (_, key) => {
-                    let value = user[key] || `%${key}%`;
+                    let value = user[key];
+                    if (key === 'name' && !value) {
+                        value = user.username;
+                    }
+                    value = value || `%${key}%`;
                     if (typeof value !== 'string') {
                         value = `%${key}%`;
                     }
