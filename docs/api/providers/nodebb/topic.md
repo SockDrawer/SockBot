@@ -3,7 +3,7 @@
 ## Topic
 NodeBB provider module Topic class
 
-**Author:** Accalia  
+**Author**: Accalia  
 **License**: MIT  
 
 * [Topic](#sockbot.providers.nodebb.module_Topic)
@@ -30,6 +30,8 @@ NodeBB provider module Topic class
                 * [.unwatch()](#sockbot.providers.nodebb.module_Topic..Topic+unwatch) ⇒ <code>Promise.&lt;Topic&gt;</code>
                 * [.mute()](#sockbot.providers.nodebb.module_Topic..Topic+mute) ⇒ <code>Promise.&lt;Topic&gt;</code>
                 * [.unmute()](#sockbot.providers.nodebb.module_Topic..Topic+unmute) ⇒ <code>Promise.&lt;Topic&gt;</code>
+                * [.lock()](#sockbot.providers.nodebb.module_Topic..Topic+lock) ⇒ <code>Promise.&lt;Topic&gt;</code>
+                * [.unlock()](#sockbot.providers.nodebb.module_Topic..Topic+unlock) ⇒ <code>Promise.&lt;Topic&gt;</code>
             * _static_
                 * [.get(topicId)](#sockbot.providers.nodebb.module_Topic..Topic.get) ⇒ <code>Promise.&lt;Topic&gt;</code>
                 * [.parse(payload)](#sockbot.providers.nodebb.module_Topic..Topic.parse) ⇒ <code>Topic</code>
@@ -42,7 +44,7 @@ NodeBB provider module Topic class
 ### Topic.bindTopic(forum) ⇒ <code>User</code>
 Create a Topic class and bind it to a forum instance
 
-**Kind**: static method of <code>[Topic](#sockbot.providers.nodebb.module_Topic)</code>  
+**Kind**: static method of [<code>Topic</code>](#sockbot.providers.nodebb.module_Topic)  
 **Returns**: <code>User</code> - A Topic class bound to the provided `forum` instance  
 
 | Param | Type | Description |
@@ -56,8 +58,8 @@ Topic Class
 
 Represends a forum topic
 
-**Kind**: inner class of <code>[Topic](#sockbot.providers.nodebb.module_Topic)</code>  
-**Access:** public  
+**Kind**: inner class of [<code>Topic</code>](#sockbot.providers.nodebb.module_Topic)  
+**Access**: public  
 
 * [~Topic](#sockbot.providers.nodebb.module_Topic..Topic)
     * [new Topic(payload)](#new_sockbot.providers.nodebb.module_Topic..Topic_new)
@@ -79,6 +81,8 @@ Represends a forum topic
         * [.unwatch()](#sockbot.providers.nodebb.module_Topic..Topic+unwatch) ⇒ <code>Promise.&lt;Topic&gt;</code>
         * [.mute()](#sockbot.providers.nodebb.module_Topic..Topic+mute) ⇒ <code>Promise.&lt;Topic&gt;</code>
         * [.unmute()](#sockbot.providers.nodebb.module_Topic..Topic+unmute) ⇒ <code>Promise.&lt;Topic&gt;</code>
+        * [.lock()](#sockbot.providers.nodebb.module_Topic..Topic+lock) ⇒ <code>Promise.&lt;Topic&gt;</code>
+        * [.unlock()](#sockbot.providers.nodebb.module_Topic..Topic+unlock) ⇒ <code>Promise.&lt;Topic&gt;</code>
     * _static_
         * [.get(topicId)](#sockbot.providers.nodebb.module_Topic..Topic.get) ⇒ <code>Promise.&lt;Topic&gt;</code>
         * [.parse(payload)](#sockbot.providers.nodebb.module_Topic..Topic.parse) ⇒ <code>Topic</code>
@@ -104,65 +108,65 @@ This constructor is intended for private use only, if you need top construct a t
 #### topic.categoryId : <code>number</code>
 Forum specific ID for topic category
 
-**Kind**: instance property of <code>[Topic](#sockbot.providers.nodebb.module_Topic..Topic)</code>  
-**Access:** public  
+**Kind**: instance property of [<code>Topic</code>](#sockbot.providers.nodebb.module_Topic..Topic)  
+**Access**: public  
 <a name="sockbot.providers.nodebb.module_Topic..Topic+authorId"></a>
 
 #### topic.authorId : <code>number</code>
 Forum specific ID for topic author
 
-**Kind**: instance property of <code>[Topic](#sockbot.providers.nodebb.module_Topic..Topic)</code>  
-**Access:** public  
+**Kind**: instance property of [<code>Topic</code>](#sockbot.providers.nodebb.module_Topic..Topic)  
+**Access**: public  
 <a name="sockbot.providers.nodebb.module_Topic..Topic+title"></a>
 
 #### topic.title : <code>string</code>
 Topic title
 
-**Kind**: instance property of <code>[Topic](#sockbot.providers.nodebb.module_Topic..Topic)</code>  
-**Access:** public  
+**Kind**: instance property of [<code>Topic</code>](#sockbot.providers.nodebb.module_Topic..Topic)  
+**Access**: public  
 <a name="sockbot.providers.nodebb.module_Topic..Topic+posted"></a>
 
 #### topic.posted : <code>Date</code>
 DateTime that the topic was created
 
-**Kind**: instance property of <code>[Topic](#sockbot.providers.nodebb.module_Topic..Topic)</code>  
-**Access:** public  
+**Kind**: instance property of [<code>Topic</code>](#sockbot.providers.nodebb.module_Topic..Topic)  
+**Access**: public  
 <a name="sockbot.providers.nodebb.module_Topic..Topic+lastPosted"></a>
 
 #### topic.lastPosted : <code>Date</code>
 DateTime that the topic was last replied to
 
-**Kind**: instance property of <code>[Topic](#sockbot.providers.nodebb.module_Topic..Topic)</code>  
-**Access:** public  
+**Kind**: instance property of [<code>Topic</code>](#sockbot.providers.nodebb.module_Topic..Topic)  
+**Access**: public  
 <a name="sockbot.providers.nodebb.module_Topic..Topic+id"></a>
 
 #### topic.id : <code>number</code>
 Forum Specific Topic Id
 
-**Kind**: instance property of <code>[Topic](#sockbot.providers.nodebb.module_Topic..Topic)</code>  
-**Access:** public  
+**Kind**: instance property of [<code>Topic</code>](#sockbot.providers.nodebb.module_Topic..Topic)  
+**Access**: public  
 <a name="sockbot.providers.nodebb.module_Topic..Topic+mainPostId"></a>
 
 #### topic.mainPostId : <code>number</code>
 Forum id of the opening post
 
-**Kind**: instance property of <code>[Topic](#sockbot.providers.nodebb.module_Topic..Topic)</code>  
-**Access:** public  
+**Kind**: instance property of [<code>Topic</code>](#sockbot.providers.nodebb.module_Topic..Topic)  
+**Access**: public  
 <a name="sockbot.providers.nodebb.module_Topic..Topic+postCount"></a>
 
 #### topic.postCount : <code>number</code>
 Count of posts in topic
 
-**Kind**: instance property of <code>[Topic](#sockbot.providers.nodebb.module_Topic..Topic)</code>  
-**Access:** public  
+**Kind**: instance property of [<code>Topic</code>](#sockbot.providers.nodebb.module_Topic..Topic)  
+**Access**: public  
 <a name="sockbot.providers.nodebb.module_Topic..Topic+url"></a>
 
 #### topic.url() ⇒ <code>Promise.&lt;string&gt;</code>
 Retrieve the web URL for the topic
 
-**Kind**: instance method of <code>[Topic](#sockbot.providers.nodebb.module_Topic..Topic)</code>  
+**Kind**: instance method of [<code>Topic</code>](#sockbot.providers.nodebb.module_Topic..Topic)  
 **Returns**: <code>Promise.&lt;string&gt;</code> - Resolves to the web URL for this topic  
-**Access:** public  
+**Access**: public  
 **Promise**:   
 **Fulfill**: <code>string</code> The Web URL for this topic  
 **Reject**: <code>Error</code> An Error that occured while retrieving the post URL  
@@ -171,9 +175,9 @@ Retrieve the web URL for the topic
 #### topic.reply(content) ⇒ <code>Promise.&lt;Post&gt;</code>
 Reply to this topic with the given content
 
-**Kind**: instance method of <code>[Topic](#sockbot.providers.nodebb.module_Topic..Topic)</code>  
+**Kind**: instance method of [<code>Topic</code>](#sockbot.providers.nodebb.module_Topic..Topic)  
 **Returns**: <code>Promise.&lt;Post&gt;</code> - Resolves to the newly created Post  
-**Access:** public  
+**Access**: public  
 **Promise**:   
 **Fulfill**: <code>Post</code> The newly created Post  
 **Reject**: <code>Error</code> An Error that occured while posting  
@@ -187,9 +191,9 @@ Reply to this topic with the given content
 #### topic.getAllPosts(eachPost) ⇒ <code>Promise.&lt;Topic&gt;</code>
 Retrieve all posts from this topic, passing each off to a provided iterator function.
 
-**Kind**: instance method of <code>[Topic](#sockbot.providers.nodebb.module_Topic..Topic)</code>  
+**Kind**: instance method of [<code>Topic</code>](#sockbot.providers.nodebb.module_Topic..Topic)  
 **Returns**: <code>Promise.&lt;Topic&gt;</code> - Resolves to self on completion  
-**Access:** public  
+**Access**: public  
 **Promise**:   
 **Fulfill**: <code>Topic</code> Source Topic  
 **Reject**: <code>Error</code> An Error that occured while posting  
@@ -203,9 +207,9 @@ Retrieve all posts from this topic, passing each off to a provided iterator func
 #### topic.getLatestPosts(eachPost) ⇒ <code>Promise.&lt;Topic&gt;</code>
 Retrieve most posts from this topic, passing each off to a provided iterator function.
 
-**Kind**: instance method of <code>[Topic](#sockbot.providers.nodebb.module_Topic..Topic)</code>  
+**Kind**: instance method of [<code>Topic</code>](#sockbot.providers.nodebb.module_Topic..Topic)  
 **Returns**: <code>Promise.&lt;Topic&gt;</code> - Resolves to self on completion  
-**Access:** public  
+**Access**: public  
 **Promise**:   
 **Fulfill**: <code>Topic</code> Source Topic  
 **Reject**: <code>Error</code> An Error that occured while posting  
@@ -219,9 +223,9 @@ Retrieve most posts from this topic, passing each off to a provided iterator fun
 #### topic.markRead([postNumber]) ⇒ <code>Promise.&lt;Topic&gt;</code>
 Mark the topic read up to a point
 
-**Kind**: instance method of <code>[Topic](#sockbot.providers.nodebb.module_Topic..Topic)</code>  
+**Kind**: instance method of [<code>Topic</code>](#sockbot.providers.nodebb.module_Topic..Topic)  
 **Returns**: <code>Promise.&lt;Topic&gt;</code> - Resolves to self on completion  
-**Access:** public  
+**Access**: public  
 **Promise**:   
 **Fulfill**: <code>Topic</code> Source Topic  
 **Reject**: <code>Error</code> An Error that occured while posting  
@@ -235,9 +239,9 @@ Mark the topic read up to a point
 #### topic.watch() ⇒ <code>Promise.&lt;Topic&gt;</code>
 Watch the topic for new replies
 
-**Kind**: instance method of <code>[Topic](#sockbot.providers.nodebb.module_Topic..Topic)</code>  
+**Kind**: instance method of [<code>Topic</code>](#sockbot.providers.nodebb.module_Topic..Topic)  
 **Returns**: <code>Promise.&lt;Topic&gt;</code> - Resolves to self on completion  
-**Access:** public  
+**Access**: public  
 **Promise**:   
 **Fulfill**: <code>Topic</code> Source Topic  
 **Reject**: <code>Error</code> An Error that occured while posting  
@@ -246,9 +250,9 @@ Watch the topic for new replies
 #### topic.unwatch() ⇒ <code>Promise.&lt;Topic&gt;</code>
 Stop watching the tipic for new replies
 
-**Kind**: instance method of <code>[Topic](#sockbot.providers.nodebb.module_Topic..Topic)</code>  
+**Kind**: instance method of [<code>Topic</code>](#sockbot.providers.nodebb.module_Topic..Topic)  
 **Returns**: <code>Promise.&lt;Topic&gt;</code> - Resolves to self on completion  
-**Access:** public  
+**Access**: public  
 **Promise**:   
 **Fulfill**: <code>Topic</code> Source Topic  
 **Reject**: <code>Error</code> An Error that occured while posting  
@@ -257,9 +261,9 @@ Stop watching the tipic for new replies
 #### topic.mute() ⇒ <code>Promise.&lt;Topic&gt;</code>
 Mute the topic to suppress notifications
 
-**Kind**: instance method of <code>[Topic](#sockbot.providers.nodebb.module_Topic..Topic)</code>  
+**Kind**: instance method of [<code>Topic</code>](#sockbot.providers.nodebb.module_Topic..Topic)  
 **Returns**: <code>Promise.&lt;Topic&gt;</code> - Resolves to self on completion  
-**Access:** public  
+**Access**: public  
 **Promise**:   
 **Fulfill**: <code>Topic</code> Source Topic  
 **Reject**: <code>Error</code> An Error that occured while posting  
@@ -268,9 +272,31 @@ Mute the topic to suppress notifications
 #### topic.unmute() ⇒ <code>Promise.&lt;Topic&gt;</code>
 Unmute the topic, allowing notifications to be generated again.
 
-**Kind**: instance method of <code>[Topic](#sockbot.providers.nodebb.module_Topic..Topic)</code>  
+**Kind**: instance method of [<code>Topic</code>](#sockbot.providers.nodebb.module_Topic..Topic)  
 **Returns**: <code>Promise.&lt;Topic&gt;</code> - Resolves to self on completion  
-**Access:** public  
+**Access**: public  
+**Promise**:   
+**Fulfill**: <code>Topic</code> Source Topic  
+**Reject**: <code>Error</code> An Error that occured while posting  
+<a name="sockbot.providers.nodebb.module_Topic..Topic+lock"></a>
+
+#### topic.lock() ⇒ <code>Promise.&lt;Topic&gt;</code>
+Locks the topic. Will reject if you're not a moderator.
+
+**Kind**: instance method of [<code>Topic</code>](#sockbot.providers.nodebb.module_Topic..Topic)  
+**Returns**: <code>Promise.&lt;Topic&gt;</code> - Resolves to self on completion  
+**Access**: public  
+**Promise**:   
+**Fulfill**: <code>Topic</code> Source Topic  
+**Reject**: <code>Error</code> An Error that occured while posting  
+<a name="sockbot.providers.nodebb.module_Topic..Topic+unlock"></a>
+
+#### topic.unlock() ⇒ <code>Promise.&lt;Topic&gt;</code>
+Unlocks the topic. Will reject if you're not a moderator.
+
+**Kind**: instance method of [<code>Topic</code>](#sockbot.providers.nodebb.module_Topic..Topic)  
+**Returns**: <code>Promise.&lt;Topic&gt;</code> - Resolves to self on completion  
+**Access**: public  
 **Promise**:   
 **Fulfill**: <code>Topic</code> Source Topic  
 **Reject**: <code>Error</code> An Error that occured while posting  
@@ -279,9 +305,9 @@ Unmute the topic, allowing notifications to be generated again.
 #### Topic.get(topicId) ⇒ <code>Promise.&lt;Topic&gt;</code>
 Retrieve a topic by topic id
 
-**Kind**: static method of <code>[Topic](#sockbot.providers.nodebb.module_Topic..Topic)</code>  
+**Kind**: static method of [<code>Topic</code>](#sockbot.providers.nodebb.module_Topic..Topic)  
 **Returns**: <code>Promise.&lt;Topic&gt;</code> - Retrieved topic  
-**Access:** public  
+**Access**: public  
 **Promise**:   
 **Fulfill**: <code>Topic</code> Retrieved Topic  
 **Reject**: <code>Error</code> An Error that occured while posting  
@@ -295,9 +321,9 @@ Retrieve a topic by topic id
 #### Topic.parse(payload) ⇒ <code>Topic</code>
 Parse a topic from retrieved data
 
-**Kind**: static method of <code>[Topic](#sockbot.providers.nodebb.module_Topic..Topic)</code>  
+**Kind**: static method of [<code>Topic</code>](#sockbot.providers.nodebb.module_Topic..Topic)  
 **Returns**: <code>Topic</code> - Parsed topic  
-**Access:** public  
+**Access**: public  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -308,9 +334,9 @@ Parse a topic from retrieved data
 #### Topic.parseExtended(data) ⇒ <code>Promise.&lt;TopicExtended&gt;</code>
 Parse a topic with embedded user and category information into respective objects
 
-**Kind**: static method of <code>[Topic](#sockbot.providers.nodebb.module_Topic..Topic)</code>  
+**Kind**: static method of [<code>Topic</code>](#sockbot.providers.nodebb.module_Topic..Topic)  
 **Returns**: <code>Promise.&lt;TopicExtended&gt;</code> - Parsed Results  
-**Access:** public  
+**Access**: public  
 **Promise**:   
 **Fulfill**: <code>TopicExtended</code> Parsed topic data  
 
@@ -323,9 +349,9 @@ Parse a topic with embedded user and category information into respective object
 #### Topic.getUnreadTopics(eachTopic) ⇒ <code>Promise</code>
 Get All Unread Topics
 
-**Kind**: static method of <code>[Topic](#sockbot.providers.nodebb.module_Topic..Topic)</code>  
+**Kind**: static method of [<code>Topic</code>](#sockbot.providers.nodebb.module_Topic..Topic)  
 **Returns**: <code>Promise</code> - A promise that resolves when all topics have been processed  
-**Access:** public  
+**Access**: public  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -336,9 +362,9 @@ Get All Unread Topics
 #### Topic.getRecentTopics(eachTopic) ⇒ <code>Promise</code>
 Get All Topics in order of most recent activity
 
-**Kind**: static method of <code>[Topic](#sockbot.providers.nodebb.module_Topic..Topic)</code>  
+**Kind**: static method of [<code>Topic</code>](#sockbot.providers.nodebb.module_Topic..Topic)  
 **Returns**: <code>Promise</code> - A promise that resolves when all topics have been processed  
-**Access:** public  
+**Access**: public  
 
 | Param | Type | Description |
 | --- | --- | --- |
