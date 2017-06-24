@@ -25,27 +25,27 @@ describe('lib/app', () => {
             testModule.relativeRequire('foo', 'bar', spy);
             const actual = spy.firstCall.args[0];
             actual.should.equal(expected);
-            spy.should.have.been.calledWith(expected).once;
+            spy.should.have.been.calledWith(expected);
         });
         it('should require relative to config for relative path', () => {
             const spy = sinon.spy();
             config.basePath = '/bar/baz/';
             const expected = '/bar/baz/foo';
             testModule.relativeRequire('../ardvark', './foo', spy);
-            spy.should.have.been.calledWith(expected).once;
+            spy.should.have.been.calledWith(expected);
         });
         it('should require relative to config for walking relative path', () => {
             const spy = sinon.spy();
             config.basePath = '/bar/baz/';
             const expected = '/bar/foo';
             testModule.relativeRequire('../ardvark', '../foo', spy);
-            spy.should.have.been.calledWith(expected).once;
+            spy.should.have.been.calledWith(expected);
         });
         it('should require absolute for absolute path', () => {
             const spy = sinon.spy();
             const expected = '/foo/to/the/bar';
             testModule.relativeRequire('../ardvark', '/foo/to/the/bar', spy);
-            spy.should.have.been.calledWith(expected).once;
+            spy.should.have.been.calledWith(expected);
         });
         it('should require module direct on ENOENT', () => {
             const spy = sinon.stub(),
@@ -53,7 +53,7 @@ describe('lib/app', () => {
             enoent.code = 45;
             spy.onFirstCall().throws(enoent);
             testModule.relativeRequire('../ardvark', 'bar', spy);
-            spy.should.have.been.calledWith('bar').once;
+            spy.should.have.been.calledWith('bar');
         });
         it('should rethrow non ENOENT error', () => {
             const spy = sinon.stub();
@@ -89,7 +89,7 @@ describe('lib/app', () => {
             };
             cfg.plugins[name] = true;
             return testModule.loadPlugins(forum, cfg).then(() => {
-                testModule.relativeRequire.should.have.been.calledWith('plugins', name, testModule.require).once;
+                testModule.relativeRequire.should.have.been.calledWith('plugins', name, testModule.require);
             });
         });
         it('should log message on plugin load', () => {
@@ -103,7 +103,7 @@ describe('lib/app', () => {
             };
             cfg.plugins[name] = true;
             return testModule.loadPlugins(forum, cfg).then(() => {
-                testModule.log.should.have.been.calledWith(`Loading plugin ${name} for ${username}`).once;
+                testModule.log.should.have.been.calledWith(`Loading plugin ${name} for ${username}`);
             });
         });
         it('should add loaded plugin to forum', () => {
@@ -116,7 +116,7 @@ describe('lib/app', () => {
                     alpha: cfg
                 }
             }).then(() => {
-                forum.addPlugin.should.have.been.calledWith(plugin, cfg).once;
+                forum.addPlugin.should.have.been.calledWith(plugin, cfg);
             });
         });
         it('should reject when forum.addPlugin rejects', () => {
@@ -142,7 +142,7 @@ describe('lib/app', () => {
                     alpha: cfg
                 }
             }).catch(() => {
-                testModule.error.should.have.been.calledWith('Plugin alpha failed to load with error: Error: bad').once;
+                testModule.error.should.have.been.calledWith('Plugin alpha failed to load with error: Error: bad');
             });
         });
         it('should reject with error from forum.addPlugin when rejecting', () => {
@@ -195,7 +195,7 @@ describe('lib/app', () => {
             const name = `provider${Math.random()}`;
             basicConfig.core.provider = name;
             return testModule.activateConfig(basicConfig).then(() => {
-                testModule.relativeRequire.should.have.been.calledWith('providers', name).once;
+                testModule.relativeRequire.should.have.been.calledWith('providers', name);
             });
         });
         it('should construct provider instance', () => {
@@ -219,7 +219,7 @@ describe('lib/app', () => {
             const cfg = JSON.parse(JSON.stringify(basicConfig));
             cfg.estTag = Math.random();
             return testModule.activateConfig(cfg).then(() => {
-                testModule.getUserAgent.should.have.been.calledWith(cfg).once;
+                testModule.getUserAgent.should.have.been.calledWith(cfg);
             });
         });
         it('should construct provider instance with useragent information', () => {
@@ -231,7 +231,7 @@ describe('lib/app', () => {
         });
         it('should bind commands to instance', () => {
             return testModule.activateConfig(basicConfig).then(() => {
-                commands.bindCommands.should.have.been.calledWith(instance).once;
+                commands.bindCommands.should.have.been.calledWith(instance);
             });
         });
         it('should store bound commands on instance', () => {
@@ -265,17 +265,17 @@ describe('lib/app', () => {
         });
         it('should register for forum event `log`', () => {
             return testModule.activateConfig(basicConfig).then(() => {
-                instance.on.should.have.been.calledWith('log', testModule.log).once;
+                instance.on.should.have.been.calledWith('log', testModule.log);
             });
         });
         it('should register for forum event `log`', () => {
             return testModule.activateConfig(basicConfig).then(() => {
-                instance.on.should.have.been.calledWith('error', testModule.error).once;
+                instance.on.should.have.been.calledWith('error', testModule.error);
             });
         });
         it('should register for forum event `logExtended`', () => {
             return testModule.activateConfig(basicConfig).then(() => {
-                instance.on.should.have.been.calledWith('logExtended', utils.logExtended).once;
+                instance.on.should.have.been.calledWith('logExtended', utils.logExtended);
             });
         });
         describe('logging', () => {
@@ -285,21 +285,21 @@ describe('lib/app', () => {
                 basicConfig.core.provider = name;
                 basicConfig.core.username = username;
                 return testModule.activateConfig(basicConfig).then(() => {
-                    testModule.log.should.have.been.calledWith(`Using provider ${name} for ${username}`).once;
+                    testModule.log.should.have.been.calledWith(`Using provider ${name} for ${username}`);
                 });
             });
             it('should log ready for login', () => {
                 const username = `user${Math.random()}`;
                 basicConfig.core.username = username;
                 return testModule.activateConfig(basicConfig).then(() => {
-                    testModule.log.should.have.been.calledWith(`${username} ready for login`).once;
+                    testModule.log.should.have.been.calledWith(`${username} ready for login`);
                 });
             });
             it('should log logged in', () => {
                 const username = `user${Math.random()}`;
                 basicConfig.core.username = username;
                 return testModule.activateConfig(basicConfig).then(() => {
-                    testModule.log.should.have.been.calledWith(`${username} login successful`).once;
+                    testModule.log.should.have.been.calledWith(`${username} login successful`);
                 });
             });
             it('should not log logged in on login failure', () => {
@@ -316,7 +316,7 @@ describe('lib/app', () => {
                 const username = `user${Math.random()}`;
                 basicConfig.core.username = username;
                 return testModule.activateConfig(basicConfig).then(() => {
-                    testModule.log.should.have.been.calledWith(`${username} activated`).once;
+                    testModule.log.should.have.been.calledWith(`${username} activated`);
                 });
             });
             it('should log activated', () => {
@@ -388,7 +388,7 @@ describe('lib/app', () => {
             const message = `a${Math.random()}b`;
             testModule._buildMessage.returns(message);
             testModule.log();
-            console.log.should.have.been.calledWith(message).once; //eslint-disable-line no-console
+            console.log.should.have.been.calledWith(message); //eslint-disable-line no-console
         });
     });
     describe('error()', () => {
@@ -413,7 +413,7 @@ describe('lib/app', () => {
             const message = `a${Math.random()}b`;
             testModule._buildMessage.returns(message);
             testModule.error();
-            console.error.should.have.been.calledWith(message).once; //eslint-disable-line no-console
+            console.error.should.have.been.calledWith(message); //eslint-disable-line no-console
         });
     });
     describe('getUserAgent()', () => {

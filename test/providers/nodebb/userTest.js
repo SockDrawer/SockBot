@@ -139,7 +139,7 @@ describe('providers/nodebb/user', () => {
             it('should load via function `user.getUserByUID`', () => {
                 const expected = Math.random();
                 return User.get(expected).then(() => {
-                    forum.fetchObject.should.have.been.calledWith('user.getUserByUID', expected, User.parse).once;
+                    forum.fetchObject.should.have.been.calledWith('user.getUserByUID', expected, User.parse);
                 });
             });
             it('should resolve to result of forum.fetchObject()', () => {
@@ -156,7 +156,7 @@ describe('providers/nodebb/user', () => {
             it('should load via function `user.getUserByUID`', () => {
                 const expected = Math.random();
                 return User.getByName(expected).then(() => {
-                    forum.fetchObject.should.have.been.calledWith('user.getUserByUsername', expected, User.parse).once;
+                    forum.fetchObject.should.have.been.calledWith('user.getUserByUsername', expected, User.parse);
                 });
             });
             it('should resolve to result of forum.fetchObject()', () => {

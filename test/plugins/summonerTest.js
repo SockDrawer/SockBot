@@ -68,11 +68,11 @@ describe('plugins/echo', () => {
         });
         it('should register handler for event on activate', () => {
             summoner.activate();
-            forum.on.should.have.been.calledWith('notification:mention', summoner.handler).once;
+            forum.on.should.have.been.calledWith('notification:mention', summoner.handler);
         });
         it('should unregister handler for event on deactivate', () => {
             summoner.deactivate();
-            forum.off.should.have.been.calledWith('notification:mention', summoner.handler).once;
+            forum.off.should.have.been.calledWith('notification:mention', summoner.handler);
         });
     });
     describe('handler', () => {
@@ -107,14 +107,14 @@ describe('plugins/echo', () => {
             const expected = Math.random();
             notification.topicId = expected;
             return summoner.handler(notification).then(() => {
-                forum.Post.reply.should.have.been.calledWith(expected).once;
+                forum.Post.reply.should.have.been.calledWith(expected);
             });
         });
         it('should reply to notification.postId', () => {
             const expected = Math.random();
             notification.postId = expected;
             return summoner.handler(notification).then(() => {
-                forum.Post.reply.should.have.been.calledWith(undefined, expected).once;
+                forum.Post.reply.should.have.been.calledWith(undefined, expected);
             });
         });
         it('should perform string replacements on message', () => {
@@ -122,14 +122,14 @@ describe('plugins/echo', () => {
             user.keyblade = expected;
             summoner = testModule(forum, ['%keyblade%']);
             return summoner.handler(notification).then(() => {
-                forum.Post.reply.should.have.been.calledWith(undefined, undefined, expected).once;
+                forum.Post.reply.should.have.been.calledWith(undefined, undefined, expected);
             });
         });
         it('should leave replacement string in place when the replacement is not stringy', () => {
             user.keyblade = () => 0;
             summoner = testModule(forum, ['%keyblade%']);
             return summoner.handler(notification).then(() => {
-                forum.Post.reply.should.have.been.calledWith(undefined, undefined, '%keyblade%').once;
+                forum.Post.reply.should.have.been.calledWith(undefined, undefined, '%keyblade%');
             });
         });
         it('should substitute `username` when `name` is missing', () => {
@@ -137,7 +137,7 @@ describe('plugins/echo', () => {
             user.username = expected;
             summoner = testModule(forum, ['%name%']);
             return summoner.handler(notification).then(() => {
-                forum.Post.reply.should.have.been.calledWith(undefined, undefined, expected).once;
+                forum.Post.reply.should.have.been.calledWith(undefined, undefined, expected);
             });
         });
         it('should not substitute `username` when `name` is present', () => {
@@ -147,7 +147,7 @@ describe('plugins/echo', () => {
             user.name = expected;
             summoner = testModule(forum, ['%name%']);
             return summoner.handler(notification).then(() => {
-                forum.Post.reply.should.have.been.calledWith(undefined, undefined, expected).once;
+                forum.Post.reply.should.have.been.calledWith(undefined, undefined, expected);
             });
         });
         it('choose message randomly', () => {
@@ -157,7 +157,7 @@ describe('plugins/echo', () => {
             summoner = testModule(forum, ['0', '1', '2', '3', '4']);
             return summoner.handler(notification).then(() => {
                 Math.random.should.have.been.calledOnce;
-                forum.Post.reply.should.have.been.calledWith(undefined, undefined, '2').once;
+                forum.Post.reply.should.have.been.calledWith(undefined, undefined, '2');
             }).then(() => sandbox.restore());
         });
         describe('errors', () => {
@@ -165,7 +165,7 @@ describe('plugins/echo', () => {
                 const expected = new Error(Math.random());
                 notification.getUser.rejects(expected);
                 return summoner.handler(notification).catch(() => {
-                    forum.emit.should.have.been.calledWith('error', expected).once;
+                    forum.emit.should.have.been.calledWith('error', expected);
                 });
             });
             it('should reject when getUser rejects', () => {

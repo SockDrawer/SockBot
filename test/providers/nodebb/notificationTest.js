@@ -188,7 +188,7 @@ describe('providers/nodebb/notification', () => {
                 data.body = expected;
                 data.type = 'mention';
                 return notification.getText().then(() => {
-                    forum.Post.preview.should.have.been.calledWith(expected).once;
+                    forum.Post.preview.should.have.been.calledWith(expected);
                 });
             });
             it('should resolve to result of Post.preview for mention notification', () => {
@@ -250,7 +250,7 @@ describe('providers/nodebb/notification', () => {
                     const expected = Math.random();
                     data[prop] = expected;
                     return notification[fn]().then(() => {
-                        forum[obj].get.should.have.been.calledWith(expected).once;
+                        forum[obj].get.should.have.been.calledWith(expected);
                     });
                 });
                 it(`should resolve to results of ${obj}.get()`, () => {
@@ -274,7 +274,7 @@ describe('providers/nodebb/notification', () => {
             afterEach(() => sandbox.restore());
             it('should emit `notifications.get` via websocket', () => {
                 return Notification.get('foo').then(() => {
-                    forum._emit.should.have.been.calledWith('notifications.get').once;
+                    forum._emit.should.have.been.calledWith('notifications.get');
                 });
             });
             it('should pass expected payload to `notifications.get`', () => {
@@ -294,7 +294,7 @@ describe('providers/nodebb/notification', () => {
                 const expected = Math.random();
                 forum._emit.resolves([expected]);
                 return Notification.get().then(() => {
-                    Notification.parse.should.have.been.calledWith(expected).once;
+                    Notification.parse.should.have.been.calledWith(expected);
                 });
             });
             it('should resolve to results of `Notification.parse()`', () => {
@@ -433,7 +433,7 @@ describe('providers/nodebb/notification', () => {
             });
             it('should listen to `event:new_notification`', () => {
                 Notification.activate();
-                forum.socket.on.should.have.been.calledWith('event:new_notification').once;
+                forum.socket.on.should.have.been.calledWith('event:new_notification');
             });
             it('should register listener function for `event:new_notification`', () => {
                 Notification.activate();
@@ -449,7 +449,7 @@ describe('providers/nodebb/notification', () => {
             });
             it('should unlisten to `event:new_notification`', () => {
                 Notification.deactivate();
-                forum.socket.off.should.have.been.calledWith('event:new_notification').once;
+                forum.socket.off.should.have.been.calledWith('event:new_notification');
             });
             it('should unregister listener function for `event:new_notification`', () => {
                 Notification.deactivate();
@@ -505,7 +505,7 @@ describe('providers/nodebb/notification', () => {
                     notifications: [expected]
                 });
                 return Notification.getNotifications(() => Promise.resolve()).then(() => {
-                    Notification.parse.should.have.been.calledWith(expected).once;
+                    Notification.parse.should.have.been.calledWith(expected);
                 });
             });
             it('should call progress function with result of `Notification.parse`', () => {
@@ -516,7 +516,7 @@ describe('providers/nodebb/notification', () => {
                 });
                 Notification.parse.returns(expected);
                 return Notification.getNotifications(spy).then(() => {
-                    spy.should.have.been.calledWith(expected).once;
+                    spy.should.have.been.calledWith(expected);
                 });
             });
             it('should reject when `notifications.loadMore` rejects', () => {
@@ -583,7 +583,7 @@ describe('providers/nodebb/notification', () => {
             it('should parse notification with `Notification.parse`', () => {
                 const expected = Math.random();
                 return notifyHandler(expected).then(() => {
-                    Notification.parse.should.have.been.calledWith(expected).once;
+                    Notification.parse.should.have.been.calledWith(expected);
                 });
             });
             it('should get text from notification with `notification.getText()`', () => {
@@ -629,7 +629,7 @@ describe('providers/nodebb/notification', () => {
                     const handler = args[2];
                     const content = `a${Math.random()}g`;
                     return handler(content).then(() => {
-                        forum.Post.reply.should.have.been.calledWith(topic, post, content).once;
+                        forum.Post.reply.should.have.been.calledWith(topic, post, content);
                     });
                 });
             });
@@ -647,7 +647,7 @@ describe('providers/nodebb/notification', () => {
                 commands.commands = [];
                 notifier.type = `a${Math.random()}b`;
                 return notifyHandler(5).then(() => {
-                    forum.emit.should.have.been.calledWith(`notification:${notifier.type}`, notifier).once;
+                    forum.emit.should.have.been.calledWith(`notification:${notifier.type}`, notifier);
                 });
             });
             it('should not emit specific notification event when commands in post', () => {
@@ -661,7 +661,7 @@ describe('providers/nodebb/notification', () => {
                 commands.commands = [];
                 notifier.type = `a${Math.random()}b`;
                 return notifyHandler(5).then(() => {
-                    forum.emit.should.have.been.calledWith('notification', notifier).once;
+                    forum.emit.should.have.been.calledWith('notification', notifier);
                 });
             });
             it('should not emit general notification event when commands in post', () => {
