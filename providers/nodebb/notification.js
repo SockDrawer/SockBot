@@ -386,35 +386,35 @@ exports.bindNotification = function bindNotification(forum) {
     function notifyHandler(data) {
         const notification = Notification.parse(data);
         return evalBlacklist(notification)
-        .then(() => {
-            forum.emit('log', `Notification ${notification.id}: ${notification.label} received`);
+            .then(() => {
+                forum.emit('log', `Notification ${notification.id}: ${notification.label} received`);
     
-            const ids = {
-                post: notification.postId,
-                topic: notification.topicId,
-                user: notification.userId,
-                pm: -1,
-                chat: -1
-            };
-            return notification.getText()
-                .then((postData) => forum.Commands.get(ids,
-                    postData, (content) => forum.Post.reply(notification.topicId, notification.postId, content)))
-                .then((commands) => {
-                    if (commands.commands.length === 0) {
-                        debug(`Emitting events: 'notification' and 'notification:${notification.type}'`);
-                        forum.emit(`notification:${notification.type}`, notification);
-                        forum.emit('notification', notification);
-                    }
-                    return commands;
-                })
-                .then((commands) => commands.execute());
-        }).catch((err) => {
-            if (err === 'Ignoring notification') {
+                const ids = {
+                    post: notification.postId,
+                    topic: notification.topicId,
+                    user: notification.userId,
+                    pm: -1,
+                    chat: -1
+                };
+                return notification.getText()
+                    .then((postData) => forum.Commands.get(ids,
+                        postData, (content) => forum.Post.reply(notification.topicId, notification.postId, content)))
+                    .then((commands) => {
+                        if (commands.commands.length === 0) {
+                            debug(`Emitting events: 'notification' and 'notification:${notification.type}'`);
+                            forum.emit(`notification:${notification.type}`, notification);
+                            forum.emit('notification', notification);
+                        }
+                        return commands;
+                    })
+                    .then((commands) => commands.execute());
+            }).catch((err) => {
+                if (err === 'Ignoring notification') {
                 //We do not process the notification, but we can continue with life
-                return Promise.resolve();
-            }
-            throw err;
-        });
+                    return Promise.resolve();
+                }
+                throw err;
+            });
     }
     
     /**
