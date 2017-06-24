@@ -73,7 +73,7 @@ describe('lib/utils', () => {
             const spy = sinon.stub().resolves();
             const value = Math.random();
             return utils.iterate([value], spy).then(() => {
-                spy.should.have.been.calledWith(value).once;
+                spy.should.have.been.calledWith(value);
             });
         });
         it('should stop iteration on reject', () => {
