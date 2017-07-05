@@ -664,12 +664,12 @@ describe('providers/nodebb', () => {
             };
         });
         it('should accept direct generation function', () => {
-            return forum.addPlugin(() => plug).should.be.resolved;
+            return forum.addPlugin(() => plug).should.be.fulfilled;
         });
         it('should accept indirect generation function', () => {
             return forum.addPlugin({
                 plugin: () => plug
-            }).should.be.resolved;
+            }).should.be.fulfilled;
         });
         it('should add plugin to plugin list', () => {
             forum._plugins = [5, 3, 4, 1, 2];

@@ -206,7 +206,7 @@ describe('providers/nodebb/notification', () => {
             it('should not reject when Post.preview rejects for non mention notification', () => {
                 data.type = 'not a mention';
                 forum.Post.preview.rejects('bad');
-                return notification.getText().should.be.resolved;
+                return notification.getText().should.be.fulfilled;
             });
         });
         describe('url()', () => {

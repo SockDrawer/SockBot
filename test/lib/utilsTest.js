@@ -64,10 +64,10 @@ describe('lib/utils', () => {
     });
     describe('iterate()', () => {
         it('should resolve on empty input', () => {
-            return utils.iterate([]).should.eventually.resolve;
+            return utils.iterate([]).should.eventually.be.fulfilled;
         });
         it('should resolve on null input', () => {
-            return utils.iterate(null).should.eventually.resolve;
+            return utils.iterate(null).should.eventually.be.fulfilled;
         });
         it('should pass value to iterator', () => {
             const spy = sinon.stub().resolves();
