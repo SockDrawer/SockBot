@@ -57,7 +57,7 @@ describe('providers/nodebb', () => {
         });
         it('should use Post.bindPost to generate Post object', () => {
             const forum = new Forum();
-            postModule.bindPost.should.have.been.calledWith(forum).once;
+            postModule.bindPost.should.have.been.calledWith(forum);
         });
         it('should store Post object in this.Post', () => {
             const expected = Math.random();
@@ -66,7 +66,7 @@ describe('providers/nodebb', () => {
         });
         it('should use Topic.bindTopic to generate Topic object', () => {
             const forum = new Forum();
-            topicModule.bindTopic.should.have.been.calledWith(forum).once;
+            topicModule.bindTopic.should.have.been.calledWith(forum);
         });
         it('should store Topic object in this.Topic', () => {
             const expected = Math.random();
@@ -75,7 +75,7 @@ describe('providers/nodebb', () => {
         });
         it('should use Category.bindCategory to generate Category object', () => {
             const forum = new Forum();
-            categoryModule.bindCategory.should.have.been.calledWith(forum).once;
+            categoryModule.bindCategory.should.have.been.calledWith(forum);
         });
         it('should store Category object in this.Category', () => {
             const expected = Math.random();
@@ -84,7 +84,7 @@ describe('providers/nodebb', () => {
         });
         it('should use User.bindUser to generate User object', () => {
             const forum = new Forum();
-            userModule.bindUser.should.have.been.calledWith(forum).once;
+            userModule.bindUser.should.have.been.calledWith(forum);
         });
         it('should store User object in this.User', () => {
             const expected = Math.random();
@@ -93,7 +93,7 @@ describe('providers/nodebb', () => {
         });
         it('should use Notification.bindNotification to generate Notification object', () => {
             const forum = new Forum({});
-            notifyModule.bindNotification.should.have.been.calledWith(forum).once;
+            notifyModule.bindNotification.should.have.been.calledWith(forum);
         });
         it('should store Notification object in this.Notification', () => {
             const expected = Math.random();
@@ -102,7 +102,7 @@ describe('providers/nodebb', () => {
         });
         it('should use Chat.bindChat to generate Chat object', () => {
             const forum = new Forum({});
-            chatModule.bindChat.should.have.been.calledWith(forum).once;
+            chatModule.bindChat.should.have.been.calledWith(forum);
         });
         it('should store Notification object in this.Notification', () => {
             const expected = Math.random();
@@ -523,14 +523,14 @@ describe('providers/nodebb', () => {
                 const url = `a${Math.random()}b`;
                 data.config.core.forum = url;
                 return forum.connectWebsocket().then(() => {
-                    forum._cookiejar.getCookieString.should.have.been.calledWith(url).once;
+                    forum._cookiejar.getCookieString.should.have.been.calledWith(url);
                 });
             });
             it('should construct websocket for forum', () => {
                 const url = `a${Math.random()}b`;
                 data.config.core.forum = url;
                 return forum.connectWebsocket().then(() => {
-                    Forum.io.should.have.been.calledWith(url).once;
+                    Forum.io.should.have.been.calledWith(url);
                 });
             });
             it('should pass cookies to websocket for forum', () => {
@@ -568,35 +568,35 @@ describe('providers/nodebb', () => {
             });
             it('should register for websocket `pong` event', () => {
                 return forum.connectWebsocket().then(() => {
-                    socket.on.should.have.been.calledWith('pong').once;
+                    socket.on.should.have.been.calledWith('pong');
                 });
             });
             it('should emit `log` on websocket pong event', () => {
                 socket.on = (evt, callback) => evt === 'pong' && callback(4242);
                 return forum.connectWebsocket().then(() => {
-                    forum.emit.should.have.been.calledWith('log', 'Ping exchanged with 4242ms latency').once;
+                    forum.emit.should.have.been.calledWith('log', 'Ping exchanged with 4242ms latency');
                 });
             });
             it('should register for websocket `connect` event', () => {
                 return forum.connectWebsocket().then(() => {
-                    socket.on.should.have.been.calledWith('connect').once;
+                    socket.on.should.have.been.calledWith('connect');
                 });
             });
             it('should emit `connect` on websocket connect event', () => {
                 socket.on = (evt, callback) => evt === 'connect' && callback();
                 return forum.connectWebsocket().then(() => {
-                    forum.emit.should.have.been.calledWith('connect').once;
+                    forum.emit.should.have.been.calledWith('connect');
                 });
             });
             it('should register for websocket `disconnect` event', () => {
                 return forum.connectWebsocket().then(() => {
-                    socket.on.should.have.been.calledWith('disconnect').once;
+                    socket.on.should.have.been.calledWith('disconnect');
                 });
             });
             it('should emit `connect` on websocket connect event', () => {
                 socket.on = (evt, callback) => evt === 'disconnect' && callback();
                 return forum.connectWebsocket().then(() => {
-                    forum.emit.should.have.been.calledWith('disconnect').once;
+                    forum.emit.should.have.been.calledWith('disconnect');
                 });
             });
             it('should store socket for later', () => {
@@ -664,12 +664,12 @@ describe('providers/nodebb', () => {
             };
         });
         it('should accept direct generation function', () => {
-            return forum.addPlugin(() => plug).should.be.resolved;
+            return forum.addPlugin(() => plug).should.be.fulfilled;
         });
         it('should accept indirect generation function', () => {
             return forum.addPlugin({
                 plugin: () => plug
-            }).should.be.resolved;
+            }).should.be.fulfilled;
         });
         it('should add plugin to plugin list', () => {
             forum._plugins = [5, 3, 4, 1, 2];
@@ -680,14 +680,14 @@ describe('providers/nodebb', () => {
         it('should pass forum to plugin function', () => {
             const spy = sinon.spy(() => plug);
             return forum.addPlugin(spy).then(() => {
-                spy.should.have.been.calledWith(forum).once;
+                spy.should.have.been.calledWith(forum);
             });
         });
         it('should pass configuration to plugin function', () => {
             const spy = sinon.spy(() => plug);
             const expected = Math.random();
             return forum.addPlugin(spy, expected).then(() => {
-                spy.should.have.been.calledWith(forum, expected).once;
+                spy.should.have.been.calledWith(forum, expected);
             });
         });
         it('should reject when plugin function does not return an object', () => {
@@ -727,14 +727,14 @@ describe('providers/nodebb', () => {
             const name = `name${Math.random()}`;
             data.config.core.username = name;
             return forum.activate().then(() => {
-                forum.User.getByName.should.have.been.calledWith(name).once;
+                forum.User.getByName.should.have.been.calledWith(name);
             });
         });
         it('should fetch logged in user info', () => {
             const name = `owner${Math.random()}`;
             data.config.core.owner = name;
             return forum.activate().then(() => {
-                forum.User.getByName.should.have.been.calledWith(name).once;
+                forum.User.getByName.should.have.been.calledWith(name);
             });
         });
         it('should store logged in user information', () => {
@@ -934,7 +934,7 @@ describe('providers/nodebb', () => {
                 arg1 = Math.random(),
                 arg2 = Math.random();
             return forum._emit(evt, arg1, arg2).then(() => {
-                forum.socket.emit.should.have.been.calledWith(evt, arg1, arg2).once;
+                forum.socket.emit.should.have.been.calledWith(evt, arg1, arg2);
             });
         });
         it('should resolve to undefined on empty success', () => {
@@ -1042,7 +1042,7 @@ describe('providers/nodebb', () => {
                 id = Math.random(),
                 parser = sinon.spy();
             return forum.fetchObject(func, id, parser).then(() => {
-                forum._emit.should.have.been.calledWith(func, id).once;
+                forum._emit.should.have.been.calledWith(func, id);
             });
         });
         it('should pass result to parser', () => {
@@ -1050,7 +1050,7 @@ describe('providers/nodebb', () => {
             const expected = Math.random();
             forum._emit.resolves(expected);
             return forum.fetchObject('', '', parser).then(() => {
-                parser.should.have.been.calledWith(expected).once;
+                parser.should.have.been.calledWith(expected);
             });
         });
         it('should resolve to results of parser', () => {

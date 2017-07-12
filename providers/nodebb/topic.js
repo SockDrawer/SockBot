@@ -364,7 +364,7 @@ exports.bindTopic = function bindTopic(forum) {
                 tids: [this.id],
                 cid: this.categoryId
             })
-            .then(() => this);
+                .then(() => this);
         }
         
         /**
@@ -383,7 +383,7 @@ exports.bindTopic = function bindTopic(forum) {
                 tids: [this.id],
                 cid: this.categoryId
             })
-            .then(() => this);
+                .then(() => this);
         }
 
         /**

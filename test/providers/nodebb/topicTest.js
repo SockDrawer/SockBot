@@ -125,7 +125,7 @@ describe('providers/nodebb/topic', () => {
                 const expected = Math.random();
                 forum._emitWithRetry.resolves(expected);
                 return topic.reply('xyyzy').then(() => {
-                    forum.Post.parse.should.have.been.calledWith(expected).once;
+                    forum.Post.parse.should.have.been.calledWith(expected);
                 });
             });
             it('should resolve to results of `forum.Post.parse`', () => {
@@ -201,7 +201,7 @@ describe('providers/nodebb/topic', () => {
                 forum.User.parse.returns('USER');
                 const spy = sinon.stub().resolves();
                 return topic.getAllPosts(spy).then(() => {
-                    spy.should.have.been.calledWith('POST', 'USER', topic).once;
+                    spy.should.have.been.calledWith('POST', 'USER', topic);
                 });
             });
         });
@@ -260,7 +260,7 @@ describe('providers/nodebb/topic', () => {
                 forum.User.parse.returns('USER');
                 const spy = sinon.stub().resolves();
                 return topic.getLatestPosts(spy).then(() => {
-                    spy.should.have.been.calledWith('POST', 'USER', topic).once;
+                    spy.should.have.been.calledWith('POST', 'USER', topic);
                 });
             });
         });
@@ -292,7 +292,7 @@ describe('providers/nodebb/topic', () => {
             it('should emit `topics.markAsRead` to dismiss topic', () => {
                 data.id = Math.random();
                 return topic.markRead().then(() => {
-                    forum._emit.should.have.been.calledWith('topics.markAsRead', [data.id]).once;
+                    forum._emit.should.have.been.calledWith('topics.markAsRead', [data.id]);
                 });
             });
             it('should reject if websocket rejects message for dismissing topic', () => {
@@ -313,7 +313,7 @@ describe('providers/nodebb/topic', () => {
             });
             it('should emit `topics.follow`', () => {
                 return topic.watch().then(() => {
-                    forum._emit.should.have.been.calledWith('topics.follow', tid).once;
+                    forum._emit.should.have.been.calledWith('topics.follow', tid);
                 });
             });
             it('should resolve to watched topic', () => {
@@ -334,7 +334,7 @@ describe('providers/nodebb/topic', () => {
             });
             it('should emit `topics.toggleFollow`', () => {
                 return topic.unwatch().then(() => {
-                    forum._emit.should.have.been.calledWith('topics.toggleFollow', tid).once;
+                    forum._emit.should.have.been.calledWith('topics.toggleFollow', tid);
                 });
             });
             it('should emit `topics.toggleFollow` twice if first emit follows topic.', () => {
@@ -499,7 +499,7 @@ describe('providers/nodebb/topic', () => {
                     forum.User.parse.returns('USER');
                     forum.Category.parse.returns('CATEGORY');
                     return Topic.getRecentTopics(spy).then(() => {
-                        spy.should.have.been.calledWith('TOPIC', 'USER', 'CATEGORY').once;
+                        spy.should.have.been.calledWith('TOPIC', 'USER', 'CATEGORY');
                     });
                 });
                 it('should pass expected values to Topic.parse()', () => {
@@ -508,7 +508,7 @@ describe('providers/nodebb/topic', () => {
                         topics: [expected]
                     });
                     return Topic.getRecentTopics(spy).then(() => {
-                        forum.Topic.parse.should.have.been.calledWith(expected).once;
+                        forum.Topic.parse.should.have.been.calledWith(expected);
                     });
                 });
                 it('should pass expected values to User.parse()', () => {
@@ -519,7 +519,7 @@ describe('providers/nodebb/topic', () => {
                         }]
                     });
                     return Topic.getRecentTopics(spy).then(() => {
-                        forum.User.parse.should.have.been.calledWith(expected).once;
+                        forum.User.parse.should.have.been.calledWith(expected);
                     });
                 });
                 it('should pass expected values to Category.parse()', () => {
@@ -530,7 +530,7 @@ describe('providers/nodebb/topic', () => {
                         }]
                     });
                     return Topic.getRecentTopics(spy).then(() => {
-                        forum.Category.parse.should.have.been.calledWith(expected).once;
+                        forum.Category.parse.should.have.been.calledWith(expected);
                     });
                 });
             });
@@ -609,7 +609,7 @@ describe('providers/nodebb/topic', () => {
                     forum.User.parse.returns('USER');
                     forum.Category.parse.returns('CATEGORY');
                     return Topic.getUnreadTopics(spy).then(() => {
-                        spy.should.have.been.calledWith('TOPIC', 'USER', 'CATEGORY').once;
+                        spy.should.have.been.calledWith('TOPIC', 'USER', 'CATEGORY');
                     });
                 });
                 it('should pass expected values to Topic.parse()', () => {
@@ -618,7 +618,7 @@ describe('providers/nodebb/topic', () => {
                         topics: [expected]
                     });
                     return Topic.getUnreadTopics(spy).then(() => {
-                        forum.Topic.parse.should.have.been.calledWith(expected).once;
+                        forum.Topic.parse.should.have.been.calledWith(expected);
                     });
                 });
                 it('should pass expected values to User.parse()', () => {
@@ -629,7 +629,7 @@ describe('providers/nodebb/topic', () => {
                         }]
                     });
                     return Topic.getUnreadTopics(spy).then(() => {
-                        forum.User.parse.should.have.been.calledWith(expected).once;
+                        forum.User.parse.should.have.been.calledWith(expected);
                     });
                 });
                 it('should pass expected values to Category.parse()', () => {
@@ -640,7 +640,7 @@ describe('providers/nodebb/topic', () => {
                         }]
                     });
                     return Topic.getUnreadTopics(spy).then(() => {
-                        forum.Category.parse.should.have.been.calledWith(expected).once;
+                        forum.Category.parse.should.have.been.calledWith(expected);
                     });
                 });
             });
@@ -654,7 +654,7 @@ describe('providers/nodebb/topic', () => {
                 it('should emit `topics.getTopic', () => {
                     const id = Math.random();
                     return Topic.get(id).then(() => {
-                        forum._emit.should.have.been.calledWith('topics.getTopic', id).once;
+                        forum._emit.should.have.been.calledWith('topics.getTopic', id);
                     });
                 });
                 it('should reject if websocket rejects', () => {
@@ -665,7 +665,7 @@ describe('providers/nodebb/topic', () => {
                     const expected = Math.random();
                     forum._emit.resolves(expected);
                     return Topic.get(8472).then(() => {
-                        Topic.parse.should.have.been.calledWith(expected).once;
+                        Topic.parse.should.have.been.calledWith(expected);
                     });
                 });
                 it('should resolve to return value of Topic.parse()', () => {

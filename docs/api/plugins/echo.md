@@ -18,7 +18,7 @@ Plugin generation function.
 
 Returns a plugin object bound to the provided forum provider
 
-**Kind**: static method of <code>[echo](#module_echo)</code>  
+**Kind**: static method of [<code>echo</code>](#module_echo)  
 **Returns**: <code>Plugin</code> - An instance of the Echo plugin  
 
 | Param | Type | Description |
@@ -35,7 +35,7 @@ Returns a plugin object bound to the provided forum provider
 #### plugin~echo(command) ⇒ <code>Promise</code>
 Echo the command contents back to the user
 
-**Kind**: inner method of <code>[plugin](#module_echo.plugin)</code>  
+**Kind**: inner method of [<code>plugin</code>](#module_echo.plugin)  
 **Returns**: <code>Promise</code> - Resolves when processing is complete  
 
 | Param | Type | Description |
@@ -49,5 +49,5 @@ Activate the plugin.
 
 Register the command `echo` to the forum instance this plugin is bound to
 
-**Kind**: inner method of <code>[plugin](#module_echo.plugin)</code>  
+**Kind**: inner method of [<code>plugin</code>](#module_echo.plugin)  
 **Returns**: <code>Promise</code> - Resolves when plugin is fully activated  

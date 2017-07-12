@@ -49,7 +49,7 @@ describe('plugins/echo', () => {
         });
         it('should register command on activate', () => {
             return plugin.activate().then(() => {
-                forum.Commands.add.should.have.been.calledWith('echo', 'Simple testing command', plugin._echo).once;
+                forum.Commands.add.should.have.been.calledWith('echo', 'Simple testing command', plugin._echo);
             });
         });
         it('should reject activation when Commands.add rejects', () => {

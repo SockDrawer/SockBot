@@ -92,7 +92,7 @@ describe('providers/nodebb/chat', () => {
                     forum.User.parse.returns(user);
                     data.users = [userdata];
                     room.users.should.eql([user]);
-                    forum.User.parse.should.have.been.calledWith(userdata).once;
+                    forum.User.parse.should.have.been.calledWith(userdata);
                 });
                 it('should return sequential results for multiple users', () => {
                     const expected = Math.random();
@@ -116,7 +116,7 @@ describe('providers/nodebb/chat', () => {
                 const expected = Math.random();
                 forum.User.parse.returns(expected);
                 room.owner.should.equal(expected);
-                forum.User.parse.should.have.been.calledWith(owner).once;
+                forum.User.parse.should.have.been.calledWith(owner);
                 forum.User.parse.callCount.should.equal(1);
             });
         });
@@ -165,7 +165,7 @@ describe('providers/nodebb/chat', () => {
             });
             it('should emit `modules.chats.send` to reply', () => {
                 return room.send('some content').then(() => {
-                    forum._emit.should.have.been.calledWith('modules.chats.send').once;
+                    forum._emit.should.have.been.calledWith('modules.chats.send');
                     forum._emit.callCount.should.equal(1);
                 });
             });
@@ -247,7 +247,7 @@ describe('providers/nodebb/chat', () => {
                     return room.addUsers({
                         username: 'foobar'
                     }).then(() => {
-                        forum._emit.should.have.been.calledWith('modules.chats.addUserToRoom').once;
+                        forum._emit.should.have.been.calledWith('modules.chats.addUserToRoom');
                     });
                 });
                 it('should add single user to room by room id', () => {
@@ -288,8 +288,8 @@ describe('providers/nodebb/chat', () => {
                         username: 'barbaz'
                     }]).then(() => {
                         forum._emit.callCount.should.equal(2);
-                        forum._emit.firstCall.should.have.been.calledWith('modules.chats.addUserToRoom').once;
-                        forum._emit.secondCall.should.have.been.calledWith('modules.chats.addUserToRoom').once;
+                        forum._emit.firstCall.should.have.been.calledWith('modules.chats.addUserToRoom');
+                        forum._emit.secondCall.should.have.been.calledWith('modules.chats.addUserToRoom');
                     });
                 });
                 it('should reject when any socket call rejects', () => {
@@ -364,7 +364,7 @@ describe('providers/nodebb/chat', () => {
                     return room.removeUsers({
                         username: 'foobar'
                     }).then(() => {
-                        forum._emit.should.have.been.calledWith('modules.chats.removeUserFromRoom').once;
+                        forum._emit.should.have.been.calledWith('modules.chats.removeUserFromRoom');
                     });
                 });
                 it('should remove single user to room by room id', () => {
@@ -405,8 +405,8 @@ describe('providers/nodebb/chat', () => {
                         username: 'barbaz'
                     }]).then(() => {
                         forum._emit.callCount.should.equal(2);
-                        forum._emit.firstCall.should.have.been.calledWith('modules.chats.removeUserFromRoom').once;
-                        forum._emit.secondCall.should.have.been.calledWith('modules.chats.removeUserFromRoom').once;
+                        forum._emit.firstCall.should.have.been.calledWith('modules.chats.removeUserFromRoom');
+                        forum._emit.secondCall.should.have.been.calledWith('modules.chats.removeUserFromRoom');
                     });
                 });
                 it('should reject when any socket call rejects', () => {
@@ -467,7 +467,7 @@ describe('providers/nodebb/chat', () => {
             });
             it('should emit expected message', () => {
                 return room.leave().then(() => {
-                    forum._emit.calledWith('modules.chats.leave', data.id).once;
+                    forum._emit.calledWith('modules.chats.leave', data.id);
                 });
             });
             it('should reject when websocket rejects', () => {
@@ -489,7 +489,7 @@ describe('providers/nodebb/chat', () => {
             });
             it('should emit `modules.chats.renameRoom` to reply', () => {
                 return room.rename('some content').then(() => {
-                    forum._emit.should.have.been.calledWith('modules.chats.renameRoom').once;
+                    forum._emit.should.have.been.calledWith('modules.chats.renameRoom');
                     forum._emit.callCount.should.equal(1);
                 });
             });
@@ -547,7 +547,7 @@ describe('providers/nodebb/chat', () => {
             });
             it('should create room via `modules.chats.newRoom', () => {
                 return ChatRoom.create({}, '').then(() => {
-                    forum._emit.should.have.been.calledWith('modules.chats.newRoom').once;
+                    forum._emit.should.have.been.calledWith('modules.chats.newRoom');
                 });
             });
             it('should add initial user to new chatroom', () => {
@@ -573,7 +573,7 @@ describe('providers/nodebb/chat', () => {
             });
             it('should get chatroom with new room id', () => {
                 return ChatRoom.create({}, '').then(() => {
-                    ChatRoom.get.should.have.been.calledWith(id).once;
+                    ChatRoom.get.should.have.been.calledWith(id);
                 });
             });
             it('should add additional user to chatroom', () => {
@@ -598,7 +598,7 @@ describe('providers/nodebb/chat', () => {
             it('should send message to new chatroom', () => {
                 const message = `message${Math.random()}`;
                 return ChatRoom.create({}, message).then(() => {
-                    room.send.should.have.been.calledWith(message).once;
+                    room.send.should.have.been.calledWith(message);
                 });
             });
             it('should add users to new chatroom before sending message', () => {
@@ -677,7 +677,7 @@ describe('providers/nodebb/chat', () => {
             });
             it('should register event listener for `event:chats.receive`', () => {
                 ChatRoom.activate();
-                forum.socket.on.should.have.been.calledWith('event:chats.receive').once;
+                forum.socket.on.should.have.been.calledWith('event:chats.receive');
             });
             it('should register handler for `event:chats.receive`', () => {
                 ChatRoom.activate();
@@ -692,7 +692,7 @@ describe('providers/nodebb/chat', () => {
             });
             it('should unregister event listener for `event:chats.receive`', () => {
                 ChatRoom.deactivate();
-                forum.socket.off.should.have.been.calledWith('event:chats.receive').once;
+                forum.socket.off.should.have.been.calledWith('event:chats.receive');
             });
             it('should unregister handler for `event:chats.receive`', () => {
                 ChatRoom.deactivate();
@@ -708,7 +708,7 @@ describe('providers/nodebb/chat', () => {
             afterEach(() => sandbox.restore());
             it('should emit `modules.chats.loadRoom`', () => {
                 return ChatRoom.get().then(() => {
-                    forum._emit.should.have.been.calledWith('modules.chats.loadRoom').once;
+                    forum._emit.should.have.been.calledWith('modules.chats.loadRoom');
                 });
             });
             it('should emit with expected arguments', () => {
@@ -723,7 +723,7 @@ describe('providers/nodebb/chat', () => {
                 const results = Math.random();
                 forum._emit.resolves(results);
                 return ChatRoom.get().then(() => {
-                    ChatRoom.parse.should.have.been.calledWith(results).once;
+                    ChatRoom.parse.should.have.been.calledWith(results);
                 });
             });
         });
@@ -808,7 +808,7 @@ describe('providers/nodebb/chat', () => {
                 const message = new Message({
                     fromUser: userData
                 });
-                forum.User.parse.should.have.been.calledWith(userData).once;
+                forum.User.parse.should.have.been.calledWith(userData);
                 utils.mapGet(message, 'from').should.equal(user);
             });
             it('should date from timestamp', () => {
@@ -897,7 +897,7 @@ describe('providers/nodebb/chat', () => {
             });
             it('should emit `modules.chats.send` to reply', () => {
                 return message.reply('some content').then(() => {
-                    forum._emit.should.have.been.calledWith('modules.chats.send').once;
+                    forum._emit.should.have.been.calledWith('modules.chats.send');
                     forum._emit.callCount.should.equal(1);
                 });
             });
@@ -964,7 +964,7 @@ describe('providers/nodebb/chat', () => {
                 const message = Message.parse({
                     fromUser: userData
                 });
-                forum.User.parse.should.have.been.calledWith(userData).once;
+                forum.User.parse.should.have.been.calledWith(userData);
                 utils.mapGet(message, 'from').should.equal(user);
             });
             it('should date from timestamp', () => {
@@ -1033,7 +1033,7 @@ describe('providers/nodebb/chat', () => {
             return handleChat({
                 message: payload
             }).then(() => {
-                ChatRoom.Message.parse.should.have.been.calledWith(payload).once;
+                ChatRoom.Message.parse.should.have.been.calledWith(payload);
             });
         });
         it('should emit `chatMessage` event', () => {
@@ -1046,7 +1046,7 @@ describe('providers/nodebb/chat', () => {
             return handleChat({
                 message: true
             }).then(() => {
-                forum.emit.should.have.been.calledWith('chatMessage', expected).once;
+                forum.emit.should.have.been.calledWith('chatMessage', expected);
             });
         });
         it('should parse content for commands', () => {
@@ -1093,7 +1093,7 @@ describe('providers/nodebb/chat', () => {
                 adaptor.should.be.a('function');
                 const expected = Math.random();
                 adaptor(expected);
-                message.reply.should.have.been.calledWith(expected).once;
+                message.reply.should.have.been.calledWith(expected);
             });
         });
         it('should execute retrieved commands', () => {

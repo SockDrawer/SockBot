@@ -136,7 +136,7 @@ if (!args.length) {
         }
         return res(files);
     }))))
-    .then((res) => res.reduce((acc, val) => acc.concat(val), []));
+        .then((res) => res.reduce((acc, val) => acc.concat(val), []));
 }
 
 targets.then((files) => Promise.all(files.map((file) => processFile(file))))

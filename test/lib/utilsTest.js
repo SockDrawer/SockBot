@@ -64,16 +64,16 @@ describe('lib/utils', () => {
     });
     describe('iterate()', () => {
         it('should resolve on empty input', () => {
-            return utils.iterate([]).should.eventually.resolve;
+            return utils.iterate([]).should.eventually.be.fulfilled;
         });
         it('should resolve on null input', () => {
-            return utils.iterate(null).should.eventually.resolve;
+            return utils.iterate(null).should.eventually.be.fulfilled;
         });
         it('should pass value to iterator', () => {
             const spy = sinon.stub().resolves();
             const value = Math.random();
             return utils.iterate([value], spy).then(() => {
-                spy.should.have.been.calledWith(value).once;
+                spy.should.have.been.calledWith(value);
             });
         });
         it('should stop iteration on reject', () => {
