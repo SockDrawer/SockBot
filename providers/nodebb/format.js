@@ -270,7 +270,7 @@ exports.header6 = function header6(text) {
  * @param {!string} text The text
  * @returns {string} Text in a preformat block
  */
- /* eslint-disable prefer-template */
+/* eslint-disable prefer-template */
 exports.preformat = function preformat(text) {
     if (text.indexOf('\n') > -1) {
         return '```\n' + text + '\n```';
