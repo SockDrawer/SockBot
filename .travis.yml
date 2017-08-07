@@ -8,6 +8,7 @@ branches:
   except:
     - /^(?i:v)\d+[.]\d+[.]\d+$/
 before_script:
+- [[ `npm --version | cut -d. -f1` -ge 3 ]] || npm install npm@3
 - npm prune
 - rm -rf ./coverage
 script:
