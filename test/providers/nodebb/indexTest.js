@@ -262,7 +262,7 @@ describe('providers/nodebb', () => {
             });
             data = utils.mapGet(forum);
             sandbox = sinon.sandbox.create();
-            sandbox.stub(forum, '_verifyCookies');
+            forum._verifyCookies = sinon.stub(); //sandbox.stub(forum, '_verifyCookies');
             sandbox.stub(request, 'get').yields(null, null, '""');
         });
         afterEach(() => sandbox.restore());
@@ -355,8 +355,8 @@ describe('providers/nodebb', () => {
             });
             data = utils.mapGet(forum);
             sandbox = sinon.sandbox.create();
-            sandbox.stub(forum, '_verifyCookies');
-            sandbox.stub(forum, '_getConfig').resolves({});
+            forum._verifyCookies = sinon.stub(); //sandbox.stub(forum, '_verifyCookies');
+            forum._getConfig = sinon.stub().resolves({}); //sandbox.stub(forum, '_getConfig').resolves({});
             sandbox.stub(request, 'post').yields(null, {
                 statusCode: 200
             }, '""');
@@ -501,8 +501,8 @@ describe('providers/nodebb', () => {
             });
             data = utils.mapGet(forum);
             sandbox = sinon.sandbox.create();
-            sandbox.stub(forum, '_verifyCookies');
-            sandbox.stub(forum, 'emit');
+            forum._verifyCookies = sinon.stub(); //sandbox.stub(forum, '_verifyCookies');
+            forum.emit = sinon.stub(); //sandbox.stub(forum, 'emit');
             forum._cookiejar = {
                 getCookieString: sinon.stub()
             };
@@ -715,7 +715,7 @@ describe('providers/nodebb', () => {
             sandbox.stub(forum.User, 'getByName').resolves({});
             sandbox.stub(forum.Notification, 'activate');
             sandbox.stub(forum.Chat, 'activate');
-            sandbox.stub(forum, 'connectWebsocket').resolves();
+            forum.connectWebsocket = sinon.stub().resolves(); //sandbox.stub(forum, 'connectWebsocket').resolves();
         });
         afterEach(() => sandbox.restore());
         it('should connect to websocket', () => {
@@ -980,7 +980,7 @@ describe('providers/nodebb', () => {
             forum = new Forum({
                 core: {}
             });
-            sandbox.stub(forum, '_emit').resolves();
+            forum._emit = sinon.stub().resolves(); //sandbox.stub(forum, '_emit').resolves();
         });
         afterEach(() => sandbox.restore());
         it('should proxy to _emit', () => {
@@ -1030,7 +1030,7 @@ describe('providers/nodebb', () => {
                 core: {}
             });
             sandbox = sinon.sandbox.create();
-            sandbox.stub(forum, '_emit').resolves({});
+            forum._emit = sinon.stub().resolves({}); //sandbox.stub(forum, '_emit').resolves({});
         });
         it('should use self._emit', () => {
             return forum.fetchObject('', '', () => 0).then(() => {
