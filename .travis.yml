@@ -7,8 +7,9 @@ node_js:
 branches:
   except:
     - /^(?i:v)\d+[.]\d+[.]\d+$/
-before_script:
+before_install:
 - test `npm --version | cut -d. -f1` -ge 3 || npm install npm@3
+before_script:
 - npm prune
 - rm -rf ./coverage
 script:
