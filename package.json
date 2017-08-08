@@ -22,7 +22,7 @@
     "node": ">=4.0"
   },
   "dependencies": {
-    "debug": "^2.6.3",
+    "debug": "^3.0.0",
     "js-yaml": "^3.6.0",
     "request": "^2.81.0",
     "sanitize-html": "^1.13.0",
