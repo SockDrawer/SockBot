@@ -227,6 +227,27 @@ exports.bindUser = function bindUser(forum) {
         }
 
         /**
+         * Upload avatar and set as current avatar
+         *
+         * @public
+         *
+         * @param {!Buffer} imageData Image File Data to be uploaded
+         * @param {string} mimeType Mime type of the image data. E.g. 'image/jpeg'
+         * @returns {Promise<string>} Resolves to the url of the avatar that is uploaded
+         *
+         * @promise
+         * @fulfill {string} The url of the uploaded image
+         * @reject {Error} An Error that occured while processing
+         */
+        uploadAvatar(imageData, mimeType) {
+            const data = `data:${mimeType || 'application/octet-stream'};base64,${imageData.toString('base64')}`;
+            return forum._emit('user.uploadCroppedPicture', {
+                uid: this.id,
+                imageData: data
+            }).then((result) => result.url);
+        }
+
+        /**
          * Get User by Id
          *
          * @static

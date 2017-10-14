@@ -3,7 +3,7 @@
 ## nodebb
 NodeBB provider module
 
-**Author:** Accalia  
+**Author**: Accalia  
 **License**: MIT  
 
 * [nodebb](#sockbot.providers.module_nodebb)
@@ -73,28 +73,28 @@ Create a forum connector instance
 Bot instance configuration
 
 **Kind**: instance property of <code>[Forum](#sockbot.providers.module_nodebb..Forum)</code>  
-**Access:** public  
+**Access**: public  
 <a name="sockbot.providers.module_nodebb..Forum+useragent"></a>
 
 #### forum.useragent : <code>string</code>
 Useragent used by the instance
 
 **Kind**: instance property of <code>[Forum](#sockbot.providers.module_nodebb..Forum)</code>  
-**Access:** public  
+**Access**: public  
 <a name="sockbot.providers.module_nodebb..Forum+url"></a>
 
 #### forum.url : <code>string</code>
 Base URL for the forum
 
 **Kind**: instance property of <code>[Forum](#sockbot.providers.module_nodebb..Forum)</code>  
-**Access:** public  
+**Access**: public  
 <a name="sockbot.providers.module_nodebb..Forum+username"></a>
 
 #### forum.username
 Username bot will log in as
 
 **Kind**: instance property of <code>[Forum](#sockbot.providers.module_nodebb..Forum)</code>  
-**Access:** public  
+**Access**: public  
 **Type{string}**:   
 <a name="sockbot.providers.module_nodebb..Forum+user"></a>
 
@@ -102,21 +102,21 @@ Username bot will log in as
 Logged in Bot Username
 
 **Kind**: instance property of <code>[Forum](#sockbot.providers.module_nodebb..Forum)</code>  
-**Access:** public  
+**Access**: public  
 <a name="sockbot.providers.module_nodebb..Forum+owner"></a>
 
 #### forum.owner : <code>User</code>
 Bot instance Owner user
 
 **Kind**: instance property of <code>[Forum](#sockbot.providers.module_nodebb..Forum)</code>  
-**Access:** public  
+**Access**: public  
 <a name="sockbot.providers.module_nodebb..Forum+Commands"></a>
 
 #### forum.Commands : <code>Commands</code>
 Get Commands object bound to this instance
 
 **Kind**: instance property of <code>[Forum](#sockbot.providers.module_nodebb..Forum)</code>  
-**Access:** public  
+**Access**: public  
 <a name="sockbot.providers.module_nodebb..Forum+login"></a>
 
 #### forum.login() ⇒ <code>Promise.&lt;Forum&gt;</code>
@@ -133,7 +133,7 @@ Connect to remote websocket
 
 **Kind**: instance method of <code>[Forum](#sockbot.providers.module_nodebb..Forum)</code>  
 **Returns**: <code>Promise.&lt;Forum&gt;</code> - Resolves to connected forum  
-**Access:** public  
+**Access**: public  
 **Promise**:   
 **Resolves**: <code>Forum</code> Connected forum  
 <a name="sockbot.providers.module_nodebb..Forum+addPlugin"></a>
@@ -143,7 +143,7 @@ Add a plugin to this forum instance
 
 **Kind**: instance method of <code>[Forum](#sockbot.providers.module_nodebb..Forum)</code>  
 **Returns**: <code>Promise</code> - Resolves on completion  
-**Access:** public  
+**Access**: public  
 **Promise**:   
 **Fulfill**: <code>\*</code> Plugin addedd successfully  
 **Reject**: <code>Error</code> Generated plugin is invalid  
@@ -188,7 +188,7 @@ Retrieve and parse an object
 
 **Kind**: instance method of <code>[Forum](#sockbot.providers.module_nodebb..Forum)</code>  
 **Returns**: <code>Promise.&lt;T&gt;</code> - Resolves to retrieved and parsed object  
-**Access:** public  
+**Access**: public  
 **Promise**:   
 **Fullfil**: <code>T</code> Retrieved and parsed object  
 

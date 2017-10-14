@@ -135,6 +135,45 @@ describe('providers/nodebb/user', () => {
                 });
             });
         });
+        describe('uploadAvatar()', () => {
+            let user = null, buffer, url;
+            beforeEach(() => {
+                user = new User({
+                    uid: Math.random()
+                });
+                buffer = new Buffer('Hello World!', 'utf8');
+                url = `/path/to/upload/${Math.random()}`;
+                forum._emit.resolves({url: url});
+            });
+            it('should emit \'user.uploadCroppedPicture\' over websocket', () => {
+                return user.uploadAvatar(buffer).then(() => {
+                    forum._emit.calledWith('user.uploadCroppedPicture').should.be.true;
+                });
+            });
+            it('should resolve to url of uploaded image', () => {
+                return user.uploadAvatar(buffer).should.become(url);
+            });
+            it('should upload avatar for correct user', () => {
+                return user.uploadAvatar(buffer).then(() => {
+                    const payload = forum._emit.firstCall.args[1];
+                    payload.uid.should.equal(user.id);
+                });
+            });
+            it('should use default mimetype when not specified', () => {
+                return user.uploadAvatar(buffer).then(() => {
+                    const payload = forum._emit.firstCall.args[1];
+                    payload.imageData.should.equal(`data:application/octet-stream;base64,${buffer.toString('base64')}`);
+                });
+            });
+            it('should use specified mimetype', () => {
+                const mime = `MIME${Math.random()}`;
+                return user.uploadAvatar(buffer, mime).then(() => {
+                    const payload = forum._emit.firstCall.args[1];
+                    payload.imageData.should.equal(`data:${mime};base64,${buffer.toString('base64')}`);
+                });
+            });
+
+        });
         describe('static get()', () => {
             it('should load via function `user.getUserByUID`', () => {
                 const expected = Math.random();

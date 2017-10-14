@@ -25,16 +25,10 @@ build/Release
 node_modules
 
 #scratch ideas files
-test.js
-test.txt
+test.*
 
 #Cloud9 IDE
 .c9
-
-
-#test configuration files
-test.json
-test.yml
 
 # Webstorm IDE project workspace folder
 .idea/
