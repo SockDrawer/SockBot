@@ -47,8 +47,8 @@
     "mocha": "^5.0.0",
     "semantic-release": "^8.0.0",
     "simple-git": "^1.45.0",
-    "sinon-chai": "^3.0.0",
-    "sinon": "^5.0.0",
+    "sinon": "5.0.8",
+    "sinon-chai": "^2.9.0",
     "validate-commit-msg": "^2.6.1"
   },
   "scripts": {
