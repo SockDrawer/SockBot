@@ -24,7 +24,7 @@
   "dependencies": {
     "debug": "^3.0.0",
     "js-yaml": "^3.6.0",
-    "request": "2.87.0",
+    "request": "2.88.0",
     "sanitize-html": "^1.13.0",
     "socket.io-client": "^2.0.0",
     "string": "^3.3.1",
