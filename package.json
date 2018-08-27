@@ -39,7 +39,7 @@
     "commitizen": "^2.8.5",
     "cz-conventional-changelog": "^2.0.0",
     "eslint": "^5.0.0",
-    "glob": "^7.1.1",
+    "glob": "7.1.2",
     "husky": "^0.14.3",
     "istanbul": "^0.4.3",
     "jsdoc-to-markdown": "^4.0.0",
