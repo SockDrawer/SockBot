@@ -42,7 +42,7 @@
     "glob": "^7.1.1",
     "husky": "^1.0.0",
     "istanbul": "^0.4.3",
-    "jsdoc-to-markdown": "^4.0.0",
+    "jsdoc-to-markdown": "^5.0.0",
     "mkdirp": "^0.5.1",
     "mocha": "^5.0.0",
     "semantic-release": "^15.5.1",
