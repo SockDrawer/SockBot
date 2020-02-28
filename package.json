@@ -44,7 +44,7 @@
     "istanbul": "^0.4.3",
     "jsdoc-to-markdown": "^4.0.0",
     "mkdirp": "^0.5.1",
-    "mocha": "^5.0.0",
+    "mocha": "^7.1.0",
     "semantic-release": "^15.5.1",
     "simple-git": "^1.45.0",
     "sinon": "6.0.1",
